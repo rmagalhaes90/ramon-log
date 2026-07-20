@@ -12,6 +12,11 @@
   :root{--bg:#0b0c0e;--panel:#17191d;--panel-2:#1f2226;--line:#2a2d33;--text:#eef0f2;--dim:#8b9096;--volt:#d7ff3d;--volt-dim:#8ea324;--red:#ff4d5e;--blue:#4dc3ff}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100dvh}
+  .pull-refresh{position:fixed;top:0;left:0;right:0;height:70px;display:flex;align-items:center;justify-content:center;z-index:200;transform:translateY(-70px);pointer-events:none;transition:transform .25s cubic-bezier(.4,0,.2,1);}
+  .pull-refresh.dragging{transition:none}
+  .pull-spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);transform:rotate(0deg);transition:transform .15s linear}
+  .pull-refresh.spin .pull-spinner{animation:pullSpin .6s linear infinite}
+  @keyframes pullSpin{to{transform:rotate(360deg)}}
   body{padding-bottom:120px}
   h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:.03em;margin:0}
   .mono{font-family:'JetBrains Mono',monospace}
@@ -313,6 +318,10 @@
 </style>
 </head>
 <body>
+
+<div class="pull-refresh" id="pullRefresh">
+  <div class="pull-spinner" id="pullSpinner"></div>
+</div>
 
 <div id="pages">
 
@@ -3018,6 +3027,52 @@ window.addEventListener("resize", ()=>{ const canvas = document.getElementById("
 
 document.getElementById("exerciseSearch").addEventListener("input", renderExerciseList);
 store.delete = async function(key){ if(hasAppStorage) try{ await window.storage.delete(key,false); return; }catch(e){} localStorage.removeItem(LS_PREFIX+key); };
+
+// ---- Pull-to-refresh ----
+(function setupPullToRefresh(){
+  const indicator = document.getElementById("pullRefresh");
+  const PULL_THRESHOLD = 70, MAX_PULL = 110;
+  let startY = null, pulling = false, refreshing = false;
+
+  function anyModalOpen(){
+    return !!document.querySelector(".modal-overlay.show, .overlay.show, .celebrate-overlay.show, .photo-viewer.show");
+  }
+
+  document.addEventListener("touchstart", (e)=>{
+    if(refreshing || anyModalOpen() || window.scrollY > 0) { startY = null; return; }
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", (e)=>{
+    if(startY === null || refreshing) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy <= 0){ return; }
+    if(window.scrollY > 0){ startY = null; indicator.classList.remove("dragging"); indicator.style.transform = ""; return; }
+    pulling = true;
+    const dist = Math.min(MAX_PULL, dy * 0.5);
+    indicator.classList.add("dragging");
+    indicator.style.transform = `translateY(${-70 + Math.min(70, dist)}px)`;
+    if(dist > 12) e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener("touchend", ()=>{
+    if(!pulling){ startY = null; return; }
+    pulling = false;
+    const currentTranslate = indicator.style.transform.match(/-?\d+(\.\d+)?/);
+    const pulledPx = currentTranslate ? (70 + parseFloat(currentTranslate[0])) : 0;
+    indicator.classList.remove("dragging");
+    if(pulledPx >= PULL_THRESHOLD){
+      refreshing = true;
+      indicator.style.transform = "translateY(0px)";
+      indicator.classList.add("spin");
+      haptic(30);
+      setTimeout(()=> location.reload(), 350);
+    } else {
+      indicator.style.transform = "";
+    }
+    startY = null;
+  }, { passive: true });
+})();
 
 init();
 })();
