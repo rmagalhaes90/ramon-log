@@ -48,6 +48,7 @@
   .dayswitch button.restday{opacity:.55}.dayswitch button.restday .sub{font-style:italic}
   .dayswitch button .sub{display:block;font-size:10px;text-transform:uppercase;color:var(--dim);font-weight:500;margin-top:2px}
   .dayswitch button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}.dayswitch button.active .sub{color:#2b3300}
+  .day-del-x{position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px var(--bg)}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;transition:border-color .3s}
   .card.done{border-color:var(--volt-dim);background:linear-gradient(155deg,rgba(215,255,61,.07),var(--panel) 55%)}
@@ -1665,11 +1666,24 @@ function renderRotinas(){
   DAY_KEYS.forEach(dayKey=>{
     const w = workouts[dayKey];
     const btn = document.createElement("button");
+    btn.style.position = "relative";
     if(dayKey===rotinaSelectedDay) btn.classList.add("active");
     if(!w) btn.classList.add("restday");
     const shortTitle = w ? (w.title||"").split(" + ")[0].split(" ")[0] : "Descanso";
-    btn.innerHTML = `${DAY_LABELS_SHORT[dayKey]}<span class="sub">${shortTitle}</span>`;
+    btn.innerHTML = `${DAY_LABELS_SHORT[dayKey]}<span class="sub">${shortTitle}</span>${w ? '<span class="day-del-x" title="Excluir rotina deste dia">✕</span>' : ''}`;
     btn.addEventListener("click", ()=>{ rotinaSelectedDay = dayKey; renderRotinas(); });
+    const delX = btn.querySelector(".day-del-x");
+    if(delX) delX.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      if(!confirm(`Remover toda a rotina de ${DAY_LABELS_FULL[dayKey]}?`)) return;
+      workouts[dayKey] = null;
+      await store.set("workouts", workouts);
+      state[dayKey] = emptyDayState(dayKey);
+      await store.set("state", state);
+      if(rotinaSelectedDay===dayKey || dayKey===currentDay) buildDaySwitch();
+      if(dayKey===currentDay) renderDay();
+      renderRotinas();
+    });
     daySel.appendChild(btn);
   });
   el.appendChild(daySel);
