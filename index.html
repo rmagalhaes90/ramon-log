@@ -157,9 +157,72 @@
   .week-days-row{display:flex;gap:6px}
   .week-day-pill{flex:1;text-align:center;padding:10px 4px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);color:var(--dim);font-size:11px;font-weight:700}
   .week-day-pill.trained{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
+
+  /* ---- Nutrition (premium) ---- */
+  .nutri-hero{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px 14px 16px;margin-bottom:6px}
+  .nutri-rings{display:flex;justify-content:center;gap:26px}
+  .nutri-ring{position:relative;width:132px;text-align:center}
+  .nutri-ring svg{width:100%;height:auto;transform:rotate(-90deg)}
+  .nr-bg{fill:none;stroke:var(--panel-2);stroke-width:9}
+  .nr-fg{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)}
+  .nr-center{position:absolute;top:0;left:0;right:0;height:132px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+  .nr-value{font-size:23px;font-weight:700;color:var(--text);line-height:1}
+  .nr-sub{font-size:10.5px;color:var(--dim);margin-top:3px}
+  .nr-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim);margin-top:6px}
+  .nutri-kcal-left{text-align:center;margin-top:14px;font-size:12.5px;color:var(--volt)}
+
+  .macro-list{display:flex;flex-direction:column;gap:14px}
+  .macro-row{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .macro-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .macro-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+  .macro-name i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .macro-nums{font-size:13px;font-weight:700;color:var(--text)}
+  .macro-goal{color:var(--dim);font-weight:400}
+  .macro-track{height:7px;background:var(--panel-2);border-radius:99px;overflow:hidden}
+  .macro-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+  .macro-left{font-size:10.5px;color:var(--dim);margin-top:6px}
+
+  .meal-form{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .meal-input,.meal-field input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px}
+  .meal-input:focus,.meal-field input:focus{outline:none;border-color:var(--volt-dim)}
+  .meal-name{margin-bottom:10px}
+  .meal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+  .meal-field label{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:5px}
+  .meal-field input{padding:10px 4px;text-align:center;font-size:12.5px}
+  .quick-meals{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .chip-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer}
+  .chip-btn:active{transform:scale(.96)}
+  .chip-btn.danger-chip{color:var(--red)}
+  .water-row{display:flex;flex-wrap:wrap;gap:8px}
+
+  .meal-row{display:flex;align-items:center;gap:12px;padding:12px 4px;background:var(--bg)}
+  .meal-row-main{flex:1;min-width:0}
+  .meal-row-name{font-size:13px;font-weight:600}
+  .meal-row-macros{font-size:10.5px;color:var(--dim);margin-top:3px}
+  .meal-row-kcal{font-size:15px;font-weight:700;color:var(--volt)}
+  .meal-row-kcal span{font-size:9.5px;color:var(--dim);margin-left:3px}
+  .goal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+
+  /* ---- Weight hero ---- */
+  .weight-hero{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-bottom:14px}
+  .wh-main{text-align:center;margin-bottom:16px}
+  .wh-current{font-size:42px;font-weight:700;color:var(--text);line-height:1}
+  .wh-current span{font-size:17px;color:var(--dim);margin-left:5px}
+  .wh-date{font-size:11px;color:var(--dim);margin-top:6px}
+  .wd-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .wd-pill{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:11px 4px;text-align:center}
+  .wd-val{font-size:15px;font-weight:700;color:var(--dim)}
+  .wd-pill.down .wd-val{color:var(--blue)}
+  .wd-pill.up .wd-val{color:var(--red)}
+  .wd-pill.flat .wd-val{color:var(--dim)}
+  .wd-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-top:4px}
   .chart-stats b{color:var(--text)}.delta-down{color:var(--blue)}.delta-up{color:var(--red)}
 
   .entry-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:13px}
+  .swipe-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .swipe-wrap .entry-row{border-bottom:none}
+  .swipe-delete-btn{position:absolute;top:0;right:0;height:100%;width:84px;background:var(--red);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .swipe-content{position:relative;background:var(--bg);touch-action:pan-y;will-change:transform;transition:transform .25s cubic-bezier(.4,0,.2,1);cursor:grab}
   .entry-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);width:86px}.entry-val{flex:1;font-family:'JetBrains Mono',monospace;font-weight:700}
   .entry-diff{font-family:'JetBrains Mono',monospace;font-size:11px}.entry-del{background:none;border:none;color:var(--dim);font-size:15px;cursor:pointer;padding:4px 8px}
 
@@ -185,7 +248,11 @@
   .cardio-note{background:rgba(215,255,61,.06);border:1px solid var(--volt-dim);border-radius:14px;padding:14px 16px;margin-top:8px;font-size:13px;color:var(--text);font-weight:600}
   .bodies{display:flex;gap:10px;justify-content:center;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px 8px 8px}
   .body-col{flex:1;max-width:210px;text-align:center}.body-col .body-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--dim);margin-bottom:4px}
-  .bodies svg{width:100%;height:auto}.muscle-shape{stroke:#33373d;stroke-width:1.2;transition:fill .4s}.body-outline{fill:none;stroke:#3a3e45;stroke-width:1.4}
+  .bodies svg{width:100%;height:auto;overflow:visible}
+  .muscle-shape{stroke:rgba(255,255,255,.07);stroke-width:.8;fill:#191c20;transition:fill .5s cubic-bezier(.4,0,.2,1),filter .5s;cursor:pointer}
+  .muscle-shape.is-active{filter:drop-shadow(0 0 5px rgba(215,255,61,.45))}
+  .muscle-shape:active{opacity:.75}
+  .body-outline{fill:#101317;stroke:rgba(255,255,255,.16);stroke-width:1.1;stroke-linejoin:round}
   .heat-legend{display:flex;align-items:center;gap:8px;justify-content:center;margin:14px 0 4px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim)}
   .heat-bar{width:130px;height:8px;border-radius:99px;background:linear-gradient(90deg,#23262b,#5d6d1f,#a8c62e,#d7ff3d)}
   .vol-list{margin-top:18px}.vol-row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line)}
@@ -265,10 +332,12 @@
           <input type="text" inputmode="decimal" id="weightInput" placeholder="Peso de hoje (kg)">
           <button class="add-btn" id="weightAdd">Salvar</button>
         </div>
+        <div class="weight-hero" id="weightHero"></div>
         <div class="chart-card">
           <canvas id="weightChart" width="640" height="400"></canvas>
           <div class="chart-stats" id="weightStats"></div>
         </div>
+        <div class="section-label">Histórico</div>
         <div id="weightList"></div>
       </div>
 
@@ -288,46 +357,72 @@
         <div class="bodies">
           <div class="body-col">
             <div class="body-label">Frente</div>
-            <svg viewBox="0 0 200 400" id="bodyFront">
-              <circle class="body-outline" cx="100" cy="26" r="17"/>
-              <path class="body-outline" d="M84 44 L84 54 L60 62 Q40 70 36 96 L28 160 Q26 172 20 186 L14 206 L26 210 L36 190 Q44 172 46 158 L54 120 L54 170 Q52 200 58 236 L60 300 Q60 330 66 356 L64 384 L84 384 L84 356 Q88 320 86 290 L100 250 L114 290 Q112 320 116 356 L116 384 L136 384 L134 384 L134 356 Q140 330 140 300 L142 236 Q148 200 146 170 L146 120 L154 158 Q156 172 164 190 L174 210 L186 206 L180 186 Q174 172 172 160 L164 96 Q160 70 140 62 L116 54 L116 44 Z"/>
-              <ellipse class="muscle-shape" data-m="shoulders" cx="62" cy="74" rx="15" ry="12"/>
-              <ellipse class="muscle-shape" data-m="shoulders" cx="138" cy="74" rx="15" ry="12"/>
-              <ellipse class="muscle-shape" data-m="traps" cx="100" cy="56" rx="22" ry="8"/>
-              <ellipse class="muscle-shape" data-m="chest" cx="82" cy="94" rx="19" ry="13"/>
-              <ellipse class="muscle-shape" data-m="chest" cx="118" cy="94" rx="19" ry="13"/>
-              <ellipse class="muscle-shape" data-m="biceps" cx="50" cy="118" rx="10" ry="19"/>
-              <ellipse class="muscle-shape" data-m="biceps" cx="150" cy="118" rx="10" ry="19"/>
-              <ellipse class="muscle-shape" data-m="forearms" cx="38" cy="164" rx="8" ry="21"/>
-              <ellipse class="muscle-shape" data-m="forearms" cx="162" cy="164" rx="8" ry="21"/>
-              <rect class="muscle-shape" data-m="abs" x="86" y="112" width="28" height="58" rx="11"/>
-              <ellipse class="muscle-shape" data-m="obliques" cx="74" cy="138" rx="8" ry="23"/>
-              <ellipse class="muscle-shape" data-m="obliques" cx="126" cy="138" rx="8" ry="23"/>
-              <ellipse class="muscle-shape" data-m="quads" cx="80" cy="228" rx="15" ry="42"/>
-              <ellipse class="muscle-shape" data-m="quads" cx="120" cy="228" rx="15" ry="42"/>
-              <ellipse class="muscle-shape" data-m="calves" cx="76" cy="330" rx="9" ry="27"/>
-              <ellipse class="muscle-shape" data-m="calves" cx="124" cy="330" rx="9" ry="27"/>
+            <svg viewBox="0 0 220 470" id="bodyFront">
+              <g class="body-outline-g">
+              <ellipse class="body-outline" cx="110" cy="30" rx="15.5" ry="19.5"/>
+              <path class="body-outline" d="M101 46 L119 46 L122 62 L98 62 Z"/>
+              <path class="body-outline" d="M98 60 L122 60 Q139 62 149 73 Q157 85 157 99 Q156 117 151 134 Q145 152 141 170 Q139 187 140 201 Q140 211 137 217 L110 221 L83 217 Q80 211 80 201 Q81 187 79 170 Q75 152 69 134 Q64 117 63 99 Q63 85 71 73 Q81 62 98 60 Z"/>
+              <path class="body-outline" d="M67 77 Q58 85 56 99 Q54 117 52 135 Q50 153 47 171 Q44 189 42 203 Q41 211 44 215 L53 215 Q56 209 58 199 Q61 183 64 167 Q67 149 69 131 Q71 113 73 97 Q74 85 71 79 Z"/>
+              <path class="body-outline" transform="translate(220,0) scale(-1,1)" d="M67 77 Q58 85 56 99 Q54 117 52 135 Q50 153 47 171 Q44 189 42 203 Q41 211 44 215 L53 215 Q56 209 58 199 Q61 183 64 167 Q67 149 69 131 Q71 113 73 97 Q74 85 71 79 Z"/>
+              <path class="body-outline" d="M83 223 Q79 241 78 263 Q77 287 79 307 Q81 327 80 345 Q79 365 81 385 Q82 405 83 421 Q84 433 85 441 L105 441 Q105 429 104 415 Q103 397 104 379 Q105 359 106 341 Q107 321 108 301 Q109 277 109 253 Q109 235 108 225 Z"/>
+              <path class="body-outline" transform="translate(220,0) scale(-1,1)" d="M83 223 Q79 241 78 263 Q77 287 79 307 Q81 327 80 345 Q79 365 81 385 Q82 405 83 421 Q84 433 85 441 L105 441 Q105 429 104 415 Q103 397 104 379 Q105 359 106 341 Q107 321 108 301 Q109 277 109 253 Q109 235 108 225 Z"/>
+              </g>
+              <path class="muscle-shape" data-m="traps" d="M101 47 L119 47 L122 62 Q136 64 147 72 Q130 76 122 71 L110 68 L98 71 Q90 76 73 72 Q84 64 98 62 Z"/>
+              <path class="muscle-shape" data-m="shoulders" d="M71 73 Q63 82 63 99 Q63 108 64 114 Q75 111 81 102 Q86 93 85 82 Q81 75 71 73 Z"/>
+              <path class="muscle-shape" data-m="shoulders" transform="translate(220,0) scale(-1,1)" d="M71 73 Q63 82 63 99 Q63 108 64 114 Q75 111 81 102 Q86 93 85 82 Q81 75 71 73 Z"/>
+              <path class="muscle-shape" data-m="chest" d="M107 76 L107 122 Q92 126 83 119 Q75 112 74 99 Q74 87 82 80 Q93 74 107 76 Z"/>
+              <path class="muscle-shape" data-m="chest" transform="translate(220,0) scale(-1,1)" d="M107 76 L107 122 Q92 126 83 119 Q75 112 74 99 Q74 87 82 80 Q93 74 107 76 Z"/>
+              <path class="muscle-shape" data-m="biceps" d="M69 100 Q66 116 65 132 Q64 145 67 154 Q73 150 76 138 Q79 122 78 106 Q74 99 69 100 Z"/>
+              <path class="muscle-shape" data-m="biceps" transform="translate(220,0) scale(-1,1)" d="M69 100 Q66 116 65 132 Q64 145 67 154 Q73 150 76 138 Q79 122 78 106 Q74 99 69 100 Z"/>
+              <path class="muscle-shape" data-m="forearms" d="M64 160 Q60 176 57 190 Q54 202 53 210 L60 211 Q63 199 66 187 Q70 172 70 162 Q67 158 64 160 Z"/>
+              <path class="muscle-shape" data-m="forearms" transform="translate(220,0) scale(-1,1)" d="M64 160 Q60 176 57 190 Q54 202 53 210 L60 211 Q63 199 66 187 Q70 172 70 162 Q67 158 64 160 Z"/>
+              <path class="muscle-shape" data-m="abs" d="M108 120 L100 120 Q97 121 97 124 L97 139 Q97 142 100 142 L108 142 Z"/>
+              <path class="muscle-shape" data-m="abs" transform="translate(220,0) scale(-1,1)" d="M108 120 L100 120 Q97 121 97 124 L97 139 Q97 142 100 142 L108 142 Z"/>
+              <path class="muscle-shape" data-m="abs" d="M108 145 L100 145 Q97 146 97 149 L97 161 Q97 164 100 164 L108 164 Z"/>
+              <path class="muscle-shape" data-m="abs" transform="translate(220,0) scale(-1,1)" d="M108 145 L100 145 Q97 146 97 149 L97 161 Q97 164 100 164 L108 164 Z"/>
+              <path class="muscle-shape" data-m="abs" d="M108 167 L100 167 Q97 168 97 171 L97 183 Q97 186 100 186 L108 186 Z"/>
+              <path class="muscle-shape" data-m="abs" transform="translate(220,0) scale(-1,1)" d="M108 167 L100 167 Q97 168 97 171 L97 183 Q97 186 100 186 L108 186 Z"/>
+              <path class="muscle-shape" data-m="abs" d="M108 189 L101 189 Q98 190 98 193 L98 203 Q99 209 104 212 L108 214 Z"/>
+              <path class="muscle-shape" data-m="abs" transform="translate(220,0) scale(-1,1)" d="M108 189 L101 189 Q98 190 98 193 L98 203 Q99 209 104 212 L108 214 Z"/>
+              <path class="muscle-shape" data-m="obliques" d="M95 126 Q86 133 84 148 Q82 165 84 180 Q86 193 90 201 Q94 194 95 180 Q96 157 95 141 Z"/>
+              <path class="muscle-shape" data-m="obliques" transform="translate(220,0) scale(-1,1)" d="M95 126 Q86 133 84 148 Q82 165 84 180 Q86 193 90 201 Q94 194 95 180 Q96 157 95 141 Z"/>
+              <path class="muscle-shape" data-m="quads" d="M107 226 Q107 254 105 278 Q103 298 99 310 Q90 305 86 291 Q82 272 82 252 Q83 234 87 224 Q97 220 107 226 Z"/>
+              <path class="muscle-shape" data-m="quads" transform="translate(220,0) scale(-1,1)" d="M107 226 Q107 254 105 278 Q103 298 99 310 Q90 305 86 291 Q82 272 82 252 Q83 234 87 224 Q97 220 107 226 Z"/>
+              <path class="muscle-shape" data-m="calves" d="M104 330 Q101 346 100 362 Q99 376 98 388 Q92 383 90 370 Q88 353 90 336 Q96 328 104 330 Z"/>
+              <path class="muscle-shape" data-m="calves" transform="translate(220,0) scale(-1,1)" d="M104 330 Q101 346 100 362 Q99 376 98 388 Q92 383 90 370 Q88 353 90 336 Q96 328 104 330 Z"/>
             </svg>
           </div>
           <div class="body-col">
             <div class="body-label">Costas</div>
-            <svg viewBox="0 0 200 400" id="bodyBack">
-              <circle class="body-outline" cx="100" cy="26" r="17"/>
-              <path class="body-outline" d="M84 44 L84 54 L60 62 Q40 70 36 96 L28 160 Q26 172 20 186 L14 206 L26 210 L36 190 Q44 172 46 158 L54 120 L54 170 Q52 200 58 236 L60 300 Q60 330 66 356 L64 384 L84 384 L84 356 Q88 320 86 290 L100 250 L114 290 Q112 320 116 356 L116 384 L136 384 L134 384 L134 356 Q140 330 140 300 L142 236 Q148 200 146 170 L146 120 L154 158 Q156 172 164 190 L174 210 L186 206 L180 186 Q174 172 172 160 L164 96 Q160 70 140 62 L116 54 L116 44 Z"/>
-              <path class="muscle-shape" data-m="traps" d="M78 52 L122 52 L112 92 L100 100 L88 92 Z"/>
-              <ellipse class="muscle-shape" data-m="shoulders" cx="60" cy="76" rx="14" ry="12"/>
-              <ellipse class="muscle-shape" data-m="shoulders" cx="140" cy="76" rx="14" ry="12"/>
-              <ellipse class="muscle-shape" data-m="upperback" cx="78" cy="116" rx="15" ry="26"/>
-              <ellipse class="muscle-shape" data-m="upperback" cx="122" cy="116" rx="15" ry="26"/>
-              <ellipse class="muscle-shape" data-m="triceps" cx="48" cy="120" rx="10" ry="20"/>
-              <ellipse class="muscle-shape" data-m="triceps" cx="152" cy="120" rx="10" ry="20"/>
-              <rect class="muscle-shape" data-m="lowerback" x="87" y="140" width="26" height="28" rx="9"/>
-              <ellipse class="muscle-shape" data-m="glutes" cx="85" cy="186" rx="15" ry="16"/>
-              <ellipse class="muscle-shape" data-m="glutes" cx="115" cy="186" rx="15" ry="16"/>
-              <ellipse class="muscle-shape" data-m="hamstrings" cx="80" cy="244" rx="14" ry="38"/>
-              <ellipse class="muscle-shape" data-m="hamstrings" cx="120" cy="244" rx="14" ry="38"/>
-              <ellipse class="muscle-shape" data-m="calves" cx="78" cy="330" rx="10" ry="27"/>
-              <ellipse class="muscle-shape" data-m="calves" cx="122" cy="330" rx="10" ry="27"/>
+            <svg viewBox="0 0 220 470" id="bodyBack">
+              <g class="body-outline-g">
+              <ellipse class="body-outline" cx="110" cy="30" rx="15.5" ry="19.5"/>
+              <path class="body-outline" d="M101 46 L119 46 L122 62 L98 62 Z"/>
+              <path class="body-outline" d="M98 60 L122 60 Q139 62 149 73 Q157 85 157 99 Q156 117 151 134 Q145 152 141 170 Q139 187 140 201 Q140 211 137 217 L110 221 L83 217 Q80 211 80 201 Q81 187 79 170 Q75 152 69 134 Q64 117 63 99 Q63 85 71 73 Q81 62 98 60 Z"/>
+              <path class="body-outline" d="M67 77 Q58 85 56 99 Q54 117 52 135 Q50 153 47 171 Q44 189 42 203 Q41 211 44 215 L53 215 Q56 209 58 199 Q61 183 64 167 Q67 149 69 131 Q71 113 73 97 Q74 85 71 79 Z"/>
+              <path class="body-outline" transform="translate(220,0) scale(-1,1)" d="M67 77 Q58 85 56 99 Q54 117 52 135 Q50 153 47 171 Q44 189 42 203 Q41 211 44 215 L53 215 Q56 209 58 199 Q61 183 64 167 Q67 149 69 131 Q71 113 73 97 Q74 85 71 79 Z"/>
+              <path class="body-outline" d="M83 223 Q79 241 78 263 Q77 287 79 307 Q81 327 80 345 Q79 365 81 385 Q82 405 83 421 Q84 433 85 441 L105 441 Q105 429 104 415 Q103 397 104 379 Q105 359 106 341 Q107 321 108 301 Q109 277 109 253 Q109 235 108 225 Z"/>
+              <path class="body-outline" transform="translate(220,0) scale(-1,1)" d="M83 223 Q79 241 78 263 Q77 287 79 307 Q81 327 80 345 Q79 365 81 385 Q82 405 83 421 Q84 433 85 441 L105 441 Q105 429 104 415 Q103 397 104 379 Q105 359 106 341 Q107 321 108 301 Q109 277 109 253 Q109 235 108 225 Z"/>
+              </g>
+              <path class="muscle-shape" data-m="traps" d="M101 47 L119 47 L122 62 Q138 64 149 73 Q138 84 128 92 Q118 100 110 130 Q102 100 92 92 Q82 84 71 73 Q82 64 98 62 Z"/>
+              <path class="muscle-shape" data-m="shoulders" d="M71 73 Q63 82 63 99 Q63 108 64 114 Q75 111 81 102 Q86 93 85 82 Q81 75 71 73 Z"/>
+              <path class="muscle-shape" data-m="shoulders" transform="translate(220,0) scale(-1,1)" d="M71 73 Q63 82 63 99 Q63 108 64 114 Q75 111 81 102 Q86 93 85 82 Q81 75 71 73 Z"/>
+              <path class="muscle-shape" data-m="upperback" d="M109 132 Q109 158 107 175 Q92 172 84 161 Q76 150 75 133 Q75 116 80 104 Q95 114 109 132 Z"/>
+              <path class="muscle-shape" data-m="upperback" transform="translate(220,0) scale(-1,1)" d="M109 132 Q109 158 107 175 Q92 172 84 161 Q76 150 75 133 Q75 116 80 104 Q95 114 109 132 Z"/>
+              <path class="muscle-shape" data-m="triceps" d="M69 100 Q66 116 65 132 Q64 145 67 154 Q73 150 76 138 Q79 122 78 106 Q74 99 69 100 Z"/>
+              <path class="muscle-shape" data-m="triceps" transform="translate(220,0) scale(-1,1)" d="M69 100 Q66 116 65 132 Q64 145 67 154 Q73 150 76 138 Q79 122 78 106 Q74 99 69 100 Z"/>
+              <path class="muscle-shape" data-m="forearms" d="M64 160 Q60 176 57 190 Q54 202 53 210 L60 211 Q63 199 66 187 Q70 172 70 162 Q67 158 64 160 Z"/>
+              <path class="muscle-shape" data-m="forearms" transform="translate(220,0) scale(-1,1)" d="M64 160 Q60 176 57 190 Q54 202 53 210 L60 211 Q63 199 66 187 Q70 172 70 162 Q67 158 64 160 Z"/>
+              <path class="muscle-shape" data-m="lowerback" d="M108 178 L102 178 Q99 179 99 183 L99 202 Q99 208 104 211 L108 213 Z"/>
+              <path class="muscle-shape" data-m="lowerback" transform="translate(220,0) scale(-1,1)" d="M108 178 L102 178 Q99 179 99 183 L99 202 Q99 208 104 211 L108 213 Z"/>
+              <path class="muscle-shape" data-m="glutes" d="M109 216 Q109 242 105 252 Q93 254 86 246 Q80 238 81 226 Q83 215 91 211 Q100 208 109 216 Z"/>
+              <path class="muscle-shape" data-m="glutes" transform="translate(220,0) scale(-1,1)" d="M109 216 Q109 242 105 252 Q93 254 86 246 Q80 238 81 226 Q83 215 91 211 Q100 208 109 216 Z"/>
+              <path class="muscle-shape" data-m="hamstrings" d="M107 258 Q107 284 105 304 Q103 318 100 326 Q92 321 88 307 Q84 291 85 271 Q86 259 90 253 Q99 251 107 258 Z"/>
+              <path class="muscle-shape" data-m="hamstrings" transform="translate(220,0) scale(-1,1)" d="M107 258 Q107 284 105 304 Q103 318 100 326 Q92 321 88 307 Q84 291 85 271 Q86 259 90 253 Q99 251 107 258 Z"/>
+              <path class="muscle-shape" data-m="calves" d="M108 332 Q108 350 107 364 Q106 377 105 386 Q100 381 99 368 Q98 351 100 336 Q103 330 108 332 Z"/>
+              <path class="muscle-shape" data-m="calves" transform="translate(220,0) scale(-1,1)" d="M108 332 Q108 350 107 364 Q106 377 105 386 Q100 381 99 368 Q98 351 100 336 Q103 330 108 332 Z"/>
+              <path class="muscle-shape" data-m="calves" d="M97 334 Q93 346 92 360 Q91 374 93 386 Q98 382 100 369 Q102 352 102 338 Q100 332 97 334 Z"/>
+              <path class="muscle-shape" data-m="calves" transform="translate(220,0) scale(-1,1)" d="M97 334 Q93 346 92 360 Q91 374 93 386 Q98 382 100 369 Q102 352 102 338 Q100 332 97 334 Z"/>
             </svg>
           </div>
         </div>
@@ -589,53 +684,53 @@ function buildDefaultWorkouts(){
   return {
     domingo: null,
     segunda: { title: "Peito + Tríceps + Abdômen", cardioNote: cardio, exercises: [
-      {name:"Supino Reto",sets:4,reps:"6-8",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:""},
-      {name:"Supino Inclinado",sets:4,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:""},
-      {name:"Crucifixo Polia",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:""},
-      {name:"Peck Deck",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:""},
-      {name:"Tríceps Corda",sets:4,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:""},
-      {name:"Tríceps Testa",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:""}
+      {name:"Supino Reto",sets:4,reps:"6-8",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:"https://www.youtube.com/watch?v=vIGvt-vgrvY"},
+      {name:"Supino Inclinado",sets:4,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
+      {name:"Crucifixo Polia",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:"https://www.youtube.com/watch?v=mNWyWEJNCDM"},
+      {name:"Peck Deck",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:"https://www.youtube.com/watch?v=FwtqdGlRgig"},
+      {name:"Tríceps Corda",sets:4,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=YQ6MRBeyIAE"},
+      {name:"Tríceps Testa",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=r0Xf7A3k5e4"}
     ], abs: [
-      {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:""},
-      {name:"Elevação de Pernas",sets:4,reps:"12-15",muscles:{abs:1},videoUrl:""},
-      {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:""}
+      {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"},
+      {name:"Elevação de Pernas",sets:4,reps:"12-15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=oq4Xb_xI618"},
+      {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"}
     ] },
     terca: { title: "Costas + Bíceps", cardioNote: cardio, exercises: [
-      {name:"Puxada Frente",sets:4,reps:"8-10",rest:90,muscles:{lats:1,biceps:.4},videoUrl:""},
-      {name:"Remada Baixa",sets:4,reps:"10",rest:90,muscles:{upperback:1,lats:.5},videoUrl:""},
-      {name:"Remada Unilateral",sets:3,reps:"10-12",rest:75,muscles:{upperback:1,lats:.4},videoUrl:""},
-      {name:"Pulldown",sets:3,reps:"12-15",rest:60,muscles:{lats:1,biceps:.4},videoUrl:""},
-      {name:"Rosca Direta",sets:4,reps:"8-10",rest:90,muscles:{biceps:1,forearms:.3},videoUrl:""},
-      {name:"Rosca Inclinada",sets:3,reps:"10-12",rest:75,muscles:{biceps:1},videoUrl:""},
-      {name:"Rosca Scott",sets:3,reps:"12",rest:60,muscles:{biceps:1},videoUrl:""}
+      {name:"Puxada Frente",sets:4,reps:"8-10",rest:90,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=yzlQK3s-a_Y"},
+      {name:"Remada Baixa",sets:4,reps:"10",rest:90,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=2YebbYuuBJQ"},
+      {name:"Remada Unilateral",sets:3,reps:"10-12",rest:75,muscles:{upperback:1,lats:.4},videoUrl:"https://www.youtube.com/watch?v=JE3XUqMyHXo"},
+      {name:"Pulldown",sets:3,reps:"12-15",rest:60,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=V-Z_RntYhZg"},
+      {name:"Rosca Direta",sets:4,reps:"8-10",rest:90,muscles:{biceps:1,forearms:.3},videoUrl:"https://www.youtube.com/watch?v=Et1wgGMGW8w"},
+      {name:"Rosca Inclinada",sets:3,reps:"10-12",rest:75,muscles:{biceps:1},videoUrl:"https://www.youtube.com/watch?v=tiWfdwgbrBQ"},
+      {name:"Rosca Scott",sets:3,reps:"12",rest:60,muscles:{biceps:1},videoUrl:"https://www.youtube.com/watch?v=wWKrF4iSU_8"}
     ], abs: [] },
     quarta: { title: "Pernas", cardioNote: cardio, exercises: [
-      {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:""},
-      {name:"Leg Press",sets:4,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:""},
-      {name:"Extensora",sets:3,reps:"15",rest:60,muscles:{quads:1},videoUrl:""},
-      {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:""},
-      {name:"Stiff",sets:3,reps:"10",rest:90,muscles:{hamstrings:1,glutes:.6,lowerback:.5},videoUrl:""},
-      {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:""},
-      {name:"Panturrilha Sentada",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:""}
+      {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
+      {name:"Leg Press",sets:4,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
+      {name:"Extensora",sets:3,reps:"15",rest:60,muscles:{quads:1},videoUrl:"https://www.youtube.com/watch?v=Svq2T3L9oKo"},
+      {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:"https://www.youtube.com/watch?v=8Nat6GRiEoc"},
+      {name:"Stiff",sets:3,reps:"10",rest:90,muscles:{hamstrings:1,glutes:.6,lowerback:.5},videoUrl:"https://www.youtube.com/watch?v=BHfY5-jGNDA"},
+      {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=qWHH0We_9r0"},
+      {name:"Panturrilha Sentada",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=Bx6elAOgxMI"}
     ], abs: [] },
     quinta: { title: "Ombros + Trapézio + Abdômen", cardioNote: cardio, exercises: [
-      {name:"Desenvolvimento",sets:4,reps:"8-10",rest:90,muscles:{shoulders:1,triceps:.4},videoUrl:""},
-      {name:"Elevação Lateral",sets:4,reps:"12",rest:60,muscles:{shoulders:1},videoUrl:""},
-      {name:"Crucifixo Invertido Polia",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,upperback:.5,traps:.3},videoUrl:""},
-      {name:"Face Pull",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,traps:.5,upperback:.3},videoUrl:""},
-      {name:"Encolhimento",sets:4,reps:"12",rest:60,muscles:{traps:1},videoUrl:""}
+      {name:"Desenvolvimento",sets:4,reps:"8-10",rest:90,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
+      {name:"Elevação Lateral",sets:4,reps:"12",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"},
+      {name:"Crucifixo Invertido Polia",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,upperback:.5,traps:.3},videoUrl:"https://www.youtube.com/watch?v=vVDeOaw1T5g"},
+      {name:"Face Pull",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,traps:.5,upperback:.3},videoUrl:"https://www.youtube.com/watch?v=On1ysBmSWrA"},
+      {name:"Encolhimento",sets:4,reps:"12",rest:60,muscles:{traps:1},videoUrl:"https://www.youtube.com/watch?v=cZLgyI2OKcs"}
     ], abs: [
-      {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:""},
-      {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:""}
+      {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"},
+      {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"}
     ] },
     sexta: { title: "Upper Body (Volume)", cardioNote: cardio, exercises: [
-      {name:"Supino Inclinado",sets:3,reps:"8-10",rest:75,muscles:{chest:1,shoulders:.5},videoUrl:""},
-      {name:"Remada",sets:3,reps:"8-10",rest:75,muscles:{upperback:1,lats:.5},videoUrl:""},
-      {name:"Desenvolvimento Halteres",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:""},
-      {name:"Puxada Aberta",sets:3,reps:"10-12",rest:60,muscles:{lats:1,biceps:.4},videoUrl:""},
-      {name:"Rosca Martelo",sets:3,reps:"10-12",rest:60,muscles:{biceps:1,forearms:.6},videoUrl:""},
-      {name:"Tríceps Corda",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:""},
-      {name:"Elevação Lateral",sets:3,reps:"15",rest:60,muscles:{shoulders:1},videoUrl:""}
+      {name:"Supino Inclinado",sets:3,reps:"8-10",rest:75,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
+      {name:"Remada",sets:3,reps:"8-10",rest:75,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=mxvS-iwm53o"},
+      {name:"Desenvolvimento Halteres",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
+      {name:"Puxada Aberta",sets:3,reps:"10-12",rest:60,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=hTaY3y09eLc"},
+      {name:"Rosca Martelo",sets:3,reps:"10-12",rest:60,muscles:{biceps:1,forearms:.6},videoUrl:"https://www.youtube.com/watch?v=5vPGH1uTtbs"},
+      {name:"Tríceps Corda",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=YQ6MRBeyIAE"},
+      {name:"Elevação Lateral",sets:3,reps:"15",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"}
     ], abs: [] },
     sabado: null
   };
@@ -1194,6 +1289,7 @@ async function recordSessionData(dayKey){
   const s = state[dayKey];
   if(!w || !s) return;
   let totalVolume = 0;
+  const today = todayKey();
 
   if(w.exercises) w.exercises.forEach((ex,i)=>{
     const setsData = [];
@@ -1209,7 +1305,10 @@ async function recordSessionData(dayKey){
     if(setsData.length){
       if(!exerciseHistory[ex.name]) exerciseHistory[ex.name] = [];
       const bestE1rm = Math.max(...setsData.map(sd=>calcE1RM(sd.kg, sd.reps)));
-      exerciseHistory[ex.name].push({date: todayKey(), sets: setsData, e1rm: bestE1rm});
+      const existingIdx = exerciseHistory[ex.name].findIndex(e=>e.date===today);
+      const entry = {date: today, sets: setsData, e1rm: bestE1rm};
+      if(existingIdx>=0) exerciseHistory[ex.name][existingIdx] = entry;
+      else exerciseHistory[ex.name].push(entry);
       if(exerciseHistory[ex.name].length > 60) exerciseHistory[ex.name] = exerciseHistory[ex.name].slice(-60);
     }
   });
@@ -1217,12 +1316,16 @@ async function recordSessionData(dayKey){
   if(w.abs) w.abs.forEach((ex,i)=>{ if(s.abs[i]) totalVolume += (ex.sets||3) * ABS_BW_KG; });
 
   const durationSec = (s.startedAt && s.endedAt) ? (new Date(s.endedAt)-new Date(s.startedAt))/1000 : null;
-  sessionLog.push({
-    date: todayKey(), day: dayKey, title: w.title,
+  const existingSessionIdx = sessionLog.findIndex(sess=> sess.date===today && sess.day===dayKey);
+  const sessionEntry = {
+    id: (existingSessionIdx>=0 && sessionLog[existingSessionIdx].id) ? sessionLog[existingSessionIdx].id : (Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    date: today, day: dayKey, title: w.title,
     startedAt: s.startedAt, endedAt: s.endedAt, durationSec,
     volume: Math.round(totalVolume),
     exerciseCount: (w.exercises||[]).length
-  });
+  };
+  if(existingSessionIdx>=0) sessionLog[existingSessionIdx] = sessionEntry;
+  else sessionLog.push(sessionEntry);
   if(sessionLog.length > 200) sessionLog = sessionLog.slice(-200);
 
   await store.set("exerciseHistory", exerciseHistory);
@@ -1392,7 +1495,78 @@ function getWeekRange(d){
   return { start: toKey(start), end: toKey(end) };
 }
 
+// ---- Swipe-to-delete (iOS-style) reusable helper ----
+let openSwipeRow = null;
+const SWIPE_DELETE_WIDTH = 84;
+
+function buildSwipeRow(innerNode, onDelete){
+  const wrap = document.createElement("div");
+  wrap.className = "swipe-wrap";
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "swipe-delete-btn";
+  deleteBtn.textContent = "Excluir";
+
+  const content = document.createElement("div");
+  content.className = "swipe-content";
+  content.appendChild(innerNode);
+
+  wrap.appendChild(deleteBtn);
+  wrap.appendChild(content);
+
+  let startX = 0, currentX = 0, dragging = false, opened = false, moved = false, wasOpenAtStart = false;
+
+  function setX(x){
+    currentX = Math.max(-SWIPE_DELETE_WIDTH, Math.min(0, x));
+    content.style.transform = `translateX(${currentX}px)`;
+  }
+  function open(){
+    setX(-SWIPE_DELETE_WIDTH); opened = true;
+    if(openSwipeRow && openSwipeRow !== wrap) openSwipeRow.__swipeClose();
+    openSwipeRow = wrap;
+  }
+  function close(){
+    setX(0); opened = false;
+    if(openSwipeRow === wrap) openSwipeRow = null;
+  }
+  wrap.__swipeClose = close;
+
+  content.addEventListener("pointerdown", (e)=>{
+    dragging = true; moved = false;
+    wasOpenAtStart = opened;
+    startX = e.clientX - currentX;
+    content.style.transition = "none";
+    try{ content.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  content.addEventListener("pointermove", (e)=>{
+    if(!dragging) return;
+    if(Math.abs(e.clientX - (startX+currentX)) > 4) moved = true;
+    setX(e.clientX - startX);
+  });
+  function endDrag(){
+    if(!dragging) return;
+    dragging = false;
+    content.style.transition = "";
+    if(currentX < -SWIPE_DELETE_WIDTH/2) open(); else close();
+  }
+  content.addEventListener("pointerup", endDrag);
+  content.addEventListener("pointercancel", endDrag);
+
+  content.addEventListener("click", (e)=>{
+    if(moved){ e.preventDefault(); e.stopPropagation(); return; }
+    if(wasOpenAtStart){ e.preventDefault(); e.stopPropagation(); close(); }
+  }, true);
+
+  deleteBtn.addEventListener("click", (e)=>{ e.stopPropagation(); onDelete(); });
+
+  return wrap;
+}
+
 function renderWeekSummaryTab(){
+  let needsPersist = false;
+  sessionLog.forEach(s=>{ if(!s.id){ s.id = Date.now().toString(36)+Math.random().toString(36).slice(2,8); needsPersist = true; } });
+  if(needsPersist) store.set("sessionLog", sessionLog);
+
   const el = document.getElementById("sub-semana");
   const { start, end } = getWeekRange(todayKey());
   const weekSessions = sessionLog.filter(s=> s.date >= start && s.date <= end);
@@ -1436,15 +1610,60 @@ function renderWeekSummaryTab(){
     weekSessions.slice().reverse().forEach(s=>{
       const row = document.createElement("div");
       row.className = "entry-row";
+      row.style.border = "none";
       const durStr = s.durationSec ? fmtDuration(s.durationSec) : "—";
       row.innerHTML = `<span class="entry-date">${fmtDate(s.date)}</span><span class="entry-val" style="font-size:12.5px">${s.title}</span><span class="entry-diff mono">${durStr}</span>`;
-      list.appendChild(row);
+      const swipeRow = buildSwipeRow(row, async ()=>{
+        sessionLog = sessionLog.filter(x=>x.id!==s.id);
+        await store.set("sessionLog", sessionLog);
+        renderWeekSummaryTab();
+      });
+      list.appendChild(swipeRow);
     });
   }
 }
 
 function renderWeightTab(){
   drawWeightChart();
+
+  // ---- hero delta card ----
+  const hero = document.getElementById("weightHero");
+  if(hero){
+    if(!bodyWeights.length){
+      hero.innerHTML = '<div class="vol-empty" style="padding:20px 6px">Registre seu primeiro peso para começar a acompanhar</div>';
+    } else {
+      const last = bodyWeights[bodyWeights.length-1];
+      const prev = bodyWeights.length>1 ? bodyWeights[bodyWeights.length-2] : null;
+      const first = bodyWeights[0];
+      const dLast = prev ? last.kg - prev.kg : null;
+      const dTotal = last.kg - first.kg;
+
+      // 7-day change
+      const weekAgo = new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+      const inWeek = bodyWeights.filter(w=>w.d>=weekAgo);
+      const d7 = inWeek.length>=2 ? inWeek[inWeek.length-1].kg - inWeek[0].kg : null;
+
+      const pill = (v, lbl) => {
+        if(v===null) return `<div class="wd-pill"><div class="wd-val mono">—</div><div class="wd-lbl">${lbl}</div></div>`;
+        const cls = v<0 ? 'down' : (v>0 ? 'up' : 'flat');
+        const arrow = v<0 ? '↓' : (v>0 ? '↑' : '=');
+        return `<div class="wd-pill ${cls}"><div class="wd-val mono">${arrow} ${Math.abs(v).toFixed(1)}</div><div class="wd-lbl">${lbl}</div></div>`;
+      };
+
+      hero.innerHTML = `
+        <div class="wh-main">
+          <div class="wh-current mono">${last.kg.toFixed(1)}<span>kg</span></div>
+          <div class="wh-date mono">${fmtDate(last.d)}</div>
+        </div>
+        <div class="wd-pills">
+          ${pill(dLast, 'última pesagem')}
+          ${pill(d7, '7 dias')}
+          ${pill(dTotal, 'desde o início')}
+        </div>`;
+    }
+  }
+
+  // ---- history list with swipe-to-delete ----
   const list = document.getElementById("weightList");
   list.innerHTML = "";
   const rev = bodyWeights.slice().reverse();
@@ -1453,19 +1672,27 @@ function renderWeightTab(){
     const diff = prev ? (w.kg - prev.kg) : null;
     const row = document.createElement("div");
     row.className = "entry-row";
-    let diffHtml = "";
-    if(diff!==null && diff!==0){
+    row.style.border = "none";
+    let diffHtml = '<span class="entry-diff" style="color:var(--dim)">—</span>';
+    if(diff!==null && Math.abs(diff)>0.001){
       const cls = diff<0 ? "delta-down" : "delta-up";
-      diffHtml = `<span class="entry-diff ${cls}">${diff>0?"+":""}${diff.toFixed(1)}</span>`;
+      diffHtml = `<span class="entry-diff ${cls}">${diff>0?"+":""}${diff.toFixed(1)} kg</span>`;
     }
-    row.innerHTML = `<span class="entry-date">${fmtDate(w.d)}</span><span class="entry-val">${w.kg.toFixed(1)} kg</span>${diffHtml}<button class="entry-del">✕</button>`;
-    row.querySelector(".entry-del").addEventListener("click", async ()=>{ bodyWeights=bodyWeights.filter(x=>x.d!==w.d); await store.set("bodyWeights", bodyWeights); renderWeightTab(); });
-    list.appendChild(row);
+    row.innerHTML = `<span class="entry-date">${fmtDate(w.d)}</span><span class="entry-val">${w.kg.toFixed(1)} kg</span>${diffHtml}`;
+    const wrap = buildSwipeRow(row, async ()=>{
+      bodyWeights = bodyWeights.filter(x=>x.d!==w.d);
+      await store.set("bodyWeights", bodyWeights);
+      renderWeightTab();
+    });
+    list.appendChild(wrap);
   });
+
   const stats = document.getElementById("weightStats");
   if(bodyWeights.length>=2){
-    const first = bodyWeights[0].kg, last = bodyWeights[bodyWeights.length-1].kg, total = last - first, cls = total<0 ? "delta-down" : (total>0 ? "delta-up" : "");
-    stats.innerHTML = `<span>início <b>${first.toFixed(1)}</b></span><span>atual <b>${last.toFixed(1)}</b></span><span class="${cls}">total ${total>0?"+":""}${total.toFixed(1)} kg</span>`;
+    const first = bodyWeights[0].kg, last = bodyWeights[bodyWeights.length-1].kg;
+    const total = last - first, cls = total<0 ? "delta-down" : (total>0 ? "delta-up" : "");
+    const min = Math.min(...bodyWeights.map(w=>w.kg)), max = Math.max(...bodyWeights.map(w=>w.kg));
+    stats.innerHTML = `<span>mín <b>${min.toFixed(1)}</b></span><span>máx <b>${max.toFixed(1)}</b></span><span class="${cls}">total ${total>0?"+":""}${total.toFixed(1)} kg</span>`;
   } else if(bodyWeights.length===1){
     stats.innerHTML = `<span>atual <b>${bodyWeights[0].kg.toFixed(1)} kg</b></span>`;
   } else {
@@ -1585,97 +1812,199 @@ async function addPhoto(file){
   try{ const dataUrl = await compressImage(file); const id = Date.now().toString(36); await store.set("photo_"+id, dataUrl); photoIndex.push({id, d: todayKey()}); await store.set("photoIndex", photoIndex); haptic(); renderPhotoTab(); }catch(e){ alert("Erro ao salvar foto"); }
 }
 
-// ---- Nutrition tracker (protein + water daily goals) ----
+// ---- Nutrition tracker (premium: calories + macros + water) ----
+const NUTRI_DEFAULTS = { kcalGoal: 2400, proteinGoal: 150, carbGoal: 250, fatGoal: 70, waterGoal: 3.5 };
+
 function getTodayNutrition(){
   const d = todayKey();
-  if(!nutritionLog[d]) nutritionLog[d] = { protein: 0, water: 0, proteinGoal: 150, waterGoal: 3.5 };
-  // carry forward goals from most recent day if this is a fresh day
-  const keys = Object.keys(nutritionLog).filter(k=>k!==d).sort();
-  if(keys.length && (nutritionLog[d].proteinGoal===150 && nutritionLog[d].waterGoal===3.5)){
-    const prev = nutritionLog[keys[keys.length-1]];
-    if(prev){ nutritionLog[d].proteinGoal = prev.proteinGoal; nutritionLog[d].waterGoal = prev.waterGoal; }
+  if(!nutritionLog[d]){
+    const prevKeys = Object.keys(nutritionLog).filter(k=>k!==d).sort();
+    const prev = prevKeys.length ? nutritionLog[prevKeys[prevKeys.length-1]] : null;
+    nutritionLog[d] = {
+      kcal:0, protein:0, carb:0, fat:0, water:0, meals:[],
+      kcalGoal:    prev ? (prev.kcalGoal    ?? NUTRI_DEFAULTS.kcalGoal)    : NUTRI_DEFAULTS.kcalGoal,
+      proteinGoal: prev ? (prev.proteinGoal ?? NUTRI_DEFAULTS.proteinGoal) : NUTRI_DEFAULTS.proteinGoal,
+      carbGoal:    prev ? (prev.carbGoal    ?? NUTRI_DEFAULTS.carbGoal)    : NUTRI_DEFAULTS.carbGoal,
+      fatGoal:     prev ? (prev.fatGoal     ?? NUTRI_DEFAULTS.fatGoal)     : NUTRI_DEFAULTS.fatGoal,
+      waterGoal:   prev ? (prev.waterGoal   ?? NUTRI_DEFAULTS.waterGoal)   : NUTRI_DEFAULTS.waterGoal
+    };
   }
-  return nutritionLog[d];
+  const n = nutritionLog[d];
+  // migrate older shape
+  if(n.kcal===undefined) n.kcal=0;
+  if(n.carb===undefined) n.carb=0;
+  if(n.fat===undefined) n.fat=0;
+  if(!Array.isArray(n.meals)) n.meals=[];
+  Object.keys(NUTRI_DEFAULTS).forEach(k=>{ if(n[k]===undefined) n[k]=NUTRI_DEFAULTS[k]; });
+  return n;
+}
+
+const RING_R = 52, RING_C = 2*Math.PI*RING_R;
+
+function nutriRing(pct, color, label, value, sub){
+  const off = RING_C * (1 - Math.min(1,pct));
+  return `
+    <div class="nutri-ring">
+      <svg viewBox="0 0 120 120">
+        <circle class="nr-bg" cx="60" cy="60" r="${RING_R}"/>
+        <circle class="nr-fg" cx="60" cy="60" r="${RING_R}" stroke="${color}"
+                stroke-dasharray="${RING_C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+      </svg>
+      <div class="nr-center">
+        <div class="nr-value mono">${value}</div>
+        <div class="nr-sub mono">${sub}</div>
+      </div>
+      <div class="nr-label">${label}</div>
+    </div>`;
+}
+
+function macroBar(name, val, goal, color){
+  const pct = goal>0 ? Math.min(100, Math.round(val/goal*100)) : 0;
+  const left = Math.max(0, goal-val);
+  return `
+    <div class="macro-row">
+      <div class="macro-head">
+        <span class="macro-name"><i style="background:${color}"></i>${name}</span>
+        <span class="macro-nums mono">${Math.round(val)}<span class="macro-goal">/${goal}g</span></span>
+      </div>
+      <div class="macro-track"><div class="macro-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="macro-left mono">${left>0? Math.round(left)+'g restantes' : 'meta batida ✓'}</div>
+    </div>`;
 }
 
 function renderNutricaoTab(){
   const el = document.getElementById("sub-nutricao");
   const n = getTodayNutrition();
-  const proteinPct = Math.min(100, Math.round((n.protein/n.proteinGoal)*100));
-  const waterPct = Math.min(100, Math.round((n.water/n.waterGoal)*100));
+  const kcalPct = n.kcalGoal>0 ? n.kcal/n.kcalGoal : 0;
+  const waterPct = n.waterGoal>0 ? n.water/n.waterGoal : 0;
+  const kcalLeft = Math.max(0, n.kcalGoal - n.kcal);
 
   el.innerHTML = `
-    <div class="nutri-card">
-      <div class="nutri-head">
-        <div class="nutri-title">🍗 Proteína</div>
-        <div class="nutri-goal-edit"><input type="text" inputmode="numeric" id="proteinGoalInput" value="${n.proteinGoal}"> g/dia</div>
+    <div class="nutri-hero">
+      <div class="nutri-rings">
+        ${nutriRing(kcalPct, '#d7ff3d', 'Calorias', Math.round(n.kcal), 'de '+n.kcalGoal)}
+        ${nutriRing(waterPct, '#4dc3ff', 'Água', n.water.toFixed(1)+'L', 'de '+n.waterGoal+'L')}
       </div>
-      <div class="nutri-progress-track"><div class="nutri-progress-fill protein" style="width:${proteinPct}%"></div></div>
-      <div class="nutri-num-row"><span class="mono">${n.protein}g</span><span class="mono" style="color:var(--dim)">de ${n.proteinGoal}g</span></div>
-      <div class="nutri-quick-row">
-        <button class="nutri-quick-btn" data-add-protein="10">+10g</button>
-        <button class="nutri-quick-btn" data-add-protein="20">+20g</button>
-        <button class="nutri-quick-btn" data-add-protein="30">+30g</button>
-        <button class="nutri-quick-btn reset" data-reset-protein="1">↺</button>
+      <div class="nutri-kcal-left mono">${kcalLeft>0 ? kcalLeft+' kcal restantes hoje' : 'meta de calorias atingida ✓'}</div>
+    </div>
+
+    <div class="section-label">Macros</div>
+    <div class="macro-list">
+      ${macroBar('Proteína', n.protein, n.proteinGoal, '#d7ff3d')}
+      ${macroBar('Carboidrato', n.carb, n.carbGoal, '#4dc3ff')}
+      ${macroBar('Gordura', n.fat, n.fatGoal, '#ff9f4d')}
+    </div>
+
+    <div class="section-label">Adicionar refeição</div>
+    <div class="meal-form">
+      <input type="text" id="mealName" class="meal-input meal-name" placeholder="Ex: Frango com arroz">
+      <div class="meal-grid">
+        <div class="meal-field"><label>kcal</label><input type="text" inputmode="numeric" id="mealKcal" placeholder="0"></div>
+        <div class="meal-field"><label>Prot (g)</label><input type="text" inputmode="numeric" id="mealProt" placeholder="0"></div>
+        <div class="meal-field"><label>Carb (g)</label><input type="text" inputmode="numeric" id="mealCarb" placeholder="0"></div>
+        <div class="meal-field"><label>Gord (g)</label><input type="text" inputmode="numeric" id="mealFat" placeholder="0"></div>
+      </div>
+      <button class="add-btn" id="mealAdd" style="width:100%">+ Adicionar refeição</button>
+      <div class="quick-meals">
+        <button class="chip-btn" data-quick="Whey|120|25|3|1">🥤 Whey</button>
+        <button class="chip-btn" data-quick="Ovos (3)|215|19|1|15">🍳 3 Ovos</button>
+        <button class="chip-btn" data-quick="Frango 150g|248|46|0|5">🍗 Frango 150g</button>
+        <button class="chip-btn" data-quick="Arroz 100g|130|2|28|0">🍚 Arroz 100g</button>
       </div>
     </div>
 
-    <div class="nutri-card">
-      <div class="nutri-head">
-        <div class="nutri-title">💧 Água</div>
-        <div class="nutri-goal-edit"><input type="text" inputmode="decimal" id="waterGoalInput" value="${n.waterGoal}"> L/dia</div>
-      </div>
-      <div class="nutri-progress-track"><div class="nutri-progress-fill water" style="width:${waterPct}%"></div></div>
-      <div class="nutri-num-row"><span class="mono">${n.water.toFixed(1)}L</span><span class="mono" style="color:var(--dim)">de ${n.waterGoal}L</span></div>
-      <div class="nutri-quick-row">
-        <button class="nutri-quick-btn" data-add-water="0.25">+250ml</button>
-        <button class="nutri-quick-btn" data-add-water="0.5">+500ml</button>
-        <button class="nutri-quick-btn" data-add-water="1">+1L</button>
-        <button class="nutri-quick-btn reset" data-reset-water="1">↺</button>
-      </div>
+    <div class="section-label">Água</div>
+    <div class="water-row">
+      <button class="chip-btn" data-water="0.25">+250ml</button>
+      <button class="chip-btn" data-water="0.5">+500ml</button>
+      <button class="chip-btn" data-water="1">+1L</button>
+      <button class="chip-btn danger-chip" data-water="-0.25">−250ml</button>
     </div>
-    <div class="about-block" style="padding-top:6px">Meta padrão sugerida pelo seu plano: 140-160g proteína · 3-4L água/dia</div>
+
+    <div class="section-label">Refeições de hoje</div>
+    <div id="mealList"></div>
+
+    <div class="section-label">Metas diárias</div>
+    <div class="goal-grid">
+      <div class="meal-field"><label>Calorias</label><input type="text" inputmode="numeric" id="goalKcal" value="${n.kcalGoal}"></div>
+      <div class="meal-field"><label>Proteína (g)</label><input type="text" inputmode="numeric" id="goalProt" value="${n.proteinGoal}"></div>
+      <div class="meal-field"><label>Carb (g)</label><input type="text" inputmode="numeric" id="goalCarb" value="${n.carbGoal}"></div>
+      <div class="meal-field"><label>Gordura (g)</label><input type="text" inputmode="numeric" id="goalFat" value="${n.fatGoal}"></div>
+      <div class="meal-field"><label>Água (L)</label><input type="text" inputmode="decimal" id="goalWater" value="${n.waterGoal}"></div>
+    </div>
+    <div class="about-block" style="padding-top:10px">Seu plano sugere 140-160g de proteína e 3-4L de água por dia</div>
   `;
 
-  el.querySelectorAll("[data-add-protein]").forEach(btn=>{
+  // meal list with swipe-to-delete
+  const list = document.getElementById("mealList");
+  if(!n.meals.length){
+    list.innerHTML = '<div class="vol-empty" style="padding:18px 6px">Nenhuma refeição registrada hoje</div>';
+  } else {
+    n.meals.slice().reverse().forEach(meal=>{
+      const row = document.createElement("div");
+      row.className = "meal-row";
+      row.innerHTML = `
+        <div class="meal-row-main">
+          <div class="meal-row-name">${meal.name}</div>
+          <div class="meal-row-macros mono">P ${meal.prot}g · C ${meal.carb}g · G ${meal.fat}g</div>
+        </div>
+        <div class="meal-row-kcal mono">${meal.kcal}<span>kcal</span></div>`;
+      const wrap = buildSwipeRow(row, async ()=>{
+        const nn = getTodayNutrition();
+        nn.meals = nn.meals.filter(x=>x.id!==meal.id);
+        nn.kcal = Math.max(0, nn.kcal - meal.kcal);
+        nn.protein = Math.max(0, nn.protein - meal.prot);
+        nn.carb = Math.max(0, nn.carb - meal.carb);
+        nn.fat = Math.max(0, nn.fat - meal.fat);
+        await store.set("nutritionLog", nutritionLog);
+        renderNutricaoTab();
+      });
+      list.appendChild(wrap);
+    });
+  }
+
+  async function addMeal(name, kcal, prot, carb, fat){
+    if(!kcal && !prot && !carb && !fat) return;
+    const nn = getTodayNutrition();
+    nn.meals.push({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+                    name: name || 'Refeição', kcal, prot, carb, fat, t: new Date().toISOString() });
+    nn.kcal += kcal; nn.protein += prot; nn.carb += carb; nn.fat += fat;
+    await store.set("nutritionLog", nutritionLog);
+    haptic();
+    renderNutricaoTab();
+  }
+
+  document.getElementById("mealAdd").addEventListener("click", ()=>{
+    const num = id => Math.max(0, parseInt(document.getElementById(id).value)||0);
+    addMeal(document.getElementById("mealName").value.trim(), num("mealKcal"), num("mealProt"), num("mealCarb"), num("mealFat"));
+  });
+
+  el.querySelectorAll("[data-quick]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const [nm,k,p,c,f] = btn.dataset.quick.split("|");
+      addMeal(nm, +k, +p, +c, +f);
+    });
+  });
+
+  el.querySelectorAll("[data-water]").forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       const nn = getTodayNutrition();
-      nn.protein += parseFloat(btn.dataset.addProtein);
+      nn.water = Math.max(0, +(nn.water + parseFloat(btn.dataset.water)).toFixed(2));
       await store.set("nutritionLog", nutritionLog);
       haptic();
       renderNutricaoTab();
     });
   });
-  el.querySelectorAll("[data-add-water]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
+
+  const goalMap = { goalKcal:'kcalGoal', goalProt:'proteinGoal', goalCarb:'carbGoal', goalFat:'fatGoal', goalWater:'waterGoal' };
+  Object.entries(goalMap).forEach(([id,key])=>{
+    document.getElementById(id).addEventListener("change", async (e)=>{
       const nn = getTodayNutrition();
-      nn.water += parseFloat(btn.dataset.addWater);
+      const v = parseFloat(e.target.value.replace(",","."));
+      nn[key] = Math.max(key==='waterGoal'?0.5:1, isNaN(v)?NUTRI_DEFAULTS[key]:v);
       await store.set("nutritionLog", nutritionLog);
-      haptic();
       renderNutricaoTab();
     });
-  });
-  el.querySelector("[data-reset-protein]").addEventListener("click", async ()=>{
-    const nn = getTodayNutrition(); nn.protein = 0;
-    await store.set("nutritionLog", nutritionLog);
-    renderNutricaoTab();
-  });
-  el.querySelector("[data-reset-water]").addEventListener("click", async ()=>{
-    const nn = getTodayNutrition(); nn.water = 0;
-    await store.set("nutritionLog", nutritionLog);
-    renderNutricaoTab();
-  });
-  document.getElementById("proteinGoalInput").addEventListener("change", async (e)=>{
-    const nn = getTodayNutrition();
-    nn.proteinGoal = Math.max(1, parseInt(e.target.value)||150);
-    await store.set("nutritionLog", nutritionLog);
-    renderNutricaoTab();
-  });
-  document.getElementById("waterGoalInput").addEventListener("change", async (e)=>{
-    const nn = getTodayNutrition();
-    nn.waterGoal = Math.max(0.5, parseFloat(e.target.value.replace(",","."))||3.5);
-    await store.set("nutritionLog", nutritionLog);
-    renderNutricaoTab();
   });
 }
 
