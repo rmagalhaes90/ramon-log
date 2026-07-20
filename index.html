@@ -739,7 +739,11 @@ let profile = { height: null, sex: "M" };
 let restTimerHandle = null, restRemaining = 0, restTotal = 0;
 let sessionTimerInterval = null;
 
-function todayKey(){ return new Date().toISOString().slice(0,10); }
+function toLocalDateKey(date){
+  const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,"0"), d = String(date.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+function todayKey(){ return toLocalDateKey(new Date()); }
 function fmtDate(d){ const [y,m,dd] = d.split("-"); return dd + "/" + m + "/" + y.slice(2); }
 
 function emptyDayState(dayKey){ const s={exSets:{},exKg:{},exReps:{},exNotes:{},abs:{},date:todayKey(),startedAt:null,endedAt:null}; const w=workouts[dayKey]; if(!w) return s; if(w.exercises){ w.exercises.forEach((ex,i)=>{ s.exSets[i]=new Array(ex.sets||4).fill(false); s.exKg[i]=new Array(ex.sets||4).fill(""); s.exReps[i]=new Array(ex.sets||4).fill(""); s.exNotes[i]=""; }); } if(w.abs){ w.abs.forEach((_,i)=>{ s.abs[i]=false; }); } return s; }
@@ -1924,8 +1928,7 @@ function getWeekRange(d){
   const dow = date.getDay(); // 0=Sunday
   const start = new Date(date); start.setDate(date.getDate() - dow);
   const end = new Date(start); end.setDate(start.getDate() + 6);
-  const toKey = dt => dt.toISOString().slice(0,10);
-  return { start: toKey(start), end: toKey(end) };
+  return { start: toLocalDateKey(start), end: toLocalDateKey(end) };
 }
 
 // ---- Swipe-to-delete (iOS-style) reusable helper ----
@@ -2007,7 +2010,7 @@ function drawMultiWeekChart(){
   const todayD = new Date(todayKey()+"T00:00:00");
   for(let w=NUM_WEEKS-1; w>=0; w--){
     const ref = new Date(todayD); ref.setDate(ref.getDate() - w*7);
-    const { start, end } = getWeekRange(ref.toISOString().slice(0,10));
+    const { start, end } = getWeekRange(toLocalDateKey(ref));
     const vol = sessionLog.filter(s=> s.date>=start && s.date<=end).reduce((sum,s)=> sum+(s.volume||0), 0);
     weeks.push({ start, vol });
   }
@@ -2131,7 +2134,7 @@ function renderWeightTab(){
       const dTotal = last.kg - first.kg;
 
       // 7-day change
-      const weekAgo = new Date(Date.now()-7*864e5).toISOString().slice(0,10);
+      const weekAgo = toLocalDateKey(new Date(Date.now()-7*864e5));
       const inWeek = bodyWeights.filter(w=>w.d>=weekAgo);
       const d7 = inWeek.length>=2 ? inWeek[inWeek.length-1].kg - inWeek[0].kg : null;
 
