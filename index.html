@@ -114,6 +114,18 @@
   .template-card{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
   .template-name{font-size:15px;font-weight:700;color:var(--text)}
   .template-desc{font-size:12px;color:var(--dim);margin-top:4px}
+  .autogen-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .autogen-chip{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .autogen-chip.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
+  .autogen-intensity{display:flex;flex-direction:column;gap:8px}
+  .intensity-btn{display:flex;align-items:center;gap:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;cursor:pointer}
+  .intensity-btn.active{border-color:var(--volt);background:rgba(215,255,61,.08)}
+  .intensity-icon{font-size:20px;flex-shrink:0}
+  .intensity-name{font-size:13.5px;font-weight:700;color:var(--text)}
+  .intensity-desc{font-size:10.5px;color:var(--dim);margin-top:2px}
+  .autogen-preview{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:6px 14px}
+  .autogen-ex-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .autogen-ex-row:last-child{border-bottom:none}
   .ach-row{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;opacity:.55}
   .ach-row.done{opacity:1;border-color:var(--volt-dim)}
   .ach-icon{font-size:26px;width:40px;text-align:center;flex-shrink:0}
@@ -588,6 +600,16 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="autoGenModal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <h3>Gerador de Treino</h3>
+      <button class="close-btn" onclick="closeAutoGenModal()">✕</button>
+    </div>
+    <div id="autoGenBody"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="comparePhotoModal">
   <div class="modal-content">
     <div class="modal-head">
@@ -771,6 +793,110 @@ function reconcileStateForDay(dayKey){
   state[dayKey]=s;
 }
 
+
+// ---- Automatic Workout Generator ----
+const MUSCLE_GROUPS = {
+  peito: { label:"Peito", muscles:["chest"] },
+  costas: { label:"Costas", muscles:["upperback","lats"] },
+  pernas: { label:"Pernas", muscles:["quads","hamstrings","glutes","calves"] },
+  ombros: { label:"Ombros", muscles:["shoulders","traps"] },
+  bracos: { label:"Braços", muscles:["biceps","triceps","forearms"] },
+  abdomen: { label:"Abdômen", muscles:["abs","obliques"] },
+  push: { label:"Push (Peito+Ombro+Tríceps)", muscles:["chest","shoulders","triceps"] },
+  pull: { label:"Pull (Costas+Bíceps)", muscles:["upperback","lats","biceps"] },
+  fullbody: { label:"Corpo Inteiro", muscles:["quads","hamstrings","glutes","chest","upperback","lats","shoulders","biceps","triceps","calves"] }
+};
+
+const INTENSITY_LEVELS = {
+  fraco:  { label:"Fraco",  icon:"🟢", exCount:3, sets:3, reps:"12-15", rest:45,  desc:"Volume leve, ideal pra recuperação ou iniciantes" },
+  medio:  { label:"Médio",  icon:"🟡", exCount:5, sets:4, reps:"8-12",  rest:75,  desc:"Equilíbrio entre volume e intensidade" },
+  forte:  { label:"Forte",  icon:"🔴", exCount:6, sets:5, reps:"5-8",   rest:105, desc:"Alta intensidade, cargas pesadas" }
+};
+
+const GEN_VIDEO_MAP = {
+  "Agachamento":"rM6SDUdl9fs","Agachamento Livre":"rM6SDUdl9fs","Supino Reto":"vIGvt-vgrvY","Supino com Barra":"vIGvt-vgrvY",
+  "Supino Inclinado":"rCPwrZkrVVQ","Crucifixo Polia":"mNWyWEJNCDM","Peck Deck":"FwtqdGlRgig","Peck Deck Invertido":"vVDeOaw1T5g",
+  "Tríceps Corda":"YQ6MRBeyIAE","Tríceps Testa":"r0Xf7A3k5e4","Puxada Frente":"yzlQK3s-a_Y","Pulley Frontal":"yzlQK3s-a_Y",
+  "Remada Baixa":"2YebbYuuBJQ","Remada Unilateral":"JE3XUqMyHXo","Remada com Halteres":"JE3XUqMyHXo","Remada em Máquina":"2YebbYuuBJQ",
+  "Pulldown":"V-Z_RntYhZg","Rosca Direta":"Et1wgGMGW8w","Rosca Inclinada":"tiWfdwgbrBQ","Rosca Scott":"wWKrF4iSU_8","Rosca Scotch":"wWKrF4iSU_8",
+  "Leg Press":"YmKd0StxtXQ","Extensora":"Svq2T3L9oKo","Cadeira Extensora":"Svq2T3L9oKo","Mesa Flexora":"8Nat6GRiEoc","Stiff":"BHfY5-jGNDA",
+  "Panturrilha em Pé":"qWHH0We_9r0","Panturrilha Sentada":"Bx6elAOgxMI","Desenvolvimento":"dgnvHzvNOIk","Desenvolvimento Halteres":"dgnvHzvNOIk",
+  "Desenvolvimento com Halteres":"dgnvHzvNOIk","Desenvolvimento com Barra":"dgnvHzvNOIk","Desenvolvimento Arnold":"dgnvHzvNOIk",
+  "Elevação Lateral":"W5hRdgwEoEA","Elevação Lateral no Cabo":"W5hRdgwEoEA","Crucifixo Invertido Polia":"vVDeOaw1T5g",
+  "Face Pull":"On1ysBmSWrA","Face Pulls":"On1ysBmSWrA","Encolhimento":"cZLgyI2OKcs","Encolhimento com Halteres":"cZLgyI2OKcs",
+  "Remada":"mxvS-iwm53o","Rosca Martelo":"5vPGH1uTtbs","Puxada Aberta":"hTaY3y09eLc","Barra Fixa":"hTaY3y09eLc",
+  "Cable Crunch":"I64bjVbs7XI","Elevação de Pernas":"oq4Xb_xI618","Prancha":"Yu0wjtD5FkU"
+};
+
+function shuffleArr(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function pickDiverseExercises(muscleKeys, count, excludeNames){
+  excludeNames = excludeNames || [];
+  const scored = EXERCISE_DB
+    .filter(ex => !excludeNames.includes(ex.name))
+    .map(ex=>{
+      let score = 0;
+      muscleKeys.forEach(m=>{ if(ex.muscles[m]) score += ex.muscles[m]; });
+      return { ex, score };
+    })
+    .filter(x=>x.score>0);
+
+  const byPrimary = {};
+  scored.forEach(item=>{
+    let bestM=null, bestV=-1;
+    Object.entries(item.ex.muscles).forEach(([m,v])=>{ if(muscleKeys.includes(m) && v>bestV){ bestV=v; bestM=m; } });
+    if(!byPrimary[bestM]) byPrimary[bestM]=[];
+    byPrimary[bestM].push(item.ex);
+  });
+  const bucketKeys = shuffleArr(Object.keys(byPrimary));
+  bucketKeys.forEach(k=> byPrimary[k] = shuffleArr(byPrimary[k]));
+
+  const picked = [];
+  let idx = 0;
+  while(picked.length < count){
+    const anyLeft = bucketKeys.some(k=> byPrimary[k].length);
+    if(!anyLeft) break;
+    const key = bucketKeys[idx % bucketKeys.length];
+    if(byPrimary[key].length) picked.push(byPrimary[key].shift());
+    idx++;
+  }
+  return picked;
+}
+
+function generateAutoWorkout(groupKey, intensityKey){
+  const group = MUSCLE_GROUPS[groupKey];
+  const level = INTENSITY_LEVELS[intensityKey];
+  const mainExercises = pickDiverseExercises(group.muscles, level.exCount);
+
+  const exercises = mainExercises.map(ex=>({
+    name: ex.name,
+    sets: level.sets,
+    reps: level.reps,
+    rest: level.rest,
+    muscles: ex.muscles,
+    videoUrl: GEN_VIDEO_MAP[ex.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[ex.name]}` : ""
+  }));
+
+  let abs = [];
+  if(groupKey !== "abdomen"){
+    const abCount = intensityKey==="fraco" ? 1 : (intensityKey==="forte" ? 3 : 2);
+    const abPicks = pickDiverseExercises(["abs","obliques"], abCount);
+    abs = abPicks.map(ex=>({
+      name: ex.name, sets: level.sets>3?3:level.sets, reps: ex.reps || "15", muscles: ex.muscles,
+      videoUrl: GEN_VIDEO_MAP[ex.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[ex.name]}` : ""
+    }));
+  }
+
+  return {
+    title: `${group.label} — ${level.icon} ${level.label}`,
+    cardioNote: "Cardio: 15-20 min após a musculação.",
+    exercises, abs
+  };
+}
 
 const WORKOUT_TEMPLATES = {
   ppl: {
@@ -1425,6 +1551,113 @@ window.openTemplateModal = function(){
 };
 window.closeTemplateModal = function(){ document.getElementById("templateModal").classList.remove("show"); };
 
+// ---- Auto Workout Generator UI ----
+let autoGenState = { day:null, group:null, intensity:null, preview:null };
+
+window.openAutoGenModal = function(){
+  autoGenState = { day: rotinaSelectedDay, group:null, intensity:null, preview:null };
+  renderAutoGenBody();
+  document.getElementById("autoGenModal").classList.add("show");
+};
+window.closeAutoGenModal = function(){ document.getElementById("autoGenModal").classList.remove("show"); };
+
+function renderAutoGenBody(){
+  const el = document.getElementById("autoGenBody");
+  const dayHtml = `
+    <div class="section-label" style="margin-top:0">Dia</div>
+    <div class="dayswitch" id="autoGenDaySwitch" style="margin-top:0"></div>
+  `;
+  const groupHtml = `
+    <div class="section-label">Grupo muscular</div>
+    <div class="autogen-grid" id="autoGenGroups">
+      ${Object.entries(MUSCLE_GROUPS).map(([key,g])=>`<button class="autogen-chip ${autoGenState.group===key?'active':''}" data-group="${key}">${g.label}</button>`).join('')}
+    </div>
+  `;
+  const intensityHtml = `
+    <div class="section-label">Intensidade</div>
+    <div class="autogen-intensity" id="autoGenIntensity">
+      ${Object.entries(INTENSITY_LEVELS).map(([key,lv])=>`
+        <button class="intensity-btn ${autoGenState.intensity===key?'active':''}" data-intensity="${key}">
+          <div class="intensity-icon">${lv.icon}</div>
+          <div>
+            <div class="intensity-name">${lv.label}</div>
+            <div class="intensity-desc">${lv.desc}</div>
+          </div>
+        </button>`).join('')}
+    </div>
+  `;
+
+  let previewHtml = "";
+  if(autoGenState.preview){
+    const p = autoGenState.preview;
+    previewHtml = `
+      <div class="section-label">Prévia — ${p.title}</div>
+      <div class="autogen-preview">
+        ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${ex.name}</span><span class="mono">${ex.sets}×${ex.reps}</span></div>`).join('')}
+        ${p.abs.length ? `<div class="autogen-ex-row" style="opacity:.7"><span>+ ${p.abs.length} exercício(s) de abdômen</span><span></span></div>` : ''}
+      </div>
+      <div class="input-row" style="margin-top:14px">
+        <button class="settings-btn" id="autoGenReroll" style="margin:0">🔄 Gerar outro</button>
+        <button class="add-btn" id="autoGenApply" style="flex:1">✅ Aplicar</button>
+      </div>
+    `;
+  }
+
+  el.innerHTML = dayHtml + groupHtml + intensityHtml + previewHtml;
+
+  const daySwitch = document.getElementById("autoGenDaySwitch");
+  DAY_KEYS.forEach(dayKey=>{
+    const btn = document.createElement("button");
+    if(dayKey===autoGenState.day) btn.classList.add("active");
+    btn.innerHTML = `${DAY_LABELS_SHORT[dayKey]}<span class="sub">${workouts[dayKey]?'treino':'descanso'}</span>`;
+    btn.addEventListener("click", ()=>{ autoGenState.day = dayKey; renderAutoGenBody(); });
+    daySwitch.appendChild(btn);
+  });
+
+  el.querySelectorAll("[data-group]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      autoGenState.group = btn.dataset.group;
+      autoGenState.preview = null;
+      maybeGenerate();
+    });
+  });
+  el.querySelectorAll("[data-intensity]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      autoGenState.intensity = btn.dataset.intensity;
+      autoGenState.preview = null;
+      maybeGenerate();
+    });
+  });
+
+  function maybeGenerate(){
+    if(autoGenState.group && autoGenState.intensity){
+      autoGenState.preview = generateAutoWorkout(autoGenState.group, autoGenState.intensity);
+    }
+    renderAutoGenBody();
+  }
+
+  const rerollBtn = document.getElementById("autoGenReroll");
+  if(rerollBtn) rerollBtn.addEventListener("click", ()=>{
+    autoGenState.preview = generateAutoWorkout(autoGenState.group, autoGenState.intensity);
+    haptic();
+    renderAutoGenBody();
+  });
+  const applyBtn = document.getElementById("autoGenApply");
+  if(applyBtn) applyBtn.addEventListener("click", async ()=>{
+    if(!confirm(`Aplicar esse treino gerado para ${DAY_LABELS_FULL[autoGenState.day]}? Isso substitui a rotina atual desse dia.`)) return;
+    workouts[autoGenState.day] = autoGenState.preview;
+    await store.set("workouts", workouts);
+    reconcileStateForDay(autoGenState.day);
+    await store.set("state", state);
+    buildDaySwitch();
+    if(autoGenState.day===currentDay) renderDay();
+    rotinaSelectedDay = autoGenState.day;
+    renderRotinas();
+    closeAutoGenModal();
+    haptic([40,40,40]);
+  });
+}
+
 function computePlates(){
   const target = parseFloat(document.getElementById("pcTarget").value.replace(",","."));
   const bar = parseFloat(document.getElementById("pcBar").value.replace(",",".")) || 20;
@@ -1696,10 +1929,17 @@ function renderRotinas(){
 
   const tplBtn = document.createElement("button");
   tplBtn.className = "settings-btn";
-  tplBtn.style.marginBottom = "14px";
+  tplBtn.style.marginBottom = "10px";
   tplBtn.textContent = "📋 Usar template pronto";
   tplBtn.addEventListener("click", openTemplateModal);
   el.appendChild(tplBtn);
+
+  const genBtn = document.createElement("button");
+  genBtn.className = "settings-btn primary";
+  genBtn.style.marginBottom = "14px";
+  genBtn.textContent = "🎲 Gerar treino automático";
+  genBtn.addEventListener("click", openAutoGenModal);
+  el.appendChild(genBtn);
 
   // Day selector
   const daySel = document.createElement("div");
