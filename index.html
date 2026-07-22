@@ -59,6 +59,11 @@
   .card.done{border-color:var(--volt-dim);background:linear-gradient(155deg,rgba(215,255,61,.07),var(--panel) 55%)}
   .card-top{display:flex;align-items:flex-start;gap:12px}
   .idx{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);width:22px;height:22px;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .idx-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+  .move-btn{width:22px;height:18px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .move-btn:disabled{opacity:.25;cursor:default}
+  .notes-panel{margin-top:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .notes-textarea{width:100%;min-height:60px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;resize:vertical}
   .card.done .idx{color:var(--volt);border-color:var(--volt-dim)}
   .ex-name{font-size:15px;font-weight:600;line-height:1.25}
   .ex-note{font-size:11.5px;color:var(--dim);font-style:italic;margin-top:4px}
@@ -81,7 +86,7 @@
   .set-dot svg{width:15px;height:15px}
   .set-dot.checked{background:var(--volt);border-color:var(--volt);transform:scale(1.03)}
 
-  .card-controls{display:flex;gap:8px;margin-top:12px}.rest-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+  .card-controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.rest-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
   .ex-replace{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;margin-left:auto}
 
   .simple-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
@@ -1212,6 +1217,13 @@ function renderDay(){
       idx++;
     }
   }
+
+  const addExBtn = document.createElement("button");
+  addExBtn.className = "add-set-btn";
+  addExBtn.style.marginBottom = "6px";
+  addExBtn.textContent = "+ Adicionar exercício";
+  addExBtn.addEventListener("click", ()=> openExerciseBrowser(currentDay, "exercises"));
+  content.appendChild(addExBtn);
   
   if(w.abs && w.abs.length){
     const absLabel = document.createElement("div");
@@ -1243,6 +1255,48 @@ function computeWarmup(targetKg){
     .filter(st=> st.kg > 0);
 }
 
+async function moveExercise(day, i, direction){
+  const arr = workouts[day].exercises;
+  const j = i + direction;
+  if(j<0 || j>=arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  const s = state[day];
+  [s.exSets[i], s.exSets[j]] = [s.exSets[j], s.exSets[i]];
+  [s.exKg[i], s.exKg[j]] = [s.exKg[j], s.exKg[i]];
+  [s.exReps[i], s.exReps[j]] = [s.exReps[j], s.exReps[i]];
+  await store.set("workouts", workouts);
+  await store.set("state", state);
+  haptic();
+  if(day===currentDay) renderDay();
+  renderRotinas();
+}
+
+async function shuffleExercise(day, i){
+  const w = workouts[day];
+  const ex = w.exercises[i];
+  const usedNames = w.exercises.map(e=>e.name);
+  const candidates = EXERCISE_DB
+    .filter(c => !usedNames.includes(c.name))
+    .map(c => ({ c, score: muscleSimilarity(ex.muscles, c.muscles) }))
+    .filter(x=>x.score>0)
+    .sort((a,b)=>b.score-a.score);
+  if(!candidates.length){ haptic([20,20,20]); return; }
+  const top = candidates.slice(0, Math.min(5, candidates.length));
+  const pick = top[Math.floor(Math.random()*top.length)].c;
+  w.exercises[i] = {
+    name: pick.name, sets: parseInt(pick.sets)||4, reps: pick.reps, rest: pick.rest||60,
+    muscles: pick.muscles,
+    videoUrl: GEN_VIDEO_MAP[pick.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[pick.name]}` : "",
+    notes: "", supersetGroup: ex.supersetGroup || null
+  };
+  await store.set("workouts", workouts);
+  reconcileStateForDay(day);
+  await store.set("state", state);
+  haptic([30,20,30]);
+  if(day===currentDay) renderDay();
+  renderRotinas();
+}
+
 function buildExCard(ex, i){
   const s = state[currentDay];
   const setsDone = s.exSets[i] || [];
@@ -1256,10 +1310,14 @@ function buildExCard(ex, i){
   card.className = "card" + (allDone ? " done" : "");
   card.innerHTML = `
     <div class="card-top">
-      <div class="idx">${i+1}</div>
+      <div class="idx-col">
+        <div class="idx">${i+1}</div>
+        <button class="move-btn" data-role="moveup" title="Mover para cima">▲</button>
+        <button class="move-btn" data-role="movedown" title="Mover para baixo">▼</button>
+      </div>
       <div style="flex:1">
         <div class="ex-name" data-role="exname" style="cursor:pointer">${ex.name} <span class="ex-history-icon">📈</span></div>
-        ${s.exNotes[i] ? `<div class="ex-note">"${s.exNotes[i]}"</div>` : ''}
+        ${ex.notes ? `<div class="ex-note">"${ex.notes}"</div>` : ''}
         <div class="ex-meta">
           <div class="meta-chip">séries <b>${ex.sets}</b></div>
           <div class="meta-chip">reps alvo <b>${ex.reps}</b></div>
@@ -1281,9 +1339,12 @@ function buildExCard(ex, i){
       ${lastSession ? `<button class="rest-btn" data-role="repeat">🔁 Repetir última</button>` : ''}
       <button class="rest-btn" data-role="warmup">🎯</button>
       <button class="rest-btn" data-role="platecalc">🏋️</button>
+      <button class="rest-btn" data-role="notes">📝</button>
+      <button class="rest-btn" data-role="shuffle" title="Trocar automaticamente">🔀</button>
       <button class="ex-replace" data-role="replace">↔️ Trocar</button>
     </div>
     <div class="warmup-panel" data-role="warmuppanel" style="display:none"></div>
+    <div class="notes-panel" data-role="notespanel" style="display:none"></div>
   `;
   
   const tbody = card.querySelector('[data-role="settbody"]');
@@ -1426,6 +1487,34 @@ function buildExCard(ex, i){
     });
     await store.set("state", state);
     renderDay();
+  });
+
+  const totalExercises = workouts[currentDay].exercises.length;
+  const moveUpBtn = card.querySelector('[data-role="moveup"]');
+  const moveDownBtn = card.querySelector('[data-role="movedown"]');
+  if(i===0) moveUpBtn.disabled = true;
+  if(i===totalExercises-1) moveDownBtn.disabled = true;
+  moveUpBtn.addEventListener("click", ()=> moveExercise(currentDay, i, -1));
+  moveDownBtn.addEventListener("click", ()=> moveExercise(currentDay, i, 1));
+
+  card.querySelector('[data-role="shuffle"]').addEventListener("click", ()=> shuffleExercise(currentDay, i));
+
+  card.querySelector('[data-role="notes"]').addEventListener("click", ()=>{
+    const panel = card.querySelector('[data-role="notespanel"]');
+    const isOpen = panel.style.display !== "none";
+    if(isOpen){ panel.style.display = "none"; return; }
+    panel.innerHTML = `
+      <textarea class="notes-textarea" data-role="notesinput" placeholder="ex: cuidado com o ombro direito">${ex.notes||""}</textarea>
+      <button class="add-btn" data-role="savenote" style="width:100%;margin-top:8px">Salvar nota</button>
+    `;
+    panel.style.display = "block";
+    panel.querySelector('[data-role="savenote"]').addEventListener("click", async ()=>{
+      const val = panel.querySelector('[data-role="notesinput"]').value.trim();
+      workouts[currentDay].exercises[i].notes = val;
+      await store.set("workouts", workouts);
+      haptic();
+      renderDay();
+    });
   });
   
   return card;
@@ -3046,7 +3135,7 @@ window.openExerciseConfig = function(dayKey, listType, index, dbEx, forceDbDefau
   document.getElementById("cfgReps").value = source.reps;
   document.getElementById("cfgRest").value = source.rest || 60;
   document.getElementById("cfgVideo").value = source.videoUrl || "";
-  document.getElementById("cfgNotes").value = (index!=null && !forceDbDefaults && listType==="exercises" && state[dayKey] && state[dayKey].exNotes) ? (state[dayKey].exNotes[index]||"") : "";
+  document.getElementById("cfgNotes").value = source.notes || "";
   document.getElementById("cfgDelete").style.display = (index!=null && !forceDbDefaults) ? "block" : "none";
   document.getElementById("exerciseConfigModal").classList.add("show");
 
@@ -3072,18 +3161,13 @@ window.saveExerciseConfig = async function(){
   const w = workouts[day];
   if(!w[listType]) w[listType] = [];
 
-  const entry = { name, sets, reps, rest, muscles, videoUrl };
+  const entry = { name, sets, reps, rest, muscles, videoUrl, notes };
 
   if(index!=null){ w[listType][index] = entry; }
   else { w[listType].push(entry); }
 
   await store.set("workouts", workouts);
   reconcileStateForDay(day);
-  if(listType==="exercises"){
-    const idx = (index!=null) ? index : w[listType].length-1;
-    if(!state[day].exNotes) state[day].exNotes = {};
-    state[day].exNotes[idx] = notes;
-  }
   await store.set("state", state);
 
   closeExerciseConfig();
