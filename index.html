@@ -258,6 +258,7 @@
   .chip-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:99px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer}
   .chip-btn:active{transform:scale(.96)}
   .chip-btn.danger-chip{color:var(--red)}
+  .rest-btn.danger-chip{color:var(--red);border-color:rgba(255,77,94,.4)}
   .water-row{display:flex;flex-wrap:wrap;gap:8px}
 
   .meal-row{display:flex;align-items:center;gap:12px;padding:12px 4px;background:var(--bg)}
@@ -1413,6 +1414,36 @@ async function commitExerciseReorder(day, fromIndex, toIndex){
   renderRotinas();
 }
 
+// ---- Correctly remove an exercise, re-indexing all logged data so it stays attached to the right exercise ----
+async function deleteExerciseAtIndex(day, listType, index){
+  const w = workouts[day];
+  const s = state[day];
+  const arr = w[listType];
+  const removedLen = arr.length;
+  arr.splice(index, 1);
+
+  if(listType === "exercises"){
+    ["exSets","exKg","exReps","exNotes"].forEach(field=>{
+      const oldArr = [];
+      for(let k=0;k<removedLen;k++) oldArr[k] = s[field] ? s[field][k] : undefined;
+      oldArr.splice(index, 1);
+      const newObj = {};
+      oldArr.forEach((v,k)=>{ if(v!==undefined) newObj[k]=v; });
+      s[field] = newObj;
+    });
+  } else if(listType === "abs"){
+    const oldAbs = [];
+    for(let k=0;k<removedLen;k++) oldAbs[k] = s.abs ? s.abs[k] : undefined;
+    oldAbs.splice(index, 1);
+    const newAbs = {};
+    oldAbs.forEach((v,k)=>{ if(v!==undefined) newAbs[k]=v; });
+    s.abs = newAbs;
+  }
+
+  await store.set("workouts", workouts);
+  await store.set("state", state);
+}
+
 function setupDragReorder(card, i){
   const handle = card.querySelector('[data-role="draghandle"]');
   if(!handle) return;
@@ -1563,6 +1594,7 @@ function buildExCard(ex, i){
       <button class="rest-btn" data-role="notes">📝</button>
       <button class="rest-btn" data-role="shuffle" title="Trocar automaticamente">🔀</button>
       <button class="ex-replace" data-role="replace">↔️ Trocar</button>
+      <button class="rest-btn danger-chip" data-role="deleteex" title="Remover exercício">🗑️</button>
     </div>
     <div class="warmup-panel" data-role="warmuppanel" style="display:none"></div>
     <div class="notes-panel" data-role="notespanel" style="display:none"></div>
@@ -1720,6 +1752,13 @@ function buildExCard(ex, i){
   setupDragReorder(card, i);
 
   card.querySelector('[data-role="shuffle"]').addEventListener("click", ()=> shuffleExercise(currentDay, i));
+  card.querySelector('[data-role="deleteex"]').addEventListener("click", async ()=>{
+    if(!confirm(`Remover "${ex.name}" do treino de hoje?`)) return;
+    await deleteExerciseAtIndex(currentDay, "exercises", i);
+    buildDaySwitch();
+    renderDay();
+    renderRotinas();
+  });
 
   card.querySelector('[data-role="notes"]').addEventListener("click", ()=>{
     const panel = card.querySelector('[data-role="notespanel"]');
@@ -2390,10 +2429,7 @@ function buildRoutineExerciseItem(dayKey, listType, i, ex){
   });
   div.querySelector(".del").addEventListener("click", async ()=>{
     if(!confirm("Remover este exercício?")) return;
-    workouts[dayKey][listType].splice(i, 1);
-    await store.set("workouts", workouts);
-    reconcileStateForDay(dayKey);
-    await store.set("state", state);
+    await deleteExerciseAtIndex(dayKey, listType, i);
     if(dayKey===currentDay) renderDay();
     buildDaySwitch();
     renderRotinas();
@@ -3408,10 +3444,7 @@ window.deleteExerciseConfig = async function(){
   if(!configContext || configContext.index==null) return;
   const { day, listType, index } = configContext;
   if(!confirm("Remover este exercício?")) return;
-  workouts[day][listType].splice(index, 1);
-  await store.set("workouts", workouts);
-  reconcileStateForDay(day);
-  await store.set("state", state);
+  await deleteExerciseAtIndex(day, listType, index);
   closeExerciseConfig();
   if(day===currentDay){ buildDaySwitch(); renderDay(); }
   renderRotinas();
