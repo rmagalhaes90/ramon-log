@@ -62,6 +62,8 @@
   .idx-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
   .move-btn{width:22px;height:18px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
   .move-btn:disabled{opacity:.25;cursor:default}
+  .drag-handle{width:22px;height:20px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:13px;cursor:grab;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;margin-top:2px}
+  .card.dragging{box-shadow:0 12px 28px rgba(0,0,0,.5);border-color:var(--volt-dim);cursor:grabbing}
   .notes-panel{margin-top:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .notes-textarea{width:100%;min-height:60px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;resize:vertical}
   .card.done .idx{color:var(--volt);border-color:var(--volt-dim)}
@@ -741,7 +743,124 @@ const EXERCISE_DB = [
   {name:"Crucifixo Invertido Polia",muscles:{shoulders:1,upperback:.5,traps:.3},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
   {name:"Face Pull",muscles:{shoulders:1,traps:.5,upperback:.3},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
   {name:"Encolhimento",muscles:{traps:1},sets:"4",reps:"12",rest:60,equipment:"dumbbell"},
-  {name:"Remada",muscles:{upperback:1,lats:.5},sets:"3",reps:"8-10",rest:75,equipment:"barbell"}
+  {name:"Remada",muscles:{upperback:1,lats:.5},sets:"3",reps:"8-10",rest:75,equipment:"barbell"},
+  {name:"Supino Declinado",muscles:{chest:1,triceps:0.4},sets:"4",reps:"8-10",rest:90,equipment:"barbell"},
+  {name:"Supino com Halteres",muscles:{chest:1,triceps:0.4,shoulders:0.3},sets:"4",reps:"8-10",rest:90,equipment:"dumbbell"},
+  {name:"Supino Inclinado com Halteres",muscles:{chest:1,shoulders:0.5},sets:"4",reps:"8-10",rest:90,equipment:"dumbbell"},
+  {name:"Supino Declinado com Halteres",muscles:{chest:1,triceps:0.4},sets:"3",reps:"10-12",rest:75,equipment:"dumbbell"},
+  {name:"Crucifixo Reto com Halteres",muscles:{chest:1},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Crucifixo Inclinado com Halteres",muscles:{chest:1,shoulders:0.3},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Crucifixo Declinado com Halteres",muscles:{chest:1},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Peck Deck Máquina",muscles:{chest:1},sets:"3",reps:"12-15",rest:60,equipment:"machine"},
+  {name:"Crossover na Polia",muscles:{chest:1},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Crossover Baixo",muscles:{chest:1,shoulders:0.2},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Flexão de Braço",muscles:{chest:1,triceps:0.5,shoulders:0.3,abs:0.2},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Flexão Diamante",muscles:{triceps:1,chest:0.6},sets:"3",reps:"12-15",rest:45,equipment:"bodyweight"},
+  {name:"Flexão Inclinada",muscles:{chest:0.8,shoulders:0.4,triceps:0.4},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Flexão Declinada",muscles:{chest:1,shoulders:0.3,triceps:0.4},sets:"3",reps:"12-15",rest:45,equipment:"bodyweight"},
+  {name:"Supino Máquina",muscles:{chest:1,triceps:0.4},sets:"4",reps:"10-12",rest:75,equipment:"machine"},
+  {name:"Chest Press Máquina",muscles:{chest:1,triceps:0.4,shoulders:0.2},sets:"4",reps:"10-12",rest:75,equipment:"machine"},
+  {name:"Pullover com Halter",muscles:{chest:0.7,lats:0.5,triceps:0.2},sets:"3",reps:"12-15",rest:60,equipment:"dumbbell"},
+  {name:"Mergulho nas Paralelas (Peito)",muscles:{chest:1,triceps:0.6,shoulders:0.3},sets:"3",reps:"10-12",rest:75,equipment:"bodyweight"},
+  {name:"Supino Guilhotina",muscles:{chest:1,shoulders:0.3},sets:"3",reps:"8-10",rest:90,equipment:"barbell"},
+  {name:"Puxada Triângulo",muscles:{lats:1,upperback:0.4,biceps:0.3},sets:"4",reps:"10-12",rest:75,equipment:"cable"},
+  {name:"Puxada Supinada",muscles:{lats:1,biceps:0.6},sets:"4",reps:"8-10",rest:90,equipment:"cable"},
+  {name:"Remada Curvada com Barra",muscles:{upperback:1,lats:0.6,lowerback:0.3},sets:"4",reps:"8-10",rest:90,equipment:"barbell"},
+  {name:"Remada Cavalinho (T-bar)",muscles:{upperback:1,lats:0.5},sets:"4",reps:"8-10",rest:90,equipment:"machine"},
+  {name:"Barra Fixa Supinada (Chin-up)",muscles:{lats:1,biceps:0.7},sets:"3",reps:"6-10",rest:90,equipment:"bodyweight"},
+  {name:"Pull-over na Polia Alta",muscles:{lats:1,chest:0.2},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Remada Sentada no Cabo",muscles:{upperback:1,lats:0.5,biceps:0.3},sets:"4",reps:"10-12",rest:75,equipment:"cable"},
+  {name:"Levantamento Terra",muscles:{lowerback:1,glutes:0.8,hamstrings:0.7,upperback:0.4},sets:"4",reps:"5-8",rest:120,equipment:"barbell"},
+  {name:"Levantamento Terra Sumô",muscles:{glutes:1,hamstrings:0.6,lowerback:0.7,quads:0.5},sets:"4",reps:"5-8",rest:120,equipment:"barbell"},
+  {name:"Remada com Elástico",muscles:{upperback:1,lats:0.4},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Australian Pull-up (Remada Invertida)",muscles:{upperback:1,lats:0.5,biceps:0.4},sets:"3",reps:"10-15",rest:60,equipment:"bodyweight"},
+  {name:"Remada Serrote",muscles:{upperback:1,lats:0.6,biceps:0.3},sets:"4",reps:"10-12",rest:75,equipment:"dumbbell"},
+  {name:"Puxada Neutra",muscles:{lats:1,biceps:0.4,upperback:0.3},sets:"3",reps:"10-12",rest:75,equipment:"cable"},
+  {name:"Superman (Lombar)",muscles:{lowerback:1,glutes:0.3},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Hiperextensão Lombar",muscles:{lowerback:1,glutes:0.5,hamstrings:0.3},sets:"3",reps:"12-15",rest:60,equipment:"bodyweight"},
+  {name:"Desenvolvimento Militar",muscles:{shoulders:1,triceps:0.4},sets:"4",reps:"6-8",rest:90,equipment:"barbell"},
+  {name:"Desenvolvimento Máquina",muscles:{shoulders:1,triceps:0.3},sets:"4",reps:"10-12",rest:75,equipment:"machine"},
+  {name:"Elevação Frontal com Barra",muscles:{shoulders:1},sets:"3",reps:"12-15",rest:60,equipment:"barbell"},
+  {name:"Elevação Frontal com Halteres",muscles:{shoulders:1},sets:"3",reps:"12-15",rest:60,equipment:"dumbbell"},
+  {name:"Crucifixo Invertido com Halteres",muscles:{shoulders:1,upperback:0.4,traps:0.2},sets:"3",reps:"12-15",rest:60,equipment:"dumbbell"},
+  {name:"Remada Alta",muscles:{shoulders:1,traps:0.7},sets:"4",reps:"10-12",rest:75,equipment:"barbell"},
+  {name:"Remada Alta com Halteres",muscles:{shoulders:1,traps:0.6},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Encolhimento com Barra",muscles:{traps:1},sets:"4",reps:"12-15",rest:60,equipment:"barbell"},
+  {name:"Encolhimento na Polia",muscles:{traps:1},sets:"4",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Manguito Rotador (Rotação Externa)",muscles:{shoulders:1},sets:"3",reps:"15-20",rest:45,equipment:"cable"},
+  {name:"Elevação Lateral Máquina",muscles:{shoulders:1},sets:"3",reps:"12-15",rest:60,equipment:"machine"},
+  {name:"Desenvolvimento na Máquina Articulado",muscles:{shoulders:1,triceps:0.3},sets:"4",reps:"10-12",rest:75,equipment:"machine"},
+  {name:"Elevação em Y",muscles:{shoulders:1,traps:0.4},sets:"3",reps:"12-15",rest:45,equipment:"dumbbell"},
+  {name:"Rosca Direta com Halteres",muscles:{biceps:1,forearms:0.3},sets:"4",reps:"8-10",rest:75,equipment:"dumbbell"},
+  {name:"Rosca Alternada",muscles:{biceps:1,forearms:0.3},sets:"4",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Rosca Scott com Halteres",muscles:{biceps:1},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Rosca Concentrada",muscles:{biceps:1},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Rosca 21",muscles:{biceps:1,forearms:0.3},sets:"3",reps:"21",rest:75,equipment:"barbell"},
+  {name:"Rosca no Cabo",muscles:{biceps:1},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Rosca Spider",muscles:{biceps:1},sets:"3",reps:"10-12",rest:60,equipment:"barbell"},
+  {name:"Rosca Barra W",muscles:{biceps:1,forearms:0.2},sets:"4",reps:"8-10",rest:75,equipment:"barbell"},
+  {name:"Rosca Cross Body (Martelo Cruzado)",muscles:{biceps:1,forearms:0.5},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Rosca Punho Supinado",muscles:{biceps:1,forearms:0.4},sets:"3",reps:"10-12",rest:60,equipment:"barbell"},
+  {name:"Tríceps Coice (Kickback)",muscles:{triceps:1},sets:"3",reps:"12-15",rest:45,equipment:"dumbbell"},
+  {name:"Tríceps Barra Reta na Polia",muscles:{triceps:1},sets:"4",reps:"10-12",rest:60,equipment:"cable"},
+  {name:"Mergulho no Banco",muscles:{triceps:1,chest:0.3,shoulders:0.2},sets:"3",reps:"12-15",rest:60,equipment:"bodyweight"},
+  {name:"Supino Pegada Fechada",muscles:{triceps:1,chest:0.5},sets:"4",reps:"8-10",rest:90,equipment:"barbell"},
+  {name:"Tríceps Overhead com Halter",muscles:{triceps:1},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Tríceps Francês Unilateral",muscles:{triceps:1},sets:"3",reps:"10-12",rest:60,equipment:"dumbbell"},
+  {name:"Extensão de Tríceps na Polia (V)",muscles:{triceps:1},sets:"4",reps:"10-12",rest:60,equipment:"cable"},
+  {name:"Rosca de Punho",muscles:{forearms:1},sets:"3",reps:"15-20",rest:45,equipment:"barbell"},
+  {name:"Rosca de Punho Invertida",muscles:{forearms:1},sets:"3",reps:"15-20",rest:45,equipment:"barbell"},
+  {name:"Farmer's Walk",muscles:{forearms:1,traps:0.5,abs:0.3},sets:"3",reps:"30-40m",rest:60,equipment:"dumbbell"},
+  {name:"Rosca de Punho com Halteres",muscles:{forearms:1},sets:"3",reps:"15-20",rest:45,equipment:"dumbbell"},
+  {name:"Abdominal Infra",muscles:{abs:1},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Abdominal Supra",muscles:{abs:1},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Abdominal Bicicleta",muscles:{abs:1,obliques:0.6},sets:"3",reps:"20",rest:45,equipment:"bodyweight"},
+  {name:"Prancha Lateral",muscles:{obliques:1,abs:0.5},sets:"3",reps:"30-45s",rest:45,equipment:"bodyweight"},
+  {name:"Ab Wheel (Roda Abdominal)",muscles:{abs:1,lowerback:0.2},sets:"3",reps:"10-15",rest:60,equipment:"bodyweight"},
+  {name:"Sit-up",muscles:{abs:1},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Elevação de Joelhos na Barra",muscles:{abs:1},sets:"3",reps:"12-15",rest:60,equipment:"bodyweight"},
+  {name:"Oblíquo no Cabo (Wood Chop)",muscles:{obliques:1,abs:0.4},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Abdominal na Polia",muscles:{abs:1},sets:"4",reps:"15",rest:60,equipment:"cable"},
+  {name:"Prancha com Elevação de Perna",muscles:{abs:1,glutes:0.3},sets:"3",reps:"30-45s",rest:45,equipment:"bodyweight"},
+  {name:"Dead Bug",muscles:{abs:1,lowerback:0.2},sets:"3",reps:"12-15",rest:45,equipment:"bodyweight"},
+  {name:"Abdominal Canivete (V-up)",muscles:{abs:1},sets:"3",reps:"12-15",rest:60,equipment:"bodyweight"},
+  {name:"Agachamento Búlgaro",muscles:{quads:1,glutes:0.7},sets:"3",reps:"10-12 cada",rest:75,equipment:"dumbbell"},
+  {name:"Agachamento Frontal",muscles:{quads:1,glutes:0.5,abs:0.3},sets:"4",reps:"6-8",rest:105,equipment:"barbell"},
+  {name:"Hack Squat",muscles:{quads:1,glutes:0.4},sets:"4",reps:"10-12",rest:90,equipment:"machine"},
+  {name:"Passada (Lunge)",muscles:{quads:1,glutes:0.6},sets:"3",reps:"10-12 cada",rest:75,equipment:"dumbbell"},
+  {name:"Passada com Barra",muscles:{quads:1,glutes:0.6},sets:"3",reps:"10-12 cada",rest:75,equipment:"barbell"},
+  {name:"Agachamento Sumô",muscles:{quads:0.7,glutes:1,hamstrings:0.4},sets:"4",reps:"8-10",rest:90,equipment:"dumbbell"},
+  {name:"Leg Press Unilateral",muscles:{quads:1,glutes:0.5},sets:"3",reps:"10-12 cada",rest:90,equipment:"machine"},
+  {name:"Agachamento na Máquina Smith",muscles:{quads:1,glutes:0.6},sets:"4",reps:"8-10",rest:90,equipment:"machine"},
+  {name:"Agachamento Sissy",muscles:{quads:1},sets:"3",reps:"12-15",rest:60,equipment:"bodyweight"},
+  {name:"Step Up (Subida no Banco)",muscles:{quads:1,glutes:0.6},sets:"3",reps:"10-12 cada",rest:60,equipment:"dumbbell"},
+  {name:"Agachamento Livre com Halteres (Goblet)",muscles:{quads:1,glutes:0.6,abs:0.2},sets:"3",reps:"12-15",rest:75,equipment:"dumbbell"},
+  {name:"Flexora em Pé",muscles:{hamstrings:1},sets:"3",reps:"12-15",rest:60,equipment:"machine"},
+  {name:"Levantamento Terra Romeno",muscles:{hamstrings:1,glutes:0.7,lowerback:0.4},sets:"4",reps:"8-10",rest:90,equipment:"barbell"},
+  {name:"Levantamento Terra Romeno com Halteres",muscles:{hamstrings:1,glutes:0.6,lowerback:0.3},sets:"3",reps:"10-12",rest:75,equipment:"dumbbell"},
+  {name:"Good Morning",muscles:{hamstrings:1,lowerback:0.6,glutes:0.4},sets:"3",reps:"10-12",rest:75,equipment:"barbell"},
+  {name:"Cadeira Flexora",muscles:{hamstrings:1},sets:"3",reps:"12-15",rest:60,equipment:"machine"},
+  {name:"Stiff com Halteres",muscles:{hamstrings:1,glutes:0.6,lowerback:0.4},sets:"3",reps:"10-12",rest:75,equipment:"dumbbell"},
+  {name:"Flexora Deitado",muscles:{hamstrings:1},sets:"3",reps:"12-15",rest:60,equipment:"machine"},
+  {name:"Elevação Pélvica (Hip Thrust)",muscles:{glutes:1,hamstrings:0.4},sets:"4",reps:"10-12",rest:90,equipment:"barbell"},
+  {name:"Hip Thrust na Máquina",muscles:{glutes:1,hamstrings:0.3},sets:"4",reps:"10-12",rest:90,equipment:"machine"},
+  {name:"Glúteo no Cabo (Kickback)",muscles:{glutes:1},sets:"3",reps:"12-15",rest:60,equipment:"cable"},
+  {name:"Abdução de Quadril na Máquina",muscles:{glutes:1},sets:"3",reps:"15-20",rest:45,equipment:"machine"},
+  {name:"Abdução de Quadril no Cabo",muscles:{glutes:1},sets:"3",reps:"15-20",rest:45,equipment:"cable"},
+  {name:"Ponte de Glúteo",muscles:{glutes:1,hamstrings:0.3,abs:0.2},sets:"3",reps:"15-20",rest:45,equipment:"bodyweight"},
+  {name:"Coice na Máquina (Glúteo)",muscles:{glutes:1},sets:"3",reps:"12-15",rest:60,equipment:"machine"},
+  {name:"Cadeira Abdutora",muscles:{glutes:1},sets:"3",reps:"15-20",rest:45,equipment:"machine"},
+  {name:"Panturrilha no Leg Press",muscles:{calves:1},sets:"4",reps:"15-20",rest:45,equipment:"machine"},
+  {name:"Panturrilha Unilateral",muscles:{calves:1},sets:"3",reps:"15-20 cada",rest:45,equipment:"dumbbell"},
+  {name:"Panturrilha no Smith",muscles:{calves:1},sets:"4",reps:"15-20",rest:45,equipment:"machine"},
+  {name:"Panturrilha com Halteres",muscles:{calves:1},sets:"4",reps:"15-20",rest:45,equipment:"dumbbell"},
+  {name:"Rotação de Tronco com Barra",muscles:{obliques:1,abs:0.3},sets:"3",reps:"15-20",rest:45,equipment:"barbell"},
+  {name:"Prancha Lateral com Rotação",muscles:{obliques:1,abs:0.4},sets:"3",reps:"12-15 cada",rest:45,equipment:"bodyweight"},
+  {name:"Elevação de Perna Lateral Deitado",muscles:{obliques:1},sets:"3",reps:"15-20 cada",rest:45,equipment:"bodyweight"},
+  {name:"Abdominal Oblíquo no Solo",muscles:{obliques:1,abs:0.4},sets:"3",reps:"15-20 cada",rest:45,equipment:"bodyweight"},
+  {name:"Panturrilha na Barra Guiada",muscles:{calves:1},sets:"4",reps:"15-20",rest:45,equipment:"machine"},
+  {name:"Panturrilha Burrinho",muscles:{calves:1},sets:"4",reps:"15-20",rest:45,equipment:"machine"},
+  {name:"Pulo de Corda (Panturrilha)",muscles:{calves:1},sets:"3",reps:"30-45s",rest:45,equipment:"bodyweight"}
 ];
 
 const MUSCLE_NAMES = {shoulders:"Ombros",traps:"Trapézio",chest:"Peito",biceps:"Bíceps",triceps:"Tríceps",forearms:"Antebraço",abs:"Abdômen",obliques:"Oblíquos",upperback:"Costas (superior)",lowerback:"Lombar",glutes:"Glúteos",quads:"Quadríceps",hamstrings:"Posteriores",calves:"Panturrilha",lats:"Costas (lateral)"};
@@ -1271,6 +1390,106 @@ async function moveExercise(day, i, direction){
   renderRotinas();
 }
 
+async function commitExerciseReorder(day, fromIndex, toIndex){
+  if(fromIndex === toIndex) return;
+  const w = workouts[day];
+  const s = state[day];
+  const arr = w.exercises;
+  const moved = arr.splice(fromIndex,1)[0];
+  arr.splice(toIndex,0,moved);
+
+  ["exSets","exKg","exReps"].forEach(field=>{
+    const oldArr = [];
+    for(let k=0;k<arr.length;k++) oldArr[k] = s[field][k];
+    const movedVal = oldArr.splice(fromIndex,1)[0];
+    oldArr.splice(toIndex,0,movedVal);
+    const newObj = {};
+    oldArr.forEach((v,k)=>{ newObj[k]=v; });
+    s[field] = newObj;
+  });
+
+  await store.set("workouts", workouts);
+  await store.set("state", state);
+  renderRotinas();
+}
+
+function setupDragReorder(card, i){
+  const handle = card.querySelector('[data-role="draghandle"]');
+  if(!handle) return;
+  const HOLD_MS = 300, MOVE_CANCEL_PX = 10;
+  let pressTimer = null, startY = 0, startX = 0;
+
+  function clearPressTimer(){ if(pressTimer){ clearTimeout(pressTimer); pressTimer = null; } }
+
+  function onEarlyMove(ev){
+    if(Math.abs(ev.clientY-startY) > MOVE_CANCEL_PX || Math.abs(ev.clientX-startX) > MOVE_CANCEL_PX) clearPressTimer();
+  }
+  function onEarlyUp(){ clearPressTimer(); document.removeEventListener("pointermove", onEarlyMove); }
+
+  handle.addEventListener("pointerdown", (e)=>{
+    startY = e.clientY; startX = e.clientX;
+    document.addEventListener("pointermove", onEarlyMove);
+    document.addEventListener("pointerup", onEarlyUp, { once:true });
+    pressTimer = setTimeout(()=>{
+      document.removeEventListener("pointermove", onEarlyMove);
+      beginExerciseDrag(e, card);
+    }, HOLD_MS);
+  });
+}
+
+function beginExerciseDrag(e, card){
+  haptic(30);
+  card.classList.add("dragging");
+  card.style.position = "relative";
+  card.style.zIndex = "50";
+
+  const siblings = [...document.querySelectorAll('#content .card')];
+  const order = siblings.map(c=> parseInt(c.dataset.exIndex));
+  const myPos = siblings.indexOf(card);
+  const rects = siblings.map(c=> c.getBoundingClientRect());
+  const myRect = rects[myPos];
+  const startY = e.clientY;
+  let targetPos = myPos;
+
+  function onMove(ev){
+    if(ev.cancelable) ev.preventDefault();
+    const delta = ev.clientY - startY;
+    card.style.transform = `translateY(${delta}px)`;
+    const myCenter = myRect.top + myRect.height/2 + delta;
+
+    let newPos = 0;
+    rects.forEach((r,idx)=>{ if(idx!==myPos && (r.top+r.height/2) < myCenter) newPos++; });
+    newPos = Math.max(0, Math.min(siblings.length-1, newPos));
+    targetPos = newPos;
+
+    siblings.forEach((sib,idx)=>{
+      if(sib===card) return;
+      let shift = 0;
+      if(idx < myPos && idx >= newPos) shift = myRect.height + 12;
+      else if(idx > myPos && idx <= newPos) shift = -(myRect.height + 12);
+      sib.style.transition = "transform .15s ease";
+      sib.style.transform = shift ? `translateY(${shift}px)` : "translateY(0px)";
+    });
+  }
+
+  function onUp(){
+    document.removeEventListener("pointermove", onMove);
+    document.removeEventListener("pointerup", onUp);
+    siblings.forEach(sib=>{ sib.style.transition=""; sib.style.transform=""; });
+    card.style.transform=""; card.style.position=""; card.style.zIndex="";
+    card.classList.remove("dragging");
+
+    const fromIndex = order[myPos];
+    const toIndex = order[targetPos];
+    if(fromIndex !== toIndex){
+      commitExerciseReorder(currentDay, fromIndex, toIndex).then(()=>{ haptic(25); renderDay(); });
+    }
+  }
+
+  document.addEventListener("pointermove", onMove, { passive:false });
+  document.addEventListener("pointerup", onUp);
+}
+
 async function shuffleExercise(day, i){
   const w = workouts[day];
   const ex = w.exercises[i];
@@ -1308,12 +1527,14 @@ function buildExCard(ex, i){
   
   const card = document.createElement("div");
   card.className = "card" + (allDone ? " done" : "");
+  card.dataset.exIndex = i;
   card.innerHTML = `
     <div class="card-top">
       <div class="idx-col">
         <div class="idx">${i+1}</div>
         <button class="move-btn" data-role="moveup" title="Mover para cima">▲</button>
         <button class="move-btn" data-role="movedown" title="Mover para baixo">▼</button>
+        <div class="drag-handle" data-role="draghandle" title="Segurar e arrastar">⠿</div>
       </div>
       <div style="flex:1">
         <div class="ex-name" data-role="exname" style="cursor:pointer">${ex.name} <span class="ex-history-icon">📈</span></div>
@@ -1496,6 +1717,7 @@ function buildExCard(ex, i){
   if(i===totalExercises-1) moveDownBtn.disabled = true;
   moveUpBtn.addEventListener("click", ()=> moveExercise(currentDay, i, -1));
   moveDownBtn.addEventListener("click", ()=> moveExercise(currentDay, i, 1));
+  setupDragReorder(card, i);
 
   card.querySelector('[data-role="shuffle"]').addEventListener("click", ()=> shuffleExercise(currentDay, i));
 
