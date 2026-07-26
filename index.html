@@ -409,6 +409,12 @@
   </button>
 </div>
 <div class="auth-loading" id="authLoading"><div class="spinner"></div></div>
+<div id="debugErrorBanner" style="display:none;position:fixed;inset:0;z-index:9999;background:#3a0d10;color:#fff;padding:24px 18px;font-family:monospace;font-size:12.5px;overflow:auto;white-space:pre-wrap;line-height:1.5">
+  <div style="font-size:16px;font-weight:700;margin-bottom:10px">⚠️ O app encontrou um erro</div>
+  <div style="margin-bottom:14px;font-size:12px;opacity:.8">Tire um print desta tela e mande pro suporte. Detalhes técnicos abaixo:</div>
+  <div id="debugErrorText"></div>
+  <button onclick="location.reload()" style="margin-top:18px;background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-family:inherit">🔄 Tentar de novo</button>
+</div>
 
 <div class="pull-refresh" id="pullRefresh">
   <div class="pull-spinner" id="pullSpinner"></div>
@@ -966,6 +972,22 @@ const FIREBASE_CONFIG = {
 
 let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false;
 
+function showDebugError(msg){
+  const el = document.getElementById("debugErrorBanner");
+  const txt = document.getElementById("debugErrorText");
+  if(!el || !txt) return;
+  el.style.display = "block";
+  txt.textContent = (txt.textContent ? txt.textContent + "\n\n---\n\n" : "") + msg;
+}
+
+window.addEventListener("error", (e)=>{
+  showDebugError("Erro JS: " + e.message + (e.error && e.error.stack ? "\n" + e.error.stack : ""));
+});
+window.addEventListener("unhandledrejection", (e)=>{
+  const reason = e.reason;
+  showDebugError("Promise rejeitada: " + (reason && reason.message ? reason.message : String(reason)) + (reason && reason.stack ? "\n" + reason.stack : ""));
+});
+
 try{
   if(typeof firebase !== "undefined"){
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -973,25 +995,34 @@ try{
     fbDb = firebase.firestore();
     fbDb.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     firebaseReady = true;
+  } else {
+    showDebugError("A biblioteca do Firebase não carregou (sem internet, ou bloqueada). Verifique sua conexão e tente de novo.");
   }
-}catch(e){ console.error("Firebase init failed:", e); }
+}catch(e){ console.error("Firebase init failed:", e); showDebugError("Falha ao iniciar o Firebase: " + e.message); }
+
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_, reject)=> setTimeout(()=> reject(new Error("timeout: "+label)), ms))
+  ]);
+}
 
 const store = {
   async get(key){
     if(!currentUser || !fbDb) return null;
     try{
-      const doc = await fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).get();
+      const doc = await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).get(), 8000, "get:"+key);
       return doc.exists ? doc.data().value : null;
     }catch(e){ console.error("store.get error", key, e); return null; }
   },
   async set(key, value){
     if(!currentUser || !fbDb) return;
-    try{ await fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value }); }
+    try{ await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value }), 8000, "set:"+key); }
     catch(e){ console.error("store.set error", key, e); }
   },
   async delete(key){
     if(!currentUser || !fbDb) return;
-    try{ await fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).delete(); }
+    try{ await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).delete(), 8000, "delete:"+key); }
     catch(e){ console.error("store.delete error", key, e); }
   }
 };
@@ -4144,8 +4175,16 @@ if(firebaseReady){
       hideAuthScreen();
       if(!appInitialized){
         appInitialized = true;
-        await maybeMigrateLocalData();
-        init();
+        const watchdog = setTimeout(()=>{
+          showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
+        }, 15000);
+        try{
+          await maybeMigrateLocalData();
+          await init();
+        }catch(e){
+          showDebugError("Erro ao carregar o app: " + e.message + (e.stack ? "\n"+e.stack : ""));
+        }
+        clearTimeout(watchdog);
       }
     } else {
       currentUser = null;
