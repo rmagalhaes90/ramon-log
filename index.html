@@ -993,6 +993,7 @@ try{
     firebase.initializeApp(FIREBASE_CONFIG);
     fbAuth = firebase.auth();
     fbDb = firebase.firestore();
+    fbDb.settings({ experimentalAutoDetectLongPolling: true, merge: true });
     fbDb.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     firebaseReady = true;
   } else {
@@ -1455,24 +1456,32 @@ function isAbsExercise(muscles){
 
 async function init(){
   document.getElementById("todayDate").textContent = new Date().toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'short'});
-  
-  workouts = (await store.get("workouts")) || buildDefaultWorkouts();
-  const savedState = await store.get("state");
-  const savedHistory = await store.get("history");
-  
+
+  const [
+    savedWorkouts, savedState, savedHistory, savedCompletedSessions,
+    savedBodyWeights, savedBodyMeasures, savedPhotoIndex, savedExerciseHistory,
+    savedExerciseRecords, savedSessionLog, savedNutritionLog, savedProfile
+  ] = await Promise.all([
+    store.get("workouts"), store.get("state"), store.get("history"), store.get("completedSessions"),
+    store.get("bodyWeights"), store.get("bodyMeasures"), store.get("photoIndex"), store.get("exerciseHistory"),
+    store.get("exerciseRecords"), store.get("sessionLog"), store.get("nutritionLog"), store.get("profile")
+  ]);
+
+  workouts = savedWorkouts || buildDefaultWorkouts();
+
   DAY_KEYS.forEach(k=>{ history[k]={lastKg:{}}; if(savedHistory && savedHistory[k]) history[k]=savedHistory[k]; });
   DAY_KEYS.forEach(k=>{ state[k]=(savedState && savedState[k] && savedState[k].date===todayKey()) ? savedState[k] : emptyDayState(k); });
-  
-  completedSessions = (await store.get("completedSessions")) || 0;
-  bodyWeights = (await store.get("bodyWeights")) || [];
-  bodyMeasures = (await store.get("bodyMeasures")) || [];
-  photoIndex = (await store.get("photoIndex")) || [];
-  exerciseHistory = (await store.get("exerciseHistory")) || {};
-  exerciseRecords = (await store.get("exerciseRecords")) || {};
-  sessionLog = (await store.get("sessionLog")) || [];
-  nutritionLog = (await store.get("nutritionLog")) || {};
-  profile = (await store.get("profile")) || { height: null, sex: "M" };
-  
+
+  completedSessions = savedCompletedSessions || 0;
+  bodyWeights = savedBodyWeights || [];
+  bodyMeasures = savedBodyMeasures || [];
+  photoIndex = savedPhotoIndex || [];
+  exerciseHistory = savedExerciseHistory || {};
+  exerciseRecords = savedExerciseRecords || {};
+  sessionLog = savedSessionLog || [];
+  nutritionLog = savedNutritionLog || {};
+  profile = savedProfile || { height: null, sex: "M" };
+
   currentDay = DAY_KEYS[new Date().getDay()];
 
   bindPageNav();
