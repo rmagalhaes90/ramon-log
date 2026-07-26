@@ -1,4 +1,4 @@
-const CACHE_NAME = "ramon-log-v3";
+const CACHE_NAME = "ramon-log-v4";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -57,6 +57,45 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(() => cached);
       return cached || fetchPromise;
+    })
+  );
+});
+
+// ---- Push notifications ----
+// Handles both real Web Push (e.g. from Firebase Cloud Messaging, once a
+// server/Cloud Function sends one) and lets the app show notifications
+// reliably even if the tab isn't focused.
+self.addEventListener("push", (event) => {
+  let payload = { title: "Ramon.Log", body: "Você tem uma nova notificação." };
+  try{
+    if(event.data){
+      const json = event.data.json();
+      payload = {
+        title: (json.notification && json.notification.title) || json.title || payload.title,
+        body: (json.notification && json.notification.body) || json.body || payload.body
+      };
+    }
+  }catch(e){
+    if(event.data){ payload.body = event.data.text(); }
+  }
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: "./icon-192.png",
+      badge: "./icon-192.png",
+      vibrate: [100, 50, 100]
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow("./");
     })
   );
 });

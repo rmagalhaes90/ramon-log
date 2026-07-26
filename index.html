@@ -21,7 +21,7 @@
   h1,h2,h3{font-family:'Bebas Neue',sans-serif;letter-spacing:.03em;margin:0}
   .mono{font-family:'JetBrains Mono',monospace}
 
-  .page{display:none}.page.active{display:block;animation:fadein .25s}@keyframes fadein{from{opacity:0}to{opacity:1}}
+  .page{display:none}.page.active{display:block;animation:pagein .32s cubic-bezier(.16,1,.3,1)}@keyframes pagein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
   .topbar{padding:22px 20px 14px;position:sticky;top:0;z-index:30;background:linear-gradient(180deg,var(--bg) 70%,rgba(11,12,14,0))}
   .topbar-brand{display:flex;align-items:baseline;justify-content:space-between}
   .topbar-brand h1{font-size:32px;line-height:1}.topbar-brand h1 span{color:var(--volt)}
@@ -93,7 +93,12 @@
   .set-check-cell{display:flex;align-items:center;justify-content:center}
   .set-dot{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:all .15s}
   .set-dot svg{width:15px;height:15px}
-  .set-dot.checked{background:var(--volt);border-color:var(--volt);transform:scale(1.03)}
+  .set-dot.checked{background:var(--volt);border-color:var(--volt);animation:setPop .38s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes setPop{0%{transform:scale(.7)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
+  button{transition:transform .1s ease}
+  button:active{transform:scale(.95)}
+  .tab-icon{transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+  #tabbar button.active .tab-icon{transform:scale(1.15)}
 
   .card-controls{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.rest-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
   .ex-replace{background:none;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 8px;font-size:12px;cursor:pointer;margin-left:auto}
@@ -210,6 +215,11 @@
   .celebrate-streak{display:inline-flex;align-items:center;gap:8px;background:rgba(215,255,61,.1);border:1px solid var(--volt-dim);border-radius:99px;padding:9px 18px;margin-top:16px;font-size:14px;font-weight:700;color:var(--volt)}
   .celebrate-streak .streak-num{font-family:'JetBrains Mono',monospace;font-size:18px}
   .celebrate-streak.milestone{background:rgba(215,255,61,.18);box-shadow:0 0 24px rgba(215,255,61,.25)}
+  .ach-unlock-toast{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(215,255,61,.14),rgba(77,195,255,.08));border:1px solid var(--volt-dim);border-radius:16px;padding:12px 16px;margin-top:12px;text-align:left;opacity:0;animation:achUnlockIn .5s cubic-bezier(.16,1,.3,1) forwards}
+  @keyframes achUnlockIn{0%{opacity:0;transform:translateY(14px) scale(.92)}100%{opacity:1;transform:translateY(0) scale(1)}}
+  .ach-unlock-icon{font-size:28px;flex-shrink:0}
+  .ach-unlock-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--volt)}
+  .ach-unlock-title{font-size:14px;font-weight:700;color:var(--text);margin-top:2px}
   .celebrate-card h1{font-size:56px;color:var(--volt)}.celebrate-card p{color:var(--dim);font-size:14px;margin-top:8px}
   .celebrate-card .cel-actions{display:flex;gap:10px;justify-content:center;margin-top:26px}
   .celebrate-card button{border:none;border-radius:12px;padding:13px 22px;font-weight:700;font-size:14px;cursor:pointer}
@@ -372,11 +382,18 @@
   .auth-error.show{display:block}
   .auth-loading{position:fixed;inset:0;z-index:600;background:rgba(6,7,8,.7);display:none;align-items:center;justify-content:center}
   .auth-loading.show{display:flex}
+  #appLoadingScreen{position:fixed;inset:0;z-index:450;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;animation:fadein .2s}
+  #appLoadingScreen.fade-out{animation:loadFadeOut .4s forwards}
+  @keyframes loadFadeOut{to{opacity:0}}
+  .app-loading-brand{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.03em;color:var(--text)}
+  .app-loading-brand span{color:var(--volt)}
+  .app-loading-ring{width:32px;height:32px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);animation:pullSpin .7s linear infinite}
   .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);animation:pullSpin .7s linear infinite}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
 
@@ -414,6 +431,11 @@
   <div style="margin-bottom:14px;font-size:12px;opacity:.8">Tire um print desta tela e mande pro suporte. Detalhes técnicos abaixo:</div>
   <div id="debugErrorText"></div>
   <button onclick="location.reload()" style="margin-top:18px;background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-family:inherit">🔄 Tentar de novo</button>
+</div>
+
+<div id="appLoadingScreen" style="display:none">
+  <div class="app-loading-brand">RAMON<span>.</span>LOG</div>
+  <div class="app-loading-ring"></div>
 </div>
 
 <div class="pull-refresh" id="pullRefresh">
@@ -598,6 +620,9 @@
       <div class="settings-group">
         <div class="settings-group-title">App</div>
         <div class="settings-row" id="installRow"><div class="settings-label">Verificando…</div></div>
+        <div class="settings-row" id="notifRow"><div class="settings-label">Notificações</div></div>
+        <button class="settings-btn" id="enableNotifBtn">🔔 Ativar avisos de descanso</button>
+        <button class="settings-btn" id="clearCacheBtn">🧹 Limpar cache técnico (não apaga seus dados)</button>
       </div>
 
       <div class="settings-group">
@@ -764,6 +789,7 @@
     <h1 id="celebrateTitle">TREINO<br>COMPLETO!</h1>
     <p id="celebrateSub">Excelente trabalho.</p>
     <div id="celebrateStreak" class="celebrate-streak"></div>
+    <div id="celebrateNewAchievements"></div>
     <div class="cel-actions">
       <button class="cel-share" id="celebrateShare">📤 Compartilhar</button>
       <button class="cel-close" id="celebrateClose">Fechar</button>
@@ -970,7 +996,12 @@ const FIREBASE_CONFIG = {
   appId: "1:1042724517113:web:ae380512980eab207d1e28"
 };
 
-let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false;
+// Notificações push (opcional): cole aqui a "chave VAPID" gerada em
+// Firebase Console → Cloud Messaging → Configuração da Web Push.
+// Sem isso preenchido, o app funciona normalmente — só não tenta ativar push.
+const FCM_VAPID_KEY = "COLE_SUA_CHAVE_VAPID_AQUI";
+
+let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null;
 
 function showDebugError(msg){
   const el = document.getElementById("debugErrorBanner");
@@ -996,10 +1027,32 @@ try{
     fbDb.settings({ experimentalAutoDetectLongPolling: true, merge: true });
     fbDb.enablePersistence({synchronizeTabs:true}).catch(()=>{});
     firebaseReady = true;
+    try{
+      if(firebase.messaging && firebase.messaging.isSupported && firebase.messaging.isSupported()){
+        fbMessaging = firebase.messaging();
+      } else if(firebase.messaging){
+        fbMessaging = firebase.messaging();
+      }
+    }catch(e){ console.warn("Firebase Messaging não disponível neste navegador:", e); }
   } else {
     showDebugError("A biblioteca do Firebase não carregou (sem internet, ou bloqueada). Verifique sua conexão e tente de novo.");
   }
 }catch(e){ console.error("Firebase init failed:", e); showDebugError("Falha ao iniciar o Firebase: " + e.message); }
+
+async function enablePushNotifications(){
+  if(!fbMessaging){ alert("Notificações push não estão disponíveis neste navegador/dispositivo."); return false; }
+  if(FCM_VAPID_KEY.startsWith("COLE_")){ alert("Notificações push ainda não foram configuradas (falta a chave VAPID no código)."); return false; }
+  try{
+    const permission = await Notification.requestPermission();
+    if(permission !== "granted"){ return false; }
+    const registration = await navigator.serviceWorker.ready;
+    const token = await fbMessaging.getToken({ vapidKey: FCM_VAPID_KEY, serviceWorkerRegistration: registration });
+    if(token && currentUser){
+      await store.set("fcmToken", token);
+    }
+    return !!token;
+  }catch(e){ console.error("Erro ao ativar notificações push:", e); return false; }
+}
 
 function withTimeout(promise, ms, label){
   return Promise.race([
@@ -1008,20 +1061,61 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
+// ---- Local cache (safety net): every cloud read/write also mirrors to localStorage,
+// scoped per-account, so the app keeps working (and data stays safe) even if the
+// cloud connection is temporarily unavailable. ----
+function cacheKey(key){ return "ramon_log_cache_" + (currentUser ? currentUser.uid : "anon") + "_" + key; }
+function readCache(key){ try{ const raw = localStorage.getItem(cacheKey(key)); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
+function writeCache(key, value){ try{ localStorage.setItem(cacheKey(key), JSON.stringify(value)); }catch(e){} }
+function clearCache(key){ try{ localStorage.removeItem(cacheKey(key)); }catch(e){} }
+
+function pendingSyncKey(){ return "ramon_log_pending_sync_" + (currentUser ? currentUser.uid : "anon"); }
+function getPendingSync(){ try{ return JSON.parse(localStorage.getItem(pendingSyncKey())) || []; }catch(e){ return []; } }
+function addPendingSync(key){ const list = getPendingSync(); if(!list.includes(key)){ list.push(key); localStorage.setItem(pendingSyncKey(), JSON.stringify(list)); } }
+function removePendingSync(key){ const list = getPendingSync().filter(k=>k!==key); localStorage.setItem(pendingSyncKey(), JSON.stringify(list)); }
+
+async function retryPendingSync(){
+  if(!currentUser || !fbDb) return;
+  const pending = getPendingSync();
+  for(const key of pending){
+    const cached = readCache(key);
+    try{
+      await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value: cached }), 8000, "resync:"+key);
+      removePendingSync(key);
+    }catch(e){ /* still offline/unreachable, try again later */ }
+  }
+}
+window.addEventListener("online", retryPendingSync);
+
 const store = {
   async get(key){
-    if(!currentUser || !fbDb) return null;
-    try{
-      const doc = await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).get(), 8000, "get:"+key);
-      return doc.exists ? doc.data().value : null;
-    }catch(e){ console.error("store.get error", key, e); return null; }
+    if(!currentUser){ return readCache(key); }
+    if(fbDb){
+      try{
+        const doc = await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).get(), 8000, "get:"+key);
+        const value = doc.exists ? doc.data().value : null;
+        if(value !== null) writeCache(key, value);
+        return value;
+      }catch(e){
+        console.error("store.get error (using local cache as fallback)", key, e);
+      }
+    }
+    return readCache(key);
   },
   async set(key, value){
+    writeCache(key, value); // always keep the local safety copy, regardless of cloud outcome
     if(!currentUser || !fbDb) return;
-    try{ await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value }), 8000, "set:"+key); }
-    catch(e){ console.error("store.set error", key, e); }
+    try{
+      await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value }), 8000, "set:"+key);
+      removePendingSync(key);
+    }catch(e){
+      console.error("store.set error (saved locally, will retry sync later)", key, e);
+      addPendingSync(key);
+    }
   },
   async delete(key){
+    clearCache(key);
+    removePendingSync(key);
     if(!currentUser || !fbDb) return;
     try{ await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).delete(), 8000, "delete:"+key); }
     catch(e){ console.error("store.delete error", key, e); }
@@ -1044,8 +1138,13 @@ async function maybeMigrateLocalData(){
         await store.set(shortKey, value);
       }catch(e){ console.error("migration error for", lk, e); }
     }
+    // Note: we deliberately do NOT delete the original localStorage keys here.
+    // Keeping them as a redundant safety copy costs nothing and protects against
+    // a partial/failed cloud sync losing data that only existed in one place.
+    await store.set("__migrated_from_local__", true);
   }
-  await store.set("__migrated_from_local__", true);
+  // If declined, we intentionally do NOT set the migrated flag, so the person
+  // gets asked again on a future login instead of the offer silently vanishing forever.
 }
 
 // ---- Auth screen UI ----
@@ -1528,6 +1627,21 @@ function bindAjustesEvents(){
   document.getElementById("exportBtn").addEventListener("click", exportData);
   document.getElementById("importInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
   document.getElementById("resetAllBtn").addEventListener("click", resetAllData);
+  document.getElementById("clearCacheBtn").addEventListener("click", async ()=>{
+    if(!confirm("Isso limpa apenas o cache técnico do app (versões antigas guardadas offline). Seus treinos, peso e histórico NÃO são afetados — eles ficam salvos na sua conta. Continuar?")) return;
+    try{
+      if("serviceWorker" in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for(const reg of regs) await reg.unregister();
+      }
+      if("caches" in window){
+        const keys = await caches.keys();
+        for(const k of keys) await caches.delete(k);
+      }
+      alert("Cache técnico limpo. O app vai recarregar agora.");
+      location.reload();
+    }catch(e){ alert("Não foi possível limpar o cache: " + e.message); }
+  });
   document.getElementById("logoutBtn").addEventListener("click", async ()=>{
     if(!confirm("Sair da sua conta neste aparelho?")) return;
     await fbAuth.signOut();
@@ -1536,6 +1650,32 @@ function bindAjustesEvents(){
   if(currentUser){
     accountRow.innerHTML = `<div class="settings-label">Conectado como<br><b style="color:var(--text)">${currentUser.email || currentUser.displayName || "sua conta"}</b></div>`;
   }
+
+  const notifRow = document.getElementById("notifRow");
+  const notifBtn = document.getElementById("enableNotifBtn");
+  function refreshNotifStatus(){
+    const supported = "Notification" in window;
+    const perm = supported ? Notification.permission : "unsupported";
+    if(!supported){
+      notifRow.innerHTML = `<div class="settings-label">Notificações não são suportadas neste navegador</div>`;
+      notifBtn.style.display = "none";
+    } else if(perm === "granted"){
+      notifRow.innerHTML = `<div class="settings-label">Notificações: <b style="color:var(--volt)">ativadas ✓</b></div>`;
+      notifBtn.style.display = "none";
+    } else if(perm === "denied"){
+      notifRow.innerHTML = `<div class="settings-label">Notificações bloqueadas — ative manualmente nas configurações do navegador</div>`;
+      notifBtn.style.display = "none";
+    } else {
+      notifRow.innerHTML = `<div class="settings-label">Notificações: desativadas</div>`;
+      notifBtn.style.display = "block";
+    }
+  }
+  refreshNotifStatus();
+  notifBtn.addEventListener("click", async ()=>{
+    const ok = await enablePushNotifications();
+    if(ok){ alert("Notificações ativadas! Você vai receber um aviso quando o descanso entre séries terminar."); }
+    refreshNotifStatus();
+  });
 }
 
 function buildDaySwitch(){
@@ -2432,7 +2572,10 @@ async function endWorkoutTimer(){
   if(!s.startedAt || s.endedAt) return;
   s.endedAt = new Date().toISOString();
   await store.set("state", state);
+  const beforeIds = getUnlockedAchievementIds(computeAchievementContext());
   await recordSessionData(currentDay);
+  const afterIds = getUnlockedAchievementIds(computeAchievementContext());
+  lastNewlyUnlockedAchievements = ACHIEVEMENTS.filter(a=> afterIds.has(a.id) && !beforeIds.has(a.id));
   renderSessionTimer();
 }
 
@@ -2755,6 +2898,19 @@ function computeStreaks(){
 
 function totalVolumeAllTime(){ return sessionLog.reduce((sum,s)=> sum+(s.volume||0), 0); }
 
+function computeAchievementContext(){
+  const { best } = computeStreaks();
+  return {
+    sessions: sessionLog.length,
+    bestStreak: best,
+    prCount: Object.keys(exerciseRecords).filter(k=> exerciseRecords[k] && exerciseRecords[k].maxWeight).length,
+    volume: totalVolumeAllTime()
+  };
+}
+function getUnlockedAchievementIds(ctx){ return new Set(ACHIEVEMENTS.filter(a=>a.check(ctx)).map(a=>a.id)); }
+
+let lastNewlyUnlockedAchievements = [];
+
 const ACHIEVEMENTS = [
   { id:"first_session", icon:"🎬", title:"Primeiro treino", desc:"Complete sua primeira sessão", check: c=> c.sessions>=1, progress: c=>[Math.min(c.sessions,1),1] },
   { id:"sessions_10", icon:"🥉", title:"10 treinos", desc:"Complete 10 sessões", check: c=> c.sessions>=10, progress: c=>[Math.min(c.sessions,10),10] },
@@ -2773,13 +2929,9 @@ const ACHIEVEMENTS = [
 
 function renderConquistasTab(){
   const el = document.getElementById("sub-conquistas");
-  const { current, best } = computeStreaks();
-  const ctx = {
-    sessions: sessionLog.length,
-    bestStreak: best,
-    prCount: Object.keys(exerciseRecords).filter(k=> exerciseRecords[k] && exerciseRecords[k].maxWeight).length,
-    volume: totalVolumeAllTime()
-  };
+  const { current } = computeStreaks();
+  const ctx = computeAchievementContext();
+  const { bestStreak: best } = ctx;
   const unlocked = ACHIEVEMENTS.filter(a=>a.check(ctx));
 
   el.innerHTML = `
@@ -3799,6 +3951,8 @@ async function importData(file){
 
 async function resetAllData(){
   if(!confirm("Apagar TODOS os dados?") || !confirm("Tem certeza? Não dá para desfazer.")) return;
+  await exportData(); // safety copy, downloaded automatically before anything is wiped
+  alert("Por segurança, baixamos um backup dos seus dados antes de apagar. Confira a pasta de Downloads se precisar recuperar algo depois.");
   workouts = buildDefaultWorkouts();
   DAY_KEYS.forEach(k=>{ state[k]=emptyDayState(k); history[k]={lastKg:{}}; });
   completedSessions=0; bodyWeights=[]; bodyMeasures=[]; photoIndex=[];
@@ -3918,6 +4072,22 @@ function showWorkoutSummary(isFullComplete){
   } else {
     streakEl.innerHTML = "";
     streakEl.classList.remove("milestone");
+  }
+
+  const newAchEl = document.getElementById("celebrateNewAchievements");
+  if(lastNewlyUnlockedAchievements.length){
+    newAchEl.innerHTML = lastNewlyUnlockedAchievements.map((a,idx)=>`
+      <div class="ach-unlock-toast" style="animation-delay:${idx*0.12}s">
+        <span class="ach-unlock-icon">${a.icon}</span>
+        <div>
+          <div class="ach-unlock-label">Conquista desbloqueada!</div>
+          <div class="ach-unlock-title">${a.title}</div>
+        </div>
+      </div>
+    `).join("");
+    haptic([30,20,30,20,60]);
+  } else {
+    newAchEl.innerHTML = "";
   }
 
   document.getElementById("celebrateOverlay").classList.add("show");
@@ -4184,16 +4354,21 @@ if(firebaseReady){
       hideAuthScreen();
       if(!appInitialized){
         appInitialized = true;
+        const loadingEl = document.getElementById("appLoadingScreen");
+        loadingEl.style.display = "flex";
         const watchdog = setTimeout(()=>{
           showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
         }, 15000);
         try{
           await maybeMigrateLocalData();
           await init();
+          retryPendingSync();
         }catch(e){
           showDebugError("Erro ao carregar o app: " + e.message + (e.stack ? "\n"+e.stack : ""));
         }
         clearTimeout(watchdog);
+        loadingEl.classList.add("fade-out");
+        setTimeout(()=>{ loadingEl.style.display = "none"; loadingEl.classList.remove("fade-out"); }, 400);
       }
     } else {
       currentUser = null;
