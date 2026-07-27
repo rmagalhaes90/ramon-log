@@ -1987,6 +1987,24 @@ async function init(){
 
   DAY_KEYS.forEach(k=>{ history[k]={lastKg:{}}; if(savedHistory && savedHistory[k]) history[k]=savedHistory[k]; });
   DAY_KEYS.forEach(k=>{ state[k]=(savedState && savedState[k] && savedState[k].date===todayKey()) ? savedState[k] : emptyDayState(k); });
+  // Defensive migration: accounts with data saved before per-set abs tracking existed
+  // won't have these fields yet. Guarantee they always exist so nothing crashes.
+  DAY_KEYS.forEach(k=>{
+    const s = state[k];
+    if(!s.absSets) s.absSets = {};
+    if(!s.absKg) s.absKg = {};
+    if(!s.absReps) s.absReps = {};
+    if(!s.abs) s.abs = {};
+    const w = workouts[k];
+    if(w && w.abs){
+      w.abs.forEach((ex,i)=>{
+        const len = ex.sets||3;
+        if(!Array.isArray(s.absSets[i]) || s.absSets[i].length!==len) s.absSets[i] = Array.from({length:len}, (_,idx)=> (s.absSets[i]||[])[idx] || false);
+        if(!Array.isArray(s.absKg[i]) || s.absKg[i].length!==len) s.absKg[i] = Array.from({length:len}, (_,idx)=> (s.absKg[i]||[])[idx] || "");
+        if(!Array.isArray(s.absReps[i]) || s.absReps[i].length!==len) s.absReps[i] = Array.from({length:len}, (_,idx)=> (s.absReps[i]||[])[idx] || "");
+      });
+    }
+  });
 
   completedSessions = savedCompletedSessions || 0;
   bodyWeights = savedBodyWeights || [];
@@ -2951,6 +2969,10 @@ function computePlates(){
 
 function buildAbsCard(ex, i){
   const s = state[currentDay];
+  if(!s.absSets) s.absSets = {};
+  if(!s.absKg) s.absKg = {};
+  if(!s.absReps) s.absReps = {};
+  if(!s.abs) s.abs = {};
   if(!s.absSets[i]) s.absSets[i] = new Array(ex.sets||3).fill(false);
   if(!s.absKg[i]) s.absKg[i] = new Array(ex.sets||3).fill("");
   if(!s.absReps[i]) s.absReps[i] = new Array(ex.sets||3).fill("");
@@ -3069,7 +3091,7 @@ function computeProgressPct(){
   if(!w) return 0;
   let total = 0, done = 0;
   if(w.exercises) w.exercises.forEach((ex,i)=>{ total += (ex.sets||4); done += (state[currentDay].exSets[i]||[]).filter(Boolean).length; });
-  if(w.abs) w.abs.forEach((ex,i)=>{ total += (ex.sets||3); done += (state[currentDay].absSets[i]||[]).filter(Boolean).length; });
+  if(w.abs) w.abs.forEach((ex,i)=>{ total += (ex.sets||3); done += ((state[currentDay].absSets||{})[i]||[]).filter(Boolean).length; });
   return total ? Math.round((done/total)*100) : 0;
 }
 
