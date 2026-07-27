@@ -1147,14 +1147,22 @@ async function maybeMigrateLocalData(){
   if(already) return;
   const wantsImport = confirm("Encontramos dados de treino salvos neste celular (de antes de você entrar com sua conta). Deseja importar esses dados agora para sua conta?");
   if(wantsImport){
-    for(const lk of localKeys){
+    const loadingEl = document.getElementById("appLoadingScreen");
+    const brandEl = loadingEl.querySelector(".app-loading-brand");
+    const originalBrandHtml = brandEl.innerHTML;
+    loadingEl.style.display = "flex";
+    brandEl.innerHTML = `Importando seus dados<span>…</span>`;
+
+    await Promise.all(localKeys.map(async (lk)=>{
       const shortKey = lk.slice(LS_PREFIX.length);
       try{
         const raw = localStorage.getItem(lk);
         const value = JSON.parse(raw);
         await store.set(shortKey, value);
       }catch(e){ console.error("migration error for", lk, e); }
-    }
+    }));
+
+    brandEl.innerHTML = originalBrandHtml;
     // Note: we deliberately do NOT delete the original localStorage keys here.
     // Keeping them as a redundant safety copy costs nothing and protects against
     // a partial/failed cloud sync losing data that only existed in one place.
@@ -4488,11 +4496,15 @@ if(firebaseReady){
         appInitialized = true;
         const loadingEl = document.getElementById("appLoadingScreen");
         loadingEl.style.display = "flex";
-        const watchdog = setTimeout(()=>{
-          showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
+        let watchdog = setTimeout(()=>{
+          showDebugError("A importação/carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
         }, 15000);
         try{
           await maybeMigrateLocalData();
+          clearTimeout(watchdog);
+          watchdog = setTimeout(()=>{
+            showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
+          }, 15000);
           await init();
           retryPendingSync();
         }catch(e){
