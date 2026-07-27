@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>Ramon.Log v3</title>
+<title>KYRO</title>
+<meta name="apple-mobile-web-app-title" content="KYRO">
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0b0c0e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -371,6 +372,9 @@
   .settings-btn.primary{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}.settings-btn.danger{color:var(--red)}
   .about-block{padding:10px 0 30px;color:var(--dim);font-size:11.5px;font-family:'JetBrains Mono',monospace;text-align:center}
 
+  .lang-switch{display:flex;gap:8px;margin-bottom:14px}
+  .lang-switch button{flex:1;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-weight:600;font-size:13px;cursor:pointer}
+  .lang-switch button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
   .segmented{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
   .segmented button{flex:1;white-space:nowrap;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-weight:600;font-size:12.5px;cursor:pointer}
   .segmented button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
@@ -416,7 +420,7 @@
 
 <div id="authScreen">
   <div class="auth-brand">
-    <h1>RAMON<span>.</span>LOG</h1>
+    <h1>KYRO<span>.</span></h1>
     <p>Entre com sua conta pra acessar seu treino</p>
   </div>
   <div class="auth-tabs">
@@ -451,7 +455,7 @@
 </div>
 
 <div id="appLoadingScreen" style="display:none">
-  <div class="app-loading-brand">RAMON<span>.</span>LOG</div>
+  <div class="app-loading-brand">KYRO<span>.</span></div>
   <div class="app-loading-ring"></div>
 </div>
 
@@ -465,7 +469,7 @@
   <section class="page active" data-page="treino">
     <div class="topbar">
       <div class="topbar-brand">
-        <h1>RAMON<span>.</span>LOG</h1>
+        <h1>KYRO<span>.</span></h1>
         <div style="display:flex;gap:8px">
           <div class="date mono" id="todayDate">—</div>
           <button class="icon-btn" id="resetBtn" title="Reiniciar">↺</button>
@@ -480,9 +484,9 @@
       </div>
       <div class="session-timer" id="sessionTimer">
         <div class="st-times">
-          <div class="st-item"><span class="st-label">Início</span><span class="st-val mono" id="stStart">—</span></div>
-          <div class="st-item"><span class="st-label">Fim</span><span class="st-val mono" id="stEnd">—</span></div>
-          <div class="st-item"><span class="st-label">Duração</span><span class="st-val mono st-duration" id="stDuration">00:00</span></div>
+          <div class="st-item"><span class="st-label" id="lblStart">Início</span><span class="st-val mono" id="stStart">—</span></div>
+          <div class="st-item"><span class="st-label" id="lblEnd">Fim</span><span class="st-val mono" id="stEnd">—</span></div>
+          <div class="st-item"><span class="st-label" id="lblDuration">Duração</span><span class="st-val mono st-duration" id="stDuration">00:00</span></div>
         </div>
         <button class="st-btn" id="stButton">▶ Iniciar treino</button>
       </div>
@@ -502,13 +506,13 @@
     <div class="page-header"><h2>PROGRESSO<span>.</span></h2></div>
     <div class="content">
       <div class="segmented" id="progressoSegmented">
-        <button data-sub="semana" class="active">📅 Semana</button>
-        <button data-sub="peso">⚖️ Peso</button>
-        <button data-sub="medidas">📏 Medidas</button>
-        <button data-sub="fotos">📷 Fotos</button>
-        <button data-sub="musculos">💪 Músculos</button>
-        <button data-sub="nutricao">🍽️ Nutrição</button>
-        <button data-sub="conquistas">🏅 Conquistas</button>
+        <button data-sub="semana" class="active" id="subSemana">📅 Semana</button>
+        <button data-sub="peso" id="subPeso">⚖️ Peso</button>
+        <button data-sub="medidas" id="subMedidas">📏 Medidas</button>
+        <button data-sub="fotos" id="subFotos">📷 Fotos</button>
+        <button data-sub="musculos" id="subMusculos">💪 Músculos</button>
+        <button data-sub="nutricao" id="subNutricao">🍽️ Nutrição</button>
+        <button data-sub="conquistas" id="subConquistas">🏅 Conquistas</button>
       </div>
 
       <div id="sub-semana"></div>
@@ -637,6 +641,11 @@
       <div class="settings-group">
         <div class="settings-group-title">App</div>
         <div class="settings-row" id="installRow"><div class="settings-label">Verificando…</div></div>
+        <div class="settings-row" id="langRow"><div class="settings-label">Idioma / Language</div></div>
+        <div class="lang-switch" id="langSwitch">
+          <button data-lang="pt" class="active">🇧🇷 Português</button>
+          <button data-lang="en">🇺🇸 English</button>
+        </div>
         <div class="settings-row" id="notifRow"><div class="settings-label">Notificações</div></div>
         <button class="settings-btn" id="enableNotifBtn">🔔 Ativar avisos de descanso</button>
         <button class="settings-btn" id="clearCacheBtn">🧹 Limpar cache técnico (não apaga seus dados)</button>
@@ -650,17 +659,17 @@
         <button class="settings-btn danger" id="resetAllBtn">🗑 Apagar todos os dados</button>
       </div>
 
-      <div class="about-block">Ramon.Log · v3.0 · treino profissional em um app</div>
+      <div class="about-block">KYRO · v3.0 · treino profissional em um app</div>
     </div>
   </section>
 
 </div>
 
 <nav class="tabbar" id="tabbar">
-  <button data-page="treino" class="active"><span class="tab-icon">🏋️</span><span>Treino</span></button>
-  <button data-page="rotinas"><span class="tab-icon">⚙️</span><span>Rotinas</span></button>
-  <button data-page="progresso"><span class="tab-icon">📊</span><span>Progresso</span></button>
-  <button data-page="ajustes"><span class="tab-icon">⚙️</span><span>Ajustes</span></button>
+  <button data-page="treino" class="active"><span class="tab-icon">🏋️</span><span id="navTreino">Treino</span></button>
+  <button data-page="rotinas"><span class="tab-icon">⚙️</span><span id="navRotinas">Rotinas</span></button>
+  <button data-page="progresso"><span class="tab-icon">📊</span><span id="navProgresso">Progresso</span></button>
+  <button data-page="ajustes"><span class="tab-icon">⚙️</span><span id="navAjustes">Ajustes</span></button>
 </nav>
 
 <!-- MODALS -->
@@ -993,6 +1002,237 @@ const EXERCISE_DB = [
   {name:"Panturrilha Burrinho",muscles:{calves:1},sets:"4",reps:"15-20",rest:45,equipment:"machine"},
   {name:"Pulo de Corda (Panturrilha)",muscles:{calves:1},sets:"3",reps:"30-45s",rest:45,equipment:"bodyweight"}
 ];
+
+// ==================== I18N (idioma) ====================
+let currentLang = "pt";
+
+const MUSCLE_NAMES_EN = {shoulders:"Shoulders",traps:"Traps",chest:"Chest",biceps:"Biceps",triceps:"Triceps",forearms:"Forearms",abs:"Abs",obliques:"Obliques",upperback:"Upper Back",lowerback:"Lower Back",glutes:"Glutes",quads:"Quads",hamstrings:"Hamstrings",calves:"Calves",lats:"Lats"};
+
+const EQUIPMENT_NAMES_EN = {barbell:"🏋️ Barbell",dumbbell:"💪 Dumbbell",machine:"⚙️ Machine",cable:"🔗 Cable",bodyweight:"🤸 Bodyweight"};
+
+const EXERCISE_NAME_EN = {
+  "Agachamento Livre":"Free Squat",
+  "Leg Press":"Leg Press",
+  "Cadeira Extensora":"Leg Extension",
+  "Stiff":"Stiff-Leg Deadlift",
+  "Mesa Flexora":"Lying Leg Curl",
+  "Afundo com Halteres":"Dumbbell Lunge",
+  "Panturrilha em Pé":"Standing Calf Raise",
+  "Panturrilha Sentada":"Seated Calf Raise",
+  "Cable Crunch":"Cable Crunch",
+  "Elevação de Pernas":"Leg Raise",
+  "Prancha":"Plank",
+  "Desenvolvimento com Halteres":"Dumbbell Shoulder Press",
+  "Elevação Lateral":"Lateral Raise",
+  "Elevação Lateral no Cabo":"Cable Lateral Raise",
+  "Peck Deck Invertido":"Reverse Peck Deck",
+  "Desenvolvimento Arnold":"Arnold Press",
+  "Encolhimento com Halteres":"Dumbbell Shrug",
+  "Russian Twist":"Russian Twist",
+  "Rosca Direta":"Barbell Curl",
+  "Rosca Inclinada":"Incline Dumbbell Curl",
+  "Rosca Martelo":"Hammer Curl",
+  "Tríceps Corda":"Cable Rope Triceps Pushdown",
+  "Tríceps Francês":"French Press",
+  "Mergulho":"Dips",
+  "Supino com Barra":"Barbell Bench Press",
+  "Supino Inclinado":"Incline Bench Press",
+  "Crucifixo Cabos":"Cable Fly",
+  "Rosca Scotch":"Preacher Curl",
+  "Barra Fixa":"Pull-up",
+  "Remada com Halteres":"Dumbbell Row",
+  "Remada em Máquina":"Machine Row",
+  "Desenvolvimento com Barra":"Barbell Shoulder Press",
+  "Elevação Frontal":"Front Raise",
+  "Face Pulls":"Face Pulls",
+  "Pulley Frontal":"Front Pulldown",
+  "Supino Reto":"Flat Bench Press",
+  "Crucifixo Polia":"Cable Fly",
+  "Peck Deck":"Peck Deck (Chest Fly Machine)",
+  "Tríceps Testa":"Skull Crusher",
+  "Puxada Frente":"Lat Pulldown",
+  "Puxada Aberta":"Wide-Grip Pulldown",
+  "Remada Baixa":"Seated Cable Row",
+  "Remada Unilateral":"Single-Arm Dumbbell Row",
+  "Pulldown":"Pulldown",
+  "Rosca Scott":"Preacher Curl",
+  "Agachamento":"Squat",
+  "Extensora":"Leg Extension",
+  "Desenvolvimento":"Shoulder Press",
+  "Desenvolvimento Halteres":"Dumbbell Shoulder Press",
+  "Crucifixo Invertido Polia":"Cable Reverse Fly",
+  "Face Pull":"Face Pull",
+  "Encolhimento":"Shrug",
+  "Remada":"Row",
+  "Supino Declinado":"Decline Bench Press",
+  "Supino com Halteres":"Flat Dumbbell Press",
+  "Supino Inclinado com Halteres":"Incline Dumbbell Press",
+  "Supino Declinado com Halteres":"Decline Dumbbell Press",
+  "Crucifixo Reto com Halteres":"Flat Dumbbell Fly",
+  "Crucifixo Inclinado com Halteres":"Incline Dumbbell Fly",
+  "Crucifixo Declinado com Halteres":"Decline Dumbbell Fly",
+  "Peck Deck Máquina":"Peck Deck Machine",
+  "Crossover na Polia":"Cable Crossover",
+  "Crossover Baixo":"Low Cable Crossover",
+  "Flexão de Braço":"Push-up",
+  "Flexão Diamante":"Diamond Push-up",
+  "Flexão Inclinada":"Incline Push-up",
+  "Flexão Declinada":"Decline Push-up",
+  "Supino Máquina":"Machine Bench Press",
+  "Chest Press Máquina":"Chest Press Machine",
+  "Pullover com Halter":"Dumbbell Pullover",
+  "Mergulho nas Paralelas (Peito)":"Chest Dips (Parallel Bars)",
+  "Supino Guilhotina":"Guillotine Press",
+  "Puxada Triângulo":"Close-Grip Pulldown (V-Bar)",
+  "Puxada Supinada":"Underhand Pulldown",
+  "Remada Curvada com Barra":"Bent-Over Barbell Row",
+  "Remada Cavalinho (T-bar)":"T-Bar Row",
+  "Barra Fixa Supinada (Chin-up)":"Chin-up",
+  "Pull-over na Polia Alta":"High Cable Pullover",
+  "Remada Sentada no Cabo":"Seated Cable Row",
+  "Levantamento Terra":"Deadlift",
+  "Levantamento Terra Sumô":"Sumo Deadlift",
+  "Remada com Elástico":"Band Row",
+  "Australian Pull-up (Remada Invertida)":"Australian Pull-up (Inverted Row)",
+  "Remada Serrote":"Single-Arm Row",
+  "Puxada Neutra":"Neutral-Grip Pulldown",
+  "Superman (Lombar)":"Superman (Lower Back)",
+  "Hiperextensão Lombar":"Back Extension",
+  "Desenvolvimento Militar":"Military Press",
+  "Desenvolvimento Máquina":"Machine Shoulder Press",
+  "Elevação Frontal com Barra":"Barbell Front Raise",
+  "Elevação Frontal com Halteres":"Dumbbell Front Raise",
+  "Crucifixo Invertido com Halteres":"Dumbbell Reverse Fly",
+  "Remada Alta":"Upright Row",
+  "Remada Alta com Halteres":"Dumbbell Upright Row",
+  "Encolhimento com Barra":"Barbell Shrug",
+  "Encolhimento na Polia":"Cable Shrug",
+  "Manguito Rotador (Rotação Externa)":"Rotator Cuff (External Rotation)",
+  "Elevação Lateral Máquina":"Machine Lateral Raise",
+  "Desenvolvimento na Máquina Articulado":"Articulated Machine Shoulder Press",
+  "Elevação em Y":"Y-Raise",
+  "Rosca Direta com Halteres":"Dumbbell Curl",
+  "Rosca Alternada":"Alternating Dumbbell Curl",
+  "Rosca Scott com Halteres":"Dumbbell Preacher Curl",
+  "Rosca Concentrada":"Concentration Curl",
+  "Rosca 21":"21s Curl",
+  "Rosca no Cabo":"Cable Curl",
+  "Rosca Spider":"Spider Curl",
+  "Rosca Barra W":"EZ-Bar Curl",
+  "Rosca Cross Body (Martelo Cruzado)":"Cross-Body Hammer Curl",
+  "Rosca Punho Supinado":"Supinated Wrist Curl",
+  "Tríceps Coice (Kickback)":"Triceps Kickback",
+  "Tríceps Barra Reta na Polia":"Straight-Bar Triceps Pushdown",
+  "Mergulho no Banco":"Bench Dips",
+  "Supino Pegada Fechada":"Close-Grip Bench Press",
+  "Tríceps Overhead com Halter":"Overhead Dumbbell Triceps Extension",
+  "Tríceps Francês Unilateral":"Single-Arm French Press",
+  "Extensão de Tríceps na Polia (V)":"Cable Triceps Extension (V-Bar)",
+  "Rosca de Punho":"Wrist Curl",
+  "Rosca de Punho Invertida":"Reverse Wrist Curl",
+  "Farmer's Walk":"Farmer's Walk",
+  "Rosca de Punho com Halteres":"Dumbbell Wrist Curl",
+  "Abdominal Infra":"Lower Ab Crunch",
+  "Abdominal Supra":"Upper Ab Crunch",
+  "Abdominal Bicicleta":"Bicycle Crunch",
+  "Prancha Lateral":"Side Plank",
+  "Ab Wheel (Roda Abdominal)":"Ab Wheel Rollout",
+  "Sit-up":"Sit-up",
+  "Elevação de Joelhos na Barra":"Hanging Knee Raise",
+  "Oblíquo no Cabo (Wood Chop)":"Cable Woodchop",
+  "Abdominal na Polia":"Cable Crunch",
+  "Prancha com Elevação de Perna":"Plank with Leg Raise",
+  "Dead Bug":"Dead Bug",
+  "Abdominal Canivete (V-up)":"V-up",
+  "Agachamento Búlgaro":"Bulgarian Split Squat",
+  "Agachamento Frontal":"Front Squat",
+  "Hack Squat":"Hack Squat",
+  "Passada (Lunge)":"Lunge",
+  "Passada com Barra":"Barbell Lunge",
+  "Agachamento Sumô":"Sumo Squat",
+  "Leg Press Unilateral":"Single-Leg Press",
+  "Agachamento na Máquina Smith":"Smith Machine Squat",
+  "Agachamento Sissy":"Sissy Squat",
+  "Step Up (Subida no Banco)":"Step-Up",
+  "Agachamento Livre com Halteres (Goblet)":"Goblet Squat",
+  "Flexora em Pé":"Standing Leg Curl",
+  "Levantamento Terra Romeno":"Romanian Deadlift",
+  "Levantamento Terra Romeno com Halteres":"Dumbbell Romanian Deadlift",
+  "Good Morning":"Good Morning",
+  "Cadeira Flexora":"Seated Leg Curl",
+  "Stiff com Halteres":"Dumbbell Stiff-Leg Deadlift",
+  "Flexora Deitado":"Lying Leg Curl",
+  "Elevação Pélvica (Hip Thrust)":"Hip Thrust",
+  "Hip Thrust na Máquina":"Machine Hip Thrust",
+  "Glúteo no Cabo (Kickback)":"Cable Glute Kickback",
+  "Abdução de Quadril na Máquina":"Machine Hip Abduction",
+  "Abdução de Quadril no Cabo":"Cable Hip Abduction",
+  "Ponte de Glúteo":"Glute Bridge",
+  "Coice na Máquina (Glúteo)":"Machine Glute Kickback",
+  "Cadeira Abdutora":"Hip Abductor Machine",
+  "Panturrilha no Leg Press":"Leg Press Calf Raise",
+  "Panturrilha Unilateral":"Single-Leg Calf Raise",
+  "Panturrilha no Smith":"Smith Machine Calf Raise",
+  "Panturrilha com Halteres":"Dumbbell Calf Raise",
+  "Rotação de Tronco com Barra":"Barbell Torso Rotation",
+  "Prancha Lateral com Rotação":"Side Plank with Rotation",
+  "Elevação de Perna Lateral Deitado":"Lying Side Leg Raise",
+  "Abdominal Oblíquo no Solo":"Floor Oblique Crunch",
+  "Panturrilha na Barra Guiada":"Guided Bar Calf Raise",
+  "Panturrilha Burrinho":"Donkey Calf Raise",
+  "Pulo de Corda (Panturrilha)":"Jump Rope (Calves)"
+};
+
+function tExerciseName(name){
+  if(currentLang==="en" && EXERCISE_NAME_EN[name]) return EXERCISE_NAME_EN[name];
+  return name;
+}
+function tMuscleName(key){
+  return currentLang==="en" ? (MUSCLE_NAMES_EN[key]||key) : (MUSCLE_NAMES[key]||key);
+}
+function tEquipmentName(key){
+  return currentLang==="en" ? (EQUIPMENT_NAMES_EN[key]||key) : (EQUIPMENT_NAMES[key]||key);
+}
+
+const UI_STRINGS = {
+  pt: {
+    tab_treino:"Treino", tab_rotinas:"Rotinas", tab_progresso:"Progresso", tab_ajustes:"Ajustes",
+    rest_day:"Dia de descanso", start_workout:"Iniciar treino", finish_workout:"Finalizar treino",
+    restart_timer:"🔁 Reiniciar cronômetro", start_label:"INÍCIO", end_label:"FIM", duration_label:"DURAÇÃO",
+    workout_label:"TREINO", add_exercise:"+ Adicionar exercício", add_set:"+ Adicionar série",
+    series_short:"Série", kg_short:"Kg", reps_short:"Reps", how_to:"▶️ Como fazer",
+    swap_auto:"Trocar automaticamente", swap:"↔️ Trocar", notes_btn:"📝", shuffle_btn:"🔀",
+    remove_exercise:"Remover exercício", warmup_label:"🎯",
+    settings_account:"Conta", settings_app:"App", settings_data:"Dados",
+    logout:"🚪 Sair da conta", export_backup:"⬇️ Exportar backup", import_data:"⬆️ Importar dados",
+    delete_all:"🗑 Apagar todos os dados", clear_cache:"🧹 Limpar cache técnico (não apaga seus dados)",
+    enable_notif:"🔔 Ativar avisos de descanso",
+    week_label:"Semana", weight_label:"Peso", measures_label:"Medidas", photos_label:"Fotos",
+    muscles_label:"Músculos", nutrition_label:"Nutrição", achievements_label:"Conquistas",
+    consistency_title:"Consistência", recent_prs:"🏆 Recordes recentes", muscle_vol_title:"Volume por músculo esta semana",
+    days_trained:"Dias treinados", sessions_week:"Sessões da semana", weekly_volume:"Volume por semana",
+    language_label:"Idioma"
+  },
+  en: {
+    tab_treino:"Workout", tab_rotinas:"Routines", tab_progresso:"Progress", tab_ajustes:"Settings",
+    rest_day:"Rest day", start_workout:"Start workout", finish_workout:"Finish workout",
+    restart_timer:"🔁 Restart timer", start_label:"START", end_label:"END", duration_label:"DURATION",
+    workout_label:"WORKOUT", add_exercise:"+ Add exercise", add_set:"+ Add set",
+    series_short:"Set", kg_short:"Kg", reps_short:"Reps", how_to:"▶️ How to do it",
+    swap_auto:"Auto-swap", swap:"↔️ Swap", notes_btn:"📝", shuffle_btn:"🔀",
+    remove_exercise:"Remove exercise", warmup_label:"🎯",
+    settings_account:"Account", settings_app:"App", settings_data:"Data",
+    logout:"🚪 Sign out", export_backup:"⬇️ Export backup", import_data:"⬆️ Import data",
+    delete_all:"🗑 Delete all data", clear_cache:"🧹 Clear technical cache (does not delete your data)",
+    enable_notif:"🔔 Enable rest alerts",
+    week_label:"Week", weight_label:"Weight", measures_label:"Measurements", photos_label:"Photos",
+    muscles_label:"Muscles", nutrition_label:"Nutrition", achievements_label:"Achievements",
+    consistency_title:"Consistency", recent_prs:"🏆 Recent PRs", muscle_vol_title:"Volume by muscle this week",
+    days_trained:"Days trained", sessions_week:"This week\'s sessions", weekly_volume:"Weekly volume",
+    language_label:"Language"
+  }
+};
+function t(key){ return (UI_STRINGS[currentLang] && UI_STRINGS[currentLang][key]) || UI_STRINGS.pt[key] || key; }
 
 const MUSCLE_NAMES = {shoulders:"Ombros",traps:"Trapézio",chest:"Peito",biceps:"Bíceps",triceps:"Tríceps",forearms:"Antebraço",abs:"Abdômen",obliques:"Oblíquos",upperback:"Costas (superior)",lowerback:"Lombar",glutes:"Glúteos",quads:"Quadríceps",hamstrings:"Posteriores",calves:"Panturrilha",lats:"Costas (lateral)"};
 const EQUIPMENT_NAMES = {barbell:"🏋️ Barra",dumbbell:"💪 Halteres",machine:"⚙️ Máquina",cable:"🔗 Cabo/Polia",bodyweight:"🤸 Peso do Corpo"};
@@ -1584,12 +1824,14 @@ async function init(){
   const [
     savedWorkouts, savedState, savedHistory, savedCompletedSessions,
     savedBodyWeights, savedBodyMeasures, savedPhotoIndex, savedExerciseHistory,
-    savedExerciseRecords, savedSessionLog, savedNutritionLog, savedProfile
+    savedExerciseRecords, savedSessionLog, savedNutritionLog, savedProfile, savedLang
   ] = await Promise.all([
     store.get("workouts"), store.get("state"), store.get("history"), store.get("completedSessions"),
     store.get("bodyWeights"), store.get("bodyMeasures"), store.get("photoIndex"), store.get("exerciseHistory"),
-    store.get("exerciseRecords"), store.get("sessionLog"), store.get("nutritionLog"), store.get("profile")
+    store.get("exerciseRecords"), store.get("sessionLog"), store.get("nutritionLog"), store.get("profile"), store.get("language")
   ]);
+
+  currentLang = savedLang || "pt";
 
   workouts = savedWorkouts || buildDefaultWorkouts();
 
@@ -1608,6 +1850,7 @@ async function init(){
 
   currentDay = DAY_KEYS[new Date().getDay()];
 
+  applyStaticTranslations();
   bindPageNav();
   bindTrainoEvents();
   bindProgressoEvents();
@@ -1648,10 +1891,41 @@ function bindProgressoEvents(){
   document.getElementById("compareSlider").addEventListener("input", updateCompareSlider);
 }
 
+function applyStaticTranslations(){
+  document.getElementById("navTreino").textContent = t("tab_treino");
+  document.getElementById("navRotinas").textContent = t("tab_rotinas");
+  document.getElementById("navProgresso").textContent = t("tab_progresso");
+  document.getElementById("navAjustes").textContent = t("tab_ajustes");
+  document.getElementById("lblStart").textContent = t("start_label").charAt(0) + t("start_label").slice(1).toLowerCase();
+  document.getElementById("lblEnd").textContent = t("end_label").charAt(0) + t("end_label").slice(1).toLowerCase();
+  document.getElementById("lblDuration").textContent = t("duration_label").charAt(0) + t("duration_label").slice(1).toLowerCase();
+  document.getElementById("subSemana").textContent = "📅 " + t("week_label");
+  document.getElementById("subPeso").textContent = "⚖️ " + t("weight_label");
+  document.getElementById("subMedidas").textContent = "📏 " + t("measures_label");
+  document.getElementById("subFotos").textContent = "📷 " + t("photos_label");
+  document.getElementById("subMusculos").textContent = "💪 " + t("muscles_label");
+  document.getElementById("subNutricao").textContent = "🍽️ " + t("nutrition_label");
+  document.getElementById("subConquistas").textContent = "🏅 " + t("achievements_label");
+  document.querySelectorAll("#langSwitch button").forEach(b=> b.classList.toggle("active", b.dataset.lang===currentLang));
+}
+
 function bindAjustesEvents(){
   document.getElementById("exportBtn").addEventListener("click", exportData);
   document.getElementById("importInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
   document.getElementById("resetAllBtn").addEventListener("click", resetAllData);
+  document.querySelectorAll("#langSwitch button").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.lang===currentLang);
+    btn.addEventListener("click", async ()=>{
+      if(btn.dataset.lang===currentLang) return;
+      currentLang = btn.dataset.lang;
+      await store.set("language", currentLang);
+      applyStaticTranslations();
+      buildDaySwitch();
+      renderDay();
+      renderRotinas();
+      bindAjustesEvents();
+    });
+  });
   document.getElementById("clearCacheBtn").addEventListener("click", async ()=>{
     if(!confirm("Isso limpa apenas o cache técnico do app (versões antigas guardadas offline). Seus treinos, peso e histórico NÃO são afetados — eles ficam salvos na sua conta. Continuar?")) return;
     try{
@@ -1731,7 +2005,7 @@ function renderDay(){
   if(!w){
     clearInterval(sessionTimerInterval);
     document.getElementById("sessionTimer").style.display = "none";
-    document.getElementById("progLabel").textContent = "Dia de descanso";
+    document.getElementById("progLabel").textContent = t("rest_day");
     document.getElementById("progFill").style.width = "0%";
     document.getElementById("progPct").textContent = "—";
     const empty = document.createElement("div");
@@ -1783,7 +2057,7 @@ function renderDay(){
   const addExBtn = document.createElement("button");
   addExBtn.className = "add-set-btn";
   addExBtn.style.marginBottom = "6px";
-  addExBtn.textContent = "+ Adicionar exercício";
+  addExBtn.textContent = t("add_exercise");
   addExBtn.addEventListener("click", ()=> openExerciseBrowser(currentDay, "exercises"));
   content.appendChild(addExBtn);
   
@@ -2010,7 +2284,7 @@ function buildExCard(ex, i){
         <div class="drag-handle" data-role="draghandle" title="Segurar e arrastar">⠿</div>
       </div>
       <div style="flex:1">
-        <div class="ex-name" data-role="exname" style="cursor:pointer">${ex.name} <span class="ex-history-icon">📈</span></div>
+        <div class="ex-name" data-role="exname" style="cursor:pointer">${tExerciseName(ex.name)} <span class="ex-history-icon">📈</span></div>
         ${ex.notes ? `<div class="ex-note">"${ex.notes}"</div>` : ''}
         <div class="ex-meta">
           <div class="meta-chip">séries <b>${ex.sets}</b></div>
@@ -2028,7 +2302,7 @@ function buildExCard(ex, i){
       <div data-role="warmuprow"></div>
       <div data-role="settbody"></div>
     </div>
-    <button class="add-set-btn" data-role="addset">+ Adicionar série</button>
+    <button class="add-set-btn" data-role="addset">${t("add_set")}</button>
     <div class="card-controls">
       <button class="rest-btn" data-role="rest">⏱ ${ex.rest}s</button>
       ${lastSession ? `<button class="rest-btn" data-role="repeat">🔁 Repetir última</button>` : ''}
@@ -2208,7 +2482,7 @@ function buildExCard(ex, i){
 
   card.querySelector('[data-role="shuffle"]').addEventListener("click", ()=> shuffleExercise(currentDay, i));
   card.querySelector('[data-role="deleteex"]').addEventListener("click", async ()=>{
-    if(!confirm(`Remover "${ex.name}" do treino de hoje?`)) return;
+    if(!confirm(`Remover "${tExerciseName(ex.name)}" do treino de hoje?`)) return;
     await deleteExerciseAtIndex(currentDay, "exercises", i);
     buildDaySwitch();
     renderDay();
@@ -2398,7 +2672,7 @@ function renderAutoGenBody(){
     previewHtml = `
       <div class="section-label">Prévia — ${p.title}</div>
       <div class="autogen-preview">
-        ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${ex.name}</span><span class="mono">${ex.sets}×${ex.reps}</span></div>`).join('')}
+        ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${tExerciseName(ex.name)}</span><span class="mono">${ex.sets}×${ex.reps}</span></div>`).join('')}
         ${p.abs.length ? `<div class="autogen-ex-row" style="opacity:.7"><span>+ ${p.abs.length} exercício(s) de abdômen</span><span></span></div>` : ''}
       </div>
       <div class="input-row" style="margin-top:14px">
@@ -2499,7 +2773,7 @@ function buildAbsCard(ex, i){
       <svg viewBox="0 0 24 24" fill="none" stroke="#0b0c0e" stroke-width="3"><path d="M4 12l5 5L20 7"/></svg>
     </div>
     <div class="simple-info">
-      <div class="simple-name">${ex.name}</div>
+      <div class="simple-name">${tExerciseName(ex.name)}</div>
       <div class="simple-sub">${ex.sets} × ${ex.reps}</div>
     </div>
     ${ex.videoUrl ? `<a class="ex-video-link" style="margin-top:0;flex-shrink:0" href="${ex.videoUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶️</a>` : ''}
@@ -2865,7 +3139,7 @@ function buildRoutineExerciseItem(dayKey, listType, i, ex){
   const supersetTag = ex.supersetGroup ? `<span class="superset-tag">🔗 ${ex.supersetGroup}</span>` : "";
   div.innerHTML = `
     <div class="routine-exercise-info">
-      <div class="routine-exercise-name">${ex.name} ${supersetTag}</div>
+      <div class="routine-exercise-name">${tExerciseName(ex.name)} ${supersetTag}</div>
       <div class="routine-exercise-meta">${ex.sets}×${ex.reps}${ex.rest?` | ${ex.rest}s`:""} ${videoTag}</div>
     </div>
     <div class="routine-exercise-actions">
@@ -3214,7 +3488,7 @@ function renderMuscleVolumeBars(){
     const pct = Math.max(4, Math.round((v/max)*100));
     return `
       <div class="mvol-row">
-        <span class="mvol-label">${MUSCLE_NAMES[m]||m}</span>
+        <span class="mvol-label">${tMuscleName(m)}</span>
         <div class="mvol-track"><div class="mvol-fill" style="width:${pct}%"></div></div>
         <span class="mvol-num mono">${Math.round(v).toLocaleString('pt-BR')}</span>
       </div>`;
@@ -3882,7 +4156,7 @@ function renderMusclesTab(){
   document.querySelectorAll(".muscle-shape").forEach(shape=>{ const m = shape.getAttribute("data-m"); const v = vol[m]||0; shape.style.fill = (max>0 && v>0) ? heatColor(v/max) : "#1b1e22"; });
   const list = document.getElementById("volList");
   list.innerHTML = "";
-  if(!keys.length){ list.innerHTML = '<div class="vol-empty">Nenhuma série concluída</div>'; } else { keys.sort((a,b)=>vol[b]-vol[a]).forEach(m=>{ const row = document.createElement("div"); row.className = "vol-row"; const pct = max ? Math.round((vol[m]/max)*100) : 0; row.innerHTML = `<div class="vol-name">${MUSCLE_NAMES[m]||m}</div><div class="vol-bar-track"><div class="vol-bar" style="width:${pct}%"></div></div><div class="vol-kg mono">${Math.round(vol[m])} kg·vol</div>`; list.appendChild(row); }); }
+  if(!keys.length){ list.innerHTML = '<div class="vol-empty">Nenhuma série concluída</div>'; } else { keys.sort((a,b)=>vol[b]-vol[a]).forEach(m=>{ const row = document.createElement("div"); row.className = "vol-row"; const pct = max ? Math.round((vol[m]/max)*100) : 0; row.innerHTML = `<div class="vol-name">${tMuscleName(m)}</div><div class="vol-bar-track"><div class="vol-bar" style="width:${pct}%"></div></div><div class="vol-kg mono">${Math.round(vol[m])} kg·vol</div>`; list.appendChild(row); }); }
 }
 
 // SETTINGS
@@ -3893,10 +4167,10 @@ let replaceContext = null; // {day, index} when using Trocar to swap an exercise
 function buildBrowserFilters(){
   const muscleButtons = document.getElementById("muscleFilterButtons");
   muscleButtons.innerHTML = "";
-  Object.entries(MUSCLE_NAMES).forEach(([key,name])=>{
+  Object.keys(MUSCLE_NAMES).forEach((key)=>{
     const btn = document.createElement("button");
     btn.className = "muscle-btn" + (currentMuscleFilter===key ? " active" : "");
-    btn.textContent = name;
+    btn.textContent = tMuscleName(key);
     btn.addEventListener("click", ()=>{
       currentMuscleFilter = (currentMuscleFilter===key) ? null : key;
       document.querySelectorAll("#muscleFilterButtons .muscle-btn").forEach(b=>b.classList.remove("active"));
@@ -3908,10 +4182,10 @@ function buildBrowserFilters(){
 
   const equipButtons = document.getElementById("equipmentFilterButtons");
   equipButtons.innerHTML = "";
-  Object.entries(EQUIPMENT_NAMES).forEach(([key,name])=>{
+  Object.keys(EQUIPMENT_NAMES).forEach((key)=>{
     const btn = document.createElement("button");
     btn.className = "muscle-btn" + (currentEquipmentFilter===key ? " active" : "");
-    btn.textContent = name;
+    btn.textContent = tEquipmentName(key);
     btn.addEventListener("click", ()=>{
       currentEquipmentFilter = (currentEquipmentFilter===key) ? null : key;
       document.querySelectorAll("#equipmentFilterButtons .muscle-btn").forEach(b=>b.classList.remove("active"));
@@ -3984,10 +4258,10 @@ function renderExerciseList(){
   filtered.forEach(ex=>{
     const div = document.createElement("div");
     div.className = "exercise-item";
-    const muscleStr = Object.keys(ex.muscles||{}).map(k=>MUSCLE_NAMES[k]||k).join(", ");
+    const muscleStr = Object.keys(ex.muscles||{}).map(k=>tMuscleName(k)).join(", ");
     const equipBadge = ex.equipment ? `<div class="equip-badge">${EQUIPMENT_NAMES[ex.equipment]||ex.equipment}</div>` : '';
     const simBadge = (replaceContext && ex._simScore>0) ? `<div class="sim-badge">🔗 alternativa similar</div>` : '';
-    div.innerHTML = `<div class="ex-item-name">${ex.name}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}`;
+    div.innerHTML = `<div class="ex-item-name">${tExerciseName(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}`;
     div.addEventListener("click", ()=>{
       closeExerciseBrowser();
       if(replaceContext){
@@ -4080,7 +4354,7 @@ async function exportData(){
   const blob = new Blob([JSON.stringify(data)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = "ramon-log-backup-"+todayKey()+".json";
+  a.href = url; a.download = "kyro-backup-"+todayKey()+".json";
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
@@ -4280,10 +4554,10 @@ async function shareWorkoutImage(){
   ctx.textAlign = "left";
   ctx.fillStyle = "#eef0f2";
   ctx.font = "700 34px 'JetBrains Mono', monospace";
-  ctx.fillText("RAMON", 72, 100);
-  const wmWidth = ctx.measureText("RAMON").width;
+  ctx.fillText("KYRO", 72, 100);
+  const wmWidth = ctx.measureText("KYRO").width;
   ctx.fillStyle = "#d7ff3d";
-  ctx.fillText(".LOG", 72+wmWidth, 100);
+  ctx.fillText(".", 72+wmWidth, 100);
 
   // ---- Completion badge (top-right) ----
   const badgeText = pct>=100 ? "✅ COMPLETO" : `⏳ ${pct}% CONCLUÍDO`;
@@ -4384,7 +4658,7 @@ async function shareWorkoutImage(){
   ctx.beginPath(); ctx.moveTo(W/2-260, H-110); ctx.lineTo(W/2+260, H-110); ctx.stroke();
   ctx.fillStyle = "#565b61";
   ctx.font = "26px 'JetBrains Mono', monospace";
-  ctx.fillText("treino registrado no Ramon.Log", W/2, H-70);
+  ctx.fillText("treino registrado no KYRO", W/2, H-70);
 
   canvas.toBlob(async (blob)=>{
     const file = new File([blob], "treino.png", {type:"image/png"});

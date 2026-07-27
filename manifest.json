@@ -1,7 +1,7 @@
 {
-  "name": "Ramon.Log — Treino",
-  "short_name": "Ramon.Log",
-  "description": "App de treino, progresso corporal e mapa muscular do Ramon.",
+  "name": "KYRO — Treino",
+  "short_name": "KYRO",
+  "description": "App de treino, progresso corporal e mapa muscular.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -13,4 +13,3 @@
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
-
