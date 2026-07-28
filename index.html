@@ -4202,7 +4202,7 @@ async function openBarcodeScanner(){
 
   try{
     barcodeScanner = new ZXing.BrowserMultiFormatReader();
-    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+    const devices = await barcodeScanner.listVideoInputDevices();
     const rearCamera = devices.find(d=>/back|rear|environment/i.test(d.label)) || devices[devices.length-1];
     await barcodeScanner.decodeFromVideoDevice(rearCamera ? rearCamera.deviceId : undefined, "barcodeVideo", async (result, err)=>{
       if(result){
