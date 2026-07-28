@@ -1280,9 +1280,10 @@ const UI_STRINGS = {
     barcode_lib_unavailable:"Leitor de código de barras não disponível (sem internet no primeiro carregamento).",
     barcode_camera_unsupported:"Este navegador não suporta acesso à câmera.",
     barcode_point_at_code:"Aponte a câmera para o código de barras",
-    barcode_camera_error:"Não foi possível acessar a câmera. Verifique as permissões.",
+    barcode_camera_error:"Não foi possível acessar a câmera. Se você abriu isso pelo ícone instalado na tela de início, é uma limitação conhecida do iOS: abra o link direto no Safari (não pelo ícone) para escanear.",
     barcode_product_not_found:"Produto não encontrado. Você pode preencher manualmente.",
-    barcode_lookup_error:"Erro ao buscar o produto. Verifique sua internet."
+    barcode_lookup_error:"Erro ao buscar o produto. Verifique sua internet.",
+    barcode_standalone_warning:"📷 Câmera não disponível no app instalado (limitação do iOS). Abra este link direto no Safari pra escanear:"
   },
   en: {
     tab_treino:"Workout", tab_rotinas:"Routines", tab_progresso:"Progress", tab_ajustes:"Settings",
@@ -1349,9 +1350,10 @@ const UI_STRINGS = {
     barcode_lib_unavailable:"Barcode scanner unavailable (no internet on first load).",
     barcode_camera_unsupported:"This browser doesn't support camera access.",
     barcode_point_at_code:"Point the camera at the barcode",
-    barcode_camera_error:"Couldn't access the camera. Check your permissions.",
+    barcode_camera_error:"Couldn't access the camera. If you opened this from the installed home screen icon, this is a known iOS limitation: open the link directly in Safari (not the icon) to scan.",
     barcode_product_not_found:"Product not found. You can fill it in manually.",
-    barcode_lookup_error:"Error looking up the product. Check your internet connection."
+    barcode_lookup_error:"Error looking up the product. Check your internet connection.",
+    barcode_standalone_warning:"📷 Camera isn't available in the installed app (iOS limitation). Open this link directly in Safari to scan:"
   }
 };
 function t(key){ return (UI_STRINGS[currentLang] && UI_STRINGS[currentLang][key]) || UI_STRINGS.pt[key] || key; }
@@ -4180,6 +4182,13 @@ async function openBarcodeScanner(){
   const statusEl = document.getElementById("barcodeStatus");
   document.getElementById("barcodeModalTitle").textContent = t("scan_barcode");
   modal.classList.add("show");
+
+  const isStandalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+  if(isStandalone){
+    statusEl.innerHTML = t("barcode_standalone_warning") + `<div class="mono" style="margin-top:10px;padding:10px;background:var(--panel-2);border-radius:10px;word-break:break-all;font-size:11px">${location.href}</div>`;
+    return;
+  }
+
   statusEl.textContent = t("barcode_starting_camera");
 
   if(typeof ZXing === "undefined"){
