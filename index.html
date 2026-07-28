@@ -1607,7 +1607,7 @@ async function registerSharedUserProfile(){
 async function checkIfBlocked(){
   if(!currentUser || !fbDb) return false;
   try{
-    const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 8000, "sharedUsers:checkBlocked");
+    const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 4000, "sharedUsers:checkBlocked");
     return doc.exists && doc.data().blocked === true;
   }catch(e){ return false; }
 }
@@ -5468,7 +5468,7 @@ if(firebaseReady){
           showDebugError("A importação/carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
         }, 15000);
         try{
-          const blocked = await checkIfBlocked();
+          const [blocked] = await Promise.all([ checkIfBlocked(), maybeMigrateLocalData() ]);
           if(blocked){
             clearTimeout(watchdog);
             loadingEl.style.display = "none";
@@ -5477,7 +5477,6 @@ if(firebaseReady){
             return;
           }
           registerSharedUserProfile(); // fire-and-forget, non-blocking
-          await maybeMigrateLocalData();
           clearTimeout(watchdog);
           watchdog = setTimeout(()=>{
             showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
