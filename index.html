@@ -376,8 +376,8 @@
   .about-block{padding:10px 0 30px;color:var(--dim);font-size:11.5px;font-family:'JetBrains Mono',monospace;text-align:center}
 
   .lang-switch{display:flex;gap:8px;margin-bottom:14px}
-  .lang-switch button{flex:1;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-weight:600;font-size:13px;cursor:pointer}
-  .lang-switch button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
+  .lang-switch button{width:52px;height:44px;padding:0;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.55;transition:all .15s}
+  .lang-switch button.active{background:var(--panel-2);border-color:var(--volt-dim);opacity:1;transform:scale(1.06)}
   .segmented{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
   .segmented button{flex:1;white-space:nowrap;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-weight:600;font-size:12.5px;cursor:pointer}
   .segmented button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
@@ -451,6 +451,57 @@
   </button>
 </div>
 <div class="auth-loading" id="authLoading"><div class="spinner"></div></div>
+<div id="exerciseManagerModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:500px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-weight:700;font-size:16px" id="exMgrTitle">Gerenciar exercícios</div>
+      <button class="close-btn" id="exMgrCloseBtn">✕</button>
+    </div>
+    <input type="text" id="exMgrSearch" placeholder="Buscar exercício..." style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);margin-bottom:10px">
+    <button class="settings-btn primary" id="exMgrAddBtn" style="margin-bottom:10px">+ Adicionar exercício</button>
+    <div id="exMgrList" style="max-height:50vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<div id="exerciseEditModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:440px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-weight:700;font-size:16px" id="exEditTitle">Editar exercício</div>
+      <button class="close-btn" id="exEditCloseBtn">✕</button>
+    </div>
+    <div class="meas-field" style="margin-bottom:10px"><label>Nome</label><input type="text" id="exEditName"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label>Séries padrão</label><input type="text" inputmode="numeric" id="exEditSets"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label>Reps padrão</label><input type="text" id="exEditReps"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label>Descanso (s)</label><input type="text" inputmode="numeric" id="exEditRest"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label>Equipamento</label>
+      <select id="exEditEquip" class="bf-select">
+        <option value="barbell">🏋️ Barra</option>
+        <option value="dumbbell">💪 Halteres</option>
+        <option value="machine">⚙️ Máquina</option>
+        <option value="cable">🔗 Cabo</option>
+        <option value="bodyweight">🤸 Peso do corpo</option>
+      </select>
+    </div>
+    <div class="meas-field" style="margin-bottom:10px"><label>Link do vídeo (YouTube)</label><input type="text" id="exEditVideo" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="meas-field" style="margin-bottom:14px">
+      <label>Músculos trabalhados</label>
+      <div id="exEditMuscles" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+    </div>
+    <button class="settings-btn primary" id="exEditSaveBtn">Salvar</button>
+    <button class="settings-btn danger" id="exEditDeleteBtn">🗑 Excluir este exercício</button>
+  </div>
+</div>
+
+<div id="userManagerModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:460px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-weight:700;font-size:16px" id="userMgrTitle">Usuários</div>
+      <button class="close-btn" id="userMgrCloseBtn">✕</button>
+    </div>
+    <div id="userMgrList" style="max-height:60vh;overflow-y:auto"></div>
+  </div>
+</div>
+
 <div id="barcodeModal" class="modal-overlay">
   <div class="modal-content" style="padding:0;overflow:hidden;max-width:420px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px">
@@ -663,12 +714,18 @@
         <div class="settings-row" id="installRow"><div class="settings-label">Verificando…</div></div>
         <div class="settings-row" id="langRow"><div class="settings-label">Idioma / Language</div></div>
         <div class="lang-switch" id="langSwitch">
-          <button data-lang="pt" class="active">🇧🇷 Português</button>
-          <button data-lang="en">🇺🇸 English</button>
+          <button data-lang="pt" class="active" aria-label="Português" title="Português">🇧🇷</button>
+          <button data-lang="en" aria-label="English" title="English">🇺🇸</button>
         </div>
         <div class="settings-row" id="notifRow"><div class="settings-label">Notificações</div></div>
         <button class="settings-btn" id="enableNotifBtn">🔔 Ativar avisos de descanso</button>
         <button class="settings-btn" id="clearCacheBtn">🧹 Limpar cache técnico (não apaga seus dados)</button>
+      </div>
+
+      <div class="settings-group" id="adminGroup" style="display:none">
+        <div class="settings-group-title" id="adminGroupTitle">Administração</div>
+        <button class="settings-btn" id="manageExercisesBtn">🗄️ Gerenciar exercícios</button>
+        <button class="settings-btn" id="manageUsersBtn">👥 Usuários</button>
       </div>
 
       <div class="settings-group">
@@ -1203,6 +1260,14 @@ const EXERCISE_NAME_EN = {
   "Pulo de Corda (Panturrilha)":"Jump Rope (Calves)"
 };
 
+function tVideoUrl(ex){
+  if(currentLang==="en"){
+    const q = encodeURIComponent(tExerciseName(ex.name) + " how to exercise tutorial");
+    return `https://www.youtube.com/results?search_query=${q}`;
+  }
+  return ex.videoUrl;
+}
+
 function tExerciseName(name){
   if(currentLang==="en" && EXERCISE_NAME_EN[name]) return EXERCISE_NAME_EN[name];
   return name;
@@ -1283,7 +1348,9 @@ const UI_STRINGS = {
     barcode_camera_error:"Não foi possível acessar a câmera. Se você abriu isso pelo ícone instalado na tela de início, é uma limitação conhecida do iOS: abra o link direto no Safari (não pelo ícone) para escanear.",
     barcode_product_not_found:"Produto não encontrado. Você pode preencher manualmente.",
     barcode_lookup_error:"Erro ao buscar o produto. Verifique sua internet.",
-    barcode_standalone_warning:"📷 Câmera não disponível no app instalado (limitação do iOS). Abra este link direto no Safari pra escanear:"
+    barcode_standalone_warning:"📷 Câmera não disponível no app instalado (limitação do iOS). Abra este link direto no Safari pra escanear:",
+    account_blocked_msg:"Seu acesso a este app foi desativado pelo administrador.",
+    admin_section:"Administração", manage_exercises:"🗄️ Gerenciar exercícios", manage_users:"👥 Usuários"
   },
   en: {
     tab_treino:"Workout", tab_rotinas:"Routines", tab_progresso:"Progress", tab_ajustes:"Settings",
@@ -1353,7 +1420,9 @@ const UI_STRINGS = {
     barcode_camera_error:"Couldn't access the camera. If you opened this from the installed home screen icon, this is a known iOS limitation: open the link directly in Safari (not the icon) to scan.",
     barcode_product_not_found:"Product not found. You can fill it in manually.",
     barcode_lookup_error:"Error looking up the product. Check your internet connection.",
-    barcode_standalone_warning:"📷 Camera isn't available in the installed app (iOS limitation). Open this link directly in Safari to scan:"
+    barcode_standalone_warning:"📷 Camera isn't available in the installed app (iOS limitation). Open this link directly in Safari to scan:",
+    account_blocked_msg:"Your access to this app has been disabled by the administrator.",
+    admin_section:"Administration", manage_exercises:"🗄️ Manage exercises", manage_users:"👥 Users"
   }
 };
 function t(key){ return (UI_STRINGS[currentLang] && UI_STRINGS[currentLang][key]) || UI_STRINGS.pt[key] || key; }
@@ -1392,6 +1461,11 @@ const FIREBASE_CONFIG = {
 const FCM_VAPID_KEY = "BI6go5C9fEaa6fEOXJ9h5dViw3VMsPyfDGI_1qWwxZogEvAvu2skkI8CjuwZrQMMG7gFQGYvIPDv80f55NjmO6s";
 
 let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null;
+
+// ==================== ADMIN / ROLES ====================
+// Admin access is granted by email — add more emails here if needed.
+const ADMIN_EMAILS = ["rmagalhaes90@gmail.com"];
+function isAdmin(){ return !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase())); }
 
 function showDebugError(msg){
   const el = document.getElementById("debugErrorBanner");
@@ -1514,6 +1588,66 @@ const store = {
     catch(e){ console.error("store.delete error", key, e); }
   }
 };
+
+// ==================== SHARED DATA (admin-managed) ====================
+// Registers/updates the current user's entry in the shared "who has access" directory.
+// This is a small, non-sensitive profile doc — separate from the user's private data.
+async function registerSharedUserProfile(){
+  if(!currentUser || !fbDb) return;
+  try{
+    const ref = fbDb.collection("sharedUsers").doc(currentUser.uid);
+    const doc = await withTimeout(ref.get(), 8000, "sharedUsers:get");
+    if(!doc.exists){
+      await withTimeout(ref.set({ email: currentUser.email||"", createdAt: new Date().toISOString(), blocked: false }), 8000, "sharedUsers:create");
+    }
+  }catch(e){ console.error("registerSharedUserProfile error", e); }
+}
+
+// Returns true if the current account was blocked by an admin.
+async function checkIfBlocked(){
+  if(!currentUser || !fbDb) return false;
+  try{
+    const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 8000, "sharedUsers:checkBlocked");
+    return doc.exists && doc.data().blocked === true;
+  }catch(e){ return false; }
+}
+
+// Admin only: list every registered user.
+async function fetchAllSharedUsers(){
+  if(!isAdmin() || !fbDb) return [];
+  try{
+    const snap = await withTimeout(fbDb.collection("sharedUsers").get(), 8000, "sharedUsers:list");
+    const list = [];
+    snap.forEach(doc => list.push({ uid: doc.id, ...doc.data() }));
+    list.sort((a,b)=> (a.createdAt||"").localeCompare(b.createdAt||""));
+    return list;
+  }catch(e){ console.error("fetchAllSharedUsers error", e); return []; }
+}
+
+// Admin only: block/unblock a user's access.
+async function setUserBlocked(uid, blocked){
+  if(!isAdmin() || !fbDb) return false;
+  try{
+    await withTimeout(fbDb.collection("sharedUsers").doc(uid).set({ blocked }, { merge: true }), 8000, "sharedUsers:setBlocked");
+    return true;
+  }catch(e){ console.error("setUserBlocked error", e); return false; }
+}
+
+// ---- Shared exercise database (admin-editable, everyone reads) ----
+async function fetchSharedExerciseDB(){
+  if(!fbDb) return null;
+  try{
+    const doc = await withTimeout(fbDb.collection("shared").doc("exerciseDatabase").get(), 8000, "sharedExDb:get");
+    return doc.exists ? doc.data().list : null;
+  }catch(e){ console.error("fetchSharedExerciseDB error", e); return null; }
+}
+async function saveSharedExerciseDB(list){
+  if(!isAdmin() || !fbDb) return false;
+  try{
+    await withTimeout(fbDb.collection("shared").doc("exerciseDatabase").set({ list, updatedAt: new Date().toISOString(), updatedBy: currentUser.email }), 8000, "sharedExDb:set");
+    return true;
+  }catch(e){ console.error("saveSharedExerciseDB error", e); return false; }
+}
 
 // ---- Migrate any pre-existing localStorage data (from before accounts existed) into the user's cloud account ----
 async function maybeMigrateLocalData(){
@@ -1976,12 +2110,21 @@ async function init(){
   const [
     savedWorkouts, savedState, savedHistory, savedCompletedSessions,
     savedBodyWeights, savedBodyMeasures, savedPhotoIndex, savedExerciseHistory,
-    savedExerciseRecords, savedSessionLog, savedNutritionLog, savedProfile, savedLang
+    savedExerciseRecords, savedSessionLog, savedNutritionLog, savedProfile, savedLang,
+    sharedExerciseList
   ] = await Promise.all([
     store.get("workouts"), store.get("state"), store.get("history"), store.get("completedSessions"),
     store.get("bodyWeights"), store.get("bodyMeasures"), store.get("photoIndex"), store.get("exerciseHistory"),
-    store.get("exerciseRecords"), store.get("sessionLog"), store.get("nutritionLog"), store.get("profile"), store.get("language")
+    store.get("exerciseRecords"), store.get("sessionLog"), store.get("nutritionLog"), store.get("profile"), store.get("language"),
+    fetchSharedExerciseDB()
   ]);
+
+  // If an admin has ever published a shared exercise database, it becomes the source
+  // of truth for everyone (keeps additions/edits/removals consistent across accounts).
+  if(Array.isArray(sharedExerciseList) && sharedExerciseList.length){
+    EXERCISE_DB.length = 0;
+    sharedExerciseList.forEach(ex => EXERCISE_DB.push(ex));
+  }
 
   currentLang = savedLang || "pt";
 
@@ -2083,6 +2226,10 @@ function applyStaticTranslations(){
 }
 
 function bindAjustesEvents(){
+  const adminGroup = document.getElementById("adminGroup");
+  adminGroup.style.display = isAdmin() ? "block" : "none";
+  document.getElementById("manageExercisesBtn").addEventListener("click", openExerciseManager);
+  document.getElementById("manageUsersBtn").addEventListener("click", openUserManager);
   document.getElementById("exportBtn").addEventListener("click", exportData);
   document.getElementById("importInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
   document.getElementById("resetAllBtn").addEventListener("click", resetAllData);
@@ -2500,7 +2647,7 @@ function buildExCard(ex, i){
         ${rec && rec.maxWeight ? `<div class="pr-chip">🏆 recorde: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps}</div>` : ''}
         ${suggestion ? `<div class="suggest-chip">😮‍💨 sugestão: <b>${suggestion.kg}kg</b> × ${suggestion.reps} <span>(${suggestion.note})</span></div>` : ''}
         ${isPlateaued ? `<div class="plateau-chip">⚠️ Sem evolução há 3 treinos — considere subir a carga ou trocar a variação</div>` : ''}
-        ${ex.videoUrl ? `<a class="ex-video-link" href="${ex.videoUrl}" target="_blank" rel="noopener">▶️ Como fazer</a>` : ''}
+        ${ex.videoUrl ? `<a class="ex-video-link" href="${tVideoUrl(ex)}" target="_blank" rel="noopener">▶️ ${t("how_to").replace('▶️ ','')}</a>` : ''}
       </div>
     </div>
     <div class="set-table">
@@ -2992,7 +3139,7 @@ function buildAbsCard(ex, i){
           <div class="meta-chip">${t("series_short")||"séries"} <b>${ex.sets||3}</b></div>
           <div class="meta-chip">${t("reps_short")||"reps"} <b>${ex.reps}</b></div>
         </div>
-        ${ex.videoUrl ? `<a class="ex-video-link" href="${ex.videoUrl}" target="_blank" rel="noopener">${t("how_to")}</a>` : ''}
+        ${ex.videoUrl ? `<a class="ex-video-link" href="${tVideoUrl(ex)}" target="_blank" rel="noopener">${t("how_to")}</a>` : ''}
       </div>
     </div>
     <div class="set-table">
@@ -3455,7 +3602,7 @@ function renderRotinas(){
 function buildRoutineExerciseItem(dayKey, listType, i, ex){
   const div = document.createElement("div");
   div.className = "routine-exercise-item";
-  const videoTag = ex.videoUrl ? `<a href="${ex.videoUrl}" target="_blank" rel="noopener" class="video-tag" onclick="event.stopPropagation()">▶ vídeo</a>` : "";
+  const videoTag = ex.videoUrl ? `<a href="${tVideoUrl(ex)}" target="_blank" rel="noopener" class="video-tag" onclick="event.stopPropagation()">▶ ${currentLang==="en"?"video":"vídeo"}</a>` : "";
   const supersetTag = ex.supersetGroup ? `<span class="superset-tag">🔗 ${ex.supersetGroup}</span>` : "";
   div.innerHTML = `
     <div class="routine-exercise-info">
@@ -4573,6 +4720,127 @@ let addingToListType = "exercises";
 let configContext = null; // {day, listType, index}
 let replaceContext = null; // {day, index} when using Trocar to swap an exercise
 
+// ==================== ADMIN: Exercise database manager ====================
+let exMgrEditingIndex = null; // null = adding new
+
+function openExerciseManager(){
+  document.getElementById("exMgrSearch").value = "";
+  renderExerciseManagerList("");
+  document.getElementById("exerciseManagerModal").classList.add("show");
+}
+function closeExerciseManager(){ document.getElementById("exerciseManagerModal").classList.remove("show"); }
+
+function renderExerciseManagerList(filterText){
+  const list = document.getElementById("exMgrList");
+  const q = (filterText||"").toLowerCase();
+  const filtered = EXERCISE_DB.filter(ex => !q || ex.name.toLowerCase().includes(q));
+  if(!filtered.length){
+    list.innerHTML = '<div class="vol-empty">Nenhum exercício encontrado</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(ex=>{
+    const realIdx = EXERCISE_DB.indexOf(ex);
+    return `<div class="exercise-item" data-idx="${realIdx}"><div class="ex-item-name">${ex.name}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} · ${tEquipmentName(ex.equipment)}</div></div>`;
+  }).join('');
+  list.querySelectorAll('.exercise-item').forEach(el=>{
+    el.addEventListener("click", ()=> openExerciseEditModal(parseInt(el.dataset.idx)));
+  });
+}
+
+function openExerciseEditModal(idx){
+  exMgrEditingIndex = idx;
+  const isNew = idx === null;
+  const ex = isNew ? { name:"", sets:4, reps:"10", rest:60, equipment:"machine", videoUrl:"", muscles:{} } : EXERCISE_DB[idx];
+
+  document.getElementById("exEditTitle").textContent = isNew ? "Adicionar exercício" : "Editar exercício";
+  document.getElementById("exEditName").value = ex.name;
+  document.getElementById("exEditSets").value = ex.sets;
+  document.getElementById("exEditReps").value = ex.reps;
+  document.getElementById("exEditRest").value = ex.rest||60;
+  document.getElementById("exEditEquip").value = ex.equipment||"machine";
+  document.getElementById("exEditVideo").value = ex.videoUrl||"";
+  document.getElementById("exEditDeleteBtn").style.display = isNew ? "none" : "block";
+
+  const musclesWrap = document.getElementById("exEditMuscles");
+  musclesWrap.innerHTML = Object.keys(MUSCLE_NAMES).map(key=>{
+    const active = ex.muscles && ex.muscles[key];
+    return `<button type="button" class="muscle-btn${active?' active':''}" data-muscle="${key}">${tMuscleName(key)}</button>`;
+  }).join('');
+  musclesWrap.querySelectorAll('.muscle-btn').forEach(btn=>{
+    btn.addEventListener("click", ()=> btn.classList.toggle("active"));
+  });
+
+  document.getElementById("exerciseEditModal").classList.add("show");
+}
+function closeExerciseEditModal(){ document.getElementById("exerciseEditModal").classList.remove("show"); }
+
+async function saveExerciseEditModal(){
+  const name = document.getElementById("exEditName").value.trim();
+  if(!name){ alert("Digite um nome para o exercício."); return; }
+  const sets = parseInt(document.getElementById("exEditSets").value)||4;
+  const reps = document.getElementById("exEditReps").value.trim()||"10";
+  const rest = parseInt(document.getElementById("exEditRest").value)||60;
+  const equipment = document.getElementById("exEditEquip").value;
+  const videoUrl = document.getElementById("exEditVideo").value.trim();
+  const muscles = {};
+  document.querySelectorAll('#exEditMuscles .muscle-btn.active').forEach(btn=>{ muscles[btn.dataset.muscle] = 1; });
+
+  const newEx = { name, sets, reps, rest, equipment, videoUrl, muscles };
+
+  if(exMgrEditingIndex === null){
+    EXERCISE_DB.push(newEx);
+  } else {
+    EXERCISE_DB[exMgrEditingIndex] = newEx;
+  }
+
+  const ok = await saveSharedExerciseDB(EXERCISE_DB);
+  if(!ok){ alert("Não foi possível salvar. Verifique sua internet e se você tem permissão de admin."); return; }
+  closeExerciseEditModal();
+  renderExerciseManagerList(document.getElementById("exMgrSearch").value);
+}
+
+async function deleteExerciseFromManager(){
+  if(exMgrEditingIndex === null) return;
+  if(!confirm("Excluir este exercício da base compartilhada? Isso afeta todos os usuários.")) return;
+  EXERCISE_DB.splice(exMgrEditingIndex, 1);
+  const ok = await saveSharedExerciseDB(EXERCISE_DB);
+  if(!ok){ alert("Não foi possível salvar a exclusão."); return; }
+  closeExerciseEditModal();
+  renderExerciseManagerList(document.getElementById("exMgrSearch").value);
+}
+
+// ==================== ADMIN: User manager ====================
+async function openUserManager(){
+  const modal = document.getElementById("userManagerModal");
+  const list = document.getElementById("userMgrList");
+  list.innerHTML = '<div class="vol-empty">Carregando...</div>';
+  modal.classList.add("show");
+  const users = await fetchAllSharedUsers();
+  if(!users.length){ list.innerHTML = '<div class="vol-empty">Nenhum usuário encontrado</div>'; return; }
+  list.innerHTML = users.map(u=>{
+    const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('pt-BR') : "—";
+    const isSelf = currentUser && u.uid === currentUser.uid;
+    return `
+      <div class="pr-feed-row">
+        <div class="pr-feed-info">
+          <div class="pr-feed-name">${u.email||u.uid}${isSelf?' (você)':''}</div>
+          <div class="pr-feed-date">Desde ${joined}${u.blocked?' · bloqueado':''}</div>
+        </div>
+        ${isSelf ? '' : `<button class="settings-btn${u.blocked?' primary':' danger'}" data-uid="${u.uid}" data-blocked="${!!u.blocked}" style="width:auto;margin:0;padding:8px 14px">${u.blocked?'Desbloquear':'Bloquear'}</button>`}
+      </div>`;
+  }).join('');
+  list.querySelectorAll('button[data-uid]').forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const uid = btn.dataset.uid;
+      const currentlyBlocked = btn.dataset.blocked === "true";
+      const ok = await setUserBlocked(uid, !currentlyBlocked);
+      if(ok) openUserManager(); // refresh
+      else alert("Não foi possível atualizar o usuário.");
+    });
+  });
+}
+function closeUserManager(){ document.getElementById("userManagerModal").classList.remove("show"); }
+
 function buildBrowserFilters(){
   const muscleButtons = document.getElementById("muscleFilterButtons");
   muscleButtons.innerHTML = "";
@@ -5125,6 +5393,13 @@ window.addEventListener("resize", ()=>{ const canvas = document.getElementById("
 
 document.getElementById("exerciseSearch").addEventListener("input", renderExerciseList);
 document.getElementById("barcodeCloseBtn").addEventListener("click", closeBarcodeScanner);
+document.getElementById("exMgrCloseBtn").addEventListener("click", closeExerciseManager);
+document.getElementById("exMgrSearch").addEventListener("input", (e)=> renderExerciseManagerList(e.target.value));
+document.getElementById("exMgrAddBtn").addEventListener("click", ()=> openExerciseEditModal(null));
+document.getElementById("exEditCloseBtn").addEventListener("click", closeExerciseEditModal);
+document.getElementById("exEditSaveBtn").addEventListener("click", saveExerciseEditModal);
+document.getElementById("exEditDeleteBtn").addEventListener("click", deleteExerciseFromManager);
+document.getElementById("userMgrCloseBtn").addEventListener("click", closeUserManager);
 
 // ---- Pull-to-refresh ----
 (function setupPullToRefresh(){
@@ -5189,6 +5464,15 @@ if(firebaseReady){
           showDebugError("A importação/carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
         }, 15000);
         try{
+          const blocked = await checkIfBlocked();
+          if(blocked){
+            clearTimeout(watchdog);
+            loadingEl.style.display = "none";
+            alert(t("account_blocked_msg"));
+            await fbAuth.signOut();
+            return;
+          }
+          registerSharedUserProfile(); // fire-and-forget, non-blocking
           await maybeMigrateLocalData();
           clearTimeout(watchdog);
           watchdog = setTimeout(()=>{
