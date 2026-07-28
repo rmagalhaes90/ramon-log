@@ -1615,13 +1615,11 @@ async function checkIfBlocked(){
 // Admin only: list every registered user.
 async function fetchAllSharedUsers(){
   if(!isAdmin() || !fbDb) return [];
-  try{
-    const snap = await withTimeout(fbDb.collection("sharedUsers").get(), 8000, "sharedUsers:list");
-    const list = [];
-    snap.forEach(doc => list.push({ uid: doc.id, ...doc.data() }));
-    list.sort((a,b)=> (a.createdAt||"").localeCompare(b.createdAt||""));
-    return list;
-  }catch(e){ console.error("fetchAllSharedUsers error", e); return []; }
+  const snap = await withTimeout(fbDb.collection("sharedUsers").get(), 8000, "sharedUsers:list");
+  const list = [];
+  snap.forEach(doc => list.push({ uid: doc.id, ...doc.data() }));
+  list.sort((a,b)=> (a.createdAt||"").localeCompare(b.createdAt||""));
+  return list;
 }
 
 // Admin only: block/unblock a user's access.
@@ -4815,7 +4813,13 @@ async function openUserManager(){
   const list = document.getElementById("userMgrList");
   list.innerHTML = '<div class="vol-empty">Carregando...</div>';
   modal.classList.add("show");
-  const users = await fetchAllSharedUsers();
+  let users = [];
+  try{
+    users = await fetchAllSharedUsers();
+  }catch(e){
+    list.innerHTML = `<div class="vol-empty">Erro ao carregar usuários: ${(e&&e.message)||e}</div>`;
+    return;
+  }
   if(!users.length){ list.innerHTML = '<div class="vol-empty">Nenhum usuário encontrado</div>'; return; }
   list.innerHTML = users.map(u=>{
     const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('pt-BR') : "—";
