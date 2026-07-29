@@ -129,7 +129,7 @@
   .config-field{margin-bottom:14px}.config-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:6px}
   .config-field input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:11px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13.5px}
   .config-field input:focus{outline:none;border-color:var(--volt-dim)}
-  .video-tag{color:var(--blue);text-decoration:none;font-weight:700;margin-left:4px}
+  .video-tag{color:var(--blue);text-decoration:none;font-weight:700;margin-left:4px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:inherit}
   .superset-tag{font-size:10px;color:var(--blue);font-weight:700;background:rgba(77,195,255,.1);border-radius:6px;padding:2px 6px;margin-left:4px}
   .superset-btn{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--dim);cursor:pointer;font-size:13px;padding:5px 7px}
   .template-card{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
@@ -173,7 +173,12 @@
   .compare-after-wrap .compare-img{position:absolute;top:0;left:0;height:100%}
   .compare-handle{position:absolute;top:0;left:50%;width:3px;height:100%;background:var(--volt);pointer-events:none;transform:translateX(-50%)}
   .compare-slider{width:100%;margin-top:14px;accent-color:var(--volt)}
-  .ex-video-link{display:inline-flex;align-items:center;gap:5px;color:var(--blue);text-decoration:none;font-size:11.5px;font-weight:600;background:rgba(77,195,255,.1);border:1px solid rgba(77,195,255,.3);border-radius:8px;padding:6px 10px;margin-top:8px}
+  .ex-video-link{display:inline-flex;align-items:center;gap:5px;color:var(--blue);text-decoration:none;font-size:11.5px;font-weight:600;background:rgba(77,195,255,.1);border:1px solid rgba(77,195,255,.3);border-radius:8px;padding:6px 10px;margin-top:8px;cursor:pointer;font-family:inherit}
+  .video-player-frame-wrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+  .video-player-frame-wrap iframe{width:100%;height:100%;border:0}
+  .video-player-fallback{text-align:center;padding:20px 0}
+  .video-player-fallback p{color:var(--dim);font-size:13px;margin-bottom:14px;line-height:1.4}
+  .video-player-fallback a{display:block;text-decoration:none;text-align:center}
   .ex-history-icon{font-size:11px;opacity:.6}
   .pr-chip{display:inline-block;font-size:11.5px;font-weight:700;color:var(--volt);background:rgba(215,255,61,.08);border:1px solid var(--volt-dim);border-radius:8px;padding:5px 10px;margin-top:8px}
   .plateau-chip{font-size:11.5px;font-weight:600;color:#ffb84d;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.4);border-radius:8px;padding:8px 10px;margin-top:8px;line-height:1.4}
@@ -547,6 +552,20 @@
     </div>
     <button class="settings-btn primary" id="exEditSaveBtn">Salvar</button>
     <button class="settings-btn danger" id="exEditDeleteBtn">🗑 Excluir este exercício</button>
+  </div>
+</div>
+
+<div id="videoPlayerModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-weight:700;font-size:15px" id="videoPlayerTitle"></div>
+      <button class="close-btn" id="videoPlayerCloseBtn" aria-label="Fechar">✕</button>
+    </div>
+    <div id="videoPlayerFrameWrap" class="video-player-frame-wrap"></div>
+    <div id="videoPlayerFallback" class="video-player-fallback" style="display:none">
+      <p id="videoPlayerFallbackText"></p>
+      <a class="settings-btn primary" target="_blank" rel="noopener" id="videoPlayerExternalLink">▶️ Abrir no YouTube</a>
+    </div>
   </div>
 </div>
 
@@ -1356,6 +1375,49 @@ function tVideoUrl(ex){
   return ex.videoUrl;
 }
 
+// Extracts the video ID from common YouTube URL shapes (watch?v=, youtu.be/, /embed/).
+// Returns null for anything else (like a search-results URL, which has no single video to embed).
+function extractYouTubeId(url){
+  if(!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=)([\w-]{6,})/,
+    /(?:youtu\.be\/)([\w-]{6,})/,
+    /(?:youtube\.com\/embed\/)([\w-]{6,})/
+  ];
+  for(const re of patterns){
+    const m = url.match(re);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function openVideoPlayer(videoUrl, title){
+  const modal = document.getElementById("videoPlayerModal");
+  const frameWrap = document.getElementById("videoPlayerFrameWrap");
+  const fallback = document.getElementById("videoPlayerFallback");
+  document.getElementById("videoPlayerTitle").textContent = title || "";
+
+  const videoId = extractYouTubeId(videoUrl);
+  if(videoId){
+    frameWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1" title="${escapeHtml(title||"")}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    frameWrap.style.display = "block";
+    fallback.style.display = "none";
+  } else {
+    // No single video to embed (e.g., the English search-results fallback) — offer an external link instead.
+    frameWrap.innerHTML = "";
+    frameWrap.style.display = "none";
+    fallback.style.display = "block";
+    document.getElementById("videoPlayerFallbackText").textContent = t("video_no_embed_fallback");
+    fallback.querySelector("a").href = videoUrl;
+  }
+  modal.classList.add("show");
+}
+
+function closeVideoPlayer(){
+  document.getElementById("videoPlayerModal").classList.remove("show");
+  document.getElementById("videoPlayerFrameWrap").innerHTML = ""; // stop playback
+}
+
 // Escapes free-text user input before it's placed inside innerHTML templates.
 // Anything typed by a person (meal names, exercise notes, exercise names in the
 // admin editor, etc.) must go through this before being interpolated into HTML —
@@ -1479,6 +1541,7 @@ const UI_STRINGS = {
     weekly_priority_volume_drop:"Seu volume caiu {pct}% em relação à semana anterior. Prioridade: recuperar o volume, ou confirmar que essa redução foi intencional (deload).",
     weekly_priority_maintain:"Você manteve a consistência e o volume. Prioridade: continuar assim e buscar pequenos aumentos de carga.",
     photo_uploading:"Enviando foto...",
+    video_no_embed_fallback:"Ainda não temos um vídeo específico em inglês para este exercício. Toque abaixo para buscar no YouTube.",
     nav_home:"Início",
     home_today:"Hoje", home_no_workout_today:"Nenhum treino agendado pra hoje. Aproveite pra descansar ou criar uma rotina.",
     home_already_trained:"✅ Treino de hoje já concluído", home_start_workout:"Iniciar treino",
@@ -1578,6 +1641,7 @@ const UI_STRINGS = {
     weekly_priority_volume_drop:"Your volume dropped {pct}% compared to last week. Priority: recover the volume, or confirm this drop was intentional (deload).",
     weekly_priority_maintain:"You kept up consistency and volume. Priority: keep it up and aim for small load increases.",
     photo_uploading:"Uploading photo...",
+    video_no_embed_fallback:"We don't have a specific English tutorial video for this exercise yet. Tap below to search YouTube.",
     nav_home:"Home",
     home_today:"Today", home_no_workout_today:"No workout scheduled for today. Take a rest day or build a routine.",
     home_already_trained:"✅ Today's workout already done", home_start_workout:"Start workout",
@@ -2556,6 +2620,8 @@ function bindAjustesEvents(){
       buildDaySwitch();
       renderDay();
       renderRotinas();
+      renderHomePage();
+      if(!document.querySelector(".readiness-prompt-title")) renderReadinessCard(); // don't wipe an in-progress answer
     });
   });
   document.getElementById("clearCacheBtn").addEventListener("click", async ()=>{
@@ -2960,7 +3026,7 @@ function buildExCard(ex, i){
         ${rec && rec.maxWeight ? `<div class="pr-chip">🏆 recorde: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps}</div>` : ''}
         ${suggestion ? `<div class="suggest-chip">😮‍💨 sugestão: <b>${suggestion.kg}kg</b> × ${suggestion.reps} <span>(${suggestion.note})</span></div>` : ''}
         ${isPlateaued ? `<div class="plateau-chip">⚠️ Sem evolução há 3 treinos <button type="button" data-role="deloadToggle" style="background:none;border:none;color:inherit;text-decoration:underline;font-weight:700;font-size:11.5px;cursor:pointer;padding:0;margin-left:4px">ver sugestão de deload</button><div data-role="deloadDetail" style="display:none;margin-top:6px"></div></div>` : ''}
-        ${ex.videoUrl ? `<a class="ex-video-link" href="${tVideoUrl(ex)}" target="_blank" rel="noopener">▶️ ${t("how_to").replace('▶️ ','')}</a>` : ''}
+        ${ex.videoUrl ? `<button type="button" class="ex-video-link" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}">▶️ ${t("how_to").replace('▶️ ','')}</button>` : ''}
       </div>
     </div>
     <div class="set-table">
@@ -3467,7 +3533,7 @@ function buildAbsCard(ex, i){
           <div class="meta-chip">${t("series_short")||"séries"} <b>${ex.sets||3}</b></div>
           <div class="meta-chip">${t("reps_short")||"reps"} <b>${ex.reps}</b></div>
         </div>
-        ${ex.videoUrl ? `<a class="ex-video-link" href="${tVideoUrl(ex)}" target="_blank" rel="noopener">${t("how_to")}</a>` : ''}
+        ${ex.videoUrl ? `<button type="button" class="ex-video-link" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}">${t("how_to")}</button>` : ''}
       </div>
     </div>
     <div class="set-table">
@@ -3943,7 +4009,7 @@ function renderRotinas(){
 function buildRoutineExerciseItem(dayKey, listType, i, ex){
   const div = document.createElement("div");
   div.className = "routine-exercise-item";
-  const videoTag = ex.videoUrl ? `<a href="${tVideoUrl(ex)}" target="_blank" rel="noopener" class="video-tag" onclick="event.stopPropagation()">▶ ${currentLang==="en"?"video":"vídeo"}</a>` : "";
+  const videoTag = ex.videoUrl ? `<button type="button" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}" class="video-tag" onclick="event.stopPropagation()">▶ ${currentLang==="en"?"video":"vídeo"}</button>` : "";
   const supersetTag = ex.supersetGroup ? `<span class="superset-tag">🔗 ${ex.supersetGroup}</span>` : "";
   div.innerHTML = `
     <div class="routine-exercise-info">
@@ -5351,7 +5417,7 @@ async function saveExerciseEditModal(){
 
 async function deleteExerciseFromManager(){
   if(exMgrEditingIndex === null) return;
-  if(!confirm("Excluir este exercício da base compartilhada? Isso afeta todos os usuários.")) return;
+  if(!confirm("Excluir este exercício da base compartilhada?\n\nIsso remove ele da busca para todo mundo a partir de agora, mas NÃO afeta rotinas que já usam esse exercício — elas continuam com sua própria cópia dos dados.")) return;
   EXERCISE_DB.splice(exMgrEditingIndex, 1);
   const ok = await saveSharedExerciseDB(EXERCISE_DB);
   if(!ok){ alert("Não foi possível salvar a exclusão."); return; }
@@ -5619,7 +5685,7 @@ function exportMeasuresCsv(){
   downloadCsv("kyro-medidas-"+todayKey()+".csv", rows);
 }
 function exportNutritionCsv(){
-  const rows = [["Data","Proteína (g)","Meta proteína (g)","Água (ml)","Meta água (ml)"]];
+  const rows = [["Data","Proteína (g)","Meta proteína (g)","Água (L)","Meta água (L)"]];
   Object.keys(nutritionLog).sort().forEach(d=>{
     const n = nutritionLog[d];
     rows.push([d, n.protein||"", n.proteinGoal||"", n.water||"", n.waterGoal||""]);
@@ -6168,9 +6234,20 @@ document.getElementById("importReplaceBtn").addEventListener("click", ()=>{
   if(confirm("Isso vai SUBSTITUIR todos os seus dados atuais pelo conteúdo deste arquivo. Continuar?")) applyImport("replace");
 });
 
+// Delegated click handler for any "watch how-to video" trigger, wherever it's rendered
+// (main workout card, exercise browser, exercise config) — opens the embedded player
+// instead of navigating away from the app.
+document.addEventListener("click", (e)=>{
+  const trigger = e.target.closest("[data-video-trigger]");
+  if(trigger) openVideoPlayer(trigger.dataset.videoUrl, trigger.dataset.videoTitle);
+});
+document.getElementById("videoPlayerCloseBtn").addEventListener("click", closeVideoPlayer);
+
 // Accessibility: Escape closes whatever modal is currently open, for people navigating by keyboard.
 document.addEventListener("keydown", (e)=>{
   if(e.key !== "Escape") return;
+  const videoModal = document.getElementById("videoPlayerModal");
+  if(videoModal.classList.contains("show")) closeVideoPlayer(); // also stops playback, not just hides it
   document.querySelectorAll(".modal-overlay.show").forEach(el=> el.classList.remove("show"));
 });
 
