@@ -27,7 +27,7 @@
   .topbar-brand{display:flex;align-items:baseline;justify-content:space-between}
   .topbar-brand h1{font-size:32px;line-height:1}.topbar-brand h1 span{color:var(--volt)}
   .topbar-brand .date{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.12em}
-  .icon-btn{background:var(--panel);border:1px solid var(--line);color:var(--dim);width:30px;height:30px;border-radius:9px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .icon-btn{background:var(--panel);border:1px solid var(--line);color:var(--dim);width:44px;height:44px;border-radius:9px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
   .page-header{padding:22px 20px 4px}.page-header h2{font-size:30px}.page-header h2 span{color:var(--volt)}
   .content{padding:18px 20px 10px}
@@ -116,7 +116,7 @@
   .modal-overlay{position:fixed;inset:0;background:rgba(6,7,8,.92);z-index:100;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
   .modal-overlay.show{display:flex}.modal-content{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto}
   .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:12px}.modal-head h3{font-size:24px;margin:0}
-  .close-btn{background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+  .close-btn{background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
 
   .search-input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;margin-bottom:14px}
   .exercise-list{display:flex;flex-direction:column;gap:8px}.exercise-item{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s}
@@ -177,6 +177,34 @@
   .ex-history-icon{font-size:11px;opacity:.6}
   .pr-chip{display:inline-block;font-size:11.5px;font-weight:700;color:var(--volt);background:rgba(215,255,61,.08);border:1px solid var(--volt-dim);border-radius:8px;padding:5px 10px;margin-top:8px}
   .plateau-chip{font-size:11.5px;font-weight:600;color:#ffb84d;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.4);border-radius:8px;padding:8px 10px;margin-top:8px;line-height:1.4}
+  .readiness-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 16px 12px}
+  .readiness-prompt-title{font-weight:700;font-size:14px;margin-bottom:10px}
+  .readiness-q{margin-bottom:12px}
+  .readiness-q-label{font-size:12px;color:var(--dim);margin-bottom:6px}
+  .readiness-scale{display:flex;gap:6px}
+  .readiness-scale button{flex:1;padding:9px 0;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--dim);font-weight:700;font-size:13px;cursor:pointer}
+  .readiness-scale button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
+  .readiness-submit{width:100%;padding:11px;border-radius:11px;border:none;background:var(--volt);color:#0b0c0e;font-weight:700;font-size:13px;cursor:pointer;margin-top:4px}
+  .readiness-result{display:flex;align-items:center;gap:12px}
+  .readiness-ring{position:relative;width:56px;height:56px;flex:none}
+  .readiness-ring svg{width:56px;height:56px;transform:rotate(-90deg)}
+  .readiness-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;font-family:'JetBrains Mono',monospace}
+  .readiness-label{font-weight:700;font-size:13.5px}
+  .readiness-advice{font-size:11.5px;color:var(--dim);margin-top:2px;line-height:1.4}
+  .readiness-edit-btn{margin-left:auto;background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;text-decoration:underline;flex:none;align-self:flex-start}
+  .wr-week-label{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim);margin-bottom:12px}
+  .wr-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .wr-stat{background:var(--panel-2);border-radius:12px;padding:12px}
+  .wr-stat-num{font-weight:800;font-size:20px;font-family:'JetBrains Mono',monospace}
+  .wr-stat-label{font-size:11px;color:var(--dim);margin-top:2px}
+  .wr-stat-sub{font-size:10.5px;font-weight:700;margin-top:4px}
+  .wr-section-title{font-weight:700;font-size:12.5px;margin:14px 0 8px;color:var(--dim);text-transform:uppercase;letter-spacing:.03em}
+  .wr-pr-row{font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+  .wr-missed{display:flex;flex-wrap:wrap;gap:6px}
+  .wr-missed-chip{background:rgba(255,138,77,.1);border:1px solid rgba(255,138,77,.35);color:#ff8a4d;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:8px}
+  .wr-priority{background:rgba(124,252,110,.08);border:1px solid var(--volt-dim);border-radius:12px;padding:12px 14px;margin-top:16px}
+  .wr-priority-label{font-weight:700;font-size:11.5px;color:var(--volt);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
+  .wr-priority-text{font-size:13px;line-height:1.4}
   .suggest-chip{display:inline-block;font-size:11.5px;font-weight:700;color:var(--blue);background:rgba(77,195,255,.08);border:1px solid rgba(77,195,255,.35);border-radius:8px;padding:5px 10px;margin-top:8px;cursor:pointer}
   .suggest-chip span{font-weight:500;color:var(--dim)}
   .warmup-panel{margin-top:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
@@ -413,6 +441,14 @@
   .app-loading-brand span{color:var(--volt)}
   .app-loading-ring{width:32px;height:32px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);animation:pullSpin .7s linear infinite}
   .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);animation:pullSpin .7s linear infinite}
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -455,7 +491,7 @@
   <div class="modal-content" style="max-width:500px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-weight:700;font-size:16px" id="exMgrTitle">Gerenciar exercícios</div>
-      <button class="close-btn" id="exMgrCloseBtn">✕</button>
+      <button class="close-btn" id="exMgrCloseBtn" aria-label="Fechar">✕</button>
     </div>
     <input type="text" id="exMgrSearch" placeholder="Buscar exercício..." style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);margin-bottom:10px">
     <button class="settings-btn primary" id="exMgrAddBtn" style="margin-bottom:10px">+ Adicionar exercício</button>
@@ -467,7 +503,7 @@
   <div class="modal-content" style="max-width:440px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-weight:700;font-size:16px" id="exEditTitle">Editar exercício</div>
-      <button class="close-btn" id="exEditCloseBtn">✕</button>
+      <button class="close-btn" id="exEditCloseBtn" aria-label="Fechar">✕</button>
     </div>
     <div class="meas-field" style="margin-bottom:10px"><label>Nome</label><input type="text" id="exEditName"></div>
     <div class="meas-field" style="margin-bottom:10px"><label>Séries padrão</label><input type="text" inputmode="numeric" id="exEditSets"></div>
@@ -492,11 +528,21 @@
   </div>
 </div>
 
+<div id="weeklyReportModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:460px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-weight:700;font-size:16px" id="weeklyReportTitle">Relatório semanal</div>
+      <button class="close-btn" id="weeklyReportCloseBtn" aria-label="Fechar">✕</button>
+    </div>
+    <div id="weeklyReportBody"></div>
+  </div>
+</div>
+
 <div id="userManagerModal" class="modal-overlay">
   <div class="modal-content" style="max-width:460px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-weight:700;font-size:16px" id="userMgrTitle">Usuários</div>
-      <button class="close-btn" id="userMgrCloseBtn">✕</button>
+      <button class="close-btn" id="userMgrCloseBtn" aria-label="Fechar">✕</button>
     </div>
     <div id="userMgrList" style="max-height:60vh;overflow-y:auto"></div>
   </div>
@@ -506,7 +552,7 @@
   <div class="modal-content" style="padding:0;overflow:hidden;max-width:420px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px">
       <div style="font-weight:700;font-size:15px" id="barcodeModalTitle">Escanear código de barras</div>
-      <button class="close-btn" id="barcodeCloseBtn">✕</button>
+      <button class="close-btn" id="barcodeCloseBtn" aria-label="Fechar">✕</button>
     </div>
     <div style="position:relative;background:#000;aspect-ratio:1/1;width:100%">
       <video id="barcodeVideo" style="width:100%;height:100%;object-fit:cover" playsinline muted></video>
@@ -543,7 +589,7 @@
         <h1>KYRO<span>.</span></h1>
         <div style="display:flex;gap:8px">
           <div class="date mono" id="todayDate">—</div>
-          <button class="icon-btn" id="resetBtn" title="Reiniciar">↺</button>
+          <button class="icon-btn" id="resetBtn" title="Reiniciar" aria-label="Reiniciar treino do dia">↺</button>
         </div>
       </div>
       <div class="progress-wrap">
@@ -561,6 +607,7 @@
         </div>
         <button class="st-btn" id="stButton">▶ Iniciar treino</button>
       </div>
+      <div id="readinessCard"></div>
       <div class="dayswitch" id="dayswitch"></div>
     </div>
     <div class="content" id="content"></div>
@@ -754,7 +801,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Adicionar Exercício</h3>
-      <button class="close-btn" onclick="closeExerciseBrowser()">✕</button>
+      <button class="close-btn" onclick="closeExerciseBrowser()" aria-label="Fechar">✕</button>
     </div>
     <input type="text" class="search-input" id="exerciseSearch" placeholder="Buscar exercício...">
     <div class="muscle-select">
@@ -773,7 +820,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3 id="configExName">Exercício</h3>
-      <button class="close-btn" onclick="closeExerciseConfig()">✕</button>
+      <button class="close-btn" onclick="closeExerciseConfig()" aria-label="Fechar">✕</button>
     </div>
     <input type="hidden" id="configContextName">
     <input type="hidden" id="configContextMuscles">
@@ -793,7 +840,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3 id="historyExName">Exercício</h3>
-      <button class="close-btn" onclick="closeExerciseHistoryModal()">✕</button>
+      <button class="close-btn" onclick="closeExerciseHistoryModal()" aria-label="Fechar">✕</button>
     </div>
     <div id="historyBody"></div>
   </div>
@@ -803,7 +850,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Calculadora de Anilhas</h3>
-      <button class="close-btn" onclick="closePlateCalc()">✕</button>
+      <button class="close-btn" onclick="closePlateCalc()" aria-label="Fechar">✕</button>
     </div>
     <div class="config-field"><label>Peso total alvo (kg)</label><input type="text" inputmode="decimal" id="pcTarget" placeholder="ex: 80"></div>
     <div class="config-field"><label>Peso da barra (kg)</label><input type="text" inputmode="decimal" id="pcBar" value="20"></div>
@@ -815,7 +862,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Templates Prontos</h3>
-      <button class="close-btn" onclick="closeTemplateModal()">✕</button>
+      <button class="close-btn" onclick="closeTemplateModal()" aria-label="Fechar">✕</button>
     </div>
     <div class="about-block" style="padding:0 0 14px;text-align:left">Isso substitui toda a rotina da semana atual. Seus pesos, medidas e histórico não são afetados.</div>
     <div id="templateList"></div>
@@ -826,7 +873,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Gerador de Treino</h3>
-      <button class="close-btn" onclick="closeAutoGenModal()">✕</button>
+      <button class="close-btn" onclick="closeAutoGenModal()" aria-label="Fechar">✕</button>
     </div>
     <div id="autoGenBody"></div>
   </div>
@@ -836,7 +883,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Antes / Depois</h3>
-      <button class="close-btn" onclick="closeCompareModal()">✕</button>
+      <button class="close-btn" onclick="closeCompareModal()" aria-label="Fechar">✕</button>
     </div>
     <div class="compare-dates">
       <span id="compareBeforeDate">—</span>
@@ -1268,6 +1315,30 @@ function tVideoUrl(ex){
   return ex.videoUrl;
 }
 
+// Escapes free-text user input before it's placed inside innerHTML templates.
+// Anything typed by a person (meal names, exercise notes, exercise names in the
+// admin editor, etc.) must go through this before being interpolated into HTML —
+// otherwise a name like "<img src=x onerror=...>" would execute as real HTML/JS.
+// Delays calling `fn` until `ms` have passed without it being called again —
+// used for search-as-you-type so a fast typist doesn't re-render a list on every keystroke.
+function debounce(fn, ms){
+  let handle;
+  return function(...args){
+    clearTimeout(handle);
+    handle = setTimeout(()=> fn.apply(this, args), ms);
+  };
+}
+
+function escapeHtml(str){
+  if(str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function tExerciseName(name){
   if(currentLang==="en" && EXERCISE_NAME_EN[name]) return EXERCISE_NAME_EN[name];
   return name;
@@ -1350,7 +1421,28 @@ const UI_STRINGS = {
     barcode_lookup_error:"Erro ao buscar o produto. Verifique sua internet.",
     barcode_standalone_warning:"📷 Câmera não disponível no app instalado (limitação do iOS). Abra este link direto no Safari pra escanear:",
     account_blocked_msg:"Seu acesso a este app foi desativado pelo administrador.",
-    admin_section:"Administração", manage_exercises:"🗄️ Gerenciar exercícios", manage_users:"👥 Usuários"
+    admin_section:"Administração", manage_exercises:"🗄️ Gerenciar exercícios", manage_users:"👥 Usuários",
+    readiness_prompt_title:"Como você está hoje?",
+    readiness_q_sleep:"Qualidade do sono", readiness_q_energy:"Nível de energia", readiness_q_soreness:"Dor muscular", readiness_q_stress:"Estresse",
+    readiness_hint_sleep:"1 = péssima · 5 = ótima", readiness_hint_energy:"1 = exausto · 5 = cheio de energia",
+    readiness_hint_soreness:"1 = nenhuma · 5 = muita dor", readiness_hint_stress:"1 = tranquilo · 5 = muito estressado",
+    readiness_submit:"Ver minha prontidão",
+    readiness_answer_cta:"Responder →",
+    weekly_report_open_btn:"Ver relatório semanal",
+    weekly_sessions:"treinos", weekly_volume:"volume", weekly_consistency:"consistência", weekly_prs:"PRs",
+    weekly_vs_last_week:"vs. semana passada", weekly_no_previous_data:"sem dados da semana passada ainda",
+    weekly_prs_title:"Recordes desta semana", weekly_missed_title:"Músculos não treinados esta semana",
+    weekly_priority_title:"Prioridade para a próxima semana",
+    weekly_priority_frequency:"Você completou {done} de {planned} treinos planejados. Prioridade: manter a frequência na próxima semana.",
+    weekly_priority_muscle:"{muscle} não foi treinado esta semana. Prioridade: incluir esse grupo muscular na próxima semana.",
+    weekly_priority_volume_drop:"Seu volume caiu {pct}% em relação à semana anterior. Prioridade: recuperar o volume, ou confirmar que essa redução foi intencional (deload).",
+    weekly_priority_maintain:"Você manteve a consistência e o volume. Prioridade: continuar assim e buscar pequenos aumentos de carga.",
+    readiness_edit:"editar",
+    readiness_label_high:"Pronto para treino pesado", readiness_advice_high:"Ótimo momento para buscar novos recordes.",
+    readiness_label_normal:"Treino normal", readiness_advice_normal:"Siga o plano como está hoje.",
+    readiness_label_reduce:"Reduzir volume", readiness_advice_reduce:"Considere cortar uma ou duas séries por exercício.",
+    readiness_label_light:"Sessão leve", readiness_advice_light:"Foque em técnica e cargas mais leves hoje.",
+    readiness_label_rest:"Descanso recomendado", readiness_advice_rest:"Seu corpo pode estar pedindo recuperação — considere descansar."
   },
   en: {
     tab_treino:"Workout", tab_rotinas:"Routines", tab_progresso:"Progress", tab_ajustes:"Settings",
@@ -1422,7 +1514,28 @@ const UI_STRINGS = {
     barcode_lookup_error:"Error looking up the product. Check your internet connection.",
     barcode_standalone_warning:"📷 Camera isn't available in the installed app (iOS limitation). Open this link directly in Safari to scan:",
     account_blocked_msg:"Your access to this app has been disabled by the administrator.",
-    admin_section:"Administration", manage_exercises:"🗄️ Manage exercises", manage_users:"👥 Users"
+    admin_section:"Administration", manage_exercises:"🗄️ Manage exercises", manage_users:"👥 Users",
+    readiness_prompt_title:"How are you feeling today?",
+    readiness_q_sleep:"Sleep quality", readiness_q_energy:"Energy level", readiness_q_soreness:"Muscle soreness", readiness_q_stress:"Stress",
+    readiness_hint_sleep:"1 = poor · 5 = great", readiness_hint_energy:"1 = exhausted · 5 = full of energy",
+    readiness_hint_soreness:"1 = none · 5 = very sore", readiness_hint_stress:"1 = calm · 5 = very stressed",
+    readiness_submit:"See my readiness",
+    readiness_answer_cta:"Answer →",
+    weekly_report_open_btn:"View weekly report",
+    weekly_sessions:"sessions", weekly_volume:"volume", weekly_consistency:"consistency", weekly_prs:"PRs",
+    weekly_vs_last_week:"vs. last week", weekly_no_previous_data:"no data from last week yet",
+    weekly_prs_title:"This week's PRs", weekly_missed_title:"Muscle groups not trained this week",
+    weekly_priority_title:"Priority for next week",
+    weekly_priority_frequency:"You completed {done} of {planned} planned sessions. Priority: keep up the frequency next week.",
+    weekly_priority_muscle:"{muscle} wasn't trained this week. Priority: include that muscle group next week.",
+    weekly_priority_volume_drop:"Your volume dropped {pct}% compared to last week. Priority: recover the volume, or confirm this drop was intentional (deload).",
+    weekly_priority_maintain:"You kept up consistency and volume. Priority: keep it up and aim for small load increases.",
+    readiness_edit:"edit",
+    readiness_label_high:"Ready for a heavy session", readiness_advice_high:"Great time to chase a new PR.",
+    readiness_label_normal:"Normal training", readiness_advice_normal:"Stick to today's plan as-is.",
+    readiness_label_reduce:"Reduce volume", readiness_advice_reduce:"Consider cutting a set or two per exercise.",
+    readiness_label_light:"Light session", readiness_advice_light:"Focus on technique and lighter loads today.",
+    readiness_label_rest:"Rest recommended", readiness_advice_rest:"Your body may be asking for recovery — consider resting."
   }
 };
 function t(key){ return (UI_STRINGS[currentLang] && UI_STRINGS[currentLang][key]) || UI_STRINGS.pt[key] || key; }
@@ -1462,7 +1575,121 @@ const FCM_VAPID_KEY = "BI6go5C9fEaa6fEOXJ9h5dViw3VMsPyfDGI_1qWwxZogEvAvu2skkI8Cj
 
 let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null;
 
-// ==================== ADMIN / ROLES ====================
+// ==================== READINESS SCORE ====================
+// A quick daily check-in (sleep, energy, soreness, stress) turned into a 0-100
+// score with a plain-language recommendation. Never phrased as medical advice —
+// just a nudge the person can accept, adjust, or ignore.
+function computeReadinessScore(sleep, energy, soreness, stress){
+  const normSleep = (sleep-1)/4;
+  const normEnergy = (energy-1)/4;
+  const normSoreness = 1 - (soreness-1)/4; // higher soreness = worse readiness
+  const normStress = 1 - (stress-1)/4;     // higher stress = worse readiness
+  return Math.round(((normSleep + normEnergy + normSoreness + normStress) / 4) * 100);
+}
+
+function classifyReadiness(score){
+  if(score >= 80) return { label: t("readiness_label_high"), advice: t("readiness_advice_high"), color: "#7CFC6E" };
+  if(score >= 60) return { label: t("readiness_label_normal"), advice: t("readiness_advice_normal"), color: "var(--volt)" };
+  if(score >= 40) return { label: t("readiness_label_reduce"), advice: t("readiness_advice_reduce"), color: "#ffb84d" };
+  if(score >= 20) return { label: t("readiness_label_light"), advice: t("readiness_advice_light"), color: "#ff8a4d" };
+  return { label: t("readiness_label_rest"), advice: t("readiness_advice_rest"), color: "#ff5d5d" };
+}
+
+function renderReadinessCard(){
+  const container = document.getElementById("readinessCard");
+  if(!container) return;
+  const today = todayKey();
+  const entry = readinessLog[today];
+
+  if(entry){
+    const cls = classifyReadiness(entry.score);
+    const circumference = 2 * Math.PI * 24;
+    const offset = circumference * (1 - entry.score/100);
+    container.innerHTML = `
+      <div class="readiness-card readiness-result">
+        <div class="readiness-ring">
+          <svg viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="var(--panel-2)" stroke-width="5"/>
+            <circle cx="28" cy="28" r="24" fill="none" stroke="${cls.color}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+          </svg>
+          <div class="readiness-ring-num">${entry.score}</div>
+        </div>
+        <div style="flex:1">
+          <div class="readiness-label">${cls.label}</div>
+          <div class="readiness-advice">${cls.advice}</div>
+        </div>
+        <button class="readiness-edit-btn" id="readinessEditBtn">${t("readiness_edit")}</button>
+      </div>`;
+    document.getElementById("readinessEditBtn").addEventListener("click", ()=> renderReadinessPrompt(true));
+    return;
+  }
+
+  renderReadinessPrompt(false);
+}
+
+function renderReadinessPrompt(expanded){
+  const container = document.getElementById("readinessCard");
+  if(!container) return;
+  const today = todayKey();
+  const existing = readinessLog[today] || {};
+
+  if(!expanded){
+    container.innerHTML = `
+      <div class="readiness-card readiness-collapsed" id="readinessCollapsedBtn" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 16px">
+        <span style="font-size:20px">☀️</span>
+        <span style="flex:1;font-weight:600;font-size:13px">${t("readiness_prompt_title")}</span>
+        <span style="color:var(--volt);font-weight:700;font-size:12px">${t("readiness_answer_cta")}</span>
+      </div>`;
+    document.getElementById("readinessCollapsedBtn").addEventListener("click", ()=> renderReadinessPrompt(true));
+    return;
+  }
+
+  const questions = [
+    { key: "sleep", label: t("readiness_q_sleep"), hint: t("readiness_hint_sleep") },
+    { key: "energy", label: t("readiness_q_energy"), hint: t("readiness_hint_energy") },
+    { key: "soreness", label: t("readiness_q_soreness"), hint: t("readiness_hint_soreness") },
+    { key: "stress", label: t("readiness_q_stress"), hint: t("readiness_hint_stress") }
+  ];
+  const answers = { sleep: existing.sleep||0, energy: existing.energy||0, soreness: existing.soreness||0, stress: existing.stress||0 };
+
+  container.innerHTML = `
+    <div class="readiness-card">
+      <div class="readiness-prompt-title">${t("readiness_prompt_title")}</div>
+      ${questions.map(q=>`
+        <div class="readiness-q" data-q="${q.key}">
+          <div class="readiness-q-label">${q.label} <span style="opacity:.6;font-weight:400">(${q.hint})</span></div>
+          <div class="readiness-scale">
+            ${[1,2,3,4,5].map(n=>`<button type="button" data-val="${n}" class="${answers[q.key]===n?'active':''}">${n}</button>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+      <button class="readiness-submit" id="readinessSubmitBtn" ${Object.values(answers).some(v=>!v)?'disabled style="opacity:.4"':''}>${t("readiness_submit")}</button>
+    </div>`;
+
+  container.querySelectorAll('.readiness-q').forEach(qEl=>{
+    const key = qEl.dataset.q;
+    qEl.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        answers[key] = parseInt(btn.dataset.val);
+        qEl.querySelectorAll('button').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.val)===answers[key]));
+        const submitBtn = document.getElementById("readinessSubmitBtn");
+        const allAnswered = Object.values(answers).every(v=>v);
+        submitBtn.disabled = !allAnswered;
+        submitBtn.style.opacity = allAnswered ? "1" : ".4";
+      });
+    });
+  });
+
+  document.getElementById("readinessSubmitBtn").addEventListener("click", async ()=>{
+    const score = computeReadinessScore(answers.sleep, answers.energy, answers.soreness, answers.stress);
+    const cls = classifyReadiness(score);
+    readinessLog[today] = { ...answers, score, classification: cls.label, recordedAt: new Date().toISOString() };
+    await store.set("readinessLog", readinessLog);
+    haptic();
+    renderReadinessCard();
+  });
+}
+
 // Admin access is granted by email — add more emails here if needed.
 const ADMIN_EMAILS = ["rmagalhaes90@gmail.com"];
 function isAdmin(){ return !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase())); }
@@ -1775,6 +2002,7 @@ let exerciseRecords = {}; // { exerciseName: {maxE1rm, maxWeight, maxReps, date}
 let sessionLog = []; // [{date, day, title, startedAt, endedAt, durationSec, volume, exerciseCount}]
 let nutritionLog = {}; // { date: {protein, water, proteinGoal, waterGoal} }
 let profile = { height: null, sex: "M" };
+let readinessLog = {}; // { date: {sleep, energy, soreness, stress, score, classification} }
 let restTimerHandle = null, restRemaining = 0, restTotal = 0, restEndTime = null, restNotifyHandle = null, restExName = "";
 let sessionTimerInterval = null;
 
@@ -1825,21 +2053,21 @@ function reconcileStateForDay(dayKey){
 
 // ---- Automatic Workout Generator ----
 const MUSCLE_GROUPS = {
-  peito: { label:"Peito", muscles:["chest"] },
-  costas: { label:"Costas", muscles:["upperback","lats"] },
-  pernas: { label:"Pernas", muscles:["quads","hamstrings","glutes","calves"] },
-  ombros: { label:"Ombros", muscles:["shoulders","traps"] },
-  bracos: { label:"Braços", muscles:["biceps","triceps","forearms"] },
-  abdomen: { label:"Abdômen", muscles:["abs","obliques"] },
-  push: { label:"Push (Peito+Ombro+Tríceps)", muscles:["chest","shoulders","triceps"] },
-  pull: { label:"Pull (Costas+Bíceps)", muscles:["upperback","lats","biceps"] },
-  fullbody: { label:"Corpo Inteiro", muscles:["quads","hamstrings","glutes","chest","upperback","lats","shoulders","biceps","triceps","calves"] }
+  peito: { label:"Peito", labelEn:"Chest", muscles:["chest"] },
+  costas: { label:"Costas", labelEn:"Back", muscles:["upperback","lats"] },
+  pernas: { label:"Pernas", labelEn:"Legs", muscles:["quads","hamstrings","glutes","calves"] },
+  ombros: { label:"Ombros", labelEn:"Shoulders", muscles:["shoulders","traps"] },
+  bracos: { label:"Braços", labelEn:"Arms", muscles:["biceps","triceps","forearms"] },
+  abdomen: { label:"Abdômen", labelEn:"Abs", muscles:["abs","obliques"] },
+  push: { label:"Push (Peito+Ombro+Tríceps)", labelEn:"Push (Chest+Shoulders+Triceps)", muscles:["chest","shoulders","triceps"] },
+  pull: { label:"Pull (Costas+Bíceps)", labelEn:"Pull (Back+Biceps)", muscles:["upperback","lats","biceps"] },
+  fullbody: { label:"Corpo Inteiro", labelEn:"Full Body", muscles:["quads","hamstrings","glutes","chest","upperback","lats","shoulders","biceps","triceps","calves"] }
 };
 
 const INTENSITY_LEVELS = {
-  fraco:  { label:"Fraco",  icon:"🟢", exCount:3, sets:3, reps:"12-15", rest:45,  desc:"Volume leve, ideal pra recuperação ou iniciantes" },
-  medio:  { label:"Médio",  icon:"🟡", exCount:5, sets:4, reps:"8-12",  rest:75,  desc:"Equilíbrio entre volume e intensidade" },
-  forte:  { label:"Forte",  icon:"🔴", exCount:6, sets:5, reps:"5-8",   rest:105, desc:"Alta intensidade, cargas pesadas" }
+  fraco:  { label:"Fraco",  labelEn:"Light",  icon:"🟢", exCount:3, sets:3, reps:"12-15", rest:45,  desc:"Volume leve, ideal pra recuperação ou iniciantes", descEn:"Light volume, ideal for recovery or beginners" },
+  medio:  { label:"Médio",  labelEn:"Medium", icon:"🟡", exCount:5, sets:4, reps:"8-12",  rest:75,  desc:"Equilíbrio entre volume e intensidade", descEn:"Balance between volume and intensity" },
+  forte:  { label:"Forte",  labelEn:"Heavy",  icon:"🔴", exCount:6, sets:5, reps:"5-8",   rest:105, desc:"Alta intensidade, cargas pesadas", descEn:"High intensity, heavy loads" }
 };
 
 const GEN_VIDEO_MAP = {
@@ -1921,8 +2149,8 @@ function generateAutoWorkout(groupKey, intensityKey){
   }
 
   return {
-    title: `${group.label} — ${level.icon} ${level.label}`,
-    cardioNote: "Cardio: 15-20 min após a musculação.",
+    title: `${currentLang==="en"?group.labelEn:group.label} — ${level.icon} ${currentLang==="en"?level.labelEn:level.label}`,
+    cardioNote: currentLang==="en" ? "Cardio: 15-20 min after weight training." : "Cardio: 15-20 min após a musculação.",
     exercises, abs
   };
 }
@@ -2109,12 +2337,12 @@ async function init(){
     savedWorkouts, savedState, savedHistory, savedCompletedSessions,
     savedBodyWeights, savedBodyMeasures, savedPhotoIndex, savedExerciseHistory,
     savedExerciseRecords, savedSessionLog, savedNutritionLog, savedProfile, savedLang,
-    sharedExerciseList
+    sharedExerciseList, savedReadinessLog
   ] = await Promise.all([
     store.get("workouts"), store.get("state"), store.get("history"), store.get("completedSessions"),
     store.get("bodyWeights"), store.get("bodyMeasures"), store.get("photoIndex"), store.get("exerciseHistory"),
     store.get("exerciseRecords"), store.get("sessionLog"), store.get("nutritionLog"), store.get("profile"), store.get("language"),
-    fetchSharedExerciseDB()
+    fetchSharedExerciseDB(), store.get("readinessLog")
   ]);
 
   // If an admin has ever published a shared exercise database, it becomes the source
@@ -2125,6 +2353,7 @@ async function init(){
   }
 
   currentLang = savedLang || "pt";
+  readinessLog = savedReadinessLog || {};
 
   workouts = savedWorkouts || {};
 
@@ -2168,6 +2397,7 @@ async function init(){
   bindAjustesEvents();
   buildDaySwitch();
   renderDay();
+  renderReadinessCard();
   updateInstallRow();
 }
 
@@ -2636,7 +2866,7 @@ function buildExCard(ex, i){
       </div>
       <div style="flex:1">
         <div class="ex-name" data-role="exname" style="cursor:pointer">${tExerciseName(ex.name)} <span class="ex-history-icon">📈</span></div>
-        ${ex.notes ? `<div class="ex-note">"${ex.notes}"</div>` : ''}
+        ${ex.notes ? `<div class="ex-note">"${escapeHtml(ex.notes)}"</div>` : ''}
         <div class="ex-meta">
           <div class="meta-chip">séries <b>${ex.sets}</b></div>
           <div class="meta-chip">reps alvo <b>${ex.reps}</b></div>
@@ -2644,7 +2874,7 @@ function buildExCard(ex, i){
         </div>
         ${rec && rec.maxWeight ? `<div class="pr-chip">🏆 recorde: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps}</div>` : ''}
         ${suggestion ? `<div class="suggest-chip">😮‍💨 sugestão: <b>${suggestion.kg}kg</b> × ${suggestion.reps} <span>(${suggestion.note})</span></div>` : ''}
-        ${isPlateaued ? `<div class="plateau-chip">⚠️ Sem evolução há 3 treinos — considere subir a carga ou trocar a variação</div>` : ''}
+        ${isPlateaued ? `<div class="plateau-chip">⚠️ Sem evolução há 3 treinos <button type="button" data-role="deloadToggle" style="background:none;border:none;color:inherit;text-decoration:underline;font-weight:700;font-size:11.5px;cursor:pointer;padding:0;margin-left:4px">ver sugestão de deload</button><div data-role="deloadDetail" style="display:none;margin-top:6px"></div></div>` : ''}
         ${ex.videoUrl ? `<a class="ex-video-link" href="${tVideoUrl(ex)}" target="_blank" rel="noopener">▶️ ${t("how_to").replace('▶️ ','')}</a>` : ''}
       </div>
     </div>
@@ -2809,6 +3039,21 @@ function buildExCard(ex, i){
     haptic();
     renderDay();
   });
+  const deloadToggle = card.querySelector('[data-role="deloadToggle"]');
+  if(deloadToggle) deloadToggle.addEventListener("click", ()=>{
+    const detail = card.querySelector('[data-role="deloadDetail"]');
+    if(detail.style.display === "none"){
+      const dl = computeDeloadSuggestion(ex.name);
+      detail.innerHTML = dl
+        ? `Última sessão: <b>${dl.currentKg}kg</b> × ${dl.currentReps}. Sugestão: reduza para <b>${dl.suggestedKg}kg</b> × ${dl.suggestedReps} nesta sessão, depois volte a subir a carga aos poucos ao longo das próximas semanas.`
+        : `Continue registrando cargas e reps para gerar uma sugestão específica.`;
+      detail.style.display = "block";
+      deloadToggle.textContent = "ocultar sugestão";
+    } else {
+      detail.style.display = "none";
+      deloadToggle.textContent = "ver sugestão de deload";
+    }
+  });
   const repeatBtn = card.querySelector('[data-role="repeat"]');
   if(repeatBtn) repeatBtn.addEventListener("click", async ()=>{
     lastSession.forEach((set,k)=>{
@@ -2845,7 +3090,7 @@ function buildExCard(ex, i){
     const isOpen = panel.style.display !== "none";
     if(isOpen){ panel.style.display = "none"; return; }
     panel.innerHTML = `
-      <textarea class="notes-textarea" data-role="notesinput" placeholder="ex: cuidado com o ombro direito">${ex.notes||""}</textarea>
+      <textarea class="notes-textarea" data-role="notesinput" placeholder="ex: cuidado com o ombro direito">${escapeHtml(ex.notes||"")}</textarea>
       <button class="add-btn" data-role="savenote" style="width:100%;margin-top:8px">Salvar nota</button>
     `;
     panel.style.display = "block";
@@ -2998,20 +3243,20 @@ function renderAutoGenBody(){
     <div class="dayswitch" id="autoGenDaySwitch" style="margin-top:0"></div>
   `;
   const groupHtml = `
-    <div class="section-label">Grupo muscular</div>
+    <div class="section-label">${currentLang==="en"?"Muscle group":"Grupo muscular"}</div>
     <div class="autogen-grid" id="autoGenGroups">
-      ${Object.entries(MUSCLE_GROUPS).map(([key,g])=>`<button class="autogen-chip ${autoGenState.group===key?'active':''}" data-group="${key}">${g.label}</button>`).join('')}
+      ${Object.entries(MUSCLE_GROUPS).map(([key,g])=>`<button class="autogen-chip ${autoGenState.group===key?'active':''}" data-group="${key}">${currentLang==="en"?g.labelEn:g.label}</button>`).join('')}
     </div>
   `;
   const intensityHtml = `
-    <div class="section-label">Intensidade</div>
+    <div class="section-label">${currentLang==="en"?"Intensity":"Intensidade"}</div>
     <div class="autogen-intensity" id="autoGenIntensity">
       ${Object.entries(INTENSITY_LEVELS).map(([key,lv])=>`
         <button class="intensity-btn ${autoGenState.intensity===key?'active':''}" data-intensity="${key}">
           <div class="intensity-icon">${lv.icon}</div>
           <div>
-            <div class="intensity-name">${lv.label}</div>
-            <div class="intensity-desc">${lv.desc}</div>
+            <div class="intensity-name">${currentLang==="en"?lv.labelEn:lv.label}</div>
+            <div class="intensity-desc">${currentLang==="en"?lv.descEn:lv.desc}</div>
           </div>
         </button>`).join('')}
     </div>
@@ -3362,6 +3607,19 @@ function detectPlateau(exName){
   const last3 = hist.slice(-3);
   const bestE1rms = last3.map(entry => Math.max(...entry.sets.map(s=>calcE1RM(s.kg, s.reps))));
   return bestE1rms[1] <= bestE1rms[0] && bestE1rms[2] <= bestE1rms[1];
+}
+
+// ---- Concrete deload suggestion once a plateau is confirmed ----
+// Not automatic — just a specific, actionable number the person can accept, adjust, or ignore.
+function computeDeloadSuggestion(exName){
+  const hist = exerciseHistory[exName];
+  if(!hist || hist.length < 3) return null;
+  const last = hist[hist.length-1];
+  if(!last.sets || !last.sets.length) return null;
+  const bestSet = last.sets.reduce((a,b)=> (calcE1RM(b.kg,b.reps) > calcE1RM(a.kg,a.reps)) ? b : a, last.sets[0]);
+  if(!bestSet || !bestSet.kg) return null;
+  const suggestedKg = Math.max(0, Math.round(bestSet.kg * 0.9 * 2) / 2); // ~10% reduction, rounded to nearest 0.5kg
+  return { currentKg: bestSet.kg, currentReps: bestSet.reps, suggestedKg, suggestedReps: bestSet.reps };
 }
 
 // ---- Get most recent logged sets for an exercise (for "repeat last session") ----
@@ -3932,6 +4190,78 @@ function computeWeeklyMuscleVolumes(){
   return vol;
 }
 
+// ==================== RELATÓRIO SEMANAL ====================
+function generateWeeklyReport(){
+  const thisWeek = getWeekRange(todayKey());
+  const lastWeekAnchor = new Date(thisWeek.start + "T00:00:00"); lastWeekAnchor.setDate(lastWeekAnchor.getDate()-7);
+  const lastWeek = getWeekRange(toLocalDateKey(lastWeekAnchor));
+
+  const thisWeekSessions = sessionLog.filter(s=> s.date >= thisWeek.start && s.date <= thisWeek.end);
+  const lastWeekSessions = sessionLog.filter(s=> s.date >= lastWeek.start && s.date <= lastWeek.end);
+
+  const plannedDays = DAY_KEYS.filter(k=> workouts[k]).length;
+
+  const thisWeekVolume = thisWeekSessions.reduce((sum,s)=> sum + (s.volume||0), 0);
+  const lastWeekVolume = lastWeekSessions.reduce((sum,s)=> sum + (s.volume||0), 0);
+  const volumeChangePct = lastWeekVolume > 0 ? Math.round(((thisWeekVolume - lastWeekVolume) / lastWeekVolume) * 100) : null;
+
+  const prsThisWeek = getRecentPRs(50).filter(pr => pr.date >= thisWeek.start && pr.date <= thisWeek.end);
+
+  const muscleVol = computeWeeklyMuscleVolumes();
+  const trainedMuscles = Object.keys(muscleVol).filter(m => muscleVol[m] > 0.01);
+  const scheduledMuscles = new Set();
+  DAY_KEYS.forEach(k=>{
+    const w = workouts[k];
+    if(!w || !w.exercises) return;
+    w.exercises.forEach(ex=>{ if(ex.muscles) Object.keys(ex.muscles).forEach(m=> scheduledMuscles.add(m)); });
+  });
+  const missedMuscles = [...scheduledMuscles].filter(m => !trainedMuscles.includes(m));
+
+  const consistency = computeConsistencyScore();
+
+  let priority;
+  if(plannedDays > 0 && thisWeekSessions.length < plannedDays){
+    priority = tFmt("weekly_priority_frequency", { done: thisWeekSessions.length, planned: plannedDays });
+  } else if(missedMuscles.length > 0){
+    priority = tFmt("weekly_priority_muscle", { muscle: tMuscleName(missedMuscles[0]) });
+  } else if(volumeChangePct !== null && volumeChangePct < -10){
+    priority = tFmt("weekly_priority_volume_drop", { pct: Math.abs(volumeChangePct) });
+  } else {
+    priority = t("weekly_priority_maintain");
+  }
+
+  return {
+    thisWeekCount: thisWeekSessions.length, plannedDays,
+    thisWeekVolume, lastWeekVolume, volumeChangePct,
+    prsThisWeek, trainedMuscles, missedMuscles, consistency, priority,
+    weekLabel: `${fmtDate(thisWeek.start)} – ${fmtDate(thisWeek.end)}`
+  };
+}
+
+function renderWeeklyReportModal(){
+  const modal = document.getElementById("weeklyReportModal");
+  const body = document.getElementById("weeklyReportBody");
+  const r = generateWeeklyReport();
+
+  const volumeChangeHtml = r.volumeChangePct === null
+    ? `<div class="wr-stat-sub">${t("weekly_no_previous_data")}</div>`
+    : `<div class="wr-stat-sub" style="color:${r.volumeChangePct>=0?'var(--volt)':'#ff8a4d'}">${r.volumeChangePct>=0?'▲':'▼'} ${Math.abs(r.volumeChangePct)}% ${t("weekly_vs_last_week")}</div>`;
+
+  body.innerHTML = `
+    <div class="wr-week-label">${r.weekLabel}</div>
+    <div class="wr-stats-grid">
+      <div class="wr-stat"><div class="wr-stat-num">${r.thisWeekCount}${r.plannedDays?'/'+r.plannedDays:''}</div><div class="wr-stat-label">${t("weekly_sessions")}</div></div>
+      <div class="wr-stat"><div class="wr-stat-num">${(r.thisWeekVolume/1000).toFixed(1)}t</div><div class="wr-stat-label">${t("weekly_volume")}</div>${volumeChangeHtml}</div>
+      <div class="wr-stat"><div class="wr-stat-num">${r.consistency}%</div><div class="wr-stat-label">${t("weekly_consistency")}</div></div>
+      <div class="wr-stat"><div class="wr-stat-num">${r.prsThisWeek.length}</div><div class="wr-stat-label">${t("weekly_prs")}</div></div>
+    </div>
+    ${r.prsThisWeek.length ? `<div class="wr-section-title">${t("weekly_prs_title")}</div><div class="wr-prs">${r.prsThisWeek.map(pr=>`<div class="wr-pr-row">🏆 ${escapeHtml(tExerciseName(pr.name))} <b>${pr.label}</b></div>`).join('')}</div>` : ''}
+    ${r.missedMuscles.length ? `<div class="wr-section-title">${t("weekly_missed_title")}</div><div class="wr-missed">${r.missedMuscles.map(m=>`<span class="wr-missed-chip">${tMuscleName(m)}</span>`).join('')}</div>` : ''}
+    <div class="wr-priority"><div class="wr-priority-label">${t("weekly_priority_title")}</div><div class="wr-priority-text">${r.priority}</div></div>
+  `;
+  modal.classList.add("show");
+}
+
 function getRecentPRs(limit){
   const items = [];
   Object.entries(exerciseRecords).forEach(([name, rec])=>{
@@ -4027,6 +4357,8 @@ function renderWeekSummaryTab(){
       </div>
     </div>
 
+    <button class="settings-btn primary" id="openWeeklyReportBtn" style="margin-top:14px">📋 ${t("weekly_report_open_btn")}</button>
+
     <div class="section-label" style="margin-top:22px">Volume por semana</div>
     <div class="chart-card">
       <canvas id="multiWeekChart" width="640" height="240"></canvas>
@@ -4062,6 +4394,7 @@ function renderWeekSummaryTab(){
   ringFg.style.transition = "stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)";
   document.getElementById("consistencyNum").textContent = consistency + "%";
   requestAnimationFrame(()=>{ ringFg.style.strokeDashoffset = circumference * (1 - consistency/100); });
+  document.getElementById("openWeeklyReportBtn").addEventListener("click", renderWeeklyReportModal);
 
   const list = document.getElementById("weekSessionList");
   if(!weekSessions.length){
@@ -4537,7 +4870,7 @@ function renderNutricaoTab(){
       row.className = "meal-row";
       row.innerHTML = `
         <div class="meal-row-main">
-          <div class="meal-row-name">${meal.name}</div>
+          <div class="meal-row-name">${escapeHtml(meal.name)}</div>
           <div class="meal-row-macros mono">P ${meal.prot}g · C ${meal.carb}g · G ${meal.fat}g</div>
         </div>
         <div class="meal-row-kcal mono">${meal.kcal}<span>kcal</span></div>`;
@@ -4738,7 +5071,7 @@ function renderExerciseManagerList(filterText){
   }
   list.innerHTML = filtered.map(ex=>{
     const realIdx = EXERCISE_DB.indexOf(ex);
-    return `<div class="exercise-item" data-idx="${realIdx}"><div class="ex-item-name">${ex.name}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} · ${tEquipmentName(ex.equipment)}</div></div>`;
+    return `<div class="exercise-item" data-idx="${realIdx}"><div class="ex-item-name">${escapeHtml(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} · ${tEquipmentName(ex.equipment)}</div></div>`;
   }).join('');
   list.querySelectorAll('.exercise-item').forEach(el=>{
     el.addEventListener("click", ()=> openExerciseEditModal(parseInt(el.dataset.idx)));
@@ -4775,11 +5108,13 @@ function closeExerciseEditModal(){ document.getElementById("exerciseEditModal").
 async function saveExerciseEditModal(){
   const name = document.getElementById("exEditName").value.trim();
   if(!name){ alert("Digite um nome para o exercício."); return; }
+  if(/[<>]/.test(name)){ alert("O nome não pode conter os caracteres < ou >."); return; }
   const sets = parseInt(document.getElementById("exEditSets").value)||4;
   const reps = document.getElementById("exEditReps").value.trim()||"10";
   const rest = parseInt(document.getElementById("exEditRest").value)||60;
   const equipment = document.getElementById("exEditEquip").value;
   const videoUrl = document.getElementById("exEditVideo").value.trim();
+  if(videoUrl && !/^https?:\/\//i.test(videoUrl)){ alert("O link do vídeo precisa começar com http:// ou https://"); return; }
   const muscles = {};
   document.querySelectorAll('#exEditMuscles .muscle-btn.active').forEach(btn=>{ muscles[btn.dataset.muscle] = 1; });
 
@@ -5040,8 +5375,97 @@ async function exportData(){
   URL.revokeObjectURL(url);
 }
 
+// Expected shape of each field in a backup file — used to reject corrupted/malformed
+// imports before they ever get written to the database (which could otherwise crash
+// the app on next load, the same way the old abs-tracking format mismatch did).
+const BACKUP_FIELD_TYPES = {
+  state: "object", history: "object", completedSessions: "number",
+  bodyWeights: "array", bodyMeasures: "array", photoIndex: "array",
+  workouts: "object", exerciseHistory: "object", exerciseRecords: "object",
+  sessionLog: "array", nutritionLog: "object", profile: "object"
+};
+function typeOf(v){ if(Array.isArray(v)) return "array"; if(v===null) return "null"; return typeof v; }
+
+function validateBackupData(data){
+  const errors = [];
+  if(typeOf(data) !== "object"){ errors.push("O arquivo não contém um objeto JSON válido."); return errors; }
+  let recognizedFields = 0;
+  Object.keys(BACKUP_FIELD_TYPES).forEach(key=>{
+    if(!(key in data)) return; // field is optional — importing a partial backup is fine
+    recognizedFields++;
+    const expected = BACKUP_FIELD_TYPES[key];
+    const actual = typeOf(data[key]);
+    if(actual !== expected){
+      errors.push(`Campo "${key}" deveria ser do tipo ${expected}, mas veio como ${actual}.`);
+    }
+  });
+  if(recognizedFields === 0){
+    errors.push("Nenhum dado reconhecido foi encontrado neste arquivo — não parece ser um backup do KYRO.");
+  }
+  return errors;
+}
+
+function summarizeBackupData(data){
+  const parts = [];
+  if(data.sessionLog) parts.push(`${data.sessionLog.length} sessões de treino`);
+  if(data.bodyWeights) parts.push(`${data.bodyWeights.length} registros de peso`);
+  if(data.nutritionLog) parts.push(`${Object.keys(data.nutritionLog).length} dias de nutrição`);
+  if(data.photoIndex) parts.push(`${data.photoIndex.length} fotos`);
+  if(data.workouts) parts.push(`rotinas de treino`);
+  return parts.length ? parts.join(", ") : "dados do KYRO";
+}
+
 async function importData(file){
-  try{ const text = await file.text(); const data = JSON.parse(text); if(data.state) await store.set("state", data.state); if(data.history) await store.set("history", data.history); if(data.completedSessions) await store.set("completedSessions", data.completedSessions); if(data.bodyWeights) await store.set("bodyWeights", data.bodyWeights); if(data.bodyMeasures) await store.set("bodyMeasures", data.bodyMeasures); if(data.photoIndex) await store.set("photoIndex", data.photoIndex); if(data.workouts) await store.set("workouts", data.workouts); if(data.exerciseHistory) await store.set("exerciseHistory", data.exerciseHistory); if(data.exerciseRecords) await store.set("exerciseRecords", data.exerciseRecords); if(data.sessionLog) await store.set("sessionLog", data.sessionLog); if(data.nutritionLog) await store.set("nutritionLog", data.nutritionLog); if(data.profile) await store.set("profile", data.profile); alert(t("alert_import_success")); location.reload(); }catch(e){ alert(t("alert_import_error")); }
+  const MAX_IMPORT_BYTES = 25 * 1024 * 1024; // 25MB — generous for a JSON backup, guards against garbage files
+  if(file.size > MAX_IMPORT_BYTES){
+    alert("Esse arquivo é grande demais para ser um backup válido do KYRO.");
+    return;
+  }
+
+  let data;
+  try{
+    const text = await file.text();
+    data = JSON.parse(text);
+  }catch(e){
+    alert(t("alert_import_error") + " (o arquivo não é um JSON válido)");
+    return;
+  }
+
+  const errors = validateBackupData(data);
+  if(errors.length){
+    alert("Não foi possível importar este arquivo:\n\n" + errors.join("\n"));
+    return;
+  }
+
+  const summary = summarizeBackupData(data);
+  const confirmed = confirm(
+    `Este arquivo contém: ${summary}.\n\n` +
+    `Isso vai SUBSTITUIR seus dados atuais. Antes de continuar, vamos baixar uma cópia de segurança dos seus dados de agora — se algo der errado, você pode importar essa cópia de volta.\n\n` +
+    `Continuar?`
+  );
+  if(!confirmed) return;
+
+  // Safety net: back up whatever is currently loaded before overwriting anything.
+  try{ await exportData(); }catch(e){ /* best-effort — don't block the import on this */ }
+
+  try{
+    if(data.state) await store.set("state", data.state);
+    if(data.history) await store.set("history", data.history);
+    if(data.completedSessions !== undefined) await store.set("completedSessions", data.completedSessions);
+    if(data.bodyWeights) await store.set("bodyWeights", data.bodyWeights);
+    if(data.bodyMeasures) await store.set("bodyMeasures", data.bodyMeasures);
+    if(data.photoIndex) await store.set("photoIndex", data.photoIndex);
+    if(data.workouts) await store.set("workouts", data.workouts);
+    if(data.exerciseHistory) await store.set("exerciseHistory", data.exerciseHistory);
+    if(data.exerciseRecords) await store.set("exerciseRecords", data.exerciseRecords);
+    if(data.sessionLog) await store.set("sessionLog", data.sessionLog);
+    if(data.nutritionLog) await store.set("nutritionLog", data.nutritionLog);
+    if(data.profile) await store.set("profile", data.profile);
+    alert(t("alert_import_success"));
+    location.reload();
+  }catch(e){
+    alert(t("alert_import_error") + " Uma cópia de segurança dos seus dados anteriores foi baixada antes da tentativa, então nada foi perdido.");
+  }
 }
 
 async function resetAllData(){
@@ -5050,8 +5474,8 @@ async function resetAllData(){
   alert(t("alert_backup_before_delete"));
   workouts = {};
   DAY_KEYS.forEach(k=>{ state[k]=emptyDayState(k); history[k]={lastKg:{}}; });
+  for(const p of photoIndex) await store.delete("photo_"+p.id); // delete the actual photo files BEFORE clearing the index that points to them
   completedSessions=0; bodyWeights=[]; bodyMeasures=[]; photoIndex=[];
-  for(const p of photoIndex) await store.delete("photo_"+p.id);
   await store.set("state", state); await store.set("history", history); await store.set("completedSessions", completedSessions);
   await store.set("bodyWeights", bodyWeights); await store.set("bodyMeasures", bodyMeasures); await store.set("photoIndex", photoIndex); await store.set("workouts", workouts);
   currentDay = DAY_KEYS[new Date().getDay()];
@@ -5395,15 +5819,22 @@ function fireConfetti(){
 }
 window.addEventListener("resize", ()=>{ const canvas = document.getElementById("confetti"); canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 
-document.getElementById("exerciseSearch").addEventListener("input", renderExerciseList);
+document.getElementById("exerciseSearch").addEventListener("input", debounce(renderExerciseList, 150));
 document.getElementById("barcodeCloseBtn").addEventListener("click", closeBarcodeScanner);
 document.getElementById("exMgrCloseBtn").addEventListener("click", closeExerciseManager);
-document.getElementById("exMgrSearch").addEventListener("input", (e)=> renderExerciseManagerList(e.target.value));
+document.getElementById("exMgrSearch").addEventListener("input", debounce((e)=> renderExerciseManagerList(e.target.value), 150));
 document.getElementById("exMgrAddBtn").addEventListener("click", ()=> openExerciseEditModal(null));
 document.getElementById("exEditCloseBtn").addEventListener("click", closeExerciseEditModal);
 document.getElementById("exEditSaveBtn").addEventListener("click", saveExerciseEditModal);
 document.getElementById("exEditDeleteBtn").addEventListener("click", deleteExerciseFromManager);
 document.getElementById("userMgrCloseBtn").addEventListener("click", closeUserManager);
+document.getElementById("weeklyReportCloseBtn").addEventListener("click", ()=> document.getElementById("weeklyReportModal").classList.remove("show"));
+
+// Accessibility: Escape closes whatever modal is currently open, for people navigating by keyboard.
+document.addEventListener("keydown", (e)=>{
+  if(e.key !== "Escape") return;
+  document.querySelectorAll(".modal-overlay.show").forEach(el=> el.classList.remove("show"));
+});
 
 // ---- Pull-to-refresh ----
 (function setupPullToRefresh(){
