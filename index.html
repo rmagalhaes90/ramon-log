@@ -205,6 +205,25 @@
   .wr-priority{background:rgba(124,252,110,.08);border:1px solid var(--volt-dim);border-radius:12px;padding:12px 14px;margin-top:16px}
   .wr-priority-label{font-weight:700;font-size:11.5px;color:var(--volt);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em}
   .wr-priority-text{font-size:13px;line-height:1.4}
+  .home-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .home-card-label{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px}
+  .home-next-workout{border-color:var(--volt-dim)}
+  .home-workout-title{font-size:18px;font-weight:800;margin-bottom:4px}
+  .home-workout-muscles{font-size:12px;color:var(--dim);margin-bottom:14px}
+  .home-empty-state{font-size:13px;color:var(--dim);text-align:center;padding:8px 0}
+  .home-readiness-row{display:flex;align-items:center;gap:12px}
+  .home-readiness-score{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:24px;color:var(--volt)}
+  .home-readiness-label{font-size:13px;font-weight:600}
+  .home-week-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .home-week-stats > div{display:flex;flex-direction:column}
+  .home-week-stats b{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800}
+  .home-week-stats span{font-size:11px;color:var(--dim)}
+  .home-insight{background:rgba(124,252,110,.08);border:1px solid var(--volt-dim)}
+  .home-insight .home-card-label{color:var(--volt)}
+  .home-insight-text{font-size:13px;line-height:1.4}
+  .home-nutrition-row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .home-nutrition-bar{height:6px;border-radius:3px;background:var(--panel-2);overflow:hidden;margin-top:8px}
+  .home-nutrition-bar-fill{height:100%;background:var(--volt);border-radius:3px}
   .suggest-chip{display:inline-block;font-size:11.5px;font-weight:700;color:var(--blue);background:rgba(77,195,255,.08);border:1px solid rgba(77,195,255,.35);border-radius:8px;padding:5px 10px;margin-top:8px;cursor:pointer}
   .suggest-chip span{font-weight:500;color:var(--dim)}
   .warmup-panel{margin-top:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
@@ -368,6 +387,8 @@
   .meas-vals{display:flex;flex-wrap:wrap;gap:6px 14px}.meas-vals span{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim)}.meas-vals b{color:var(--text)}.m-diff.down{color:var(--blue)}.m-diff.up{color:var(--red)}
 
   .photo-add{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:18px;color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px}
+  .photo-add.uploading{opacity:.6;pointer-events:none}
+  .photo-add .spinner{width:14px;height:14px;border:2px solid var(--dim);border-top-color:var(--volt);border-radius:50%;animation:pullSpin .7s linear infinite;display:inline-block}
   .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photo-cell{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);aspect-ratio:3/4;cursor:pointer}
   .photo-cell img{width:100%;height:100%;object-fit:cover;display:block}.p-date{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:rgba(6,7,8,.72);font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text)}
 
@@ -529,6 +550,18 @@
   </div>
 </div>
 
+<div id="importChoiceModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:420px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-weight:700;font-size:16px">Importar backup</div>
+      <button class="close-btn" id="importChoiceCloseBtn" aria-label="Fechar">✕</button>
+    </div>
+    <div id="importChoiceSummary" style="font-size:13px;color:var(--dim);margin-bottom:16px;line-height:1.5"></div>
+    <button class="settings-btn primary" id="importMergeBtn" style="margin-bottom:8px">➕ Mesclar (adicionar sem apagar nada)</button>
+    <button class="settings-btn danger" id="importReplaceBtn">⚠️ Substituir tudo</button>
+  </div>
+</div>
+
 <div id="weeklyReportModal" class="modal-overlay">
   <div class="modal-content" style="max-width:460px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -584,6 +617,11 @@
 <div id="pages">
 
   <!-- TREINO -->
+  <section class="page" data-page="home">
+    <div class="page-header"><h2>INÍCIO<span>.</span></h2></div>
+    <div id="homeContent"></div>
+  </section>
+
   <section class="page active" data-page="treino">
     <div class="topbar">
       <div class="topbar-brand">
@@ -779,6 +817,7 @@
       <div class="settings-group">
         <div class="settings-group-title">Dados</div>
         <button class="settings-btn" id="exportBtn">⬇️ Exportar backup</button>
+        <button class="settings-btn" id="exportCsvBtn">📊 Exportar CSV (planilha)</button>
         <label class="settings-btn" for="importInput">⬆️ Importar dados</label>
         <input type="file" id="importInput" accept="application/json" style="display:none">
         <button class="settings-btn danger" id="resetAllBtn">🗑 Apagar todos os dados</button>
@@ -791,6 +830,7 @@
 </div>
 
 <nav class="tabbar" id="tabbar">
+  <button data-page="home"><span class="tab-icon">🏠</span><span id="navHome">Início</span></button>
   <button data-page="treino" class="active"><span class="tab-icon">🏋️</span><span id="navTreino">Treino</span></button>
   <button data-page="rotinas"><span class="tab-icon">⚙️</span><span id="navRotinas">Rotinas</span></button>
   <button data-page="progresso"><span class="tab-icon">📊</span><span id="navProgresso">Progresso</span></button>
@@ -1438,6 +1478,12 @@ const UI_STRINGS = {
     weekly_priority_muscle:"{muscle} não foi treinado esta semana. Prioridade: incluir esse grupo muscular na próxima semana.",
     weekly_priority_volume_drop:"Seu volume caiu {pct}% em relação à semana anterior. Prioridade: recuperar o volume, ou confirmar que essa redução foi intencional (deload).",
     weekly_priority_maintain:"Você manteve a consistência e o volume. Prioridade: continuar assim e buscar pequenos aumentos de carga.",
+    photo_uploading:"Enviando foto...",
+    nav_home:"Início",
+    home_today:"Hoje", home_no_workout_today:"Nenhum treino agendado pra hoje. Aproveite pra descansar ou criar uma rotina.",
+    home_already_trained:"✅ Treino de hoje já concluído", home_start_workout:"Iniciar treino",
+    home_readiness:"Prontidão", home_this_week:"Esta semana", home_insight:"Prioridade", home_nutrition:"Nutrição hoje",
+    kcal_remaining_today:"{kcal} kcal restantes hoje",
     readiness_edit:"editar",
     readiness_label_high:"Pronto para treino pesado", readiness_advice_high:"Ótimo momento para buscar novos recordes.",
     readiness_label_normal:"Treino normal", readiness_advice_normal:"Siga o plano como está hoje.",
@@ -1531,6 +1577,12 @@ const UI_STRINGS = {
     weekly_priority_muscle:"{muscle} wasn't trained this week. Priority: include that muscle group next week.",
     weekly_priority_volume_drop:"Your volume dropped {pct}% compared to last week. Priority: recover the volume, or confirm this drop was intentional (deload).",
     weekly_priority_maintain:"You kept up consistency and volume. Priority: keep it up and aim for small load increases.",
+    photo_uploading:"Uploading photo...",
+    nav_home:"Home",
+    home_today:"Today", home_no_workout_today:"No workout scheduled for today. Take a rest day or build a routine.",
+    home_already_trained:"✅ Today's workout already done", home_start_workout:"Start workout",
+    home_readiness:"Readiness", home_this_week:"This week", home_insight:"Priority", home_nutrition:"Nutrition today",
+    kcal_remaining_today:"{kcal} kcal left today",
     readiness_edit:"edit",
     readiness_label_high:"Ready for a heavy session", readiness_advice_high:"Great time to chase a new PR.",
     readiness_label_normal:"Normal training", readiness_advice_normal:"Stick to today's plan as-is.",
@@ -1813,8 +1865,11 @@ const store = {
     clearCache(key);
     removePendingSync(key);
     if(!currentUser || !fbDb) return;
-    try{ await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).delete(), 8000, "delete:"+key); }
-    catch(e){ console.error("store.delete error", key, e); }
+    // Non-blocking, same reasoning as store.set: don't make the caller wait on the network
+    // round-trip for a delete — this was making photo deletion (and anything else that
+    // deletes) feel frozen for up to 8s.
+    withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).delete(), 8000, "delete:"+key)
+      .catch((e)=> console.error("store.delete error", key, e));
   }
 };
 
@@ -2384,6 +2439,18 @@ async function init(){
   bodyWeights = savedBodyWeights || [];
   bodyMeasures = savedBodyMeasures || [];
   photoIndex = savedPhotoIndex || [];
+  {
+    const seenIds = new Set();
+    const dedupedPhotoIndex = photoIndex.filter(p=>{
+      if(seenIds.has(p.id)) return false;
+      seenIds.add(p.id);
+      return true;
+    });
+    if(dedupedPhotoIndex.length !== photoIndex.length){
+      photoIndex = dedupedPhotoIndex;
+      store.set("photoIndex", photoIndex); // persist the cleanup, fire-and-forget
+    }
+  }
   exerciseHistory = savedExerciseHistory || {};
   exerciseRecords = savedExerciseRecords || {};
   sessionLog = savedSessionLog || [];
@@ -2400,6 +2467,7 @@ async function init(){
   buildDaySwitch();
   renderDay();
   renderReadinessCard();
+  renderHomePage();
   updateInstallRow();
 }
 
@@ -2411,6 +2479,7 @@ function bindPageNav(){
 function switchPage(name){
   document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active", p.dataset.page===name));
   document.querySelectorAll("#tabbar button").forEach(b=>b.classList.toggle("active", b.dataset.page===name));
+  if(name==="home") renderHomePage();
   if(name==="rotinas") renderRotinas();
   if(name==="progresso") renderProgSub();
 }
@@ -2428,13 +2497,26 @@ function bindProgressoEvents(){
   document.getElementById("weightAdd").addEventListener("click", addWeight);
   document.getElementById("weightInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addWeight(); });
   document.getElementById("measAdd").addEventListener("click", addMeasures);
-  document.getElementById("photoInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) addPhoto(e.target.files[0]); e.target.value=""; });
+  document.getElementById("photoInput").addEventListener("change", e=>{
+    if(e.target.files && e.target.files[0]){
+      const label = document.getElementById("photoAddLabel");
+      const originalText = label.textContent;
+      label.classList.add("uploading");
+      label.innerHTML = `<span class="spinner"></span> ${t("photo_uploading")}`;
+      addPhoto(e.target.files[0]).finally(()=>{
+        label.classList.remove("uploading");
+        label.textContent = originalText;
+      });
+    }
+    e.target.value="";
+  });
   document.getElementById("pvClose").addEventListener("click", ()=>document.getElementById("photoViewer").classList.remove("show"));
   document.getElementById("pvDelete").addEventListener("click", deleteCurrentPhoto);
   document.getElementById("compareSlider").addEventListener("input", updateCompareSlider);
 }
 
 function applyStaticTranslations(){
+  document.getElementById("navHome").textContent = t("nav_home");
   document.getElementById("navTreino").textContent = t("tab_treino");
   document.getElementById("navRotinas").textContent = t("tab_rotinas");
   document.getElementById("navProgresso").textContent = t("tab_progresso");
@@ -2461,6 +2543,7 @@ function bindAjustesEvents(){
   document.getElementById("manageExercisesBtn").addEventListener("click", openExerciseManager);
   document.getElementById("manageUsersBtn").addEventListener("click", openUserManager);
   document.getElementById("exportBtn").addEventListener("click", exportData);
+  document.getElementById("exportCsvBtn").addEventListener("click", exportAllCsv);
   document.getElementById("importInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
   document.getElementById("resetAllBtn").addEventListener("click", resetAllData);
   document.querySelectorAll("#langSwitch button").forEach(btn=>{
@@ -4193,6 +4276,91 @@ function computeWeeklyMuscleVolumes(){
 }
 
 // ==================== RELATÓRIO SEMANAL ====================
+// ==================== HOME DASHBOARD ====================
+// A single screen answering the questions from the mobile-first vision: what's my next
+// workout, how ready am I, how's my week going, what needs attention, am I on track with food.
+// Deliberately reuses existing computations (readiness, weekly report, nutrition) rather than
+// duplicating logic — this is a view that aggregates, not a new data source.
+function renderHomePage(){
+  const container = document.getElementById("homeContent");
+  if(!container) return;
+  const today = todayKey();
+  const dayKey = DAY_KEYS[new Date().getDay()];
+  const w = workouts[dayKey];
+  const alreadyTrainedToday = sessionLog.some(s=>s.date===today);
+
+  let workoutCardHtml;
+  if(!w){
+    workoutCardHtml = `<div class="home-card home-next-workout"><div class="home-card-label">${t("home_today")}</div><div class="home-empty-state">${t("home_no_workout_today")}</div></div>`;
+  } else if(alreadyTrainedToday){
+    workoutCardHtml = `<div class="home-card home-next-workout"><div class="home-card-label">${t("home_today")}</div><div class="home-workout-title">✅ ${escapeHtml(w.title||"")}</div><div class="home-workout-muscles">${t("home_already_trained")}</div></div>`;
+  } else {
+    const muscleSet = new Set();
+    (w.exercises||[]).forEach(ex=>{ if(ex.muscles) Object.keys(ex.muscles).forEach(m=>muscleSet.add(m)); });
+    const muscleNames = [...muscleSet].slice(0,3).map(tMuscleName).join(" · ");
+    workoutCardHtml = `
+      <div class="home-card home-next-workout">
+        <div class="home-card-label">${t("home_today")}</div>
+        <div class="home-workout-title">${escapeHtml(w.title||"")}</div>
+        <div class="home-workout-muscles">${muscleNames}</div>
+        <button class="settings-btn primary" id="homeStartWorkoutBtn">${t("home_start_workout")}</button>
+      </div>`;
+  }
+
+  const readinessEntry = readinessLog[today];
+  let readinessHtml;
+  if(readinessEntry){
+    const cls = classifyReadiness(readinessEntry.score);
+    readinessHtml = `
+      <div class="home-card">
+        <div class="home-card-label">${t("home_readiness")}</div>
+        <div class="home-readiness-row">
+          <div class="home-readiness-score">${readinessEntry.score}</div>
+          <div class="home-readiness-label">${cls.label}</div>
+        </div>
+      </div>`;
+  } else {
+    readinessHtml = `
+      <div class="home-card" id="homeReadinessPrompt" style="cursor:pointer">
+        <div class="home-card-label">${t("home_readiness")}</div>
+        <div class="home-empty-state">☀️ ${t("readiness_prompt_title")}</div>
+      </div>`;
+  }
+
+  const report = generateWeeklyReport();
+  const weeklyHtml = `
+    <div class="home-card">
+      <div class="home-card-label">${t("home_this_week")}</div>
+      <div class="home-week-stats">
+        <div><b>${report.thisWeekCount}${report.plannedDays?'/'+report.plannedDays:''}</b><span>${t("weekly_sessions")}</span></div>
+        <div><b>${report.consistency}%</b><span>${t("weekly_consistency")}</span></div>
+      </div>
+    </div>`;
+
+  const insightHtml = `
+    <div class="home-card home-insight">
+      <div class="home-card-label">${t("home_insight")}</div>
+      <div class="home-insight-text">${report.priority}</div>
+    </div>`;
+
+  const n = getTodayNutrition();
+  const kcalLeft = Math.max(0, (n.kcalGoal||0) - (n.kcal||0));
+  const kcalPct = n.kcalGoal>0 ? Math.min(100, Math.round((n.kcal/n.kcalGoal)*100)) : 0;
+  const nutritionHtml = `
+    <div class="home-card">
+      <div class="home-card-label">${t("home_nutrition")}</div>
+      <div class="home-nutrition-row"><span>${tFmt("kcal_remaining_today", {kcal: Math.round(kcalLeft)})}</span><span>${kcalPct}%</span></div>
+      <div class="home-nutrition-bar"><div class="home-nutrition-bar-fill" style="width:${kcalPct}%"></div></div>
+    </div>`;
+
+  container.innerHTML = workoutCardHtml + readinessHtml + weeklyHtml + insightHtml + nutritionHtml;
+
+  const startBtn = document.getElementById("homeStartWorkoutBtn");
+  if(startBtn) startBtn.addEventListener("click", ()=> switchPage("treino"));
+  const readinessPromptEl = document.getElementById("homeReadinessPrompt");
+  if(readinessPromptEl) readinessPromptEl.addEventListener("click", ()=> switchPage("treino"));
+}
+
 function generateWeeklyReport(){
   const thisWeek = getWeekRange(todayKey());
   const lastWeekAnchor = new Date(thisWeek.start + "T00:00:00"); lastWeekAnchor.setDate(lastWeekAnchor.getDate()-7);
@@ -4773,7 +4941,7 @@ window.lookupBarcodeProduct = async function(code){
 async function addPhoto(file){
   try{
     const dataUrl = await compressImage(file);
-    const id = Date.now().toString(36);
+    const id = Date.now().toString(36)+Math.random().toString(36).slice(2,8);
     const storageUrl = await uploadPhotoToStorage(dataUrl, id);
     await store.set("photo_"+id, storageUrl || dataUrl); // falls back to base64 if Storage upload failed
     photoIndex.push({id, d: todayKey()});
@@ -5057,10 +5225,11 @@ window.closeCompareModal = function(){ document.getElementById("comparePhotoModa
 
 async function deleteCurrentPhoto(){
   if(!currentPhotoId || !confirm(t("confirm_delete_generic"))) return;
-  await store.delete("photo_"+currentPhotoId);
-  await deletePhotoFromStorage(currentPhotoId);
-  photoIndex = photoIndex.filter(p=>p.id!==currentPhotoId);
-  await store.set("photoIndex", photoIndex);
+  const idToDelete = currentPhotoId;
+  photoIndex = photoIndex.filter(p=>p.id!==idToDelete);
+  store.set("photoIndex", photoIndex); // non-blocking — local cache updates immediately
+  store.delete("photo_"+idToDelete);   // non-blocking
+  deletePhotoFromStorage(idToDelete);  // non-blocking, best-effort
   currentPhotoId = null;
   document.getElementById("photoViewer").classList.remove("show");
   renderPhotoTab();
@@ -5413,6 +5582,56 @@ function updateInstallRow(){
   }
 }
 
+// ==================== CSV EXPORT ====================
+function toCsv(rows){
+  return rows.map(row => row.map(cell=>{
+    const s = String(cell ?? "");
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  }).join(",")).join("\r\n");
+}
+function downloadCsv(filename, rows){
+  // Leading BOM so Excel opens UTF-8 accented characters (á, ç, ã...) correctly.
+  const blob = new Blob(["\uFEFF" + toCsv(rows)], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function exportWorkoutsCsv(){
+  const rows = [["Data","Dia","Título","Duração (min)","Volume (kg)","Exercícios"]];
+  sessionLog.forEach(s=>{
+    rows.push([s.date, s.day||"", s.title||"", s.durationSec?Math.round(s.durationSec/60):"", s.volume||"", s.exerciseCount||""]);
+  });
+  downloadCsv("kyro-treinos-"+todayKey()+".csv", rows);
+}
+function exportMeasuresCsv(){
+  const rows = [["Data","Peso (kg)", ...MEAS_FIELDS.map(f=>f.label)]];
+  const byDate = {};
+  bodyWeights.forEach(w=>{ byDate[w.d] = byDate[w.d]||{}; byDate[w.d].kg = w.kg; });
+  bodyMeasures.forEach(m=>{ byDate[m.d] = byDate[m.d]||{}; byDate[m.d].vals = m.vals; });
+  Object.keys(byDate).sort().forEach(d=>{
+    const entry = byDate[d];
+    const row = [d, entry.kg ?? ""];
+    MEAS_FIELDS.forEach(f=> row.push(entry.vals && entry.vals[f.key]!=null ? entry.vals[f.key] : ""));
+    rows.push(row);
+  });
+  downloadCsv("kyro-medidas-"+todayKey()+".csv", rows);
+}
+function exportNutritionCsv(){
+  const rows = [["Data","Proteína (g)","Meta proteína (g)","Água (ml)","Meta água (ml)"]];
+  Object.keys(nutritionLog).sort().forEach(d=>{
+    const n = nutritionLog[d];
+    rows.push([d, n.protein||"", n.proteinGoal||"", n.water||"", n.waterGoal||""]);
+  });
+  downloadCsv("kyro-nutricao-"+todayKey()+".csv", rows);
+}
+function exportAllCsv(){
+  exportWorkoutsCsv();
+  exportMeasuresCsv();
+  exportNutritionCsv();
+}
+
 async function exportData(){
   const data = { state, history, completedSessions, bodyWeights, bodyMeasures, photoIndex, workouts, exerciseHistory, exerciseRecords, sessionLog, nutritionLog, profile, exportedAt: new Date().toISOString(), version: 4 };
   const blob = new Blob([JSON.stringify(data)], {type:"application/json"});
@@ -5463,6 +5682,56 @@ function summarizeBackupData(data){
   return parts.length ? parts.join(", ") : "dados do KYRO";
 }
 
+// Merge policy: never destroy what's already here — only add what's missing from the
+// imported file. On any conflict (same date/key/exercise), the EXISTING data wins.
+// "workouts", "state" and "profile" represent your current setup, not a history log,
+// so merge leaves those untouched entirely (only a full "replace" changes them).
+function mergeBackupData(data){
+  const mergeArrayByKey = (existingArr, importedArr, keyFn) => {
+    if(!Array.isArray(existingArr)) existingArr = [];
+    if(!Array.isArray(importedArr)) return existingArr;
+    const existingKeys = new Set(existingArr.map(keyFn));
+    const merged = existingArr.slice();
+    importedArr.forEach(item=>{ if(!existingKeys.has(keyFn(item))) merged.push(item); });
+    return merged;
+  };
+  const mergeObjectByKey = (existingObj, importedObj) => {
+    const merged = Object.assign({}, existingObj||{});
+    Object.keys(importedObj||{}).forEach(k=>{ if(!(k in merged)) merged[k] = importedObj[k]; });
+    return merged;
+  };
+
+  if(data.bodyWeights) bodyWeights = mergeArrayByKey(bodyWeights, data.bodyWeights, w=>w.d);
+  if(data.bodyMeasures) bodyMeasures = mergeArrayByKey(bodyMeasures, data.bodyMeasures, m=>m.d);
+  if(data.sessionLog) sessionLog = mergeArrayByKey(sessionLog, data.sessionLog, s=>s.date+"|"+(s.day||""));
+  if(data.photoIndex) photoIndex = mergeArrayByKey(photoIndex, data.photoIndex, p=>p.id);
+  if(data.nutritionLog) nutritionLog = mergeObjectByKey(nutritionLog, data.nutritionLog);
+  if(data.history){
+    const merged = Object.assign({}, history);
+    Object.keys(data.history).forEach(day=>{ if(!merged[day]) merged[day] = data.history[day]; });
+    history = merged;
+  }
+  if(data.exerciseHistory){
+    const merged = Object.assign({}, exerciseHistory);
+    Object.keys(data.exerciseHistory).forEach(exName=>{
+      merged[exName] = mergeArrayByKey(merged[exName]||[], data.exerciseHistory[exName], e=>e.date);
+    });
+    exerciseHistory = merged;
+  }
+  if(data.exerciseRecords){
+    const merged = Object.assign({}, exerciseRecords);
+    Object.keys(data.exerciseRecords).forEach(exName=>{
+      const existing = merged[exName], imported = data.exerciseRecords[exName];
+      if(!existing || (imported && (imported.maxWeight||0) > (existing.maxWeight||0))) merged[exName] = imported;
+    });
+    exerciseRecords = merged;
+  }
+  if(data.completedSessions !== undefined) completedSessions = Math.max(completedSessions||0, data.completedSessions||0);
+  // workouts, state, profile intentionally left untouched on merge.
+}
+
+let pendingImportData = null;
+
 async function importData(file){
   const MAX_IMPORT_BYTES = 25 * 1024 * 1024; // 25MB — generous for a JSON backup, guards against garbage files
   if(file.size > MAX_IMPORT_BYTES){
@@ -5485,34 +5754,50 @@ async function importData(file){
     return;
   }
 
-  const summary = summarizeBackupData(data);
-  const confirmed = confirm(
-    `Este arquivo contém: ${summary}.\n\n` +
-    `Isso vai SUBSTITUIR seus dados atuais. Antes de continuar, vamos baixar uma cópia de segurança dos seus dados de agora — se algo der errado, você pode importar essa cópia de volta.\n\n` +
-    `Continuar?`
-  );
-  if(!confirmed) return;
+  pendingImportData = data;
+  document.getElementById("importChoiceSummary").textContent =
+    `Este arquivo contém: ${summarizeBackupData(data)}. Antes de aplicar qualquer opção abaixo, uma cópia de segurança dos seus dados atuais é baixada automaticamente.`;
+  document.getElementById("importChoiceModal").classList.add("show");
+}
 
-  // Safety net: back up whatever is currently loaded before overwriting anything.
+async function applyImport(mode){
+  const data = pendingImportData;
+  if(!data) return;
+  document.getElementById("importChoiceModal").classList.remove("show");
+
+  // Safety net: back up whatever is currently loaded before changing anything.
   try{ await exportData(); }catch(e){ /* best-effort — don't block the import on this */ }
 
   try{
-    if(data.state) await store.set("state", data.state);
-    if(data.history) await store.set("history", data.history);
-    if(data.completedSessions !== undefined) await store.set("completedSessions", data.completedSessions);
-    if(data.bodyWeights) await store.set("bodyWeights", data.bodyWeights);
-    if(data.bodyMeasures) await store.set("bodyMeasures", data.bodyMeasures);
-    if(data.photoIndex) await store.set("photoIndex", data.photoIndex);
-    if(data.workouts) await store.set("workouts", data.workouts);
-    if(data.exerciseHistory) await store.set("exerciseHistory", data.exerciseHistory);
-    if(data.exerciseRecords) await store.set("exerciseRecords", data.exerciseRecords);
-    if(data.sessionLog) await store.set("sessionLog", data.sessionLog);
-    if(data.nutritionLog) await store.set("nutritionLog", data.nutritionLog);
-    if(data.profile) await store.set("profile", data.profile);
+    if(mode === "merge"){
+      mergeBackupData(data);
+      await Promise.all([
+        store.set("bodyWeights", bodyWeights), store.set("bodyMeasures", bodyMeasures),
+        store.set("sessionLog", sessionLog), store.set("photoIndex", photoIndex),
+        store.set("nutritionLog", nutritionLog), store.set("history", history),
+        store.set("exerciseHistory", exerciseHistory), store.set("exerciseRecords", exerciseRecords),
+        store.set("completedSessions", completedSessions)
+      ]);
+    } else {
+      if(data.state) await store.set("state", data.state);
+      if(data.history) await store.set("history", data.history);
+      if(data.completedSessions !== undefined) await store.set("completedSessions", data.completedSessions);
+      if(data.bodyWeights) await store.set("bodyWeights", data.bodyWeights);
+      if(data.bodyMeasures) await store.set("bodyMeasures", data.bodyMeasures);
+      if(data.photoIndex) await store.set("photoIndex", data.photoIndex);
+      if(data.workouts) await store.set("workouts", data.workouts);
+      if(data.exerciseHistory) await store.set("exerciseHistory", data.exerciseHistory);
+      if(data.exerciseRecords) await store.set("exerciseRecords", data.exerciseRecords);
+      if(data.sessionLog) await store.set("sessionLog", data.sessionLog);
+      if(data.nutritionLog) await store.set("nutritionLog", data.nutritionLog);
+      if(data.profile) await store.set("profile", data.profile);
+    }
     alert(t("alert_import_success"));
     location.reload();
   }catch(e){
     alert(t("alert_import_error") + " Uma cópia de segurança dos seus dados anteriores foi baixada antes da tentativa, então nada foi perdido.");
+  }finally{
+    pendingImportData = null;
   }
 }
 
@@ -5877,6 +6162,11 @@ document.getElementById("exEditSaveBtn").addEventListener("click", saveExerciseE
 document.getElementById("exEditDeleteBtn").addEventListener("click", deleteExerciseFromManager);
 document.getElementById("userMgrCloseBtn").addEventListener("click", closeUserManager);
 document.getElementById("weeklyReportCloseBtn").addEventListener("click", ()=> document.getElementById("weeklyReportModal").classList.remove("show"));
+document.getElementById("importChoiceCloseBtn").addEventListener("click", ()=>{ document.getElementById("importChoiceModal").classList.remove("show"); pendingImportData = null; });
+document.getElementById("importMergeBtn").addEventListener("click", ()=> applyImport("merge"));
+document.getElementById("importReplaceBtn").addEventListener("click", ()=>{
+  if(confirm("Isso vai SUBSTITUIR todos os seus dados atuais pelo conteúdo deste arquivo. Continuar?")) applyImport("replace");
+});
 
 // Accessibility: Escape closes whatever modal is currently open, for people navigating by keyboard.
 document.addEventListener("keydown", (e)=>{
