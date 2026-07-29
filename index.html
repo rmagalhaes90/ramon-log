@@ -454,6 +454,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 </head>
 <body>
@@ -1573,7 +1574,7 @@ const FIREBASE_CONFIG = {
 // Sem isso preenchido, o app funciona normalmente — só não tenta ativar push.
 const FCM_VAPID_KEY = "BI6go5C9fEaa6fEOXJ9h5dViw3VMsPyfDGI_1qWwxZogEvAvu2skkI8CjuwZrQMMG7gFQGYvIPDv80f55NjmO6s";
 
-let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null;
+let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null, fbStorage = null;
 
 // ==================== READINESS SCORE ====================
 // A quick daily check-in (sleep, energy, soreness, stress) turned into a 0-100
@@ -1717,6 +1718,7 @@ try{
     fbDb = firebase.firestore();
     fbDb.settings({ experimentalAutoDetectLongPolling: true, merge: true });
     fbDb.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    try{ fbStorage = firebase.storage(); }catch(e){ console.warn("Firebase Storage não disponível:", e); }
     firebaseReady = true;
     try{
       if(firebase.messaging && firebase.messaging.isSupported && firebase.messaging.isSupported()){
@@ -4652,6 +4654,42 @@ function renderMeasTab(){
 // PHOTOS
 function compressImage(file){ return new Promise((resolve, reject)=>{ const reader = new FileReader(); reader.onload = ()=>{ const img = new Image(); img.onload = ()=>{ const MAXW = 900, scale = Math.min(1, MAXW / img.width), c = document.createElement("canvas"); c.width = Math.round(img.width*scale); c.height = Math.round(img.height*scale); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); resolve(c.toDataURL("image/jpeg", 0.8)); }; img.onerror = reject; img.src = reader.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
 
+// ==================== PHOTO STORAGE (Firebase Storage) ====================
+// Progress photos are compressed client-side (compressImage, above — this also strips
+// EXIF metadata since re-encoding through canvas never carries it over), then uploaded
+// to Storage under the user's own folder instead of being kept as base64 inside Firestore.
+// If Storage isn't available (offline, or the project isn't on a plan with Storage enabled),
+// we fall back to the old base64-in-Firestore behavior so the feature never breaks.
+function dataUrlToBlob(dataUrl){
+  const [header, base64] = dataUrl.split(",");
+  const mimeMatch = header.match(/data:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+async function uploadPhotoToStorage(dataUrl, id){
+  if(!fbStorage || !currentUser) return null;
+  try{
+    const blob = dataUrlToBlob(dataUrl);
+    const ref = fbStorage.ref().child(`users/${currentUser.uid}/photos/${id}.jpg`);
+    await ref.put(blob, { contentType: "image/jpeg" });
+    return await ref.getDownloadURL();
+  }catch(e){
+    console.error("uploadPhotoToStorage error", e);
+    return null; // caller falls back to storing the base64 data URL directly
+  }
+}
+
+async function deletePhotoFromStorage(id){
+  if(!fbStorage || !currentUser) return;
+  try{ await fbStorage.ref().child(`users/${currentUser.uid}/photos/${id}.jpg`).delete(); }
+  catch(e){ /* best-effort — file may not exist (older photo saved before Storage was enabled) */ }
+}
+
+
 // ---- Barcode scanner (nutrition) ----
 let barcodeScanner = null;
 
@@ -4733,7 +4771,16 @@ window.lookupBarcodeProduct = async function(code){
 }
 
 async function addPhoto(file){
-  try{ const dataUrl = await compressImage(file); const id = Date.now().toString(36); await store.set("photo_"+id, dataUrl); photoIndex.push({id, d: todayKey()}); await store.set("photoIndex", photoIndex); haptic(); renderPhotoTab(); }catch(e){ alert(t("alert_photo_save_error")); }
+  try{
+    const dataUrl = await compressImage(file);
+    const id = Date.now().toString(36);
+    const storageUrl = await uploadPhotoToStorage(dataUrl, id);
+    await store.set("photo_"+id, storageUrl || dataUrl); // falls back to base64 if Storage upload failed
+    photoIndex.push({id, d: todayKey()});
+    await store.set("photoIndex", photoIndex);
+    haptic();
+    renderPhotoTab();
+  }catch(e){ alert(t("alert_photo_save_error")); }
 }
 
 // ---- Nutrition tracker (premium: calories + macros + water) ----
@@ -5011,6 +5058,7 @@ window.closeCompareModal = function(){ document.getElementById("comparePhotoModa
 async function deleteCurrentPhoto(){
   if(!currentPhotoId || !confirm(t("confirm_delete_generic"))) return;
   await store.delete("photo_"+currentPhotoId);
+  await deletePhotoFromStorage(currentPhotoId);
   photoIndex = photoIndex.filter(p=>p.id!==currentPhotoId);
   await store.set("photoIndex", photoIndex);
   currentPhotoId = null;
@@ -5474,7 +5522,7 @@ async function resetAllData(){
   alert(t("alert_backup_before_delete"));
   workouts = {};
   DAY_KEYS.forEach(k=>{ state[k]=emptyDayState(k); history[k]={lastKg:{}}; });
-  for(const p of photoIndex) await store.delete("photo_"+p.id); // delete the actual photo files BEFORE clearing the index that points to them
+  for(const p of photoIndex){ await store.delete("photo_"+p.id); await deletePhotoFromStorage(p.id); } // delete the actual photo files BEFORE clearing the index that points to them
   completedSessions=0; bodyWeights=[]; bodyMeasures=[]; photoIndex=[];
   await store.set("state", state); await store.set("history", history); await store.set("completedSessions", completedSessions);
   await store.set("bodyWeights", bodyWeights); await store.set("bodyMeasures", bodyMeasures); await store.set("photoIndex", photoIndex); await store.set("workouts", workouts);
