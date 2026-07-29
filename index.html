@@ -64,6 +64,7 @@
   .move-btn{width:22px;height:18px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
   .move-btn:disabled{opacity:.25;cursor:default}
   .drag-handle{width:22px;height:20px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;color:var(--dim);font-size:13px;cursor:grab;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;margin-top:2px}
+  .no-select-while-dragging, .no-select-while-dragging *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   .card.dragging{box-shadow:0 12px 28px rgba(0,0,0,.5);border-color:var(--volt-dim);cursor:grabbing}
   .notes-panel{margin-top:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .notes-textarea{width:100%;min-height:60px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:13px;resize:vertical}
@@ -237,8 +238,8 @@
   .superset-wrap{border:1.5px dashed var(--blue);border-radius:20px;padding:10px 8px 2px;margin-bottom:12px}
   .superset-label{font-size:10.5px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;padding:2px 8px 10px}
   .superset-wrap .card{margin-bottom:10px}
-  .pr-badge-pop{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--volt);color:#0b0c0e;font-size:10px;font-weight:800;padding:3px 7px;border-radius:20px;white-space:nowrap;animation:prPop 1.8s ease forwards;z-index:5}
-  @keyframes prPop{0%{opacity:0;transform:translateX(-50%) translateY(6px) scale(.7)}15%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.15)}30%{transform:translateX(-50%) translateY(0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.9)}}
+  .pr-badge-pop{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--volt);color:#0b0c0e;font-size:10px;font-weight:800;padding:3px 7px;border-radius:20px;white-space:nowrap;animation:prPop 1.8s ease forwards;z-index:5}
+  @keyframes prPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
   .plate-chip{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text)}
   .plate-chip b{color:var(--volt)}
   .muscle-buttons{display:flex;flex-wrap:wrap;gap:6px}.muscle-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:8px 12px;font-size:12px;cursor:pointer;transition:all .2s}
@@ -2921,6 +2922,11 @@ function beginExerciseDrag(e, card){
   card.classList.add("dragging");
   card.style.position = "relative";
   card.style.zIndex = "50";
+  // iOS treats a sustained touch-hold as a hint to start text selection unless we explicitly
+  // opt out — without this, holding the drag handle can trigger the native "select text"
+  // gesture (blue selection handles) on the surrounding card content at the same time as
+  // our custom drag, which is confusing and visually broken.
+  document.body.classList.add("no-select-while-dragging");
 
   const siblings = [...document.querySelectorAll('#content .card')];
   const order = siblings.map(c=> parseInt(c.dataset.exIndex));
@@ -2954,6 +2960,7 @@ function beginExerciseDrag(e, card){
   function onUp(){
     document.removeEventListener("pointermove", onMove);
     document.removeEventListener("pointerup", onUp);
+    document.body.classList.remove("no-select-while-dragging");
     siblings.forEach(sib=>{ sib.style.transition=""; sib.style.transform=""; });
     card.style.transform=""; card.style.position=""; card.style.zIndex="";
     card.classList.remove("dragging");
@@ -3261,8 +3268,8 @@ function showPRBadge(row, cell){
   const badge = document.createElement("div");
   badge.className = "pr-badge-pop";
   badge.textContent = "🏆 PR!";
-  cell.style.position = "relative";
-  cell.appendChild(badge);
+  row.style.position = "relative";
+  row.appendChild(badge);
   setTimeout(()=>badge.remove(), 1800);
 }
 
