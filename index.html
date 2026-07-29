@@ -54,7 +54,7 @@
   .dayswitch button.restday{opacity:.55}.dayswitch button.restday .sub{font-style:italic}
   .dayswitch button .sub{display:block;font-size:10px;text-transform:uppercase;color:var(--dim);font-weight:500;margin-top:2px}
   .dayswitch button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}.dayswitch button.active .sub{color:#2b3300}
-  .day-del-x{position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 0 0 2px var(--bg)}
+  .day-del-x{position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;transition:border-color .3s}
   .card.done{border-color:var(--volt-dim);background:linear-gradient(155deg,rgba(215,255,61,.07),var(--panel) 55%)}
@@ -120,7 +120,11 @@
   .close-btn{background:none;border:none;color:var(--dim);font-size:24px;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
 
   .search-input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;margin-bottom:14px}
-  .exercise-list{display:flex;flex-direction:column;gap:8px}.exercise-item{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s}
+  .exercise-list{display:flex;flex-direction:column;gap:8px}.exercise-item{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:10px}
+  .exercise-item.selected{border-color:var(--volt);background:rgba(215,255,61,.06)}
+  .ex-item-checkbox{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#0b0c0e;margin-top:1px}
+  .exercise-item.selected .ex-item-checkbox{background:var(--volt);border-color:var(--volt)}
+  .ex-item-body{flex:1;min-width:0}
   .exercise-item:hover{border-color:var(--volt);background:var(--panel)}.ex-item-name{font-weight:600;font-size:13.5px;margin-bottom:4px}
   .ex-item-meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--dim)}.ex-item-muscles{font-size:10px;color:var(--volt);margin-top:4px;font-weight:600}
   .sim-badge{display:inline-block;font-size:10px;color:var(--blue);margin-top:5px;font-weight:600}
@@ -874,6 +878,7 @@
       <div class="muscle-buttons" id="muscleFilterButtons"></div>
     </div>
     <div class="exercise-list" id="exerciseList"></div>
+    <button class="add-btn" id="addSelectedExercisesBtn" style="display:none;position:sticky;bottom:0">+ Adicionar selecionados</button>
   </div>
 </div>
 
@@ -2117,6 +2122,7 @@ function showAuthScreen(){
 function hideAuthScreen(){ document.getElementById("authScreen").classList.add("hide"); }
 
 let currentDay = "quarta", currentMuscleFilter = null, currentEquipmentFilter = null, addingToDay = null, currentProgSub = "semana", currentPhotoId = null;
+let selectedExercisesForAdd = new Set(); // exercise names currently checked in the multi-select browser
 let state = {}, history = {}, workouts = {quarta:{},quinta:{},sexta:{}};
 let completedSessions = 0, bodyWeights = [], bodyMeasures = [], photoIndex = [];
 let exerciseHistory = {}; // { exerciseName: [{date, sets:[{kg,reps}], e1rm}] }
@@ -2213,10 +2219,11 @@ function shuffleArr(arr){
   return a;
 }
 
-function pickDiverseExercises(muscleKeys, count, excludeNames){
+function pickDiverseExercises(muscleKeys, count, excludeNames, equipmentFilter){
   excludeNames = excludeNames || [];
   const scored = EXERCISE_DB
     .filter(ex => !excludeNames.includes(ex.name))
+    .filter(ex => !equipmentFilter || !equipmentFilter.length || equipmentFilter.includes(ex.equipment))
     .map(ex=>{
       let score = 0;
       muscleKeys.forEach(m=>{ if(ex.muscles[m]) score += ex.muscles[m]; });
@@ -2246,10 +2253,14 @@ function pickDiverseExercises(muscleKeys, count, excludeNames){
   return picked;
 }
 
-function generateAutoWorkout(groupKey, intensityKey){
-  const group = MUSCLE_GROUPS[groupKey];
+function generateAutoWorkout(groupKeys, intensityKey, equipmentFilter){
+  if(!Array.isArray(groupKeys)) groupKeys = [groupKeys]; // backward compatible with a single group string
+  const groups = groupKeys.map(k=> MUSCLE_GROUPS[k]);
   const level = INTENSITY_LEVELS[intensityKey];
-  const mainExercises = pickDiverseExercises(group.muscles, level.exCount);
+  const combinedMuscles = [...new Set(groups.flatMap(g=> g.muscles))];
+  // More muscle groups selected at once means more exercises overall, scaled by how many groups are combined.
+  const totalExCount = Math.max(level.exCount, Math.round(level.exCount * (0.7 + 0.55*(groups.length-1))));
+  const mainExercises = pickDiverseExercises(combinedMuscles, totalExCount, [], equipmentFilter);
 
   const exercises = mainExercises.map(ex=>({
     name: ex.name,
@@ -2257,21 +2268,22 @@ function generateAutoWorkout(groupKey, intensityKey){
     reps: level.reps,
     rest: level.rest,
     muscles: ex.muscles,
-    videoUrl: GEN_VIDEO_MAP[ex.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[ex.name]}` : ""
+    videoUrl: ex.videoUrl || (GEN_VIDEO_MAP[ex.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[ex.name]}` : "")
   }));
 
   let abs = [];
-  if(groupKey !== "abdomen"){
+  if(!groupKeys.includes("abdomen")){
     const abCount = intensityKey==="fraco" ? 1 : (intensityKey==="forte" ? 3 : 2);
-    const abPicks = pickDiverseExercises(["abs","obliques"], abCount);
+    const abPicks = pickDiverseExercises(["abs","obliques"], abCount, [], equipmentFilter);
     abs = abPicks.map(ex=>({
-      name: ex.name, sets: level.sets>3?3:level.sets, reps: ex.reps || "15", muscles: ex.muscles,
-      videoUrl: GEN_VIDEO_MAP[ex.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[ex.name]}` : ""
+      name: ex.name, sets: level.sets>3?3:level.sets, reps: ex.reps || "15", rest: ex.rest||45, muscles: ex.muscles,
+      videoUrl: ex.videoUrl || (GEN_VIDEO_MAP[ex.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[ex.name]}` : "")
     }));
   }
 
+  const groupLabel = groups.map(g=> currentLang==="en"?g.labelEn:g.label).join(" + ");
   return {
-    title: `${currentLang==="en"?group.labelEn:group.label} — ${level.icon} ${currentLang==="en"?level.labelEn:level.label}`,
+    title: `${groupLabel} — ${level.icon} ${currentLang==="en"?level.labelEn:level.label}`,
     cardioNote: currentLang==="en" ? "Cardio: 15-20 min after weight training." : "Cardio: 15-20 min após a musculação.",
     exercises, abs
   };
@@ -3388,7 +3400,7 @@ window.closeTemplateModal = function(){ document.getElementById("templateModal")
 let autoGenState = { day:null, group:null, intensity:null, preview:null };
 
 window.openAutoGenModal = function(){
-  autoGenState = { day: rotinaSelectedDay, group:null, intensity:null, preview:null };
+  autoGenState = { day: rotinaSelectedDay, groups:[], equipment:[], intensity:null, preview:null };
   renderAutoGenBody();
   document.getElementById("autoGenModal").classList.add("show");
 };
@@ -3401,9 +3413,15 @@ function renderAutoGenBody(){
     <div class="dayswitch" id="autoGenDaySwitch" style="margin-top:0"></div>
   `;
   const groupHtml = `
-    <div class="section-label">${currentLang==="en"?"Muscle group":"Grupo muscular"}</div>
+    <div class="section-label">${currentLang==="en"?"Muscle groups (choose one or more)":"Grupos musculares (escolha um ou mais)"}</div>
     <div class="autogen-grid" id="autoGenGroups">
-      ${Object.entries(MUSCLE_GROUPS).map(([key,g])=>`<button class="autogen-chip ${autoGenState.group===key?'active':''}" data-group="${key}">${currentLang==="en"?g.labelEn:g.label}</button>`).join('')}
+      ${Object.entries(MUSCLE_GROUPS).map(([key,g])=>`<button class="autogen-chip ${autoGenState.groups.includes(key)?'active':''}" data-group="${key}">${currentLang==="en"?g.labelEn:g.label}</button>`).join('')}
+    </div>
+  `;
+  const equipmentHtml = `
+    <div class="section-label">${currentLang==="en"?"Equipment (optional filter)":"Equipamento (filtro opcional)"}</div>
+    <div class="autogen-grid" id="autoGenEquipment">
+      ${Object.entries(EQUIPMENT_NAMES).map(([key])=>`<button class="autogen-chip ${autoGenState.equipment.includes(key)?'active':''}" data-equipment="${key}">${currentLang==="en"?EQUIPMENT_NAMES_EN[key]:EQUIPMENT_NAMES[key]}</button>`).join('')}
     </div>
   `;
   const intensityHtml = `
@@ -3436,7 +3454,7 @@ function renderAutoGenBody(){
     `;
   }
 
-  el.innerHTML = dayHtml + groupHtml + intensityHtml + previewHtml;
+  el.innerHTML = dayHtml + groupHtml + equipmentHtml + intensityHtml + previewHtml;
 
   const daySwitch = document.getElementById("autoGenDaySwitch");
   DAY_KEYS.forEach(dayKey=>{
@@ -3449,7 +3467,18 @@ function renderAutoGenBody(){
 
   el.querySelectorAll("[data-group]").forEach(btn=>{
     btn.addEventListener("click", ()=>{
-      autoGenState.group = btn.dataset.group;
+      const key = btn.dataset.group;
+      const idx = autoGenState.groups.indexOf(key);
+      if(idx>=0) autoGenState.groups.splice(idx,1); else autoGenState.groups.push(key);
+      autoGenState.preview = null;
+      maybeGenerate();
+    });
+  });
+  el.querySelectorAll("[data-equipment]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const key = btn.dataset.equipment;
+      const idx = autoGenState.equipment.indexOf(key);
+      if(idx>=0) autoGenState.equipment.splice(idx,1); else autoGenState.equipment.push(key);
       autoGenState.preview = null;
       maybeGenerate();
     });
@@ -3463,15 +3492,15 @@ function renderAutoGenBody(){
   });
 
   function maybeGenerate(){
-    if(autoGenState.group && autoGenState.intensity){
-      autoGenState.preview = generateAutoWorkout(autoGenState.group, autoGenState.intensity);
+    if(autoGenState.groups.length && autoGenState.intensity){
+      autoGenState.preview = generateAutoWorkout(autoGenState.groups, autoGenState.intensity, autoGenState.equipment);
     }
     renderAutoGenBody();
   }
 
   const rerollBtn = document.getElementById("autoGenReroll");
   if(rerollBtn) rerollBtn.addEventListener("click", ()=>{
-    autoGenState.preview = generateAutoWorkout(autoGenState.group, autoGenState.intensity);
+    autoGenState.preview = generateAutoWorkout(autoGenState.groups, autoGenState.intensity, autoGenState.equipment);
     haptic();
     renderAutoGenBody();
   });
@@ -5508,6 +5537,7 @@ window.openExerciseBrowser = function(dayKey, listType){
   replaceContext = null;
   currentMuscleFilter = null;
   currentEquipmentFilter = null;
+  selectedExercisesForAdd = new Set();
   const modal = document.getElementById("exerciseBrowserModal");
   const searchInput = document.getElementById("exerciseSearch");
   searchInput.value = "";
@@ -5525,6 +5555,7 @@ window.openExerciseBrowserForReplace = function(dayKey, index){
   replaceContext = { day: dayKey, index, originalMuscles: originalEx.muscles || {} };
   currentMuscleFilter = primaryMuscleOf(originalEx.muscles);
   currentEquipmentFilter = null;
+  selectedExercisesForAdd = new Set();
   const modal = document.getElementById("exerciseBrowserModal");
   const searchInput = document.getElementById("exerciseSearch");
   searchInput.value = "";
@@ -5561,14 +5592,28 @@ function renderExerciseList(){
     filtered.sort((a,b)=> (b._simScore||0) - (a._simScore||0));
   }
 
+  const multiSelectEnabled = !replaceContext;
+
   filtered.forEach(ex=>{
     const div = document.createElement("div");
-    div.className = "exercise-item";
+    const isSelected = selectedExercisesForAdd.has(ex.name);
+    div.className = "exercise-item" + (isSelected ? " selected" : "");
     const muscleStr = Object.keys(ex.muscles||{}).map(k=>tMuscleName(k)).join(", ");
     const equipBadge = ex.equipment ? `<div class="equip-badge">${EQUIPMENT_NAMES[ex.equipment]||ex.equipment}</div>` : '';
     const simBadge = (replaceContext && ex._simScore>0) ? `<div class="sim-badge">🔗 alternativa similar</div>` : '';
-    div.innerHTML = `<div class="ex-item-name">${tExerciseName(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}`;
-    div.addEventListener("click", ()=>{
+    const checkbox = multiSelectEnabled ? `<div class="ex-item-checkbox" data-role="checkbox">${isSelected ? '✓' : ''}</div>` : '';
+    div.innerHTML = `${checkbox}<div class="ex-item-body" data-role="body"><div class="ex-item-name">${tExerciseName(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}</div>`;
+
+    const checkboxEl = div.querySelector('[data-role="checkbox"]');
+    if(checkboxEl){
+      checkboxEl.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        if(selectedExercisesForAdd.has(ex.name)) selectedExercisesForAdd.delete(ex.name);
+        else selectedExercisesForAdd.add(ex.name);
+        renderExerciseList();
+      });
+    }
+    div.querySelector('[data-role="body"]').addEventListener("click", ()=>{
       closeExerciseBrowser();
       if(replaceContext){
         openExerciseConfig(replaceContext.day, "exercises", replaceContext.index, ex, true);
@@ -5579,6 +5624,58 @@ function renderExerciseList(){
     list.appendChild(div);
   });
   if(!filtered.length) list.innerHTML = '<div class="vol-empty">Nenhum exercício encontrado</div>';
+
+  const addSelectedBtn = document.getElementById("addSelectedExercisesBtn");
+  if(multiSelectEnabled && selectedExercisesForAdd.size > 0){
+    addSelectedBtn.style.display = "block";
+    addSelectedBtn.textContent = selectedExercisesForAdd.size === 1
+      ? `+ Adicionar exercício`
+      : `+ Adicionar ${selectedExercisesForAdd.size} exercícios`;
+  } else {
+    addSelectedBtn.style.display = "none";
+  }
+}
+
+async function addSelectedExercises(){
+  const names = [...selectedExercisesForAdd];
+  if(!names.length) return;
+
+  if(names.length === 1){
+    // Single exercise: keep the existing customization flow (config modal lets you tweak sets/reps first).
+    const ex = EXERCISE_DB.find(e=> e.name === names[0]);
+    closeExerciseBrowser();
+    if(ex) openExerciseConfig(addingToDay, addingToListType, null, ex);
+    return;
+  }
+
+  // Multiple exercises: add them all directly with their database defaults — going through
+  // the config modal one-by-one would defeat the point of selecting several at once. Each
+  // can still be fine-tuned afterward via the pencil icon in Rotinas.
+  if(!workouts[addingToDay]) workouts[addingToDay] = { title: tDayFull(addingToDay), exercises: [], abs: [] };
+  const w = workouts[addingToDay];
+  if(!w[addingToListType]) w[addingToListType] = [];
+
+  names.forEach(name=>{
+    const dbEx = EXERCISE_DB.find(e=> e.name === name);
+    if(!dbEx) return;
+    w[addingToListType].push({
+      name: dbEx.name,
+      sets: parseInt(dbEx.sets)||4,
+      reps: dbEx.reps,
+      rest: dbEx.rest||60,
+      muscles: dbEx.muscles,
+      videoUrl: dbEx.videoUrl || ""
+    });
+  });
+
+  await store.set("workouts", workouts);
+  reconcileStateForDay(addingToDay);
+  await store.set("state", state);
+
+  closeExerciseBrowser();
+  if(addingToDay===currentDay){ buildDaySwitch(); renderDay(); }
+  renderRotinas();
+  haptic();
 }
 
 // Exercise config modal: used both for adding (dbEx provided) and editing (index provided)
@@ -5587,7 +5684,7 @@ window.openExerciseConfig = function(dayKey, listType, index, dbEx, forceDbDefau
   configContext = { day: dayKey, listType, index };
   const w = workouts[dayKey];
   const existing = (index!=null && !forceDbDefaults) ? w[listType][index] : null;
-  const source = existing || { name: dbEx.name, sets: parseInt(dbEx.sets)||4, reps: dbEx.reps, rest: dbEx.rest||60, muscles: dbEx.muscles, videoUrl: GEN_VIDEO_MAP[dbEx.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[dbEx.name]}` : "" };
+  const source = existing || { name: dbEx.name, sets: parseInt(dbEx.sets)||4, reps: dbEx.reps, rest: dbEx.rest||60, muscles: dbEx.muscles, videoUrl: dbEx.videoUrl || (GEN_VIDEO_MAP[dbEx.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[dbEx.name]}` : "") };
 
   document.getElementById("configExName").textContent = source.name;
   document.getElementById("cfgSets").value = source.sets;
@@ -6226,6 +6323,7 @@ function fireConfetti(){
 window.addEventListener("resize", ()=>{ const canvas = document.getElementById("confetti"); canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
 
 document.getElementById("exerciseSearch").addEventListener("input", debounce(renderExerciseList, 150));
+document.getElementById("addSelectedExercisesBtn").addEventListener("click", addSelectedExercises);
 document.getElementById("barcodeCloseBtn").addEventListener("click", closeBarcodeScanner);
 document.getElementById("exMgrCloseBtn").addEventListener("click", closeExerciseManager);
 document.getElementById("exMgrSearch").addEventListener("input", debounce((e)=> renderExerciseManagerList(e.target.value), 150));
