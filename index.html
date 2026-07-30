@@ -3994,7 +3994,7 @@ function updateProgress(){
 function fmtClock(iso){
   if(!iso) return "—";
   const d = new Date(iso);
-  return d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  return d.toLocaleTimeString(currentLang==="en"?"en-US":"pt-BR", {hour:'2-digit', minute:'2-digit'});
 }
 
 function fmtDuration(sec){
@@ -4473,7 +4473,7 @@ function renderConquistasTab(){
       <div class="ach-info">
         <div class="ach-title">${achTitle(a)}</div>
         <div class="ach-desc">${achDesc(a)}</div>
-        ${!done ? `<div class="ach-track"><div class="ach-fill" style="width:${pct}%"></div></div><div class="ach-progress mono">${Math.round(cur).toLocaleString('pt-BR')} / ${target.toLocaleString('pt-BR')}</div>` : ''}
+        ${!done ? `<div class="ach-track"><div class="ach-fill" style="width:${pct}%"></div></div><div class="ach-progress mono">${Math.round(cur).toLocaleString(currentLang==='en'?'en-US':'pt-BR')} / ${target.toLocaleString(currentLang==='en'?'en-US':'pt-BR')}</div>` : ''}
       </div>
       ${done ? '<div class="ach-check">✓</div>' : ''}
     `;
@@ -4636,7 +4636,7 @@ function drawMultiWeekChart(){
     const v = (g/3)*max;
     const gy = pad.t + (1-g/3)*(H-pad.t-pad.b);
     ctx.beginPath(); ctx.moveTo(pad.l, gy); ctx.lineTo(W-pad.r, gy); ctx.stroke();
-    ctx.fillText(Math.round(v).toLocaleString('pt-BR'), pad.l-8, gy+5);
+    ctx.fillText(Math.round(v).toLocaleString(currentLang==='en'?'en-US':'pt-BR'), pad.l-8, gy+5);
   }
 
   weeks.forEach((w,i)=>{
@@ -4867,7 +4867,7 @@ function renderMuscleVolumeBars(){
       <div class="mvol-row">
         <span class="mvol-label">${tMuscleName(m)}</span>
         <div class="mvol-track"><div class="mvol-fill" style="width:${pct}%"></div></div>
-        <span class="mvol-num mono">${Math.round(v).toLocaleString('pt-BR')}</span>
+        <span class="mvol-num mono">${Math.round(v).toLocaleString(currentLang==='en'?'en-US':'pt-BR')}</span>
       </div>`;
   }).join('');
 }
@@ -6536,7 +6536,7 @@ async function shareWorkoutImage(){
 
   // ---- Stat cards with icons ----
   const stats = [
-    { icon:"📊", label: "VOLUME", value: Math.round(volume).toLocaleString('pt-BR'), unit:"kg", color:"#d7ff3d" },
+    { icon:"📊", label: "VOLUME", value: Math.round(volume).toLocaleString(currentLang==="en"?"en-US":"pt-BR"), unit:"kg", color:"#d7ff3d" },
     { icon:"⏱️", label: "DURAÇÃO", value: durationStr, unit:"", color:"#4dc3ff" },
     { icon:"✅", label: "SÉRIES", value: setsCompleted+"/"+setsTotal, unit:"", color:"#ff9f4d" }
   ];
