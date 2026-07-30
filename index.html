@@ -849,7 +849,7 @@
         <button class="settings-btn danger" id="resetAllBtn">🗑 Apagar todos os dados</button>
       </div>
 
-      <div class="about-block">KYRO · v3.0 · treino profissional em um app</div>
+      <div class="about-block" id="aboutBlockText">KYRO · v3.0 · treino profissional em um app</div>
     </div>
   </section>
 
@@ -1473,6 +1473,7 @@ const UI_STRINGS = {
     settings_account:"Conta", settings_app:"App", settings_data:"Dados",
     logout:"🚪 Sair da conta", export_backup:"⬇️ Exportar backup", import_data:"⬆️ Importar dados",
     delete_all:"🗑 Apagar todos os dados", clear_cache:"🧹 Limpar cache técnico (não apaga seus dados)",
+    export_csv:"📊 Exportar CSV (planilha)", about_footer:"KYRO · v3.0 · treino profissional em um app",
     enable_notif:"🔔 Ativar avisos de descanso",
     week_label:"Semana", weight_label:"Peso", measures_label:"Medidas", photos_label:"Fotos",
     muscles_label:"Músculos", nutrition_label:"Nutrição", achievements_label:"Conquistas",
@@ -1662,6 +1663,7 @@ const UI_STRINGS = {
     settings_account:"Account", settings_app:"App", settings_data:"Data",
     logout:"🚪 Sign out", export_backup:"⬇️ Export backup", import_data:"⬆️ Import data",
     delete_all:"🗑 Delete all data", clear_cache:"🧹 Clear technical cache (does not delete your data)",
+    export_csv:"📊 Export CSV (spreadsheet)", about_footer:"KYRO · v3.0 · professional training in one app",
     enable_notif:"🔔 Enable rest alerts",
     week_label:"Week", weight_label:"Weight", measures_label:"Measurements", photos_label:"Photos",
     muscles_label:"Muscles", nutrition_label:"Nutrition", achievements_label:"Achievements",
@@ -2686,7 +2688,7 @@ function isAbsExercise(muscles){
 
 
 async function init(){
-  document.getElementById("todayDate").textContent = new Date().toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'short'});
+  document.getElementById("todayDate").textContent = new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR", {weekday:'long', day:'2-digit', month:'short'});
 
   const [
     savedWorkouts, savedState, savedHistory, savedCompletedSessions,
@@ -2914,6 +2916,13 @@ function applyStaticTranslations(){
   refreshAccountRow();
   document.getElementById("lblWeightHistory").textContent = t("lbl_history");
   document.getElementById("lblDadosGroup").textContent = t("lbl_dados_group");
+  document.getElementById("clearCacheBtn").textContent = t("clear_cache");
+  document.getElementById("exportBtn").textContent = t("export_backup");
+  document.getElementById("exportCsvBtn").textContent = t("export_csv");
+  document.querySelector('label[for="importInput"]').textContent = t("import_data");
+  document.getElementById("resetAllBtn").textContent = t("delete_all");
+  document.getElementById("aboutBlockText").textContent = t("about_footer");
+  document.getElementById("todayDate").textContent = new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR", {weekday:'long', day:'2-digit', month:'short'});
   document.getElementById("lblContaGroup").textContent = t("lbl_conta_group");
   document.getElementById("lblBodyFront").textContent = t("lbl_body_front");
   document.getElementById("lblBodyBack").textContent = t("lbl_body_back");
@@ -3106,7 +3115,7 @@ function renderDay(){
   if(w.abs && w.abs.length){
     const absLabel = document.createElement("div");
     absLabel.className = "section-label";
-    absLabel.textContent = "Abdômen";
+    absLabel.textContent = t("abs_label");
     content.appendChild(absLabel);
     w.abs.forEach((ex,i)=> content.appendChild(buildAbsCard(ex,i)));
   }
@@ -5776,7 +5785,7 @@ async function openUserManager(){
   if(!users.length){ list.innerHTML = `<div class="vol-empty">${t("empty_no_users_found")}</div>`; return; }
   const showAdminControls = isSuperAdmin();
   list.innerHTML = users.map(u=>{
-    const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('pt-BR') : "—";
+    const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString(currentLang==="en"?"en-US":"pt-BR") : "—";
     const isSelf = currentUser && u.uid === currentUser.uid;
     const isUserAdmin = u.isAdmin === true || (u.email && ADMIN_EMAILS.includes(u.email.toLowerCase()));
     const adminTag = isUserAdmin ? ` · <span style="color:var(--volt)">${t('admin_tag')}</span>` : '';
@@ -6507,7 +6516,7 @@ async function shareWorkoutImage(){
 
   ctx.fillStyle = "#8b9096";
   ctx.font = "32px 'JetBrains Mono', monospace";
-  ctx.fillText(tDayFull(currentDay) + " · " + new Date().toLocaleDateString('pt-BR'), W/2, 380);
+  ctx.fillText(tDayFull(currentDay) + " · " + new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR"), W/2, 380);
 
   // ---- Streak flame badge ----
   let statsTop = 440;
