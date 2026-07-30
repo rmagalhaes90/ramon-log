@@ -834,6 +834,8 @@
 
       <div class="settings-group" id="adminGroup" style="display:none">
         <div class="settings-group-title" id="adminGroupTitle">Administração</div>
+        <button class="settings-btn" id="adminBenefitsToggle" style="text-align:left">ℹ️ <span id="adminBenefitsToggleLabel">O que muda sendo admin</span></button>
+        <div id="adminBenefitsText" style="display:none;font-size:12.5px;color:var(--dim);line-height:1.6;white-space:pre-line;padding:4px 4px 14px"></div>
         <button class="settings-btn" id="manageExercisesBtn">🗄️ Gerenciar exercícios</button>
         <button class="settings-btn" id="manageUsersBtn">👥 Usuários</button>
       </div>
@@ -1632,6 +1634,11 @@ const UI_STRINGS = {
     stat_current_streak:"sequência atual", stat_best_streak:"melhor sequência",
     stat_achievements:"conquistas", stat_workouts:"treinos", stat_volume_kg:"kg de volume", stat_total_time:"tempo total",
     import_summary_text:"Este arquivo contém: {summary}. Antes de aplicar qualquer opção abaixo, uma cópia de segurança dos seus dados atuais é baixada automaticamente.",
+    admin_tag:"admin", grant_admin_btn:"Tornar admin", revoke_admin_btn:"Remover admin",
+    confirm_grant_admin:"Tornar esta pessoa admin? Ela vai poder editar a base de exercícios compartilhada e bloquear/desbloquear outros usuários (mas não conceder admin pra mais ninguém).",
+    confirm_revoke_admin:"Remover o acesso de admin desta pessoa?",
+    admin_benefits_title:"O que muda sendo admin",
+    admin_benefits_list:"• Editar, adicionar e excluir exercícios da base compartilhada (afeta buscas futuras de todo mundo)\n• Ver a lista de todas as contas cadastradas no app\n• Bloquear ou desbloquear o acesso de qualquer conta\n• Conceder ou remover admin de outras contas (só o admin original pode fazer isso)\n\nUsuários normais têm acesso completo a todas as funcionalidades pessoais (treino, nutrição, fotos, progresso) — a única diferença é não poder mexer na base compartilhada nem gerenciar outras contas.",
     nav_home:"Início",
     home_today:"Hoje", home_no_workout_today:"Nenhum treino agendado pra hoje. Aproveite pra descansar ou criar uma rotina.",
     home_already_trained:"✅ Treino de hoje já concluído", home_start_workout:"Iniciar treino",
@@ -1816,6 +1823,11 @@ const UI_STRINGS = {
     stat_current_streak:"current streak", stat_best_streak:"best streak",
     stat_achievements:"achievements", stat_workouts:"workouts", stat_volume_kg:"kg volume", stat_total_time:"total time",
     import_summary_text:"This file contains: {summary}. Before applying any option below, a backup of your current data is automatically downloaded.",
+    admin_tag:"admin", grant_admin_btn:"Make admin", revoke_admin_btn:"Remove admin",
+    confirm_grant_admin:"Make this person an admin? They'll be able to edit the shared exercise database and block/unblock other users (but won't be able to grant admin to anyone else).",
+    confirm_revoke_admin:"Remove this person's admin access?",
+    admin_benefits_title:"What being admin changes",
+    admin_benefits_list:"• Edit, add, and delete exercises in the shared database (affects everyone's future searches)\n• See the list of every registered account in the app\n• Block or unblock any account's access\n• Grant or remove admin from other accounts (only the original admin can do this)\n\nRegular users have full access to all personal features (workouts, nutrition, photos, progress) — the only difference is not being able to touch the shared database or manage other accounts.",
     nav_home:"Home",
     home_today:"Today", home_no_workout_today:"No workout scheduled for today. Take a rest day or build a routine.",
     home_already_trained:"✅ Today's workout already done", home_start_workout:"Start workout",
@@ -1983,7 +1995,9 @@ function renderReadinessPrompt(expanded){
 
 // Admin access is granted by email — add more emails here if needed.
 const ADMIN_EMAILS = ["rmagalhaes90@gmail.com"];
-function isAdmin(){ return !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase())); }
+let currentUserGrantedAdmin = false; // set after loading the user's own sharedUsers profile
+function isSuperAdmin(){ return !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase())); }
+function isAdmin(){ return isSuperAdmin() || currentUserGrantedAdmin; }
 
 function showDebugError(msg){
   const el = document.getElementById("debugErrorBanner");
@@ -2130,6 +2144,7 @@ async function checkIfBlocked(){
   if(!currentUser || !fbDb) return false;
   try{
     const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 4000, "sharedUsers:checkBlocked");
+    currentUserGrantedAdmin = doc.exists && doc.data().isAdmin === true;
     return doc.exists && doc.data().blocked === true;
   }catch(e){ return false; }
 }
@@ -2151,6 +2166,17 @@ async function setUserBlocked(uid, blocked){
     await withTimeout(fbDb.collection("sharedUsers").doc(uid).set({ blocked }, { merge: true }), 8000, "sharedUsers:setBlocked");
     return true;
   }catch(e){ console.error("setUserBlocked error", e); return false; }
+}
+
+// Only the super admin (hardcoded email) can grant/revoke admin access to other accounts —
+// this keeps one person always in ultimate control and avoids an accidental admin-granting chain.
+async function setUserAdmin(uid, makeAdmin){
+  if(!isSuperAdmin() || !fbDb) return false;
+  if(uid === currentUser.uid) return false; // can't change your own super-admin status this way
+  try{
+    await withTimeout(fbDb.collection("sharedUsers").doc(uid).set({ isAdmin: makeAdmin }, { merge: true }), 8000, "sharedUsers:setAdmin");
+    return true;
+  }catch(e){ console.error("setUserAdmin error", e); return false; }
 }
 
 // ---- Shared exercise database (admin-editable, everyone reads) ----
@@ -2892,6 +2918,9 @@ function applyStaticTranslations(){
   document.getElementById("lblBodyFront").textContent = t("lbl_body_front");
   document.getElementById("lblBodyBack").textContent = t("lbl_body_back");
   const adminGroupTitleEl = document.getElementById("adminGroupTitle"); if(adminGroupTitleEl) adminGroupTitleEl.textContent = t("admin_section");
+  const adminBenefitsLabel = document.getElementById("adminBenefitsToggleLabel"); if(adminBenefitsLabel) adminBenefitsLabel.textContent = t("admin_benefits_title");
+  const adminBenefitsText = document.getElementById("adminBenefitsText");
+  if(adminBenefitsText && adminBenefitsText.style.display !== "none") adminBenefitsText.textContent = t("admin_benefits_list");
   const manageExercisesBtnEl = document.getElementById("manageExercisesBtn"); if(manageExercisesBtnEl) manageExercisesBtnEl.textContent = t("manage_exercises");
   const manageUsersBtnEl = document.getElementById("manageUsersBtn"); if(manageUsersBtnEl) manageUsersBtnEl.textContent = t("manage_users");
 
@@ -2903,6 +2932,12 @@ function bindAjustesEvents(){
   adminGroup.style.display = isAdmin() ? "block" : "none";
   document.getElementById("manageExercisesBtn").addEventListener("click", openExerciseManager);
   document.getElementById("manageUsersBtn").addEventListener("click", openUserManager);
+  document.getElementById("adminBenefitsToggle").addEventListener("click", ()=>{
+    const textEl = document.getElementById("adminBenefitsText");
+    const expanded = textEl.style.display !== "none";
+    textEl.style.display = expanded ? "none" : "block";
+    if(!expanded) textEl.textContent = t("admin_benefits_list");
+  });
   document.getElementById("exportBtn").addEventListener("click", exportData);
   document.getElementById("exportCsvBtn").addEventListener("click", exportAllCsv);
   document.getElementById("importInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
@@ -5739,23 +5774,39 @@ async function openUserManager(){
     return;
   }
   if(!users.length){ list.innerHTML = `<div class="vol-empty">${t("empty_no_users_found")}</div>`; return; }
+  const showAdminControls = isSuperAdmin();
   list.innerHTML = users.map(u=>{
     const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('pt-BR') : "—";
     const isSelf = currentUser && u.uid === currentUser.uid;
+    const isUserAdmin = u.isAdmin === true || (u.email && ADMIN_EMAILS.includes(u.email.toLowerCase()));
+    const adminTag = isUserAdmin ? ` · <span style="color:var(--volt)">${t('admin_tag')}</span>` : '';
+    const blockBtn = isSelf ? '' : `<button class="settings-btn${u.blocked?' primary':' danger'}" data-action="block" data-uid="${u.uid}" data-blocked="${!!u.blocked}" style="width:auto;margin:0;padding:8px 14px">${u.blocked?t('unblock_btn'):t('block_btn')}</button>`;
+    const adminBtn = (showAdminControls && !isSelf) ? `<button class="settings-btn" data-action="admin" data-uid="${u.uid}" data-isadmin="${!!u.isAdmin}" style="width:auto;margin:0;padding:8px 14px">${u.isAdmin?t('revoke_admin_btn'):t('grant_admin_btn')}</button>` : '';
     return `
       <div class="pr-feed-row">
         <div class="pr-feed-info">
-          <div class="pr-feed-name">${u.email||u.uid}${isSelf?' '+t('you_tag'):''}</div>
+          <div class="pr-feed-name">${u.email||u.uid}${isSelf?' '+t('you_tag'):''}${adminTag}</div>
           <div class="pr-feed-date">${tFmt('since_date',{date:joined})}${u.blocked?' · '+t('blocked_tag'):''}</div>
         </div>
-        ${isSelf ? '' : `<button class="settings-btn${u.blocked?' primary':' danger'}" data-uid="${u.uid}" data-blocked="${!!u.blocked}" style="width:auto;margin:0;padding:8px 14px">${u.blocked?t('unblock_btn'):t('block_btn')}</button>`}
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${adminBtn}${blockBtn}</div>
       </div>`;
   }).join('');
-  list.querySelectorAll('button[data-uid]').forEach(btn=>{
+  list.querySelectorAll('button[data-action="block"]').forEach(btn=>{
     btn.addEventListener("click", async ()=>{
       const uid = btn.dataset.uid;
       const currentlyBlocked = btn.dataset.blocked === "true";
       const ok = await setUserBlocked(uid, !currentlyBlocked);
+      if(ok) openUserManager(); // refresh
+      else alert(t("alert_user_update_failed"));
+    });
+  });
+  list.querySelectorAll('button[data-action="admin"]').forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const uid = btn.dataset.uid;
+      const currentlyAdmin = btn.dataset.isadmin === "true";
+      const confirmMsg = currentlyAdmin ? t("confirm_revoke_admin") : t("confirm_grant_admin");
+      if(!confirm(confirmMsg)) return;
+      const ok = await setUserAdmin(uid, !currentlyAdmin);
       if(ok) openUserManager(); // refresh
       else alert(t("alert_user_update_failed"));
     });
