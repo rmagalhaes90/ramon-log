@@ -493,29 +493,29 @@
 <div id="authScreen">
   <div class="auth-brand">
     <h1>KYRO<span>.</span></h1>
-    <p>Entre com sua conta pra acessar seu treino</p>
+    <p id="authSubtitle">Entre com sua conta pra acessar seu treino</p>
   </div>
   <div class="auth-tabs">
-    <button class="auth-tab active" data-authtab="login">Entrar</button>
-    <button class="auth-tab" data-authtab="signup">Criar conta</button>
+    <button class="auth-tab active" data-authtab="login" id="authTabLogin">Entrar</button>
+    <button class="auth-tab" data-authtab="signup" id="authTabSignup">Criar conta</button>
   </div>
   <div class="auth-error" id="authError"></div>
   <form id="authForm">
     <div class="auth-field">
-      <label>Email</label>
+      <label id="authEmailLabel">Email</label>
       <input type="email" id="authEmail" autocomplete="email" required>
     </div>
     <div class="auth-field">
-      <label>Senha</label>
+      <label id="authPasswordLabel">Senha</label>
       <input type="password" id="authPassword" autocomplete="current-password" required minlength="6">
     </div>
     <button type="submit" class="auth-submit" id="authSubmit">Entrar</button>
   </form>
   <button class="auth-forgot" id="authForgot">Esqueci minha senha</button>
-  <div class="auth-divider">ou</div>
+  <div class="auth-divider" id="authDivider">ou</div>
   <button class="auth-google" id="authGoogle">
     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.8 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.9 5.1 29.7 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.9 5.1 29.7 3 24 3 16.3 3 9.7 7.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.6 0 10.6-1.9 14.5-5.2l-6.7-5.6C29.6 35.7 26.9 36.5 24 36.5c-5.3 0-9.8-3.4-11.4-8.1l-6.6 5.1C9.5 40.5 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.9 2.6-2.6 4.8-4.8 6.3l6.7 5.6C40.1 37.4 45 31.4 45 24c0-1.4-.1-2.4-.4-3.5z"/></svg>
-    Continuar com Google
+    <span id="authGoogleLabel">Continuar com Google</span>
   </button>
 </div>
 <div class="auth-loading" id="authLoading"><div class="spinner"></div></div>
@@ -537,22 +537,22 @@
       <div style="font-weight:700;font-size:16px" id="exEditTitle">Editar exercício</div>
       <button class="close-btn" id="exEditCloseBtn" aria-label="Fechar">✕</button>
     </div>
-    <div class="meas-field" style="margin-bottom:10px"><label>Nome</label><input type="text" id="exEditName"></div>
-    <div class="meas-field" style="margin-bottom:10px"><label>Séries padrão</label><input type="text" inputmode="numeric" id="exEditSets"></div>
-    <div class="meas-field" style="margin-bottom:10px"><label>Reps padrão</label><input type="text" id="exEditReps"></div>
-    <div class="meas-field" style="margin-bottom:10px"><label>Descanso (s)</label><input type="text" inputmode="numeric" id="exEditRest"></div>
-    <div class="meas-field" style="margin-bottom:10px"><label>Equipamento</label>
+    <div class="meas-field" style="margin-bottom:10px"><label id="lblExEditName">Nome</label><input type="text" id="exEditName"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label id="lblExEditSets">Séries padrão</label><input type="text" inputmode="numeric" id="exEditSets"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label id="lblExEditReps">Reps padrão</label><input type="text" id="exEditReps"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label id="lblExEditRest">Descanso (s)</label><input type="text" inputmode="numeric" id="exEditRest"></div>
+    <div class="meas-field" style="margin-bottom:10px"><label id="lblExEditEquip">Equipamento</label>
       <select id="exEditEquip" class="bf-select">
-        <option value="barbell">🏋️ Barra</option>
-        <option value="dumbbell">💪 Halteres</option>
-        <option value="machine">⚙️ Máquina</option>
-        <option value="cable">🔗 Cabo</option>
-        <option value="bodyweight">🤸 Peso do corpo</option>
+        <option value="barbell" id="optEquipBarbell">🏋️ Barra</option>
+        <option value="dumbbell" id="optEquipDumbbell">💪 Halteres</option>
+        <option value="machine" id="optEquipMachine">⚙️ Máquina</option>
+        <option value="cable" id="optEquipCable">🔗 Cabo</option>
+        <option value="bodyweight" id="optEquipBodyweight">🤸 Peso do corpo</option>
       </select>
     </div>
-    <div class="meas-field" style="margin-bottom:10px"><label>Link do vídeo (YouTube)</label><input type="text" id="exEditVideo" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="meas-field" style="margin-bottom:10px"><label id="lblExEditVideo">Link do vídeo (YouTube)</label><input type="text" id="exEditVideo" placeholder="https://youtube.com/watch?v=..."></div>
     <div class="meas-field" style="margin-bottom:14px">
-      <label>Músculos trabalhados</label>
+      <label id="lblExEditMuscles">Músculos trabalhados</label>
       <div id="exEditMuscles" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
     </div>
     <button class="settings-btn primary" id="exEditSaveBtn">Salvar</button>
@@ -577,7 +577,7 @@
 <div id="importChoiceModal" class="modal-overlay">
   <div class="modal-content" style="max-width:420px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="font-weight:700;font-size:16px">Importar backup</div>
+      <div style="font-weight:700;font-size:16px" id="importChoiceTitle">Importar backup</div>
       <button class="close-btn" id="importChoiceCloseBtn" aria-label="Fechar">✕</button>
     </div>
     <div id="importChoiceSummary" style="font-size:13px;color:var(--dim);margin-bottom:16px;line-height:1.5"></div>
@@ -710,7 +710,7 @@
           <canvas id="weightChart" width="640" height="400"></canvas>
           <div class="chart-stats" id="weightStats"></div>
         </div>
-        <div class="section-label">Histórico</div>
+        <div class="section-label" id="lblWeightHistory">Histórico</div>
         <div id="weightList"></div>
       </div>
 
@@ -731,7 +731,7 @@
       <div id="sub-musculos" style="display:none">
         <div class="bodies">
           <div class="body-col">
-            <div class="body-label">Frente</div>
+            <div class="body-label" id="lblBodyFront">Frente</div>
             <svg viewBox="0 0 220 470" id="bodyFront">
               <g class="body-outline-g">
               <ellipse class="body-outline" cx="110" cy="30" rx="15.5" ry="19.5"/>
@@ -768,7 +768,7 @@
             </svg>
           </div>
           <div class="body-col">
-            <div class="body-label">Costas</div>
+            <div class="body-label" id="lblBodyBack">Costas</div>
             <svg viewBox="0 0 220 470" id="bodyBack">
               <g class="body-outline-g">
               <ellipse class="body-outline" cx="110" cy="30" rx="15.5" ry="19.5"/>
@@ -814,7 +814,7 @@
     <div class="page-header"><h2>AJUSTES<span>.</span></h2></div>
     <div class="content">
       <div class="settings-group">
-        <div class="settings-group-title">Conta</div>
+        <div class="settings-group-title" id="lblContaGroup">Conta</div>
         <div class="settings-row" id="accountRow"><div class="settings-label">—</div></div>
         <button class="settings-btn danger" id="logoutBtn">🚪 Sair da conta</button>
       </div>
@@ -827,7 +827,7 @@
           <button data-lang="pt" class="active" aria-label="Português" title="Português">🇧🇷</button>
           <button data-lang="en" aria-label="English" title="English">🇺🇸</button>
         </div>
-        <div class="settings-row" id="notifRow"><div class="settings-label">Notificações</div></div>
+        <div class="settings-row" id="notifRow"><div class="settings-label" id="lblNotifRow">Notificações</div></div>
         <button class="settings-btn" id="enableNotifBtn">🔔 Ativar avisos de descanso</button>
         <button class="settings-btn" id="clearCacheBtn">🧹 Limpar cache técnico (não apaga seus dados)</button>
       </div>
@@ -839,7 +839,7 @@
       </div>
 
       <div class="settings-group">
-        <div class="settings-group-title">Dados</div>
+        <div class="settings-group-title" id="lblDadosGroup">Dados</div>
         <button class="settings-btn" id="exportBtn">⬇️ Exportar backup</button>
         <button class="settings-btn" id="exportCsvBtn">📊 Exportar CSV (planilha)</button>
         <label class="settings-btn" for="importInput">⬆️ Importar dados</label>
@@ -890,11 +890,11 @@
     </div>
     <input type="hidden" id="configContextName">
     <input type="hidden" id="configContextMuscles">
-    <div class="config-field"><label>Séries</label><input type="number" id="cfgSets" min="1" max="10"></div>
-    <div class="config-field"><label>Repetições</label><input type="text" id="cfgReps" placeholder="ex: 8-10"></div>
-    <div class="config-field"><label>Descanso (segundos)</label><input type="number" id="cfgRest" min="0" step="5"></div>
-    <div class="config-field"><label>Link do vídeo (YouTube)</label><input type="url" id="cfgVideo" placeholder="https://youtube.com/watch?v=..."></div>
-    <div class="config-field"><label>Notas (opcional)</label><input type="text" id="cfgNotes" placeholder="ex: cuidado com o ombro"></div>
+    <div class="config-field"><label id="lblCfgSets">Séries</label><input type="number" id="cfgSets" min="1" max="10"></div>
+    <div class="config-field"><label id="lblCfgReps">Repetições</label><input type="text" id="cfgReps" placeholder="ex: 8-10"></div>
+    <div class="config-field"><label id="lblCfgRest">Descanso (segundos)</label><input type="number" id="cfgRest" min="0" step="5"></div>
+    <div class="config-field"><label id="lblCfgVideo">Link do vídeo (YouTube)</label><input type="url" id="cfgVideo" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="config-field"><label id="lblCfgNotes">Notas (opcional)</label><input type="text" id="cfgNotes" placeholder="ex: cuidado com o ombro"></div>
     <div style="display:flex;gap:10px;margin-top:18px">
       <button class="settings-btn danger" id="cfgDelete" style="display:none;flex:1;margin-bottom:0" onclick="deleteExerciseConfig()">Remover</button>
       <button class="settings-btn primary" id="cfgSave" style="flex:1;margin-bottom:0" onclick="saveExerciseConfig()">Salvar</button>
@@ -915,11 +915,11 @@
 <div class="modal-overlay" id="plateCalcModal">
   <div class="modal-content">
     <div class="modal-head">
-      <h3>Calculadora de Anilhas</h3>
+      <h3 id="lblPlateCalcTitle">Calculadora de Anilhas</h3>
       <button class="close-btn" onclick="closePlateCalc()" aria-label="Fechar">✕</button>
     </div>
-    <div class="config-field"><label>Peso total alvo (kg)</label><input type="text" inputmode="decimal" id="pcTarget" placeholder="ex: 80"></div>
-    <div class="config-field"><label>Peso da barra (kg)</label><input type="text" inputmode="decimal" id="pcBar" value="20"></div>
+    <div class="config-field"><label id="lblPcTarget">Peso total alvo (kg)</label><input type="text" inputmode="decimal" id="pcTarget" placeholder="ex: 80"></div>
+    <div class="config-field"><label id="lblPcBar">Peso da barra (kg)</label><input type="text" inputmode="decimal" id="pcBar" value="20"></div>
     <div id="pcResult"></div>
   </div>
 </div>
@@ -991,7 +991,7 @@
 
 <!-- PHOTO VIEWER -->
 <div class="photo-viewer" id="photoViewer">
-  <img id="pvImg" alt="Foto">
+  <img id="pvImg" alt="Photo">
   <div class="pv-date" id="pvDate"></div>
   <div class="pv-actions">
     <button class="pv-del" id="pvDelete">Excluir</button>
@@ -1194,7 +1194,7 @@ const EXERCISE_DB = [
 ];
 
 // ==================== I18N (idioma) ====================
-let currentLang = "pt";
+let currentLang = (typeof navigator !== "undefined" && /^en/i.test(navigator.language||"")) ? "en" : "pt";
 
 const MUSCLE_NAMES_EN = {shoulders:"Shoulders",traps:"Traps",chest:"Chest",biceps:"Biceps",triceps:"Triceps",forearms:"Forearms",abs:"Abs",obliques:"Obliques",upperback:"Upper Back",lowerback:"Lower Back",glutes:"Glutes",quads:"Quads",hamstrings:"Hamstrings",calves:"Calves",lats:"Lats"};
 
@@ -1548,6 +1548,90 @@ const UI_STRINGS = {
     weekly_priority_maintain:"Você manteve a consistência e o volume. Prioridade: continuar assim e buscar pequenos aumentos de carga.",
     photo_uploading:"Enviando foto...",
     video_no_embed_fallback:"Ainda não temos um vídeo específico em inglês para este exercício. Toque abaixo para buscar no YouTube.",
+    lbl_cfg_sets:"Séries", lbl_cfg_reps:"Repetições", lbl_cfg_rest:"Descanso (segundos)",
+    lbl_cfg_video:"Link do vídeo (YouTube)", lbl_cfg_notes:"Notas (opcional)",
+    cfg_remove:"Remover", cfg_save:"Salvar", cfg_default_ex_name:"Exercício",
+    plate_calc_title:"Calculadora de Anilhas", lbl_pc_target:"Peso total alvo (kg)", lbl_pc_bar:"Peso da barra (kg)",
+    pc_enter_target:"Digite o peso total desejado (maior que a barra).",
+    pc_per_side:"por lado", pc_no_plates_needed:"Nenhuma anilha necessária",
+    pc_leftover:"Sobra {kg}kg que não fecha com as anilhas padrão (25/20/15/10/5/2.5/1.25kg)",
+    history_no_data:"Ainda sem histórico registrado para este exercício. Complete um treino com peso e reps preenchidos para começar a acompanhar sua evolução.",
+    history_record:"Recorde", history_reps_short:"reps", history_e1rm_est:"1RM est.",
+    lbl_ex_edit_name:"Nome", lbl_ex_edit_sets:"Séries padrão", lbl_ex_edit_reps:"Reps padrão",
+    lbl_ex_edit_rest:"Descanso (s)", lbl_ex_edit_equip:"Equipamento", lbl_ex_edit_video:"Link do vídeo (YouTube)",
+    lbl_ex_edit_muscles:"Músculos trabalhados",
+    opt_equip_barbell:"🏋️ Barra", opt_equip_dumbbell:"💪 Halteres", opt_equip_machine:"⚙️ Máquina",
+    opt_equip_cable:"🔗 Cabo", opt_equip_bodyweight:"🤸 Peso do corpo",
+    ex_edit_delete:"🗑 Excluir este exercício", ex_mgr_title:"Gerenciar exercícios", ex_mgr_search_ph:"Buscar exercício...",
+    ex_mgr_add:"+ Adicionar exercício", user_mgr_title:"Usuários", weekly_report_title:"Relatório semanal",
+    import_choice_title:"Importar backup",
+    empty_no_sessions_week:"Ainda sem treinos registrados esta semana",
+    empty_no_prs:"Nenhum recorde registrado ainda",
+    empty_no_sessions_week2:"Nenhum treino registrado ainda nesta semana",
+    empty_no_exercise_found:"Nenhum exercício encontrado",
+    loading_generic:"Carregando...",
+    error_loading_users:"Erro ao carregar usuários: {msg}",
+    empty_no_users_found:"Nenhum usuário encontrado",
+    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}",
+    alert_cache_clear_error:"Não foi possível limpar o cache: {msg}",
+    alert_enter_ex_name:"Digite um nome para o exercício.",
+    alert_no_angle_brackets:"O nome não pode conter os caracteres < ou >.",
+    alert_video_must_be_url:"O link do vídeo precisa começar com http:// ou https://",
+    alert_save_failed_admin:"Não foi possível salvar. Verifique sua internet e se você tem permissão de admin.",
+    alert_delete_failed:"Não foi possível salvar a exclusão.",
+    alert_user_update_failed:"Não foi possível atualizar o usuário.",
+    alert_file_too_large:"Esse arquivo é grande demais para ser um backup válido do KYRO.",
+    alert_import_failed_list:"Não foi possível importar este arquivo:\n\n{list}",
+    confirm_delete_shared_exercise:"Excluir este exercício da base compartilhada?\n\nIsso remove ele da busca para todo mundo a partir de agora, mas NÃO afeta rotinas que já usam esse exercício — elas continuam com sua própria cópia dos dados.",
+    confirm_replace_all_data:"Isso vai SUBSTITUIR todos os seus dados atuais pelo conteúdo deste arquivo. Continuar?",
+    lbl_close:"Fechar", lbl_exclude:"Excluir", lbl_save:"Salvar", lbl_save_measures:"Salvar medidas",
+    lbl_skip:"Pular", lbl_notifications:"Notificações", lbl_history:"Histórico",
+    lbl_dados_group:"Dados", lbl_conta_group:"Conta", lbl_body_front:"Frente", lbl_body_back:"Costas",
+    auth_subtitle:"Entre com sua conta pra acessar seu treino",
+    auth_login_btn:"Entrar", auth_signup_btn:"Criar conta",
+    auth_email_label:"Email", auth_password_label:"Senha",
+    auth_forgot_pw:"Esqueci minha senha", auth_or:"ou", auth_google_btn:"Continuar com Google",
+    auth_err_wrong_credentials:"Email ou senha incorretos.",
+    auth_err_email_in_use:"Já existe uma conta com esse email. Tente entrar.",
+    auth_err_weak_password:"A senha precisa ter pelo menos 6 caracteres.",
+    auth_err_invalid_email:"Email inválido.",
+    auth_err_no_connection:"Sem conexão com a internet.",
+    auth_err_generic:"Não foi possível completar. Tente novamente.",
+    use_this_template:"Usar este template", save_note:"Salvar nota",
+    connected_as:"Conectado como", your_account:"sua conta",
+    consistency_sub:"% dos treinos planejados que você realmente fez, últimas 4 semanas",
+    stat_min:"mín", stat_max:"máx", stat_total:"total", stat_current:"atual",
+    add_first_weight:"Adicione seu primeiro peso",
+    suggest_repeat_weight:"repita o peso", suggest_increase_load:"suba a carga",
+    suggest_more_reps:"foque em mais reps", suggest_plus_one_rep:"tente +1 rep",
+    chip_record:"recorde", chip_suggestion:"sugestão", chip_no_progress:"Sem evolução há 3 treinos",
+    deload_view:"ver sugestão de deload", deload_hide:"ocultar sugestão",
+    deload_detail_text:"Última sessão: <b>{curKg}kg</b> × {curReps}. Sugestão: reduza para <b>{sugKg}kg</b> × {sugReps} nesta sessão, depois volte a subir a carga aos poucos ao longo das próximas semanas.",
+    deload_no_data:"Continue registrando cargas e reps para gerar uma sugestão específica.",
+    notif_label:"Notificações", notif_enabled:"ativadas", notif_disabled:"desativadas",
+    notif_blocked:"Notificações bloqueadas — ative manualmente nas configurações do navegador",
+    notif_unsupported:"Notificações não são suportadas neste navegador",
+    importing_data_msg:"Importando seus dados",
+    summary_sessions:"{n} sessões de treino", summary_weights:"{n} registros de peso",
+    summary_nutrition_days:"{n} dias de nutrição", summary_photos:"{n} fotos",
+    summary_routines:"rotinas de treino", summary_kyro_data:"dados do KYRO",
+    this_week_suffix:"nesta semana", share_workout_done_text:"Treino de {title} concluído! 💪",
+    share_more_exercises:"+ {n} exercício(s)", add_n_exercises:"+ Adicionar {n} exercícios",
+    repeat_last:"Repetir última", group_superset:"Agrupar em superconjunto",
+    similar_alternative:"alternativa similar", superset_label:"Superconjunto {letter} — descanse só ao final das {count}",
+    field_wrong_type:"Campo \"{key}\" deveria ser do tipo {expected}, mas veio como {actual}.",
+    rest_over_title:"Descanso finalizado 💪", rest_over_body:"Hora de continuar: {ex}",
+    last_entry:"último registro", status_complete:"COMPLETO", status_done:"CONCLUÍDO",
+    streak_msg_full:"{n} dias seguidos treinando",
+    autogen_plus_abs:"+ {n} exercício(s) de abdômen",
+    you_tag:"(você)", blocked_tag:"bloqueado", since_date:"Desde {date}",
+    app_installed:"App instalado", no_weight_data_week:"sem dados de peso esta semana",
+    unblock_btn:"Desbloquear", block_btn:"Bloquear", default_meal_name:"Refeição",
+    open_in_browser_to_install:"Abra em http://localhost:8000 em um servidor local para instalar como app",
+    meta_sets:"séries", meta_target_reps:"reps alvo", meta_rest:"descanso",
+    stat_current_streak:"sequência atual", stat_best_streak:"melhor sequência",
+    stat_achievements:"conquistas", stat_workouts:"treinos", stat_volume_kg:"kg de volume", stat_total_time:"tempo total",
+    import_summary_text:"Este arquivo contém: {summary}. Antes de aplicar qualquer opção abaixo, uma cópia de segurança dos seus dados atuais é baixada automaticamente.",
     nav_home:"Início",
     home_today:"Hoje", home_no_workout_today:"Nenhum treino agendado pra hoje. Aproveite pra descansar ou criar uma rotina.",
     home_already_trained:"✅ Treino de hoje já concluído", home_start_workout:"Iniciar treino",
@@ -1648,6 +1732,90 @@ const UI_STRINGS = {
     weekly_priority_maintain:"You kept up consistency and volume. Priority: keep it up and aim for small load increases.",
     photo_uploading:"Uploading photo...",
     video_no_embed_fallback:"We don't have a specific English tutorial video for this exercise yet. Tap below to search YouTube.",
+    lbl_cfg_sets:"Sets", lbl_cfg_reps:"Reps", lbl_cfg_rest:"Rest (seconds)",
+    lbl_cfg_video:"Video link (YouTube)", lbl_cfg_notes:"Notes (optional)",
+    cfg_remove:"Remove", cfg_save:"Save", cfg_default_ex_name:"Exercise",
+    plate_calc_title:"Plate Calculator", lbl_pc_target:"Target total weight (kg)", lbl_pc_bar:"Bar weight (kg)",
+    pc_enter_target:"Enter the target total weight (greater than the bar).",
+    pc_per_side:"per side", pc_no_plates_needed:"No plates needed",
+    pc_leftover:"{kg}kg left over that doesn't match standard plates (25/20/15/10/5/2.5/1.25kg)",
+    history_no_data:"No history recorded yet for this exercise. Complete a workout with weight and reps filled in to start tracking your progress.",
+    history_record:"Record", history_reps_short:"reps", history_e1rm_est:"est. 1RM",
+    lbl_ex_edit_name:"Name", lbl_ex_edit_sets:"Default sets", lbl_ex_edit_reps:"Default reps",
+    lbl_ex_edit_rest:"Rest (s)", lbl_ex_edit_equip:"Equipment", lbl_ex_edit_video:"Video link (YouTube)",
+    lbl_ex_edit_muscles:"Muscles worked",
+    opt_equip_barbell:"🏋️ Barbell", opt_equip_dumbbell:"💪 Dumbbell", opt_equip_machine:"⚙️ Machine",
+    opt_equip_cable:"🔗 Cable", opt_equip_bodyweight:"🤸 Bodyweight",
+    ex_edit_delete:"🗑 Delete this exercise", ex_mgr_title:"Manage exercises", ex_mgr_search_ph:"Search exercise...",
+    ex_mgr_add:"+ Add exercise", user_mgr_title:"Users", weekly_report_title:"Weekly report",
+    import_choice_title:"Import backup",
+    empty_no_sessions_week:"No workouts logged this week yet",
+    empty_no_prs:"No records logged yet",
+    empty_no_sessions_week2:"No workouts logged this week yet",
+    empty_no_exercise_found:"No exercise found",
+    loading_generic:"Loading...",
+    error_loading_users:"Error loading users: {msg}",
+    empty_no_users_found:"No users found",
+    alert_reset_pw_sent:"We sent a password reset link to {email}",
+    alert_cache_clear_error:"Couldn't clear the cache: {msg}",
+    alert_enter_ex_name:"Enter a name for the exercise.",
+    alert_no_angle_brackets:"The name can't contain the characters < or >.",
+    alert_video_must_be_url:"The video link must start with http:// or https://",
+    alert_save_failed_admin:"Couldn't save. Check your internet connection and that you have admin permission.",
+    alert_delete_failed:"Couldn't save the deletion.",
+    alert_user_update_failed:"Couldn't update the user.",
+    alert_file_too_large:"This file is too large to be a valid KYRO backup.",
+    alert_import_failed_list:"Couldn't import this file:\n\n{list}",
+    confirm_delete_shared_exercise:"Delete this exercise from the shared database?\n\nThis removes it from search for everyone going forward, but does NOT affect routines that already use this exercise — they keep their own copy of the data.",
+    confirm_replace_all_data:"This will REPLACE all your current data with the contents of this file. Continue?",
+    lbl_close:"Close", lbl_exclude:"Delete", lbl_save:"Save", lbl_save_measures:"Save measurements",
+    lbl_skip:"Skip", lbl_notifications:"Notifications", lbl_history:"History",
+    lbl_dados_group:"Data", lbl_conta_group:"Account", lbl_body_front:"Front", lbl_body_back:"Back",
+    auth_subtitle:"Sign in to access your workout",
+    auth_login_btn:"Sign In", auth_signup_btn:"Create Account",
+    auth_email_label:"Email", auth_password_label:"Password",
+    auth_forgot_pw:"Forgot my password", auth_or:"or", auth_google_btn:"Continue with Google",
+    auth_err_wrong_credentials:"Incorrect email or password.",
+    auth_err_email_in_use:"An account with this email already exists. Try signing in.",
+    auth_err_weak_password:"Password must be at least 6 characters.",
+    auth_err_invalid_email:"Invalid email.",
+    auth_err_no_connection:"No internet connection.",
+    auth_err_generic:"Couldn't complete this action. Try again.",
+    use_this_template:"Use this template", save_note:"Save note",
+    connected_as:"Signed in as", your_account:"your account",
+    consistency_sub:"% of planned workouts you actually completed, last 4 weeks",
+    stat_min:"min", stat_max:"max", stat_total:"total", stat_current:"current",
+    add_first_weight:"Add your first weight entry",
+    suggest_repeat_weight:"repeat the weight", suggest_increase_load:"increase the load",
+    suggest_more_reps:"focus on more reps", suggest_plus_one_rep:"try +1 rep",
+    chip_record:"record", chip_suggestion:"suggestion", chip_no_progress:"No progress in 3 sessions",
+    deload_view:"view deload suggestion", deload_hide:"hide suggestion",
+    deload_detail_text:"Last session: <b>{curKg}kg</b> × {curReps}. Suggestion: reduce to <b>{sugKg}kg</b> × {sugReps} this session, then gradually build the load back up over the next few weeks.",
+    deload_no_data:"Keep logging weight and reps to generate a specific suggestion.",
+    notif_label:"Notifications", notif_enabled:"enabled", notif_disabled:"disabled",
+    notif_blocked:"Notifications blocked — enable manually in your browser settings",
+    notif_unsupported:"Notifications aren't supported in this browser",
+    importing_data_msg:"Importing your data",
+    summary_sessions:"{n} workout sessions", summary_weights:"{n} weight entries",
+    summary_nutrition_days:"{n} days of nutrition", summary_photos:"{n} photos",
+    summary_routines:"workout routines", summary_kyro_data:"KYRO data",
+    this_week_suffix:"this week", share_workout_done_text:"{title} workout complete! 💪",
+    share_more_exercises:"+ {n} exercise(s)", add_n_exercises:"+ Add {n} exercises",
+    repeat_last:"Repeat last", group_superset:"Group into superset",
+    similar_alternative:"similar alternative", superset_label:"Superset {letter} — rest only after all {count}",
+    field_wrong_type:"Field \"{key}\" should be of type {expected}, but came as {actual}.",
+    rest_over_title:"Rest finished 💪", rest_over_body:"Time to continue: {ex}",
+    last_entry:"latest entry", status_complete:"COMPLETE", status_done:"DONE",
+    streak_msg_full:"{n} day streak",
+    autogen_plus_abs:"+ {n} abs exercise(s)",
+    you_tag:"(you)", blocked_tag:"blocked", since_date:"Since {date}",
+    app_installed:"App installed", no_weight_data_week:"no weight data this week",
+    unblock_btn:"Unblock", block_btn:"Block", default_meal_name:"Meal",
+    open_in_browser_to_install:"Open on http://localhost:8000 on a local server to install as an app",
+    meta_sets:"sets", meta_target_reps:"target reps", meta_rest:"rest",
+    stat_current_streak:"current streak", stat_best_streak:"best streak",
+    stat_achievements:"achievements", stat_workouts:"workouts", stat_volume_kg:"kg volume", stat_total_time:"total time",
+    import_summary_text:"This file contains: {summary}. Before applying any option below, a backup of your current data is automatically downloaded.",
     nav_home:"Home",
     home_today:"Today", home_no_workout_today:"No workout scheduled for today. Take a rest day or build a routine.",
     home_already_trained:"✅ Today's workout already done", home_start_workout:"Start workout",
@@ -2013,7 +2181,7 @@ async function maybeMigrateLocalData(){
     const brandEl = loadingEl.querySelector(".app-loading-brand");
     const originalBrandHtml = brandEl.innerHTML;
     loadingEl.style.display = "flex";
-    brandEl.innerHTML = `Importando seus dados<span>…</span>`;
+    brandEl.innerHTML = `${t("importing_data_msg")}<span>…</span>`;
 
     await Promise.all(localKeys.map(async (lk)=>{
       const shortKey = lk.slice(LS_PREFIX.length);
@@ -2046,22 +2214,34 @@ function setAuthError(msg){
 
 function translateAuthError(msg){
   const m = String(msg);
-  if(/user-not-found|wrong-password|invalid-credential/i.test(m)) return "Email ou senha incorretos.";
-  if(/email-already-in-use/i.test(m)) return "Já existe uma conta com esse email. Tente entrar.";
-  if(/weak-password/i.test(m)) return "A senha precisa ter pelo menos 6 caracteres.";
-  if(/invalid-email/i.test(m)) return "Email inválido.";
-  if(/network-request-failed/i.test(m)) return "Sem conexão com a internet.";
+  if(/user-not-found|wrong-password|invalid-credential/i.test(m)) return t("auth_err_wrong_credentials");
+  if(/email-already-in-use/i.test(m)) return t("auth_err_email_in_use");
+  if(/weak-password/i.test(m)) return t("auth_err_weak_password");
+  if(/invalid-email/i.test(m)) return t("auth_err_invalid_email");
+  if(/network-request-failed/i.test(m)) return t("auth_err_no_connection");
   if(/popup-closed-by-user|cancelled-popup-request/i.test(m)) return "";
-  return "Não foi possível completar. Tente novamente.";
+  return t("auth_err_generic");
 }
 
 function setAuthMode(mode){
   authMode = mode;
   document.querySelectorAll(".auth-tab").forEach(t=> t.classList.toggle("active", t.dataset.authtab===mode));
-  document.getElementById("authSubmit").textContent = mode==="login" ? "Entrar" : "Criar conta";
+  document.getElementById("authSubmit").textContent = mode==="login" ? t("auth_login_btn") : t("auth_signup_btn");
   document.getElementById("authForgot").style.display = mode==="login" ? "block" : "none";
   document.getElementById("authPassword").autocomplete = mode==="login" ? "current-password" : "new-password";
   setAuthError(null);
+}
+
+function applyAuthScreenTranslations(){
+  document.getElementById("authSubtitle").textContent = t("auth_subtitle");
+  document.getElementById("authTabLogin").textContent = t("auth_login_btn");
+  document.getElementById("authTabSignup").textContent = t("auth_signup_btn");
+  document.getElementById("authEmailLabel").textContent = t("auth_email_label");
+  document.getElementById("authPasswordLabel").textContent = t("auth_password_label");
+  document.getElementById("authForgot").textContent = t("auth_forgot_pw");
+  document.getElementById("authDivider").textContent = t("auth_or");
+  document.getElementById("authSubmit").textContent = authMode==="login" ? t("auth_login_btn") : t("auth_signup_btn");
+  document.getElementById("authGoogleLabel").textContent = t("auth_google_btn");
 }
 
 function initAuthScreenEvents(){
@@ -2102,7 +2282,7 @@ function initAuthScreenEvents(){
     if(!email){ setAuthError("Digite seu email no campo acima primeiro."); return; }
     try{
       await fbAuth.sendPasswordResetEmail(email);
-      alert("Enviamos um link de redefinição de senha para " + email);
+      alert(tFmt("alert_reset_pw_sent",{email}));
     }catch(err){ setAuthError(err.message); }
   });
 }
@@ -2311,14 +2491,14 @@ const WORKOUT_TEMPLATES = {
         ], abs:[ {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"} ]},
         quarta: { title:"Legs A", cardioNote: cardio, exercises:[
           {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
-          {name:"Leg Press",sets:4,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
+          {name:"Agachamento Búlgaro",sets:3,reps:"10-12 cada",rest:75,muscles:{quads:1,glutes:.7},videoUrl:"https://www.youtube.com/watch?v=a3-bQbTdA_0"},
           {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:"https://www.youtube.com/watch?v=8Nat6GRiEoc"},
           {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=qWHH0We_9r0"}
         ], abs:[]},
         quinta: { title:"Push B (Ombro/Peito/Tríceps)", cardioNote: cardio, exercises:[
           {name:"Supino Inclinado",sets:4,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
           {name:"Desenvolvimento Halteres",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
-          {name:"Elevação Lateral",sets:3,reps:"15",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"},
+          {name:"Crucifixo Invertido com Halteres",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,upperback:.4,traps:.2},videoUrl:"https://www.youtube.com/watch?v=vVDeOaw1T5g"},
           {name:"Tríceps Testa",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=r0Xf7A3k5e4"}
         ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]},
         sexta: { title:"Pull B (Costas/Bíceps)", cardioNote: cardio, exercises:[
@@ -2351,7 +2531,7 @@ const WORKOUT_TEMPLATES = {
         ], abs:[]},
         terca: { title:"Lower A", cardioNote: cardio, exercises:[
           {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
-          {name:"Leg Press",sets:4,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
+          {name:"Agachamento Búlgaro",sets:3,reps:"10-12 cada",rest:75,muscles:{quads:1,glutes:.7},videoUrl:"https://www.youtube.com/watch?v=a3-bQbTdA_0"},
           {name:"Stiff",sets:3,reps:"10",rest:90,muscles:{hamstrings:1,glutes:.6,lowerback:.5},videoUrl:"https://www.youtube.com/watch?v=BHfY5-jGNDA"},
           {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=qWHH0We_9r0"}
         ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]},
@@ -2375,20 +2555,36 @@ const WORKOUT_TEMPLATES = {
   },
   fullBody: {
     label: "Full Body",
-    desc: "3x por semana — corpo inteiro em cada sessão",
+    desc: "3x por semana — corpo inteiro em cada sessão, com exercícios variados entre os dias",
     build(){
       const cardio = "Cardio: 20-30 min após a musculação.";
-      const day = (title) => ({ title, cardioNote: cardio, exercises:[
+      const dayA = { title:"Full Body A", cardioNote: cardio, exercises:[
         {name:"Agachamento",sets:3,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
         {name:"Supino Reto",sets:3,reps:"8-10",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:"https://www.youtube.com/watch?v=vIGvt-vgrvY"},
         {name:"Remada Baixa",sets:3,reps:"10",rest:75,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=2YebbYuuBJQ"},
         {name:"Desenvolvimento",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
         {name:"Rosca Direta",sets:2,reps:"10",rest:60,muscles:{biceps:1,forearms:.3},videoUrl:"https://www.youtube.com/watch?v=Et1wgGMGW8w"},
         {name:"Tríceps Corda",sets:2,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=YQ6MRBeyIAE"}
-      ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]});
+      ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]};
+      const dayB = { title:"Full Body B", cardioNote: cardio, exercises:[
+        {name:"Levantamento Terra Romeno",sets:3,reps:"8-10",rest:90,muscles:{hamstrings:1,glutes:.7,lowerback:.4},videoUrl:"https://www.youtube.com/watch?v=jSomWOwLiGE"},
+        {name:"Supino Inclinado com Halteres",sets:3,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=RGeSgQmO1EU"},
+        {name:"Puxada Frente",sets:3,reps:"10",rest:75,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=yzlQK3s-a_Y"},
+        {name:"Elevação Lateral",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"},
+        {name:"Rosca Martelo",sets:2,reps:"10-12",rest:60,muscles:{biceps:1,forearms:.6},videoUrl:"https://www.youtube.com/watch?v=5vPGH1uTtbs"},
+        {name:"Tríceps Testa",sets:2,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=r0Xf7A3k5e4"}
+      ], abs:[ {name:"Cable Crunch",sets:3,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"} ]};
+      const dayC = { title:"Full Body C", cardioNote: cardio, exercises:[
+        {name:"Leg Press",sets:3,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
+        {name:"Crucifixo Cabos",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:"https://www.youtube.com/watch?v=mNWyWEJNCDM"},
+        {name:"Puxada Triângulo",sets:3,reps:"10-12",rest:75,muscles:{lats:1,upperback:.4,biceps:.3},videoUrl:"https://www.youtube.com/watch?v=SIyWK5Uy1yM"},
+        {name:"Elevação Frontal",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=jhxLYSm_P-k"},
+        {name:"Rosca Concentrada",sets:2,reps:"10-12",rest:60,muscles:{biceps:1},videoUrl:"https://www.youtube.com/watch?v=wWKrF4iSU_8"},
+        {name:"Tríceps Francês",sets:2,reps:"10-12",rest:75,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=gB-QMYMlHLs"}
+      ], abs:[ {name:"Elevação de Pernas",sets:3,reps:"12-15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=oq4Xb_xI618"} ]};
       return {
-        domingo: null, segunda: day("Full Body A"), terca: null,
-        quarta: day("Full Body B"), quinta: null, sexta: day("Full Body C"), sabado: null
+        domingo: null, segunda: dayA, terca: null,
+        quarta: dayB, quinta: null, sexta: dayC, sabado: null
       };
     }
   },
@@ -2426,7 +2622,6 @@ function buildDefaultWorkouts(){
     ], abs: [] },
     quarta: { title: "Pernas", cardioNote: cardio, exercises: [
       {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
-      {name:"Leg Press",sets:4,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
       {name:"Extensora",sets:3,reps:"15",rest:60,muscles:{quads:1},videoUrl:"https://www.youtube.com/watch?v=Svq2T3L9oKo"},
       {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:"https://www.youtube.com/watch?v=8Nat6GRiEoc"},
       {name:"Stiff",sets:3,reps:"10",rest:90,muscles:{hamstrings:1,glutes:.6,lowerback:.5},videoUrl:"https://www.youtube.com/watch?v=BHfY5-jGNDA"},
@@ -2592,6 +2787,33 @@ function bindProgressoEvents(){
   document.getElementById("compareSlider").addEventListener("input", updateCompareSlider);
 }
 
+function refreshAccountRow(){
+  const accountRow = document.getElementById("accountRow");
+  if(!accountRow || !currentUser) return;
+  accountRow.innerHTML = `<div class="settings-label">${t("connected_as")}<br><b style="color:var(--text)">${currentUser.email || currentUser.displayName || t("your_account")}</b></div>`;
+}
+
+function refreshNotifStatus(){
+  const notifRow = document.getElementById("notifRow");
+  const notifBtn = document.getElementById("enableNotifBtn");
+  if(!notifRow || !notifBtn) return;
+  const supported = "Notification" in window;
+  const perm = supported ? Notification.permission : "unsupported";
+  if(!supported){
+    notifRow.innerHTML = `<div class="settings-label">${t("notif_unsupported")}</div>`;
+    notifBtn.style.display = "none";
+  } else if(perm === "granted"){
+    notifRow.innerHTML = `<div class="settings-label">${t("notif_label")}: <b style="color:var(--volt)">${t("notif_enabled")} ✓</b></div>`;
+    notifBtn.style.display = "none";
+  } else if(perm === "denied"){
+    notifRow.innerHTML = `<div class="settings-label">${t("notif_blocked")}</div>`;
+    notifBtn.style.display = "none";
+  } else {
+    notifRow.innerHTML = `<div class="settings-label">${t("notif_label")}: ${t("notif_disabled")}</div>`;
+    notifBtn.style.display = "block";
+  }
+}
+
 function applyStaticTranslations(){
   document.getElementById("navHome").textContent = t("nav_home");
   document.getElementById("navTreino").textContent = t("tab_treino");
@@ -2611,6 +2833,68 @@ function applyStaticTranslations(){
   document.getElementById("photoAddLabel").textContent = t("add_photo");
   const dragLbl = document.getElementById("dragCompareLabel");
   if(dragLbl) dragLbl.textContent = t("drag_to_compare");
+
+  // Exercise config modal
+  document.getElementById("lblCfgSets").textContent = t("lbl_cfg_sets");
+  document.getElementById("lblCfgReps").textContent = t("lbl_cfg_reps");
+  document.getElementById("lblCfgRest").textContent = t("lbl_cfg_rest");
+  document.getElementById("lblCfgVideo").textContent = t("lbl_cfg_video");
+  document.getElementById("lblCfgNotes").textContent = t("lbl_cfg_notes");
+  document.getElementById("cfgDelete").textContent = t("cfg_remove");
+  document.getElementById("cfgSave").textContent = t("cfg_save");
+  if(document.getElementById("configExName").textContent === "Exercício" || document.getElementById("configExName").textContent === "Exercise"){
+    document.getElementById("configExName").textContent = t("cfg_default_ex_name");
+  }
+
+  // Plate calculator
+  document.getElementById("lblPlateCalcTitle").textContent = t("plate_calc_title");
+  document.getElementById("lblPcTarget").textContent = t("lbl_pc_target");
+  document.getElementById("lblPcBar").textContent = t("lbl_pc_bar");
+
+  // Exercise history modal
+  if(document.getElementById("historyExName").textContent === "Exercício"){
+    document.getElementById("historyExName").textContent = t("cfg_default_ex_name");
+  }
+
+  // Admin: exercise manager / editor / user manager (safe no-ops for non-admins, elements still exist in the DOM)
+  const exMgrTitle = document.getElementById("exMgrTitle"); if(exMgrTitle) exMgrTitle.textContent = t("ex_mgr_title");
+  const exMgrSearch = document.getElementById("exMgrSearch"); if(exMgrSearch) exMgrSearch.placeholder = t("ex_mgr_search_ph");
+  const exMgrAdd = document.getElementById("exMgrAddBtn"); if(exMgrAdd) exMgrAdd.textContent = t("ex_mgr_add");
+  const exEditDelete = document.getElementById("exEditDeleteBtn"); if(exEditDelete) exEditDelete.textContent = t("ex_edit_delete");
+  const lblExEditName = document.getElementById("lblExEditName"); if(lblExEditName) lblExEditName.textContent = t("lbl_ex_edit_name");
+  const lblExEditSets = document.getElementById("lblExEditSets"); if(lblExEditSets) lblExEditSets.textContent = t("lbl_ex_edit_sets");
+  const lblExEditReps = document.getElementById("lblExEditReps"); if(lblExEditReps) lblExEditReps.textContent = t("lbl_ex_edit_reps");
+  const lblExEditRest = document.getElementById("lblExEditRest"); if(lblExEditRest) lblExEditRest.textContent = t("lbl_ex_edit_rest");
+  const lblExEditEquip = document.getElementById("lblExEditEquip"); if(lblExEditEquip) lblExEditEquip.textContent = t("lbl_ex_edit_equip");
+  const lblExEditVideo = document.getElementById("lblExEditVideo"); if(lblExEditVideo) lblExEditVideo.textContent = t("lbl_ex_edit_video");
+  const lblExEditMuscles = document.getElementById("lblExEditMuscles"); if(lblExEditMuscles) lblExEditMuscles.textContent = t("lbl_ex_edit_muscles");
+  const optBarbell = document.getElementById("optEquipBarbell"); if(optBarbell) optBarbell.textContent = t("opt_equip_barbell");
+  const optDumbbell = document.getElementById("optEquipDumbbell"); if(optDumbbell) optDumbbell.textContent = t("opt_equip_dumbbell");
+  const optMachine = document.getElementById("optEquipMachine"); if(optMachine) optMachine.textContent = t("opt_equip_machine");
+  const optCable = document.getElementById("optEquipCable"); if(optCable) optCable.textContent = t("opt_equip_cable");
+  const optBodyweight = document.getElementById("optEquipBodyweight"); if(optBodyweight) optBodyweight.textContent = t("opt_equip_bodyweight");
+  const userMgrTitle = document.getElementById("userMgrTitle"); if(userMgrTitle) userMgrTitle.textContent = t("user_mgr_title");
+  const weeklyReportTitle = document.getElementById("weeklyReportTitle"); if(weeklyReportTitle) weeklyReportTitle.textContent = t("weekly_report_title");
+  const importChoiceTitleEl = document.getElementById("importChoiceTitle"); if(importChoiceTitleEl) importChoiceTitleEl.textContent = t("import_choice_title");
+
+  document.getElementById("exEditSaveBtn").textContent = t("lbl_save");
+  document.getElementById("weightAdd").textContent = t("lbl_save");
+  document.getElementById("measAdd").textContent = t("lbl_save_measures");
+  document.getElementById("pvClose").textContent = t("lbl_close");
+  document.getElementById("pvDelete").textContent = t("lbl_exclude");
+  document.getElementById("celebrateClose").textContent = t("lbl_close");
+  document.getElementById("skipBtn").textContent = t("lbl_skip");
+  refreshNotifStatus();
+  refreshAccountRow();
+  document.getElementById("lblWeightHistory").textContent = t("lbl_history");
+  document.getElementById("lblDadosGroup").textContent = t("lbl_dados_group");
+  document.getElementById("lblContaGroup").textContent = t("lbl_conta_group");
+  document.getElementById("lblBodyFront").textContent = t("lbl_body_front");
+  document.getElementById("lblBodyBack").textContent = t("lbl_body_back");
+  const adminGroupTitleEl = document.getElementById("adminGroupTitle"); if(adminGroupTitleEl) adminGroupTitleEl.textContent = t("admin_section");
+  const manageExercisesBtnEl = document.getElementById("manageExercisesBtn"); if(manageExercisesBtnEl) manageExercisesBtnEl.textContent = t("manage_exercises");
+  const manageUsersBtnEl = document.getElementById("manageUsersBtn"); if(manageUsersBtnEl) manageUsersBtnEl.textContent = t("manage_users");
+
   document.querySelectorAll("#langSwitch button").forEach(b=> b.classList.toggle("active", b.dataset.lang===currentLang));
 }
 
@@ -2650,36 +2934,16 @@ function bindAjustesEvents(){
       }
       alert(t("alert_cache_cleared"));
       location.reload();
-    }catch(e){ alert("Não foi possível limpar o cache: " + e.message); }
+    }catch(e){ alert(tFmt("alert_cache_clear_error",{msg:e.message})); }
   });
   document.getElementById("logoutBtn").addEventListener("click", async ()=>{
     if(!confirm(t("confirm_logout"))) return;
     await fbAuth.signOut();
   });
-  const accountRow = document.getElementById("accountRow");
-  if(currentUser){
-    accountRow.innerHTML = `<div class="settings-label">Conectado como<br><b style="color:var(--text)">${currentUser.email || currentUser.displayName || "sua conta"}</b></div>`;
-  }
+  refreshAccountRow();
 
   const notifRow = document.getElementById("notifRow");
   const notifBtn = document.getElementById("enableNotifBtn");
-  function refreshNotifStatus(){
-    const supported = "Notification" in window;
-    const perm = supported ? Notification.permission : "unsupported";
-    if(!supported){
-      notifRow.innerHTML = `<div class="settings-label">Notificações não são suportadas neste navegador</div>`;
-      notifBtn.style.display = "none";
-    } else if(perm === "granted"){
-      notifRow.innerHTML = `<div class="settings-label">Notificações: <b style="color:var(--volt)">ativadas ✓</b></div>`;
-      notifBtn.style.display = "none";
-    } else if(perm === "denied"){
-      notifRow.innerHTML = `<div class="settings-label">Notificações bloqueadas — ative manualmente nas configurações do navegador</div>`;
-      notifBtn.style.display = "none";
-    } else {
-      notifRow.innerHTML = `<div class="settings-label">Notificações: desativadas</div>`;
-      notifBtn.style.display = "block";
-    }
-  }
   refreshNotifStatus();
   notifBtn.addEventListener("click", async ()=>{
     const ok = await enablePushNotifications();
@@ -2785,7 +3049,7 @@ function renderDay(){
         if(groupItems.length > 1){
           const wrap = document.createElement("div");
           wrap.className = "superset-wrap";
-          wrap.innerHTML = `<div class="superset-label">🔗 Superconjunto ${groupLetter} — descanse só ao final das ${groupItems.length}</div>`;
+          wrap.innerHTML = `<div class="superset-label">🔗 ${tFmt("superset_label",{letter:groupLetter,count:groupItems.length})}</div>`;
           groupItems.forEach(gi=> wrap.appendChild(buildExCard(gi.ex, gi.i)));
           content.appendChild(wrap);
           idx = j;
@@ -3038,25 +3302,25 @@ function buildExCard(ex, i){
         <div class="ex-name" data-role="exname" style="cursor:pointer">${tExerciseName(ex.name)} <span class="ex-history-icon">📈</span></div>
         ${ex.notes ? `<div class="ex-note">"${escapeHtml(ex.notes)}"</div>` : ''}
         <div class="ex-meta">
-          <div class="meta-chip">séries <b>${ex.sets}</b></div>
-          <div class="meta-chip">reps alvo <b>${ex.reps}</b></div>
-          <div class="meta-chip">descanso <b>${ex.rest}s</b></div>
+          <div class="meta-chip">${t("meta_sets")} <b>${ex.sets}</b></div>
+          <div class="meta-chip">${t("meta_target_reps")} <b>${ex.reps}</b></div>
+          <div class="meta-chip">${t("meta_rest")} <b>${ex.rest}s</b></div>
         </div>
-        ${rec && rec.maxWeight ? `<div class="pr-chip">🏆 recorde: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps}</div>` : ''}
-        ${suggestion ? `<div class="suggest-chip">😮‍💨 sugestão: <b>${suggestion.kg}kg</b> × ${suggestion.reps} <span>(${suggestion.note})</span></div>` : ''}
-        ${isPlateaued ? `<div class="plateau-chip">⚠️ Sem evolução há 3 treinos <button type="button" data-role="deloadToggle" style="background:none;border:none;color:inherit;text-decoration:underline;font-weight:700;font-size:11.5px;cursor:pointer;padding:0;margin-left:4px">ver sugestão de deload</button><div data-role="deloadDetail" style="display:none;margin-top:6px"></div></div>` : ''}
+        ${rec && rec.maxWeight ? `<div class="pr-chip">🏆 ${t("chip_record")}: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps}</div>` : ''}
+        ${suggestion ? `<div class="suggest-chip">😮‍💨 ${t("chip_suggestion")}: <b>${suggestion.kg}kg</b> × ${suggestion.reps} <span>(${suggestion.note})</span></div>` : ''}
+        ${isPlateaued ? `<div class="plateau-chip">⚠️ ${t("chip_no_progress")} <button type="button" data-role="deloadToggle" style="background:none;border:none;color:inherit;text-decoration:underline;font-weight:700;font-size:11.5px;cursor:pointer;padding:0;margin-left:4px">${t("deload_view")}</button><div data-role="deloadDetail" style="display:none;margin-top:6px"></div></div>` : ''}
         ${ex.videoUrl ? `<button type="button" class="ex-video-link" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}">▶️ ${t("how_to").replace('▶️ ','')}</button>` : ''}
       </div>
     </div>
     <div class="set-table">
-      <div class="set-head"><span>Série</span><span>Kg</span><span>Reps</span><span>✓</span></div>
+      <div class="set-head"><span>${t("series_short")}</span><span>${t("kg_short")}</span><span>${t("reps_short")}</span><span>✓</span></div>
       <div data-role="warmuprow"></div>
       <div data-role="settbody"></div>
     </div>
     <button class="add-set-btn" data-role="addset">${t("add_set")}</button>
     <div class="card-controls">
       <button class="rest-btn" data-role="rest">⏱ ${ex.rest}s</button>
-      ${lastSession ? `<button class="rest-btn" data-role="repeat">🔁 Repetir última</button>` : ''}
+      ${lastSession ? `<button class="rest-btn" data-role="repeat">🔁 ${t("repeat_last")}</button>` : ''}
       <button class="rest-btn" data-role="platecalc">🏋️</button>
       <button class="rest-btn" data-role="notes">📝</button>
       <button class="rest-btn" data-role="shuffle" title="Trocar automaticamente">🔀</button>
@@ -3215,13 +3479,13 @@ function buildExCard(ex, i){
     if(detail.style.display === "none"){
       const dl = computeDeloadSuggestion(ex.name);
       detail.innerHTML = dl
-        ? `Última sessão: <b>${dl.currentKg}kg</b> × ${dl.currentReps}. Sugestão: reduza para <b>${dl.suggestedKg}kg</b> × ${dl.suggestedReps} nesta sessão, depois volte a subir a carga aos poucos ao longo das próximas semanas.`
-        : `Continue registrando cargas e reps para gerar uma sugestão específica.`;
+        ? tFmt("deload_detail_text", { curKg: dl.currentKg, curReps: dl.currentReps, sugKg: dl.suggestedKg, sugReps: dl.suggestedReps })
+        : t("deload_no_data");
       detail.style.display = "block";
-      deloadToggle.textContent = "ocultar sugestão";
+      deloadToggle.textContent = t("deload_hide");
     } else {
       detail.style.display = "none";
-      deloadToggle.textContent = "ver sugestão de deload";
+      deloadToggle.textContent = t("deload_view");
     }
   });
   const repeatBtn = card.querySelector('[data-role="repeat"]');
@@ -3261,7 +3525,7 @@ function buildExCard(ex, i){
     if(isOpen){ panel.style.display = "none"; return; }
     panel.innerHTML = `
       <textarea class="notes-textarea" data-role="notesinput" placeholder="ex: cuidado com o ombro direito">${escapeHtml(ex.notes||"")}</textarea>
-      <button class="add-btn" data-role="savenote" style="width:100%;margin-top:8px">Salvar nota</button>
+      <button class="add-btn" data-role="savenote" style="width:100%;margin-top:8px">${t("save_note")}</button>
     `;
     panel.style.display = "block";
     panel.querySelector('[data-role="savenote"]').addEventListener("click", async ()=>{
@@ -3287,17 +3551,17 @@ function showPRBadge(row, cell){
 
 // ---- Exercise History Modal (progress chart per exercise) ----
 window.openExerciseHistoryModal = function(exName){
-  document.getElementById("historyExName").textContent = exName;
+  document.getElementById("historyExName").textContent = tExerciseName(exName);
   const body = document.getElementById("historyBody");
   const hist = exerciseHistory[exName];
   const rec = exerciseRecords[exName];
 
   if(!hist || !hist.length){
-    body.innerHTML = '<div class="vol-empty" style="padding:30px 6px">Ainda sem histórico registrado para este exercício. Complete um treino com peso e reps preenchidos para começar a acompanhar sua evolução.</div>';
+    body.innerHTML = `<div class="vol-empty" style="padding:30px 6px">${t("history_no_data")}</div>`;
   } else {
     let recordHtml = "";
     if(rec && rec.maxWeight){
-      recordHtml = `<div class="pr-chip" style="display:block;text-align:center;margin-bottom:14px">🏆 Recorde: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps} reps (1RM est. ${Math.round(rec.maxE1rm)}kg)</div>`;
+      recordHtml = `<div class="pr-chip" style="display:block;text-align:center;margin-bottom:14px">🏆 ${t("history_record")}: <b>${rec.maxWeight}kg</b> × ${rec.maxWeightReps} ${t("history_reps_short")} (${t("history_e1rm_est")} ${Math.round(rec.maxE1rm)}kg)</div>`;
     }
     body.innerHTML = `
       ${recordHtml}
@@ -3376,7 +3640,7 @@ window.openTemplateModal = function(){
     card.innerHTML = `
       <div class="template-name">${tpl.label}</div>
       <div class="template-desc">${tpl.desc}</div>
-      <button class="settings-btn primary" style="margin:10px 0 0" data-tpl="${key}">Usar este template</button>
+      <button class="settings-btn primary" style="margin:10px 0 0" data-tpl="${key}">${t("use_this_template")}</button>
     `;
     card.querySelector("[data-tpl]").addEventListener("click", async ()=>{
       if(!confirm(tFmt("confirm_apply_template",{name:tpl.label}))) return;
@@ -3445,7 +3709,7 @@ function renderAutoGenBody(){
       <div class="section-label">Prévia — ${p.title}</div>
       <div class="autogen-preview">
         ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${tExerciseName(ex.name)}</span><span class="mono">${ex.sets}×${ex.reps}</span></div>`).join('')}
-        ${p.abs.length ? `<div class="autogen-ex-row" style="opacity:.7"><span>+ ${p.abs.length} exercício(s) de abdômen</span><span></span></div>` : ''}
+        ${p.abs.length ? `<div class="autogen-ex-row" style="opacity:.7"><span>${tFmt("autogen_plus_abs",{n:p.abs.length})}</span><span></span></div>` : ''}
       </div>
       <div class="input-row" style="margin-top:14px">
         <button class="settings-btn" id="autoGenReroll" style="margin:0">🔄 Gerar outro</button>
@@ -3525,7 +3789,7 @@ function computePlates(){
   const bar = parseFloat(document.getElementById("pcBar").value.replace(",",".")) || 20;
   const result = document.getElementById("pcResult");
   if(isNaN(target) || target<=bar){
-    result.innerHTML = '<div class="vol-empty" style="padding:16px 4px">Digite o peso total desejado (maior que a barra).</div>';
+    result.innerHTML = `<div class="vol-empty" style="padding:16px 4px">${t("pc_enter_target")}</div>`;
     return;
   }
   let perSide = (target - bar) / 2;
@@ -3537,11 +3801,11 @@ function computePlates(){
   }
   const leftover = perSide > 0.01 ? perSide : 0;
   result.innerHTML = `
-    <div style="text-align:center;margin:16px 0"><span style="font-size:13px;color:var(--dim)">por lado</span></div>
+    <div style="text-align:center;margin:16px 0"><span style="font-size:13px;color:var(--dim)">${t("pc_per_side")}</span></div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px">
-      ${used.map(u=>`<div class="plate-chip">${u.plate}kg <b>×${u.count}</b></div>`).join('') || '<div class="vol-empty">Nenhuma anilha necessária</div>'}
+      ${used.map(u=>`<div class="plate-chip">${u.plate}kg <b>×${u.count}</b></div>`).join('') || `<div class="vol-empty">${t("pc_no_plates_needed")}</div>`}
     </div>
-    ${leftover ? `<div class="plateau-chip" style="text-align:center">Sobra ${leftover.toFixed(2)}kg que não fecha com as anilhas padrão (25/20/15/10/5/2.5/1.25kg)</div>` : ''}
+    ${leftover ? `<div class="plateau-chip" style="text-align:center">${tFmt("pc_leftover",{kg:leftover.toFixed(2)})}</div>` : ''}
   `;
 }
 
@@ -3829,18 +4093,18 @@ function suggestNextLoad(exName, targetRepsStr){
     if(nums && nums.length) upper = parseInt(nums[nums.length-1]);
   }
 
-  let suggestedKg = best.kg, suggestedReps = best.reps, note = "repita o peso";
+  let suggestedKg = best.kg, suggestedReps = best.reps, note = t("suggest_repeat_weight");
   if(upper && best.reps >= upper){
     const step = best.kg >= 20 ? 2.5 : (best.kg >= 5 ? 1.25 : 0.5);
     suggestedKg = +(best.kg + step).toFixed(2);
     suggestedReps = Math.max(1, upper - 2);
-    note = "suba a carga";
+    note = t("suggest_increase_load");
   } else if(upper && best.reps < Math.max(1, upper-4)){
     suggestedReps = best.reps + 1;
-    note = "foque em mais reps";
+    note = t("suggest_more_reps");
   } else {
     suggestedReps = best.reps + 1;
-    note = "tente +1 rep";
+    note = t("suggest_plus_one_rep");
   }
   return { kg: suggestedKg, reps: suggestedReps, note };
 }
@@ -4053,7 +4317,7 @@ function buildRoutineExerciseItem(dayKey, listType, i, ex){
       <div class="routine-exercise-meta">${ex.sets}×${ex.reps}${ex.rest?` | ${ex.rest}s`:""} ${videoTag}</div>
     </div>
     <div class="routine-exercise-actions">
-      ${listType==="exercises" ? `<button class="superset-btn" title="Agrupar em superconjunto">🔗</button>` : ""}
+      ${listType==="exercises" ? `<button class="superset-btn" title="${t("group_superset")}">🔗</button>` : ""}
       <button class="edit">✎</button>
       <button class="del">✕</button>
     </div>
@@ -4147,9 +4411,9 @@ function renderConquistasTab(){
 
   el.innerHTML = `
     <div class="week-stat-grid" style="margin-bottom:18px">
-      <div class="week-stat-card"><div class="week-stat-num">${current}</div><div class="week-stat-label">sequência atual</div></div>
-      <div class="week-stat-card"><div class="week-stat-num">${best}</div><div class="week-stat-label">melhor sequência</div></div>
-      <div class="week-stat-card"><div class="week-stat-num">${unlocked.length}/${ACHIEVEMENTS.length}</div><div class="week-stat-label">conquistas</div></div>
+      <div class="week-stat-card"><div class="week-stat-num">${current}</div><div class="week-stat-label">${t("stat_current_streak")}</div></div>
+      <div class="week-stat-card"><div class="week-stat-num">${best}</div><div class="week-stat-label">${t("stat_best_streak")}</div></div>
+      <div class="week-stat-card"><div class="week-stat-num">${unlocked.length}/${ACHIEVEMENTS.length}</div><div class="week-stat-label">${t("stat_achievements")}</div></div>
     </div>
     <div id="achList"></div>
   `;
@@ -4549,7 +4813,7 @@ function renderMuscleVolumeBars(){
   const vol = computeWeeklyMuscleVolumes();
   const entries = Object.entries(vol).sort((a,b)=>b[1]-a[1]).slice(0,8);
   if(!entries.length){
-    card.innerHTML = '<div class="vol-empty">Ainda sem treinos registrados esta semana</div>';
+    card.innerHTML = `<div class="vol-empty">${t("empty_no_sessions_week")}</div>`;
     return;
   }
   const max = entries[0][1];
@@ -4569,7 +4833,7 @@ function renderRecentPRs(){
   if(!list) return;
   const prs = getRecentPRs(5);
   if(!prs.length){
-    list.innerHTML = '<div class="vol-empty">Nenhum recorde registrado ainda</div>';
+    list.innerHTML = `<div class="vol-empty">${t("empty_no_prs")}</div>`;
     return;
   }
   list.innerHTML = prs.map(pr=>`
@@ -4597,21 +4861,21 @@ function renderWeekSummaryTab(){
   const daysTrained = [...new Set(weekSessions.map(s=>s.day))];
 
   const weekWeights = bodyWeights.filter(w=> w.d >= start && w.d <= end);
-  let weightChangeHtml = '<span style="color:var(--dim)">sem dados de peso esta semana</span>';
+  let weightChangeHtml = `<span style="color:var(--dim)">${t('no_weight_data_week')}</span>`;
   if(weekWeights.length>=2){
     const diff = weekWeights[weekWeights.length-1].kg - weekWeights[0].kg;
     const cls = diff<0?"delta-down":(diff>0?"delta-up":"");
-    weightChangeHtml = `<span class="${cls}">${diff>0?"+":""}${diff.toFixed(1)}kg</span> nesta semana`;
+    weightChangeHtml = `<span class="${cls}">${diff>0?"+":""}${diff.toFixed(1)}kg</span> ${t("this_week_suffix")}`;
   } else if(bodyWeights.length){
-    weightChangeHtml = `último registro: <b>${bodyWeights[bodyWeights.length-1].kg}kg</b>`;
+    weightChangeHtml = `${t("last_entry")}: <b>${bodyWeights[bodyWeights.length-1].kg}kg</b>`;
   }
 
   el.innerHTML = `
     <div class="week-range-label">${fmtDate(start)} – ${fmtDate(end)}</div>
     <div class="week-stat-grid">
-      <div class="week-stat-card"><div class="week-stat-num">${weekSessions.length}</div><div class="week-stat-label">treinos</div></div>
-      <div class="week-stat-card"><div class="week-stat-num">${totalVolume.toLocaleString('pt-BR')}</div><div class="week-stat-label">kg de volume</div></div>
-      <div class="week-stat-card"><div class="week-stat-num">${totalDuration ? fmtDuration(totalDuration) : "—"}</div><div class="week-stat-label">tempo total</div></div>
+      <div class="week-stat-card"><div class="week-stat-num">${weekSessions.length}</div><div class="week-stat-label">${t("stat_workouts")}</div></div>
+      <div class="week-stat-card"><div class="week-stat-num">${totalVolume.toLocaleString(currentLang==='en'?'en-US':'pt-BR')}</div><div class="week-stat-label">${t("stat_volume_kg")}</div></div>
+      <div class="week-stat-card"><div class="week-stat-num">${totalDuration ? fmtDuration(totalDuration) : "—"}</div><div class="week-stat-label">${t("stat_total_time")}</div></div>
     </div>
     <div class="week-weight-row">⚖️ ${weightChangeHtml}</div>
 
@@ -4624,22 +4888,22 @@ function renderWeekSummaryTab(){
         <div class="consistency-ring-num" id="consistencyNum">0%</div>
       </div>
       <div class="consistency-info">
-        <div class="consistency-title">Consistência</div>
-        <div class="consistency-sub">% dos treinos planejados que você realmente fez, últimas 4 semanas</div>
+        <div class="consistency-title">${t("consistency_title")}</div>
+        <div class="consistency-sub">${t("consistency_sub")}</div>
       </div>
     </div>
 
     <button class="settings-btn primary" id="openWeeklyReportBtn" style="margin-top:14px">📋 ${t("weekly_report_open_btn")}</button>
 
-    <div class="section-label" style="margin-top:22px">Volume por semana</div>
+    <div class="section-label" style="margin-top:22px">${t("weekly_volume")}</div>
     <div class="chart-card">
       <canvas id="multiWeekChart" width="640" height="240"></canvas>
     </div>
 
-    <div class="section-label" style="margin-top:22px">Volume por músculo esta semana</div>
+    <div class="section-label" style="margin-top:22px">${t("muscle_vol_title")}</div>
     <div class="chart-card" id="muscleVolCard"></div>
 
-    <div class="section-label" style="margin-top:22px">Dias treinados</div>
+    <div class="section-label" style="margin-top:22px">${t("days_trained")}</div>
     <div class="week-days-row">
       ${DAY_KEYS.map(dk=>{
         const trained = daysTrained.includes(dk);
@@ -4650,7 +4914,7 @@ function renderWeekSummaryTab(){
     <div class="section-label" style="margin-top:22px">🏆 Recordes recentes</div>
     <div id="recentPrsList"></div>
 
-    <div class="section-label" style="margin-top:22px">Sessões da semana</div>
+    <div class="section-label" style="margin-top:22px">${t("sessions_week")}</div>
     <div id="weekSessionList"></div>
   `;
 
@@ -4670,7 +4934,7 @@ function renderWeekSummaryTab(){
 
   const list = document.getElementById("weekSessionList");
   if(!weekSessions.length){
-    list.innerHTML = '<div class="vol-empty">Nenhum treino registrado ainda nesta semana</div>';
+    list.innerHTML = `<div class="vol-empty">${t("empty_no_sessions_week2")}</div>`;
   } else {
     weekSessions.slice().reverse().forEach(s=>{
       const row = document.createElement("div");
@@ -4757,11 +5021,11 @@ function renderWeightTab(){
     const first = bodyWeights[0].kg, last = bodyWeights[bodyWeights.length-1].kg;
     const total = last - first, cls = total<0 ? "delta-down" : (total>0 ? "delta-up" : "");
     const min = Math.min(...bodyWeights.map(w=>w.kg)), max = Math.max(...bodyWeights.map(w=>w.kg));
-    stats.innerHTML = `<span>mín <b>${min.toFixed(1)}</b></span><span>máx <b>${max.toFixed(1)}</b></span><span class="${cls}">total ${total>0?"+":""}${total.toFixed(1)} kg</span>`;
+    stats.innerHTML = `<span>${t("stat_min")} <b>${min.toFixed(1)}</b></span><span>${t("stat_max")} <b>${max.toFixed(1)}</b></span><span class="${cls}">${t("stat_total")} ${total>0?"+":""}${total.toFixed(1)} kg</span>`;
   } else if(bodyWeights.length===1){
-    stats.innerHTML = `<span>atual <b>${bodyWeights[0].kg.toFixed(1)} kg</b></span>`;
+    stats.innerHTML = `<span>${t("stat_current")} <b>${bodyWeights[0].kg.toFixed(1)} kg</b></span>`;
   } else {
-    stats.innerHTML = `<span>Adicione seu primeiro peso</span>`;
+    stats.innerHTML = `<span>${t("add_first_weight")}</span>`;
   }
 }
 
@@ -5209,7 +5473,7 @@ function renderNutricaoTab(){
     if(!kcal && !prot && !carb && !fat) return;
     const nn = getTodayNutrition();
     nn.meals.push({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-                    name: name || 'Refeição', kcal, prot, carb, fat, t: new Date().toISOString() });
+                    name: name || t('default_meal_name'), kcal, prot, carb, fat, t: new Date().toISOString() });
     nn.kcal += kcal; nn.protein += prot; nn.carb += carb; nn.fat += fat;
     await store.set("nutritionLog", nutritionLog);
     haptic();
@@ -5283,7 +5547,7 @@ async function renderPhotoTab(){
     const cell = document.createElement("div");
     cell.className = "photo-cell";
     const selected = compareSelection.includes(p.id);
-    cell.innerHTML = `<img src="${dataUrl}" alt="Foto"><div class="p-date">${fmtDate(p.d)}</div>${comparingPhotos ? `<div class="p-select ${selected?'on':''}">${selected?'✓':''}</div>` : ''}`;
+    cell.innerHTML = `<img src="${dataUrl}" alt="Photo"><div class="p-date">${fmtDate(p.d)}</div>${comparingPhotos ? `<div class="p-select ${selected?'on':''}">${selected?'✓':''}</div>` : ''}`;
     if(comparingPhotos){
       cell.addEventListener("click", async ()=>{
         if(compareSelection.includes(p.id)) compareSelection = compareSelection.filter(x=>x!==p.id);
@@ -5385,7 +5649,7 @@ function renderExerciseManagerList(filterText){
   const q = (filterText||"").toLowerCase();
   const filtered = EXERCISE_DB.filter(ex => !q || ex.name.toLowerCase().includes(q));
   if(!filtered.length){
-    list.innerHTML = '<div class="vol-empty">Nenhum exercício encontrado</div>';
+    list.innerHTML = `<div class="vol-empty">${t("empty_no_exercise_found")}</div>`;
     return;
   }
   list.innerHTML = filtered.map(ex=>{
@@ -5426,14 +5690,14 @@ function closeExerciseEditModal(){ document.getElementById("exerciseEditModal").
 
 async function saveExerciseEditModal(){
   const name = document.getElementById("exEditName").value.trim();
-  if(!name){ alert("Digite um nome para o exercício."); return; }
-  if(/[<>]/.test(name)){ alert("O nome não pode conter os caracteres < ou >."); return; }
+  if(!name){ alert(t("alert_enter_ex_name")); return; }
+  if(/[<>]/.test(name)){ alert(t("alert_no_angle_brackets")); return; }
   const sets = parseInt(document.getElementById("exEditSets").value)||4;
   const reps = document.getElementById("exEditReps").value.trim()||"10";
   const rest = parseInt(document.getElementById("exEditRest").value)||60;
   const equipment = document.getElementById("exEditEquip").value;
   const videoUrl = document.getElementById("exEditVideo").value.trim();
-  if(videoUrl && !/^https?:\/\//i.test(videoUrl)){ alert("O link do vídeo precisa começar com http:// ou https://"); return; }
+  if(videoUrl && !/^https?:\/\//i.test(videoUrl)){ alert(t("alert_video_must_be_url")); return; }
   const muscles = {};
   document.querySelectorAll('#exEditMuscles .muscle-btn.active').forEach(btn=>{ muscles[btn.dataset.muscle] = 1; });
 
@@ -5446,17 +5710,17 @@ async function saveExerciseEditModal(){
   }
 
   const ok = await saveSharedExerciseDB(EXERCISE_DB);
-  if(!ok){ alert("Não foi possível salvar. Verifique sua internet e se você tem permissão de admin."); return; }
+  if(!ok){ alert(t("alert_save_failed_admin")); return; }
   closeExerciseEditModal();
   renderExerciseManagerList(document.getElementById("exMgrSearch").value);
 }
 
 async function deleteExerciseFromManager(){
   if(exMgrEditingIndex === null) return;
-  if(!confirm("Excluir este exercício da base compartilhada?\n\nIsso remove ele da busca para todo mundo a partir de agora, mas NÃO afeta rotinas que já usam esse exercício — elas continuam com sua própria cópia dos dados.")) return;
+  if(!confirm(t("confirm_delete_shared_exercise"))) return;
   EXERCISE_DB.splice(exMgrEditingIndex, 1);
   const ok = await saveSharedExerciseDB(EXERCISE_DB);
-  if(!ok){ alert("Não foi possível salvar a exclusão."); return; }
+  if(!ok){ alert(t("alert_delete_failed")); return; }
   closeExerciseEditModal();
   renderExerciseManagerList(document.getElementById("exMgrSearch").value);
 }
@@ -5465,26 +5729,26 @@ async function deleteExerciseFromManager(){
 async function openUserManager(){
   const modal = document.getElementById("userManagerModal");
   const list = document.getElementById("userMgrList");
-  list.innerHTML = '<div class="vol-empty">Carregando...</div>';
+  list.innerHTML = `<div class="vol-empty">${t("loading_generic")}</div>`;
   modal.classList.add("show");
   let users = [];
   try{
     users = await fetchAllSharedUsers();
   }catch(e){
-    list.innerHTML = `<div class="vol-empty">Erro ao carregar usuários: ${(e&&e.message)||e}</div>`;
+    list.innerHTML = `<div class="vol-empty">${tFmt("error_loading_users",{msg:(e&&e.message)||e})}</div>`;
     return;
   }
-  if(!users.length){ list.innerHTML = '<div class="vol-empty">Nenhum usuário encontrado</div>'; return; }
+  if(!users.length){ list.innerHTML = `<div class="vol-empty">${t("empty_no_users_found")}</div>`; return; }
   list.innerHTML = users.map(u=>{
     const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('pt-BR') : "—";
     const isSelf = currentUser && u.uid === currentUser.uid;
     return `
       <div class="pr-feed-row">
         <div class="pr-feed-info">
-          <div class="pr-feed-name">${u.email||u.uid}${isSelf?' (você)':''}</div>
-          <div class="pr-feed-date">Desde ${joined}${u.blocked?' · bloqueado':''}</div>
+          <div class="pr-feed-name">${u.email||u.uid}${isSelf?' '+t('you_tag'):''}</div>
+          <div class="pr-feed-date">${tFmt('since_date',{date:joined})}${u.blocked?' · '+t('blocked_tag'):''}</div>
         </div>
-        ${isSelf ? '' : `<button class="settings-btn${u.blocked?' primary':' danger'}" data-uid="${u.uid}" data-blocked="${!!u.blocked}" style="width:auto;margin:0;padding:8px 14px">${u.blocked?'Desbloquear':'Bloquear'}</button>`}
+        ${isSelf ? '' : `<button class="settings-btn${u.blocked?' primary':' danger'}" data-uid="${u.uid}" data-blocked="${!!u.blocked}" style="width:auto;margin:0;padding:8px 14px">${u.blocked?t('unblock_btn'):t('block_btn')}</button>`}
       </div>`;
   }).join('');
   list.querySelectorAll('button[data-uid]').forEach(btn=>{
@@ -5493,7 +5757,7 @@ async function openUserManager(){
       const currentlyBlocked = btn.dataset.blocked === "true";
       const ok = await setUserBlocked(uid, !currentlyBlocked);
       if(ok) openUserManager(); // refresh
-      else alert("Não foi possível atualizar o usuário.");
+      else alert(t("alert_user_update_failed"));
     });
   });
 }
@@ -5600,7 +5864,7 @@ function renderExerciseList(){
     div.className = "exercise-item" + (isSelected ? " selected" : "");
     const muscleStr = Object.keys(ex.muscles||{}).map(k=>tMuscleName(k)).join(", ");
     const equipBadge = ex.equipment ? `<div class="equip-badge">${EQUIPMENT_NAMES[ex.equipment]||ex.equipment}</div>` : '';
-    const simBadge = (replaceContext && ex._simScore>0) ? `<div class="sim-badge">🔗 alternativa similar</div>` : '';
+    const simBadge = (replaceContext && ex._simScore>0) ? `<div class="sim-badge">🔗 ${t("similar_alternative")}</div>` : '';
     const checkbox = multiSelectEnabled ? `<div class="ex-item-checkbox" data-role="checkbox">${isSelected ? '✓' : ''}</div>` : '';
     div.innerHTML = `${checkbox}<div class="ex-item-body" data-role="body"><div class="ex-item-name">${tExerciseName(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}</div>`;
 
@@ -5623,14 +5887,14 @@ function renderExerciseList(){
     });
     list.appendChild(div);
   });
-  if(!filtered.length) list.innerHTML = '<div class="vol-empty">Nenhum exercício encontrado</div>';
+  if(!filtered.length) list.innerHTML = `<div class="vol-empty">${t("empty_no_exercise_found")}</div>`;
 
   const addSelectedBtn = document.getElementById("addSelectedExercisesBtn");
   if(multiSelectEnabled && selectedExercisesForAdd.size > 0){
     addSelectedBtn.style.display = "block";
     addSelectedBtn.textContent = selectedExercisesForAdd.size === 1
-      ? `+ Adicionar exercício`
-      : `+ Adicionar ${selectedExercisesForAdd.size} exercícios`;
+      ? t("add_exercise")
+      : tFmt("add_n_exercises",{n:selectedExercisesForAdd.size});
   } else {
     addSelectedBtn.style.display = "none";
   }
@@ -5686,7 +5950,7 @@ window.openExerciseConfig = function(dayKey, listType, index, dbEx, forceDbDefau
   const existing = (index!=null && !forceDbDefaults) ? w[listType][index] : null;
   const source = existing || { name: dbEx.name, sets: parseInt(dbEx.sets)||4, reps: dbEx.reps, rest: dbEx.rest||60, muscles: dbEx.muscles, videoUrl: dbEx.videoUrl || (GEN_VIDEO_MAP[dbEx.name] ? `https://www.youtube.com/watch?v=${GEN_VIDEO_MAP[dbEx.name]}` : "") };
 
-  document.getElementById("configExName").textContent = source.name;
+  document.getElementById("configExName").textContent = tExerciseName(source.name);
   document.getElementById("cfgSets").value = source.sets;
   document.getElementById("cfgReps").value = source.reps;
   document.getElementById("cfgRest").value = source.rest || 60;
@@ -5746,9 +6010,9 @@ function updateInstallRow(){
   if(!row) return;
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if(isStandalone){
-    row.innerHTML = '<div class="settings-label">✅ App instalado</div>';
+    row.innerHTML = `<div class="settings-label">✅ ${t('app_installed')}</div>`;
   } else {
-    row.innerHTML = '<div class="settings-label">Abra em http://localhost:8000 em um servidor local para instalar como app</div>';
+    row.innerHTML = `<div class="settings-label">${t('open_in_browser_to_install')}</div>`;
   }
 }
 
@@ -5833,7 +6097,7 @@ function validateBackupData(data){
     const expected = BACKUP_FIELD_TYPES[key];
     const actual = typeOf(data[key]);
     if(actual !== expected){
-      errors.push(`Campo "${key}" deveria ser do tipo ${expected}, mas veio como ${actual}.`);
+      errors.push(tFmt("field_wrong_type",{key,expected,actual}));
     }
   });
   if(recognizedFields === 0){
@@ -5844,12 +6108,12 @@ function validateBackupData(data){
 
 function summarizeBackupData(data){
   const parts = [];
-  if(data.sessionLog) parts.push(`${data.sessionLog.length} sessões de treino`);
-  if(data.bodyWeights) parts.push(`${data.bodyWeights.length} registros de peso`);
-  if(data.nutritionLog) parts.push(`${Object.keys(data.nutritionLog).length} dias de nutrição`);
-  if(data.photoIndex) parts.push(`${data.photoIndex.length} fotos`);
-  if(data.workouts) parts.push(`rotinas de treino`);
-  return parts.length ? parts.join(", ") : "dados do KYRO";
+  if(data.sessionLog) parts.push(tFmt("summary_sessions",{n:data.sessionLog.length}));
+  if(data.bodyWeights) parts.push(tFmt("summary_weights",{n:data.bodyWeights.length}));
+  if(data.nutritionLog) parts.push(tFmt("summary_nutrition_days",{n:Object.keys(data.nutritionLog).length}));
+  if(data.photoIndex) parts.push(tFmt("summary_photos",{n:data.photoIndex.length}));
+  if(data.workouts) parts.push(t("summary_routines"));
+  return parts.length ? parts.join(", ") : t("summary_kyro_data");
 }
 
 // Merge policy: never destroy what's already here — only add what's missing from the
@@ -5905,7 +6169,7 @@ let pendingImportData = null;
 async function importData(file){
   const MAX_IMPORT_BYTES = 25 * 1024 * 1024; // 25MB — generous for a JSON backup, guards against garbage files
   if(file.size > MAX_IMPORT_BYTES){
-    alert("Esse arquivo é grande demais para ser um backup válido do KYRO.");
+    alert(t("alert_file_too_large"));
     return;
   }
 
@@ -5920,13 +6184,13 @@ async function importData(file){
 
   const errors = validateBackupData(data);
   if(errors.length){
-    alert("Não foi possível importar este arquivo:\n\n" + errors.join("\n"));
+    alert(tFmt("alert_import_failed_list",{list:errors.join("\n")}));
     return;
   }
 
   pendingImportData = data;
   document.getElementById("importChoiceSummary").textContent =
-    `Este arquivo contém: ${summarizeBackupData(data)}. Antes de aplicar qualquer opção abaixo, uma cópia de segurança dos seus dados atuais é baixada automaticamente.`;
+    tFmt("import_summary_text",{summary:summarizeBackupData(data)});
   document.getElementById("importChoiceModal").classList.add("show");
 }
 
@@ -6010,13 +6274,13 @@ function startRestTimer(seconds, exName){
           if(navigator.serviceWorker && navigator.serviceWorker.ready){
             navigator.serviceWorker.ready.then(reg=>{
               if(reg && reg.showNotification){
-                reg.showNotification("Descanso finalizado 💪", { body: `Hora de continuar: ${exName}`, tag:"rest-timer", vibrate:[100,50,100] });
+                reg.showNotification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}), tag:"rest-timer", vibrate:[100,50,100] });
               } else {
-                new Notification("Descanso finalizado 💪", { body: `Hora de continuar: ${exName}` });
+                new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}) });
               }
-            }).catch(()=>{ try{ new Notification("Descanso finalizado 💪", { body: `Hora de continuar: ${exName}` }); }catch(e){} });
+            }).catch(()=>{ try{ new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}) }); }catch(e){} });
           } else {
-            new Notification("Descanso finalizado 💪", { body: `Hora de continuar: ${exName}` });
+            new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}) });
           }
         }catch(e){}
       }, seconds*1000);
@@ -6173,7 +6437,7 @@ async function shareWorkoutImage(){
   ctx.fillText(".", 72+wmWidth, 100);
 
   // ---- Completion badge (top-right) ----
-  const badgeText = pct>=100 ? "✅ COMPLETO" : `⏳ ${pct}% CONCLUÍDO`;
+  const badgeText = pct>=100 ? `✅ ${t("status_complete")}` : `⏳ ${pct}% ${t("status_done")}`;
   ctx.font = "700 26px 'JetBrains Mono', monospace";
   const badgeW = ctx.measureText(badgeText).width + 48;
   ctx.fillStyle = pct>=100 ? "rgba(215,255,61,.15)" : "rgba(77,195,255,.15)";
@@ -6197,7 +6461,7 @@ async function shareWorkoutImage(){
   // ---- Streak flame badge ----
   let statsTop = 440;
   if(streak >= 2){
-    const streakText = `🔥 ${streak} dias seguidos treinando`;
+    const streakText = `🔥 ${tFmt("streak_msg_full",{n:streak})}`;
     ctx.font = "700 30px 'JetBrains Mono', monospace";
     const stW = ctx.measureText(streakText).width + 56;
     const stX = W/2 - stW/2;
@@ -6259,7 +6523,7 @@ async function shareWorkoutImage(){
   if(exStatus.length > maxShow){
     ctx.fillStyle = "#565b61";
     ctx.font = "30px Arial";
-    ctx.fillText(`+ ${exStatus.length - maxShow} exercício(s)`, 118, ly);
+    ctx.fillText(tFmt("share_more_exercises",{n:exStatus.length - maxShow}), 118, ly);
     ly += 40;
   }
 
@@ -6276,7 +6540,7 @@ async function shareWorkoutImage(){
   canvas.toBlob(async (blob)=>{
     const file = new File([blob], "treino.png", {type:"image/png"});
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({ files:[file], title: w.title, text: `Treino de ${w.title} concluído! 💪` }); return; }catch(e){ /* user cancelled or unsupported, fall through to download */ }
+      try{ await navigator.share({ files:[file], title: w.title, text: tFmt("share_workout_done_text",{title:w.title}) }); return; }catch(e){ /* user cancelled or unsupported, fall through to download */ }
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -6336,7 +6600,7 @@ document.getElementById("weeklyReportCloseBtn").addEventListener("click", ()=> d
 document.getElementById("importChoiceCloseBtn").addEventListener("click", ()=>{ document.getElementById("importChoiceModal").classList.remove("show"); pendingImportData = null; });
 document.getElementById("importMergeBtn").addEventListener("click", ()=> applyImport("merge"));
 document.getElementById("importReplaceBtn").addEventListener("click", ()=>{
-  if(confirm("Isso vai SUBSTITUIR todos os seus dados atuais pelo conteúdo deste arquivo. Continuar?")) applyImport("replace");
+  if(confirm(t("confirm_replace_all_data"))) applyImport("replace");
 });
 
 // Delegated click handler for any "watch how-to video" trigger, wherever it's rendered
@@ -6403,6 +6667,7 @@ document.addEventListener("keydown", (e)=>{
 })();
 
 initAuthScreenEvents();
+applyAuthScreenTranslations();
 
 let appInitialized = false;
 
