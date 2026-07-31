@@ -302,7 +302,6 @@
 
   .input-row{display:flex;gap:8px;margin-bottom:14px}
   .input-row input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px}
-  .input-row input#weightDateInput{flex:0 0 128px;padding:12px 8px;font-size:13px}
   .input-row input:focus{outline:none;border-color:var(--volt-dim)}
   .add-btn{background:var(--volt);color:#0b0c0e;border:none;border-radius:12px;padding:12px 18px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
 
@@ -760,8 +759,10 @@
       <div id="sub-suplementos" style="display:none"></div>
 
       <div id="sub-peso" style="display:none">
+        <div class="input-row" style="margin-bottom:8px">
+          <input type="date" id="weightDateInput" style="flex:1">
+        </div>
         <div class="input-row">
-          <input type="date" id="weightDateInput">
           <input type="text" inputmode="decimal" id="weightInput" placeholder="Peso de hoje (kg)">
           <button class="add-btn" id="weightAdd">Salvar</button>
         </div>
