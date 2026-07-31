@@ -1661,7 +1661,7 @@ const UI_STRINGS = {
     rest_day:"Dia de descanso", start_workout:"Iniciar treino", finish_workout:"Finalizar treino",
     restart_timer:"🔁 Reiniciar cronômetro", start_label:"INÍCIO", end_label:"FIM", duration_label:"DURAÇÃO",
     workout_label:"TREINO", add_exercise:"+ Adicionar exercício", add_set:"+ Adicionar série",
-    series_short:"Série", kg_short:"Kg", reps_short:"Reps", how_to:"▶️ Como fazer", how_to_photo:"📸 Ver foto",
+    series_short:"Série", kg_short:"Kg", reps_short:"Reps", how_to:"▶️ Como fazer", how_to_photo:"📸 Ver foto", progress_label_default:"Treino",
     swap_auto:"Trocar automaticamente", swap:"↔️ Trocar", notes_btn:"📝", shuffle_btn:"🔀",
     remove_exercise:"Remover exercício", warmup_label:"🎯",
     settings_account:"Conta", settings_app:"App", settings_data:"Dados",
@@ -1816,7 +1816,7 @@ const UI_STRINGS = {
     summary_sessions:"{n} sessões de treino", summary_weights:"{n} registros de peso",
     summary_nutrition_days:"{n} dias de nutrição", summary_photos:"{n} fotos",
     summary_routines:"rotinas de treino", summary_kyro_data:"dados do KYRO",
-    this_week_suffix:"nesta semana", share_workout_done_text:"Treino de {title} concluído! 💪",
+    this_week_suffix:"nesta semana", share_workout_done_text:"Treino de {title} concluído! 💪", share_image_footer:"treino registrado no KYRO",
     share_more_exercises:"+ {n} exercício(s)", add_n_exercises:"+ Adicionar {n} exercícios",
     repeat_last:"Repetir última", group_superset:"Agrupar em superconjunto",
     similar_alternative:"alternativa similar", superset_label:"Superconjunto {letter} — descanse só ao final das {count}",
@@ -1859,7 +1859,7 @@ const UI_STRINGS = {
     rest_day:"Rest day", start_workout:"Start workout", finish_workout:"Finish workout",
     restart_timer:"🔁 Restart timer", start_label:"START", end_label:"END", duration_label:"DURATION",
     workout_label:"WORKOUT", add_exercise:"+ Add exercise", add_set:"+ Add set",
-    series_short:"Set", kg_short:"Kg", reps_short:"Reps", how_to:"▶️ How to do it", how_to_photo:"📸 View photo",
+    series_short:"Set", kg_short:"Kg", reps_short:"Reps", how_to:"▶️ How to do it", how_to_photo:"📸 View photo", progress_label_default:"Workout",
     swap_auto:"Auto-swap", swap:"↔️ Swap", notes_btn:"📝", shuffle_btn:"🔀",
     remove_exercise:"Remove exercise", warmup_label:"🎯",
     settings_account:"Account", settings_app:"App", settings_data:"Data",
@@ -2014,7 +2014,7 @@ const UI_STRINGS = {
     summary_sessions:"{n} workout sessions", summary_weights:"{n} weight entries",
     summary_nutrition_days:"{n} days of nutrition", summary_photos:"{n} photos",
     summary_routines:"workout routines", summary_kyro_data:"KYRO data",
-    this_week_suffix:"this week", share_workout_done_text:"{title} workout complete! 💪",
+    this_week_suffix:"this week", share_workout_done_text:"{title} workout complete! 💪", share_image_footer:"workout logged on KYRO",
     share_more_exercises:"+ {n} exercise(s)", add_n_exercises:"+ Add {n} exercises",
     repeat_last:"Repeat last", group_superset:"Group into superset",
     similar_alternative:"similar alternative", superset_label:"Superset {letter} — rest only after all {count}",
@@ -2069,6 +2069,10 @@ const DAY_LABELS_SHORT_EN = {domingo:"SUN",segunda:"MON",terca:"TUE",quarta:"WED
 const DAY_LABELS_FULL_EN = {domingo:"Sunday",segunda:"Monday",terca:"Tuesday",quarta:"Wednesday",quinta:"Thursday",sexta:"Friday",sabado:"Saturday"};
 function tDayShort(key){ return currentLang==="en" ? DAY_LABELS_SHORT_EN[key] : DAY_LABELS_SHORT[key]; }
 function tDayFull(key){ return currentLang==="en" ? DAY_LABELS_FULL_EN[key] : DAY_LABELS_FULL[key]; }
+// Translates a workout's display title. Built-in plan templates carry a titleEn field;
+// custom routines the person typed themselves don't (there's no reliable way to auto-translate
+// free text), so this just falls back to the original title in that case.
+function tWorkoutTitle(w){ if(!w) return ""; return (currentLang==="en" && w.titleEn) ? w.titleEn : (w.title||""); }
 const LS_PREFIX = "ramon_log_";
 
 // ==================== FIREBASE ====================
@@ -2728,37 +2732,37 @@ const WORKOUT_TEMPLATES = {
       const cardio = "Cardio: 20-30 min após a musculação.";
       return {
         domingo: null,
-        segunda: { title:"Push A (Peito/Ombro/Tríceps)", cardioNote: cardio, exercises:[
+        segunda: { title:"Push A (Peito/Ombro/Tríceps)", titleEn:"Push A (Chest/Shoulders/Triceps)", cardioNote: cardio, exercises:[
           {name:"Supino Reto",sets:4,reps:"6-8",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:"https://www.youtube.com/watch?v=vIGvt-vgrvY"},
           {name:"Desenvolvimento",sets:4,reps:"8-10",rest:90,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
           {name:"Elevação Lateral",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"},
           {name:"Tríceps Corda",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=YQ6MRBeyIAE"}
         ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]},
-        terca: { title:"Pull A (Costas/Bíceps)", cardioNote: cardio, exercises:[
+        terca: { title:"Pull A (Costas/Bíceps)", titleEn:"Pull A (Back/Biceps)", cardioNote: cardio, exercises:[
           {name:"Puxada Frente",sets:4,reps:"8-10",rest:90,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=yzlQK3s-a_Y"},
           {name:"Remada Baixa",sets:4,reps:"10",rest:90,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=2YebbYuuBJQ"},
           {name:"Rosca Direta",sets:3,reps:"8-10",rest:75,muscles:{biceps:1,forearms:.3},videoUrl:"https://www.youtube.com/watch?v=Et1wgGMGW8w"},
           {name:"Face Pull",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,traps:.5,upperback:.3},videoUrl:"https://www.youtube.com/watch?v=On1ysBmSWrA"}
         ], abs:[ {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"} ]},
-        quarta: { title:"Legs A", cardioNote: cardio, exercises:[
+        quarta: { title:"Legs A", titleEn:"Legs A", cardioNote: cardio, exercises:[
           {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
           {name:"Agachamento Búlgaro",sets:3,reps:"10-12 cada",rest:75,muscles:{quads:1,glutes:.7},videoUrl:"https://www.youtube.com/watch?v=a3-bQbTdA_0"},
           {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:"https://www.youtube.com/watch?v=8Nat6GRiEoc"},
           {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=qWHH0We_9r0"}
         ], abs:[]},
-        quinta: { title:"Push B (Ombro/Peito/Tríceps)", cardioNote: cardio, exercises:[
+        quinta: { title:"Push B (Ombro/Peito/Tríceps)", titleEn:"Push B (Shoulders/Chest/Triceps)", cardioNote: cardio, exercises:[
           {name:"Supino Inclinado",sets:4,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
           {name:"Desenvolvimento Halteres",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
           {name:"Crucifixo Invertido com Halteres",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,upperback:.4,traps:.2},videoUrl:"https://www.youtube.com/watch?v=vVDeOaw1T5g"},
           {name:"Tríceps Testa",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=r0Xf7A3k5e4"}
         ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]},
-        sexta: { title:"Pull B (Costas/Bíceps)", cardioNote: cardio, exercises:[
+        sexta: { title:"Pull B (Costas/Bíceps)", titleEn:"Pull B (Back/Biceps)", cardioNote: cardio, exercises:[
           {name:"Puxada Aberta",sets:3,reps:"10-12",rest:60,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=hTaY3y09eLc"},
           {name:"Remada Unilateral",sets:3,reps:"10-12",rest:75,muscles:{upperback:1,lats:.4},videoUrl:"https://www.youtube.com/watch?v=JE3XUqMyHXo"},
           {name:"Rosca Martelo",sets:3,reps:"10-12",rest:60,muscles:{biceps:1,forearms:.6},videoUrl:"https://www.youtube.com/watch?v=5vPGH1uTtbs"},
           {name:"Encolhimento",sets:3,reps:"12",rest:60,muscles:{traps:1},videoUrl:"https://www.youtube.com/watch?v=cZLgyI2OKcs"}
         ], abs:[ {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"} ]},
-        sabado: { title:"Legs B", cardioNote: cardio, exercises:[
+        sabado: { title:"Legs B", titleEn:"Legs B", cardioNote: cardio, exercises:[
           {name:"Stiff",sets:3,reps:"10",rest:90,muscles:{hamstrings:1,glutes:.6,lowerback:.5},videoUrl:"https://www.youtube.com/watch?v=BHfY5-jGNDA"},
           {name:"Extensora",sets:3,reps:"15",rest:60,muscles:{quads:1},videoUrl:"https://www.youtube.com/watch?v=Svq2T3L9oKo"},
           {name:"Panturrilha Sentada",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=Bx6elAOgxMI"}
@@ -2850,7 +2854,7 @@ function buildDefaultWorkouts(){
   const cardio = "Cardio: 20-30 min após a musculação.";
   return {
     domingo: null,
-    segunda: { title: "Peito + Tríceps + Abdômen", cardioNote: cardio, exercises: [
+    segunda: { title: "Peito + Tríceps + Abdômen", titleEn: "Chest + Triceps + Abs", cardioNote: cardio, exercises: [
       {name:"Supino Reto",sets:4,reps:"6-8",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:"https://www.youtube.com/watch?v=vIGvt-vgrvY"},
       {name:"Supino Inclinado",sets:4,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
       {name:"Crucifixo Polia",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:"https://www.youtube.com/watch?v=mNWyWEJNCDM"},
@@ -2862,7 +2866,7 @@ function buildDefaultWorkouts(){
       {name:"Elevação de Pernas",sets:4,reps:"12-15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=oq4Xb_xI618"},
       {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"}
     ] },
-    terca: { title: "Costas + Bíceps", cardioNote: cardio, exercises: [
+    terca: { title: "Costas + Bíceps", titleEn: "Back + Biceps", cardioNote: cardio, exercises: [
       {name:"Puxada Frente",sets:4,reps:"8-10",rest:90,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=yzlQK3s-a_Y"},
       {name:"Remada Baixa",sets:4,reps:"10",rest:90,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=2YebbYuuBJQ"},
       {name:"Remada Unilateral",sets:3,reps:"10-12",rest:75,muscles:{upperback:1,lats:.4},videoUrl:"https://www.youtube.com/watch?v=JE3XUqMyHXo"},
@@ -2871,7 +2875,7 @@ function buildDefaultWorkouts(){
       {name:"Rosca Inclinada",sets:3,reps:"10-12",rest:75,muscles:{biceps:1},videoUrl:"https://www.youtube.com/watch?v=tiWfdwgbrBQ"},
       {name:"Rosca Scott",sets:3,reps:"12",rest:60,muscles:{biceps:1},videoUrl:"https://www.youtube.com/watch?v=wWKrF4iSU_8"}
     ], abs: [] },
-    quarta: { title: "Pernas", cardioNote: cardio, exercises: [
+    quarta: { title: "Pernas", titleEn: "Legs", cardioNote: cardio, exercises: [
       {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
       {name:"Extensora",sets:3,reps:"15",rest:60,muscles:{quads:1},videoUrl:"https://www.youtube.com/watch?v=Svq2T3L9oKo"},
       {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:"https://www.youtube.com/watch?v=8Nat6GRiEoc"},
@@ -2879,7 +2883,7 @@ function buildDefaultWorkouts(){
       {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=qWHH0We_9r0"},
       {name:"Panturrilha Sentada",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=Bx6elAOgxMI"}
     ], abs: [] },
-    quinta: { title: "Ombros + Trapézio + Abdômen", cardioNote: cardio, exercises: [
+    quinta: { title: "Ombros + Trapézio + Abdômen", titleEn: "Shoulders + Traps + Abs", cardioNote: cardio, exercises: [
       {name:"Desenvolvimento",sets:4,reps:"8-10",rest:90,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
       {name:"Elevação Lateral",sets:4,reps:"12",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"},
       {name:"Crucifixo Invertido Polia",sets:3,reps:"12-15",rest:60,muscles:{shoulders:1,upperback:.5,traps:.3},videoUrl:"https://www.youtube.com/watch?v=vVDeOaw1T5g"},
@@ -2889,7 +2893,7 @@ function buildDefaultWorkouts(){
       {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"},
       {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"}
     ] },
-    sexta: { title: "Upper Body (Volume)", cardioNote: cardio, exercises: [
+    sexta: { title: "Upper Body (Volume)", titleEn: "Upper Body (Volume)", cardioNote: cardio, exercises: [
       {name:"Supino Inclinado",sets:3,reps:"8-10",rest:75,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
       {name:"Remada",sets:3,reps:"8-10",rest:75,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=mxvS-iwm53o"},
       {name:"Desenvolvimento Halteres",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
@@ -2910,9 +2914,11 @@ function isAbsExercise(muscles){
 }
 
 
-async function init(){
-  document.getElementById("todayDate").textContent = new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR", {weekday:'long', day:'2-digit', month:'short'});
-
+// Loads (or reloads) all of the user's data from storage and assigns it to the app's
+// in-memory state. Safe to call more than once — unlike init(), it never re-binds event
+// listeners and, on a reload, it deliberately leaves `currentDay` alone so a refresh
+// doesn't yank the person away from the day they're currently looking at.
+async function loadUserData(isInitialLoad){
   const [
     savedWorkouts, savedState, savedHistory, savedCompletedSessions,
     savedBodyWeights, savedBodyMeasures, savedPhotoIndex, savedExerciseHistory,
@@ -2983,7 +2989,13 @@ async function init(){
   nutritionLog = savedNutritionLog || {};
   profile = savedProfile || { height: null, sex: "M" };
 
-  currentDay = DAY_KEYS[new Date().getDay()];
+  if(isInitialLoad) currentDay = DAY_KEYS[new Date().getDay()];
+}
+
+async function init(){
+  document.getElementById("todayDate").textContent = new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR", {weekday:'long', day:'2-digit', month:'short'});
+
+  await loadUserData(true);
 
   applyStaticTranslations();
   bindPageNav();
@@ -3154,6 +3166,7 @@ function applyStaticTranslations(){
   document.getElementById("exportCsvBtn").textContent = t("export_csv");
   document.querySelector('label[for="importInput"]').textContent = t("import_data");
   document.getElementById("resetAllBtn").textContent = t("delete_all");
+  document.getElementById("logoutBtn").textContent = t("logout");
   document.getElementById("aboutBlockText").textContent = t("about_footer");
   document.getElementById("todayDate").textContent = new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR", {weekday:'long', day:'2-digit', month:'short'});
   document.getElementById("lblContaGroup").textContent = t("lbl_conta_group");
@@ -3248,7 +3261,7 @@ function buildDaySwitch(){
     const btn = document.createElement("button");
     if(dayKey===currentDay) btn.classList.add("active");
     if(!w) btn.classList.add("restday");
-    const shortTitle = w ? (w.title||"").split(" + ")[0].split(" ")[0] : t("rest_short");
+    const shortTitle = w ? tWorkoutTitle(w).split(" + ")[0].split(" ")[0] : t("rest_short");
     btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${shortTitle}</span>`;
     btn.addEventListener("click", ()=>{
       currentDay = dayKey;
@@ -3316,7 +3329,7 @@ function renderDay(){
   }
 
   document.getElementById("sessionTimer").style.display = "flex";
-  document.getElementById("progLabel").textContent = w.title || "Treino";
+  document.getElementById("progLabel").textContent = tWorkoutTitle(w) || t("progress_label_default");
   const mainLabel = document.createElement("div");
   mainLabel.className = "section-label";
   mainLabel.textContent = "Exercícios";
@@ -4586,7 +4599,7 @@ function renderRotinas(){
     btn.style.position = "relative";
     if(dayKey===rotinaSelectedDay) btn.classList.add("active");
     if(!w) btn.classList.add("restday");
-    const shortTitle = w ? (w.title||"").split(" + ")[0].split(" ")[0] : t("rest_short");
+    const shortTitle = w ? tWorkoutTitle(w).split(" + ")[0].split(" ")[0] : t("rest_short");
     btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${shortTitle}</span>${w ? `<span class="day-del-x" title="${t("delete_routine_tooltip")}">✕</span>` : ''}`;
     btn.addEventListener("click", ()=>{ rotinaSelectedDay = dayKey; renderRotinas(); });
     const delX = btn.querySelector(".day-del-x");
@@ -5205,7 +5218,7 @@ function renderHomePage(){
   if(!w){
     workoutCardHtml = `<div class="home-card home-next-workout"><div class="home-card-label">${t("home_today")}</div><div class="home-empty-state">${t("home_no_workout_today")}</div></div>`;
   } else if(alreadyTrainedToday){
-    workoutCardHtml = `<div class="home-card home-next-workout"><div class="home-card-label">${t("home_today")}</div><div class="home-workout-title">✅ ${escapeHtml(w.title||"")}</div><div class="home-workout-muscles">${t("home_already_trained")}</div></div>`;
+    workoutCardHtml = `<div class="home-card home-next-workout"><div class="home-card-label">${t("home_today")}</div><div class="home-workout-title">✅ ${escapeHtml(tWorkoutTitle(w))}</div><div class="home-workout-muscles">${t("home_already_trained")}</div></div>`;
   } else {
     const muscleSet = new Set();
     (w.exercises||[]).forEach(ex=>{ if(ex.muscles) Object.keys(ex.muscles).forEach(m=>muscleSet.add(m)); });
@@ -5213,7 +5226,7 @@ function renderHomePage(){
     workoutCardHtml = `
       <div class="home-card home-next-workout">
         <div class="home-card-label">${t("home_today")}</div>
-        <div class="home-workout-title">${escapeHtml(w.title||"")}</div>
+        <div class="home-workout-title">${escapeHtml(tWorkoutTitle(w))}</div>
         <div class="home-workout-muscles">${muscleNames}</div>
         <button class="settings-btn primary" id="homeStartWorkoutBtn">${t("home_start_workout")}</button>
       </div>`;
@@ -6916,8 +6929,8 @@ function showWorkoutSummary(isFullComplete){
 
   document.getElementById("celebrateTitle").innerHTML = isFullComplete ? t("complete_title") : t("registered_title");
   document.getElementById("celebrateSub").textContent = isFullComplete
-    ? `${w.title.toLowerCase()} ${tFmt("finished_msg",{dur:durationText})}`
-    : tFmt("partial_msg", {pct, title:w.title.toLowerCase(), dur:durationText});
+    ? `${tWorkoutTitle(w).toLowerCase()} ${tFmt("finished_msg",{dur:durationText})}`
+    : tFmt("partial_msg", {pct, title:tWorkoutTitle(w).toLowerCase(), dur:durationText});
 
   const { current } = computeStreaks();
   const streakEl = document.getElementById("celebrateStreak");
@@ -7023,7 +7036,7 @@ async function shareWorkoutImage(){
   ctx.textAlign = "center";
   ctx.fillStyle = "#f5f6f7";
   ctx.font = "800 76px Arial";
-  wrapCanvasText(ctx, w.title.toUpperCase(), W/2, 230, 900, 82);
+  wrapCanvasText(ctx, tWorkoutTitle(w).toUpperCase(), W/2, 230, 900, 82);
 
   ctx.fillStyle = "#8b9096";
   ctx.font = "32px 'JetBrains Mono', monospace";
@@ -7106,12 +7119,12 @@ async function shareWorkoutImage(){
   ctx.beginPath(); ctx.moveTo(W/2-260, H-110); ctx.lineTo(W/2+260, H-110); ctx.stroke();
   ctx.fillStyle = "#565b61";
   ctx.font = "26px 'JetBrains Mono', monospace";
-  ctx.fillText("treino registrado no KYRO", W/2, H-70);
+  ctx.fillText(t("share_image_footer"), W/2, H-70);
 
   canvas.toBlob(async (blob)=>{
     const file = new File([blob], "treino.png", {type:"image/png"});
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({ files:[file], title: w.title, text: tFmt("share_workout_done_text",{title:w.title}) }); return; }catch(e){ /* user cancelled or unsupported, fall through to download */ }
+      try{ await navigator.share({ files:[file], title: tWorkoutTitle(w), text: tFmt("share_workout_done_text",{title:tWorkoutTitle(w)}) }); return; }catch(e){ /* user cancelled or unsupported, fall through to download */ }
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -7212,6 +7225,23 @@ document.addEventListener("keydown", (e)=>{
 });
 
 // ---- Pull-to-refresh ----
+// Used by pull-to-refresh: re-syncs data from storage and re-renders wherever the person
+// currently is, instead of a full location.reload() (which briefly drops back to the auth
+// screen while Firebase re-establishes the session — jarring, and not what "refresh" should do).
+async function softRefreshCurrentView(){
+  await loadUserData(false);
+  buildDaySwitch();
+  renderDay();
+  renderReadinessCard();
+  renderHomePage();
+  updateInstallRow();
+  const activePage = document.querySelector(".page.active");
+  const pageName = activePage ? activePage.dataset.page : null;
+  if(pageName === "rotinas") renderRotinas();
+  if(pageName === "progresso") renderProgSub();
+  if(pageName === "ajustes"){ refreshAccountRow(); refreshNotifStatus(); }
+}
+
 (function setupPullToRefresh(){
   const indicator = document.getElementById("pullRefresh");
   const PULL_THRESHOLD = 70, MAX_PULL = 110;
@@ -7249,7 +7279,13 @@ document.addEventListener("keydown", (e)=>{
       indicator.style.transform = "translateY(0px)";
       indicator.classList.add("spin");
       haptic(30);
-      setTimeout(()=> location.reload(), 350);
+      softRefreshCurrentView().finally(()=>{
+        setTimeout(()=>{
+          indicator.classList.remove("spin");
+          indicator.style.transform = "";
+          refreshing = false;
+        }, 350);
+      });
     } else {
       indicator.style.transform = "";
     }
