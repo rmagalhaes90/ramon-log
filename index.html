@@ -760,10 +760,10 @@
 
       <div id="sub-peso" style="display:none">
         <div class="input-row" style="margin-bottom:8px">
-          <input type="date" id="weightDateInput" style="flex:1">
+          <input type="date" id="weightDateInput" style="flex:1" min="2000-01-01">
         </div>
         <div class="input-row">
-          <input type="text" inputmode="decimal" id="weightInput" placeholder="Peso de hoje (kg)">
+          <input type="text" inputmode="decimal" maxlength="10" id="weightInput" placeholder="Peso de hoje (kg)">
           <button class="add-btn" id="weightAdd">Salvar</button>
         </div>
         <div class="weight-hero" id="weightHero"></div>
@@ -987,8 +987,8 @@
       <h3 id="lblPlateCalcTitle">Calculadora de Anilhas</h3>
       <button class="close-btn" onclick="closePlateCalc()" aria-label="Fechar">✕</button>
     </div>
-    <div class="config-field"><label id="lblPcTarget">Peso total alvo (kg)</label><input type="text" inputmode="decimal" id="pcTarget" placeholder="ex: 80"></div>
-    <div class="config-field"><label id="lblPcBar">Peso da barra (kg)</label><input type="text" inputmode="decimal" id="pcBar" value="20"></div>
+    <div class="config-field"><label id="lblPcTarget">Peso total alvo (kg)</label><input type="text" inputmode="decimal" maxlength="7" id="pcTarget" placeholder="ex: 80"></div>
+    <div class="config-field"><label id="lblPcBar">Peso da barra (kg)</label><input type="text" inputmode="decimal" maxlength="7" id="pcBar" value="20"></div>
     <div id="pcResult"></div>
   </div>
 </div>
@@ -1776,7 +1776,7 @@ const UI_STRINGS = {
     loading_generic:"Carregando...",
     error_loading_users:"Erro ao carregar usuários: {msg}",
     empty_no_users_found:"Nenhum usuário encontrado",
-    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}", alert_weight_too_high:"Peso inválido — o máximo permitido é 500 kg (1102 lb). Confira o valor digitado.",
+    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}", alert_weight_too_high:"Peso inválido — o máximo permitido é 500 kg (1102 lb). Confira o valor digitado.", alert_weight_too_low:"Peso inválido — o mínimo permitido é 20 kg (44 lb). Confira o valor digitado.", alert_weight_invalid_format:"Formato de peso inválido. Digite apenas números, como 82.5.", alert_measure_out_of_range:"Uma ou mais medidas parecem fora do normal (entre 5 e 250 cm) e não foram salvas.", alert_height_out_of_range:"Altura inválida — deve estar entre 50 e 250 cm.",
     alert_cache_clear_error:"Não foi possível limpar o cache: {msg}",
     alert_enter_ex_name:"Digite um nome para o exercício.",
     alert_no_angle_brackets:"O nome não pode conter os caracteres < ou >.",
@@ -1974,7 +1974,7 @@ const UI_STRINGS = {
     loading_generic:"Loading...",
     error_loading_users:"Error loading users: {msg}",
     empty_no_users_found:"No users found",
-    alert_reset_pw_sent:"We sent a password reset link to {email}", alert_weight_too_high:"Invalid weight — the maximum allowed is 500 kg (1102 lb). Check the value you entered.",
+    alert_reset_pw_sent:"We sent a password reset link to {email}", alert_weight_too_high:"Invalid weight — the maximum allowed is 500 kg (1102 lb). Check the value you entered.", alert_weight_too_low:"Invalid weight — the minimum allowed is 20 kg (44 lb). Check the value you entered.", alert_weight_invalid_format:"Invalid weight format. Enter numbers only, like 82.5.", alert_measure_out_of_range:"One or more measurements look out of range (between 5 and 250 cm) and weren't saved.", alert_height_out_of_range:"Invalid height — must be between 50 and 250 cm.",
     alert_cache_clear_error:"Couldn't clear the cache: {msg}",
     alert_enter_ex_name:"Enter a name for the exercise.",
     alert_no_angle_brackets:"The name can't contain the characters < or >.",
@@ -3267,7 +3267,7 @@ function buildDaySwitch(){
     if(dayKey===currentDay) btn.classList.add("active");
     if(!w) btn.classList.add("restday");
     const shortTitle = w ? tWorkoutTitle(w).split(" + ")[0].split(" ")[0] : t("rest_short");
-    btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${shortTitle}</span>`;
+    btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${escapeHtml(shortTitle)}</span>`;
     btn.addEventListener("click", ()=>{
       currentDay = dayKey;
       document.querySelectorAll("#dayswitch button").forEach(b=>b.classList.remove("active"));
@@ -3682,6 +3682,7 @@ function buildExCard(ex, i){
     kg.className = "set-input";
     kg.type = "text";
     kg.inputMode = "decimal";
+    kg.maxLength = 7;
     kg.placeholder = "kg";
     kg.value = (s.exKg[i] && s.exKg[i][k]) || "";
 
@@ -3689,6 +3690,7 @@ function buildExCard(ex, i){
     reps.className = "set-input";
     reps.type = "text";
     reps.inputMode = "numeric";
+    reps.maxLength = 3;
     reps.placeholder = ex.reps;
     reps.value = (s.exReps && s.exReps[i] && s.exReps[i][k]) || "";
 
@@ -4103,7 +4105,7 @@ function computePlates(){
   const target = parseFloat(document.getElementById("pcTarget").value.replace(",","."));
   const bar = parseFloat(document.getElementById("pcBar").value.replace(",",".")) || 20;
   const result = document.getElementById("pcResult");
-  if(isNaN(target) || target<=bar){
+  if(!isFinite(target) || !isFinite(bar) || target<=bar || target>1000 || bar>1000 || bar<0){
     result.innerHTML = `<div class="vol-empty" style="padding:16px 4px">${t("pc_enter_target")}</div>`;
     return;
   }
@@ -4177,11 +4179,11 @@ function buildAbsCard(ex, i){
     numSpan.textContent = k+1;
 
     const kg = document.createElement("input");
-    kg.className = "set-input"; kg.type = "text"; kg.inputMode = "decimal";
+    kg.className = "set-input"; kg.type = "text"; kg.inputMode = "decimal"; kg.maxLength = 7;
     kg.placeholder = "kg"; kg.value = s.absKg[i][k] || "";
 
     const reps = document.createElement("input");
-    reps.className = "set-input"; reps.type = "text"; reps.inputMode = "numeric";
+    reps.className = "set-input"; reps.type = "text"; reps.inputMode = "numeric"; reps.maxLength = 3;
     reps.placeholder = ex.reps; reps.value = s.absReps[i][k] || "";
 
     const checkWrap = document.createElement("div");
@@ -4380,6 +4382,13 @@ async function toggleWorkoutTimer(){
 
 // ---- Estimated 1RM (Epley formula) ----
 function calcE1RM(kg, reps){ return kg * (1 + reps/30); }
+// A set only counts toward history, records, and volume if both values are finite, positive,
+// and within a generous-but-sane real-world range. This guards derived stats (PRs, weekly
+// volume, share images) from garbage/mistyped input without interrupting live typing —
+// nothing blocks the person from typing, a wildly out-of-range set just silently doesn't count.
+function isRealisticSet(kg, reps){
+  return isFinite(kg) && isFinite(reps) && kg>0 && kg<=1000 && reps>0 && reps<=200;
+}
 
 // ---- Personal Record detection (live, called when a set is checked) ----
 // ---- Compute the true best weight/e1RM from saved session history alone (optionally excluding today,
@@ -4411,7 +4420,7 @@ function getCheckedSetsToday(listType, index){
     if(!isDone) return;
     const kg = parseFloat(String((kgArr||[])[k]).replace(",","."));
     const reps = parseInt((repsArr||[])[k]);
-    if(!isNaN(kg) && !isNaN(reps) && kg>0 && reps>0) out.push({kg, reps});
+    if(isRealisticSet(kg, reps)) out.push({kg, reps});
   });
   return out;
 }
@@ -4513,7 +4522,7 @@ async function recordSessionData(dayKey){
       if(!done) return;
       const kg = parseFloat((s.exKg[i]||[])[k]);
       const reps = parseInt((s.exReps[i]||[])[k]);
-      if(!isNaN(kg) && !isNaN(reps) && kg>0 && reps>0){
+      if(isRealisticSet(kg, reps)){
         setsData.push({kg, reps});
         totalVolume += kg*reps;
       }
@@ -4535,7 +4544,7 @@ async function recordSessionData(dayKey){
       if(!doneSet) return;
       const kg = parseFloat((s.absKg[i]||[])[k]);
       const reps = parseInt((s.absReps[i]||[])[k]);
-      if(!isNaN(kg) && kg>0 && !isNaN(reps) && reps>0){
+      if(isRealisticSet(kg, reps)){
         setsData.push({kg, reps});
         totalVolume += kg*reps;
       } else {
@@ -4605,7 +4614,7 @@ function renderRotinas(){
     if(dayKey===rotinaSelectedDay) btn.classList.add("active");
     if(!w) btn.classList.add("restday");
     const shortTitle = w ? tWorkoutTitle(w).split(" + ")[0].split(" ")[0] : t("rest_short");
-    btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${shortTitle}</span>${w ? `<span class="day-del-x" title="${t("delete_routine_tooltip")}">✕</span>` : ''}`;
+    btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${escapeHtml(shortTitle)}</span>${w ? `<span class="day-del-x" title="${t("delete_routine_tooltip")}">✕</span>` : ''}`;
     btn.addEventListener("click", ()=>{ rotinaSelectedDay = dayKey; renderRotinas(); });
     const delX = btn.querySelector(".day-del-x");
     if(delX) delX.addEventListener("click", async (e)=>{
@@ -4653,7 +4662,7 @@ function renderRotinas(){
 
   panel.innerHTML = `
     <div class="input-row">
-      <input type="text" id="routineTitleInput" value="${w.title.replace(/"/g,'&quot;')}" placeholder="${t('routine_name_placeholder_short')}">
+      <input type="text" id="routineTitleInput" value="${escapeHtml(w.title)}" placeholder="${t('routine_name_placeholder_short')}">
     </div>
     <div class="routine-day-section" style="padding-top:2px">
       <div class="routine-day-title">${t("exercises_label")}</div>
@@ -5012,14 +5021,33 @@ async function saveSupplementEdit(){
 }
 
 // WEIGHT
+// Validates and parses a body-weight entry against every edge case a "tricky" input could hit:
+// empty/whitespace, non-numeric garbage, scientific notation, literal "Infinity"/"NaN" text,
+// ambiguous multi-separator numbers (e.g. "5,000.5"), negative/zero, unrealistically low values
+// (typos like "000000000005" resolving to 5kg), and absurdly high values. Shows a translated
+// alert and returns null on any failure; returns a clean, 1-decimal kg value on success.
+function validateAndParseWeightInput(rawValue){
+  if(rawValue === null || rawValue === undefined) return null;
+  const trimmed = String(rawValue).replace(/[\u200B-\u200D\uFEFF]/g, "").trim(); // strip invisible unicode too
+  if(trimmed === "") return null; // empty submit — no need to nag, just do nothing
+  const separatorCount = (trimmed.match(/[.,]/g) || []).length;
+  const looksNumeric = /^[+-]?\d*[.,]?\d*$/.test(trimmed) && /\d/.test(trimmed);
+  if(separatorCount > 1 || !looksNumeric){ alert(t("alert_weight_invalid_format")); return null; }
+  const n = parseFloat(trimmed.replace(",", "."));
+  if(!isFinite(n)){ alert(t("alert_weight_invalid_format")); return null; }
+  const kg = unitSystem === "imperial" ? lbToKg(n) : n;
+  if(kg < 20){ alert(t("alert_weight_too_low")); return null; }
+  if(kg > 500){ alert(t("alert_weight_too_high")); return null; }
+  return Math.round(kg * 10) / 10;
+}
+
 async function addWeight(){
   const inp = document.getElementById("weightInput");
   const dateInp = document.getElementById("weightDateInput");
-  const kg = parseWeightToKg(inp.value);
-  if(isNaN(kg) || kg<=0){ inp.focus(); return; }
-  if(kg > 500){ alert(t("alert_weight_too_high")); inp.focus(); return; }
-  const d = (dateInp && dateInp.value) ? dateInp.value : todayKey();
-  if(d > todayKey()){ if(dateInp) dateInp.value = todayKey(); return; }
+  const kg = validateAndParseWeightInput(inp.value);
+  if(kg === null){ inp.focus(); return; }
+  let d = (dateInp && dateInp.value) ? dateInp.value : todayKey();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > todayKey() || d < "2000-01-01"){ d = todayKey(); if(dateInp) dateInp.value = d; }
   const existing = bodyWeights.find(w=>w.d===d);
   if(existing) existing.kg = kg; else bodyWeights.push({d, kg});
   bodyWeights.sort((a,b)=>a.d.localeCompare(b.d));
@@ -5509,7 +5537,7 @@ function renderWeekSummaryTab(){
       row.className = "entry-row";
       row.style.border = "none";
       const durStr = s.durationSec ? fmtDuration(s.durationSec) : "—";
-      row.innerHTML = `<span class="entry-date">${fmtDate(s.date)}</span><span class="entry-val" style="font-size:12.5px">${s.title}</span><span class="entry-diff mono">${durStr}</span>`;
+      row.innerHTML = `<span class="entry-date">${fmtDate(s.date)}</span><span class="entry-val" style="font-size:12.5px">${escapeHtml(s.title)}</span><span class="entry-diff mono">${durStr}</span>`;
       const swipeRow = buildSwipeRow(row, async ()=>{
         sessionLog = sessionLog.filter(x=>x.id!==s.id);
         await store.set("sessionLog", sessionLog);
@@ -5669,8 +5697,15 @@ function buildMeasGrid(){
 }
 
 async function addMeasures(){
-  const vals = {}; let any = false;
-  document.querySelectorAll("[data-meas]").forEach(inp=>{ const v = parseLengthToCm(inp.value); if(!isNaN(v) && v>0){ vals[inp.dataset.meas] = v; any = true; } });
+  const vals = {}; let any = false; let rejectedAny = false;
+  document.querySelectorAll("[data-meas]").forEach(inp=>{
+    if(!inp.value.trim()) return;
+    const v = parseLengthToCm(inp.value);
+    if(!isFinite(v) || v<=0){ return; } // garbage/empty — just skip this one field silently
+    if(v < 5 || v > 250){ rejectedAny = true; return; } // clearly not a real body-part circumference
+    vals[inp.dataset.meas] = v; any = true;
+  });
+  if(rejectedAny) alert(t("alert_measure_out_of_range"));
   if(!any) return;
   const d = todayKey();
   const existing = bodyMeasures.find(m=>m.d===d);
@@ -5719,7 +5754,13 @@ function renderMeasTab(){
         : `<div class="vol-empty" style="padding:12px 4px">${tFmt("bodyfat_fill_prompt",{extra: profile.sex==='F' ? (', '+t("hip").toLowerCase()) : ''})}</div>`}
     `;
     document.getElementById("profHeight").addEventListener("change", async (e)=>{
-      profile.height = parseLengthToCm(e.target.value) || null;
+      const v = parseLengthToCm(e.target.value);
+      if(e.target.value.trim() && (!isFinite(v) || v<50 || v>250)){
+        alert(t("alert_height_out_of_range"));
+        e.target.value = profile.height ? fmtLength(profile.height,0) : "";
+        return;
+      }
+      profile.height = (isFinite(v) && v>0) ? v : null;
       await store.set("profile", profile);
       renderMeasTab();
     });
@@ -6053,8 +6094,8 @@ function renderNutricaoTab(){
   }
 
   document.getElementById("mealAdd").addEventListener("click", ()=>{
-    const num = id => Math.max(0, parseInt(document.getElementById(id).value)||0);
-    addMeal(document.getElementById("mealName").value.trim(), num("mealKcal"), num("mealProt"), num("mealCarb"), num("mealFat"));
+    const num = (id, max) => Math.min(max, Math.max(0, parseInt(document.getElementById(id).value)||0));
+    addMeal(document.getElementById("mealName").value.trim(), num("mealKcal",10000), num("mealProt",1000), num("mealCarb",1000), num("mealFat",1000));
   });
 
   document.getElementById("scanBarcodeBtn").addEventListener("click", openBarcodeScanner);
@@ -6077,11 +6118,15 @@ function renderNutricaoTab(){
   });
 
   const goalMap = { goalKcal:'kcalGoal', goalProt:'proteinGoal', goalCarb:'carbGoal', goalFat:'fatGoal', goalWater:'waterGoal' };
+  const goalBounds = { kcalGoal:[1,10000], proteinGoal:[1,1000], carbGoal:[1,1000], fatGoal:[1,1000], waterGoal:[0.5,20] };
   Object.entries(goalMap).forEach(([id,key])=>{
     document.getElementById(id).addEventListener("change", async (e)=>{
       const nn = getTodayNutrition();
       const v = parseFloat(e.target.value.replace(",","."));
-      nn[key] = Math.max(key==='waterGoal'?0.5:1, isNaN(v)?NUTRI_DEFAULTS[key]:v);
+      const [min,max] = goalBounds[key];
+      const clean = (isFinite(v) && v>=min) ? Math.min(v,max) : NUTRI_DEFAULTS[key];
+      nn[key] = clean;
+      e.target.value = clean;
       await store.set("nutritionLog", nutritionLog);
       renderNutricaoTab();
     });
@@ -6264,9 +6309,9 @@ async function saveExerciseEditModal(){
   const name = document.getElementById("exEditName").value.trim();
   if(!name){ alert(t("alert_enter_ex_name")); return; }
   if(/[<>]/.test(name)){ alert(t("alert_no_angle_brackets")); return; }
-  const sets = parseInt(document.getElementById("exEditSets").value)||4;
-  const reps = document.getElementById("exEditReps").value.trim()||"10";
-  const rest = parseInt(document.getElementById("exEditRest").value)||60;
+  const sets = Math.min(20, Math.max(1, parseInt(document.getElementById("exEditSets").value)||4));
+  const reps = document.getElementById("exEditReps").value.trim().slice(0,20)||"10";
+  const rest = Math.min(1800, Math.max(0, parseInt(document.getElementById("exEditRest").value)||60));
   const equipment = document.getElementById("exEditEquip").value;
   const videoUrl = document.getElementById("exEditVideo").value.trim();
   if(videoUrl && !/^https?:\/\//i.test(videoUrl)){ alert(t("alert_video_must_be_url")); return; }
@@ -6563,9 +6608,9 @@ window.saveExerciseConfig = async function(){
   const name = document.getElementById("configContextName").value;
   const muscles = JSON.parse(document.getElementById("configContextMuscles").value || "{}");
   const equipment = document.getElementById("configContextEquipment").value || "";
-  const sets = Math.max(1, parseInt(document.getElementById("cfgSets").value) || 1);
-  const reps = document.getElementById("cfgReps").value.trim() || "10";
-  const rest = Math.max(0, parseInt(document.getElementById("cfgRest").value) || 0);
+  const sets = Math.min(20, Math.max(1, parseInt(document.getElementById("cfgSets").value) || 1));
+  const reps = document.getElementById("cfgReps").value.trim().slice(0,20) || "10";
+  const rest = Math.min(1800, Math.max(0, parseInt(document.getElementById("cfgRest").value) || 0));
   let videoUrl = document.getElementById("cfgVideo").value.trim();
   if(videoUrl && !/^https?:\/\//i.test(videoUrl)) videoUrl = "https://" + videoUrl;
   const notes = document.getElementById("cfgNotes").value.trim();
@@ -6987,7 +7032,7 @@ async function shareWorkoutImage(){
       if(done){
         setsCompleted++; exDone++;
         const kg = parseFloat((s.exKg[i]||[])[k]), reps = parseInt((s.exReps[i]||[])[k]);
-        if(!isNaN(kg) && !isNaN(reps)) volume += kg*reps;
+        if(isRealisticSet(kg, reps)) volume += kg*reps;
       }
     });
     exStatus.push({ name: ex.name, complete: exDone >= (ex.sets||4) && exDone>0 });
