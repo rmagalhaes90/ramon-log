@@ -302,6 +302,7 @@
 
   .input-row{display:flex;gap:8px;margin-bottom:14px}
   .input-row input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px}
+  .input-row input#weightDateInput{flex:0 0 128px;padding:12px 8px;font-size:13px}
   .input-row input:focus{outline:none;border-color:var(--volt-dim)}
   .add-btn{background:var(--volt);color:#0b0c0e;border:none;border-radius:12px;padding:12px 18px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
 
@@ -760,6 +761,7 @@
 
       <div id="sub-peso" style="display:none">
         <div class="input-row">
+          <input type="date" id="weightDateInput">
           <input type="text" inputmode="decimal" id="weightInput" placeholder="Peso de hoje (kg)">
           <button class="add-btn" id="weightAdd">Salvar</button>
         </div>
@@ -3032,6 +3034,8 @@ function bindTrainoEvents(){
 }
 
 function bindProgressoEvents(){
+  const weightDateInp = document.getElementById("weightDateInput");
+  if(weightDateInp){ weightDateInp.value = todayKey(); weightDateInp.max = todayKey(); }
   document.getElementById("weightAdd").addEventListener("click", addWeight);
   document.getElementById("weightInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addWeight(); });
   document.getElementById("measAdd").addEventListener("click", addMeasures);
@@ -5009,14 +5013,17 @@ async function saveSupplementEdit(){
 // WEIGHT
 async function addWeight(){
   const inp = document.getElementById("weightInput");
+  const dateInp = document.getElementById("weightDateInput");
   const kg = parseWeightToKg(inp.value);
   if(isNaN(kg) || kg<=0){ inp.focus(); return; }
-  const d = todayKey();
+  const d = (dateInp && dateInp.value) ? dateInp.value : todayKey();
+  if(d > todayKey()){ if(dateInp) dateInp.value = todayKey(); return; }
   const existing = bodyWeights.find(w=>w.d===d);
   if(existing) existing.kg = kg; else bodyWeights.push({d, kg});
   bodyWeights.sort((a,b)=>a.d.localeCompare(b.d));
   await store.set("bodyWeights", bodyWeights);
   inp.value = "";
+  if(dateInp) dateInp.value = todayKey();
   haptic();
   renderWeightTab();
 }
