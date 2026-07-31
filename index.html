@@ -1776,7 +1776,7 @@ const UI_STRINGS = {
     loading_generic:"Carregando...",
     error_loading_users:"Erro ao carregar usuários: {msg}",
     empty_no_users_found:"Nenhum usuário encontrado",
-    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}",
+    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}", alert_weight_too_high:"Peso inválido — o máximo permitido é 500 kg (1102 lb). Confira o valor digitado.",
     alert_cache_clear_error:"Não foi possível limpar o cache: {msg}",
     alert_enter_ex_name:"Digite um nome para o exercício.",
     alert_no_angle_brackets:"O nome não pode conter os caracteres < ou >.",
@@ -1974,7 +1974,7 @@ const UI_STRINGS = {
     loading_generic:"Loading...",
     error_loading_users:"Error loading users: {msg}",
     empty_no_users_found:"No users found",
-    alert_reset_pw_sent:"We sent a password reset link to {email}",
+    alert_reset_pw_sent:"We sent a password reset link to {email}", alert_weight_too_high:"Invalid weight — the maximum allowed is 500 kg (1102 lb). Check the value you entered.",
     alert_cache_clear_error:"Couldn't clear the cache: {msg}",
     alert_enter_ex_name:"Enter a name for the exercise.",
     alert_no_angle_brackets:"The name can't contain the characters < or >.",
@@ -5017,6 +5017,7 @@ async function addWeight(){
   const dateInp = document.getElementById("weightDateInput");
   const kg = parseWeightToKg(inp.value);
   if(isNaN(kg) || kg<=0){ inp.focus(); return; }
+  if(kg > 500){ alert(t("alert_weight_too_high")); inp.focus(); return; }
   const d = (dateInp && dateInp.value) ? dateInp.value : todayKey();
   if(d > todayKey()){ if(dateInp) dateInp.value = todayKey(); return; }
   const existing = bodyWeights.find(w=>w.d===d);
