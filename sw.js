@@ -1,5 +1,5 @@
 /* KYRO service worker — bilingual fast-start build */
-const CACHE_VERSION = "kyro-shell-2026-08-01-i18n-pt-en-v1";
+const CACHE_VERSION = "kyro-shell-2026-08-01-onboarding-v1";
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));
 const SHELL_ASSETS = [

@@ -512,6 +512,51 @@
   .update-toast{position:fixed;left:16px;right:16px;bottom:100px;z-index:900;background:var(--panel);border:1px solid var(--volt-dim);border-radius:14px;padding:12px 14px;display:none;align-items:center;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
   .update-toast.show{display:flex}
   .update-toast span{flex:1;font-size:12.5px;line-height:1.4}
+
+  /* ---- First-run guided onboarding ---- */
+  .first-run-tour[hidden],.onboarding-coach[hidden]{display:none!important}
+  .first-run-tour{position:fixed;inset:0;z-index:850;background:rgba(5,6,8,.78);backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;padding:18px;padding-bottom:max(18px,env(safe-area-inset-bottom));animation:tourFadeIn .25s ease}
+  .first-run-card{width:min(100%,520px);max-height:min(86dvh,760px);overflow:auto;background:linear-gradient(160deg,#202329,#121418 72%);border:1px solid rgba(215,255,61,.32);border-radius:26px;padding:20px;box-shadow:0 28px 80px rgba(0,0,0,.58);animation:tourCardIn .45s cubic-bezier(.16,1,.3,1)}
+  .first-run-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .first-run-progress{height:5px;flex:1;background:var(--panel-2);border-radius:99px;overflow:hidden}
+  .first-run-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--volt-dim),var(--volt));border-radius:inherit;transition:width .35s ease}
+  .first-run-count{font-family:'JetBrains Mono',monospace;color:var(--dim);font-size:10px;white-space:nowrap}
+  .first-run-skip{border:none;background:transparent;color:var(--dim);font-weight:700;font-size:12px;padding:8px;cursor:pointer}
+  .first-run-icon{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;font-size:34px;background:rgba(215,255,61,.1);border:1px solid rgba(215,255,61,.25);margin-bottom:16px;animation:tourFloat 2.8s ease-in-out infinite}
+  .first-run-title{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;color:var(--text);letter-spacing:.035em;margin:0 0 10px}
+  .first-run-copy{color:#b7bbc0;font-size:14px;line-height:1.6;margin:0}
+  .first-run-copy strong{color:var(--text)}
+  .first-run-options{display:grid;gap:10px;margin-top:18px}
+  .first-run-option{display:grid;grid-template-columns:46px 1fr 24px;align-items:center;gap:12px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px;color:var(--text);cursor:pointer}
+  .first-run-option:active{border-color:var(--volt-dim)}
+  .first-run-option-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:var(--panel-2)}
+  .first-run-option b{display:block;font-size:14px;margin-bottom:3px}
+  .first-run-option small{display:block;color:var(--dim);font-size:11.5px;line-height:1.35}
+  .first-run-option-arrow{color:var(--volt);font-size:20px}
+  .first-run-footer{display:flex;gap:10px;margin-top:20px}
+  .first-run-footer button{flex:1;border-radius:14px;padding:13px 14px;font-weight:750;font-size:13px;cursor:pointer}
+  .first-run-back{background:var(--panel);border:1px solid var(--line);color:var(--text)}
+  .first-run-next{background:var(--volt);border:1px solid var(--volt);color:#0b0c0e}
+  .first-run-feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:16px}
+  .first-run-feature{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:82px}
+  .first-run-feature span{display:block;font-size:22px;margin-bottom:7px}.first-run-feature b{font-size:12.5px}.first-run-feature small{display:block;color:var(--dim);font-size:10.5px;line-height:1.3;margin-top:3px}
+  .first-run-weight-demo{margin-top:17px;background:rgba(77,195,255,.07);border:1px solid rgba(77,195,255,.28);border-radius:17px;padding:14px}
+  .first-run-demo-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--dim)}
+  .first-run-demo-head b{color:var(--text)}
+  .first-run-demo-chart{height:82px;position:relative;margin:10px 2px 2px;background:linear-gradient(180deg,transparent,rgba(77,195,255,.04));border-bottom:1px solid var(--line)}
+  .first-run-demo-chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .first-run-example-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 8px;border-radius:99px;background:var(--panel-2);color:var(--dim);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em}
+  .onboarding-coach{position:fixed;left:14px;right:14px;bottom:104px;z-index:760;max-width:560px;margin:auto;background:rgba(23,25,29,.97);border:1px solid var(--volt-dim);border-radius:18px;padding:13px 14px;box-shadow:0 16px 45px rgba(0,0,0,.5);animation:coachIn .35s cubic-bezier(.16,1,.3,1)}
+  .onboarding-coach-row{display:flex;align-items:flex-start;gap:11px}.onboarding-coach-icon{font-size:23px}.onboarding-coach-copy{flex:1}.onboarding-coach-copy b{display:block;font-size:12.5px;color:var(--text);margin-bottom:3px}.onboarding-coach-copy span{display:block;color:var(--dim);font-size:11px;line-height:1.4}
+  .onboarding-coach-actions{display:flex;gap:8px;margin-top:10px}.onboarding-coach-actions button{flex:1;border-radius:11px;padding:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:11px;font-weight:700}.onboarding-coach-actions .primary{background:var(--volt);border-color:var(--volt);color:#0b0c0e}
+  .onboarding-focus{position:relative;z-index:45;box-shadow:0 0 0 3px rgba(215,255,61,.45),0 0 34px rgba(215,255,61,.18);border-radius:18px;animation:tourPulse 1.6s ease-in-out infinite}
+  @keyframes tourFadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes tourCardIn{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes coachIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @keyframes tourFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+  @keyframes tourPulse{0%,100%{box-shadow:0 0 0 3px rgba(215,255,61,.38),0 0 22px rgba(215,255,61,.12)}50%{box-shadow:0 0 0 5px rgba(215,255,61,.55),0 0 42px rgba(215,255,61,.24)}}
+  @media(min-width:700px){.first-run-tour{align-items:center}.first-run-card{padding:26px}}
+
   @media (prefers-reduced-motion: reduce){
     *, *::before, *::after{
       animation-duration: 0.01ms !important;
@@ -728,6 +773,33 @@
   <button id="bootstrapErrorRetryBtn" style="background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 24px;font-weight:700;font-family:inherit;cursor:pointer">🔄 Tentar de novo</button>
 </div>
 
+
+<div class="first-run-tour" id="firstRunOnboarding" hidden role="dialog" aria-modal="true" aria-labelledby="firstRunTitle">
+  <div class="first-run-card">
+    <div class="first-run-top">
+      <div class="first-run-progress" aria-hidden="true"><span id="firstRunProgressFill"></span></div>
+      <div class="first-run-count" id="firstRunCount"></div>
+      <button type="button" class="first-run-skip" id="firstRunSkip"></button>
+    </div>
+    <div id="firstRunBody"></div>
+    <div class="first-run-footer">
+      <button type="button" class="first-run-back" id="firstRunBack"></button>
+      <button type="button" class="first-run-next" id="firstRunNext"></button>
+    </div>
+  </div>
+</div>
+
+<div class="onboarding-coach" id="onboardingCoach" hidden role="status" aria-live="polite">
+  <div class="onboarding-coach-row">
+    <div class="onboarding-coach-icon">✨</div>
+    <div class="onboarding-coach-copy"><b id="onboardingCoachTitle"></b><span id="onboardingCoachText"></span></div>
+  </div>
+  <div class="onboarding-coach-actions">
+    <button type="button" id="onboardingCoachBack"></button>
+    <button type="button" class="primary" id="onboardingCoachSkip"></button>
+  </div>
+</div>
+
 <div class="pull-refresh" id="pullRefresh">
   <div class="pull-spinner" id="pullSpinner"></div>
 </div>
@@ -934,6 +1006,7 @@
         <div class="settings-row" id="notifRow"><div class="settings-label" id="lblNotifRow">Notificações</div></div>
         <button class="settings-btn" id="enableNotifBtn">🔔 Ativar avisos de descanso</button>
         <button class="settings-btn" id="clearCacheBtn">🧹 Limpar cache técnico (não apaga seus dados)</button>
+        <button class="settings-btn" id="replayOnboardingBtn">✨ Ver introdução do aplicativo</button>
       </div>
 
       <div class="settings-group" id="adminGroup" style="display:none">
@@ -997,10 +1070,11 @@
     <input type="hidden" id="configContextName">
     <input type="hidden" id="configContextMuscles">
     <input type="hidden" id="configContextEquipment">
+    <input type="hidden" id="configContextVideo">
     <div class="config-field"><label id="lblCfgSets">Séries</label><input type="number" id="cfgSets" min="1" max="10"></div>
     <div class="config-field"><label id="lblCfgReps">Repetições</label><input type="text" id="cfgReps" placeholder="ex: 8-10"></div>
     <div class="config-field"><label id="lblCfgRest">Descanso (segundos)</label><input type="number" id="cfgRest" min="0" step="5"></div>
-    <div class="config-field"><label id="lblCfgVideo">Link do vídeo (YouTube)</label><input type="url" id="cfgVideo" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="config-field" id="cfgVideoField"><label id="lblCfgVideo">Link do vídeo (YouTube)</label><input type="url" id="cfgVideo" placeholder="https://youtube.com/watch?v=..."></div>
     <div class="config-field"><label id="lblCfgNotes">Notas (opcional)</label><input type="text" id="cfgNotes" placeholder="ex: cuidado com o ombro"></div>
     <div style="display:flex;gap:10px;margin-top:18px">
       <button class="settings-btn danger" id="cfgDelete" style="display:none;flex:1;margin-bottom:0">Remover</button>
@@ -2551,6 +2625,250 @@ function tFmt(key, vars){
   Object.entries(vars||{}).forEach(([k,v])=>{ str = str.split("{"+k+"}").join(v); });
   return str;
 }
+
+
+// ==================== FIRST-RUN ONBOARDING ====================
+const FIRST_RUN_ONBOARDING_VERSION = 1;
+const FIRST_RUN_COPY = Object.freeze({
+  pt: Object.freeze({
+    skip:"Pular", back:"Voltar", next:"Continuar", done:"Começar a usar",
+    replay:"✨ Ver introdução do aplicativo",
+    welcome_title:"Bem-vindo ao KYRO", welcome_copy:"Seu espaço para <strong>planejar treinos</strong>, registrar evolução e transformar consistência em resultados — sem complicação.",
+    welcome_workout:"Treinos", welcome_workout_sub:"Séries, cargas e descansos",
+    welcome_progress:"Progresso", welcome_progress_sub:"Peso, medidas e fotos",
+    welcome_nutrition:"Nutrição", welcome_nutrition_sub:"Calorias, macros e água",
+    welcome_insights:"Insights", welcome_insights_sub:"Relatórios e conquistas",
+    routine_title:"Monte sua primeira rotina", routine_copy:"Escolha o caminho que combina com você. O KYRO pode montar a base ou você pode personalizar tudo.",
+    routine_auto:"Gerar automaticamente", routine_auto_sub:"Escolha músculos, equipamento e intensidade.",
+    routine_template:"Usar template pronto", routine_template_sub:"Comece rápido com uma semana já estruturada.",
+    routine_manual:"Criar manualmente", routine_manual_sub:"Escolha o dia, dê um nome e adicione exercícios.",
+    routine_later:"Continuar sem criar agora",
+    coach_title:"Agora é com você", coach_auto:"Escolha os grupos musculares e a intensidade, veja a prévia e toque em Aplicar.", coach_template:"Escolha um template e toque em Usar este template.", coach_manual:"Escolha um dia, escreva o nome da rotina e toque em Criar rotina.",
+    coach_back:"Voltar ao guia", coach_skip:"Fazer depois",
+    created_title:"Rotina criada!", created_copy:"Excelente começo. Seu plano já está salvo e você pode ajustar exercícios, séries, repetições e descanso a qualquer momento.",
+    created_tip:"Dica: durante o treino, marque cada série para o KYRO calcular sua evolução.",
+    progress_title:"Acompanhe sua evolução", progress_copy:"Na aba <strong>Progresso</strong>, registre dados reais e compare tendências ao longo das semanas — não apenas um número isolado.",
+    progress_weight:"Peso", progress_weight_sub:"Registre em condições parecidas",
+    progress_measures:"Medidas", progress_measures_sub:"Cintura, braços, peito e mais",
+    progress_photos:"Fotos", progress_photos_sub:"Compare mudanças visuais",
+    progress_food:"Nutrição", progress_food_sub:"Calorias, proteína e hidratação",
+    weight_example:"Exemplo de perda de peso", weight_example_note:"85,0 kg → 81,8 kg", example_only:"Exemplo ilustrativo",
+    progress_tip:"Oscilações diárias são normais. A tendência semanal é o que importa.",
+    finish_title:"Tudo pronto", finish_copy:"Crie sua rotina, registre cada treino e atualize o progresso com frequência. O KYRO organiza o resto para você.",
+    finish_cta:"Vamos treinar!"
+  }),
+  en: Object.freeze({
+    skip:"Skip", back:"Back", next:"Continue", done:"Start using KYRO",
+    replay:"✨ View app introduction",
+    welcome_title:"Welcome to KYRO", welcome_copy:"Your place to <strong>plan workouts</strong>, record progress, and turn consistency into results — without the clutter.",
+    welcome_workout:"Workouts", welcome_workout_sub:"Sets, loads, and rest timers",
+    welcome_progress:"Progress", welcome_progress_sub:"Weight, measurements, and photos",
+    welcome_nutrition:"Nutrition", welcome_nutrition_sub:"Calories, macros, and water",
+    welcome_insights:"Insights", welcome_insights_sub:"Reports and achievements",
+    routine_title:"Build your first routine", routine_copy:"Choose the path that suits you. KYRO can build the foundation, or you can customize everything.",
+    routine_auto:"Auto-generate", routine_auto_sub:"Choose muscles, equipment, and intensity.",
+    routine_template:"Use a ready-made template", routine_template_sub:"Start quickly with a structured week.",
+    routine_manual:"Build manually", routine_manual_sub:"Choose a day, name the routine, and add exercises.",
+    routine_later:"Continue without creating now",
+    coach_title:"Your turn", coach_auto:"Choose muscle groups and intensity, review the preview, then tap Apply.", coach_template:"Choose a template and tap Use this template.", coach_manual:"Choose a day, enter the routine name, then tap Create routine.",
+    coach_back:"Back to guide", coach_skip:"Do it later",
+    created_title:"Routine created!", created_copy:"Great start. Your plan is saved, and you can adjust exercises, sets, reps, and rest time whenever you need.",
+    created_tip:"Tip: mark every completed set so KYRO can calculate your progress.",
+    progress_title:"Track your progress", progress_copy:"In <strong>Progress</strong>, record real data and compare trends over several weeks — not just one isolated number.",
+    progress_weight:"Weight", progress_weight_sub:"Log under similar conditions",
+    progress_measures:"Measurements", progress_measures_sub:"Waist, arms, chest, and more",
+    progress_photos:"Photos", progress_photos_sub:"Compare visual changes",
+    progress_food:"Nutrition", progress_food_sub:"Calories, protein, and hydration",
+    weight_example:"Weight-loss example", weight_example_note:"85.0 kg → 81.8 kg", example_only:"Illustrative example",
+    progress_tip:"Daily fluctuations are normal. The weekly trend is what matters.",
+    finish_title:"You're all set", finish_copy:"Build your routine, log each workout, and update progress regularly. KYRO organizes the rest for you.",
+    finish_cta:"Let's train!"
+  })
+});
+function ot(key){
+  const lang = currentLang === "en" ? "en" : "pt";
+  return FIRST_RUN_COPY[lang][key] || FIRST_RUN_COPY.pt[key] || key;
+}
+
+const firstRunTourState = {
+  step:0, open:false, awaitingRoutine:false, justCreated:false, mode:null, bound:false
+};
+
+function onboardingHasMeaningfulData(){
+  return !isWeekEntirelyEmpty() || bodyWeights.length>0 || bodyMeasures.length>0 ||
+    photoIndex.length>0 || sessionLog.length>0 || Object.keys(nutritionLog||{}).length>0;
+}
+
+function clearOnboardingFocus(){
+  document.querySelectorAll(".onboarding-focus").forEach(el=>el.classList.remove("onboarding-focus"));
+}
+
+function activateProgressWeightForTour(){
+  switchPage("progresso");
+  currentProgSub = "peso";
+  document.querySelectorAll("#progressoSegmented button").forEach(b=>b.classList.toggle("active",b.dataset.sub==="peso"));
+  document.querySelectorAll("[id^='sub-']").forEach(p=>p.style.display="none");
+  const weightPanel=document.getElementById("sub-peso");
+  if(weightPanel) weightPanel.style.display="block";
+  renderProgSub();
+  setTimeout(()=>{
+    clearOnboardingFocus();
+    const segmented=document.getElementById("progressoSegmented");
+    if(segmented) segmented.classList.add("onboarding-focus");
+  },60);
+}
+
+function onboardingStepBody(step){
+  if(step===0){
+    return `<div class="first-run-icon">⚡</div><h2 class="first-run-title" id="firstRunTitle">${ot("welcome_title")}</h2><p class="first-run-copy">${ot("welcome_copy")}</p>
+      <div class="first-run-feature-grid">
+        <div class="first-run-feature"><span>🏋️</span><b>${ot("welcome_workout")}</b><small>${ot("welcome_workout_sub")}</small></div>
+        <div class="first-run-feature"><span>📈</span><b>${ot("welcome_progress")}</b><small>${ot("welcome_progress_sub")}</small></div>
+        <div class="first-run-feature"><span>🥗</span><b>${ot("welcome_nutrition")}</b><small>${ot("welcome_nutrition_sub")}</small></div>
+        <div class="first-run-feature"><span>🏆</span><b>${ot("welcome_insights")}</b><small>${ot("welcome_insights_sub")}</small></div>
+      </div>`;
+  }
+  if(step===1){
+    return `<div class="first-run-icon">🧩</div><h2 class="first-run-title" id="firstRunTitle">${ot("routine_title")}</h2><p class="first-run-copy">${ot("routine_copy")}</p>
+      <div class="first-run-options">
+        <button class="first-run-option" data-onboarding-mode="auto"><span class="first-run-option-icon">🎲</span><span><b>${ot("routine_auto")}</b><small>${ot("routine_auto_sub")}</small></span><span class="first-run-option-arrow">›</span></button>
+        <button class="first-run-option" data-onboarding-mode="template"><span class="first-run-option-icon">📋</span><span><b>${ot("routine_template")}</b><small>${ot("routine_template_sub")}</small></span><span class="first-run-option-arrow">›</span></button>
+        <button class="first-run-option" data-onboarding-mode="manual"><span class="first-run-option-icon">✏️</span><span><b>${ot("routine_manual")}</b><small>${ot("routine_manual_sub")}</small></span><span class="first-run-option-arrow">›</span></button>
+      </div>`;
+  }
+  if(step===2){
+    return `<div class="first-run-icon">🎉</div><h2 class="first-run-title" id="firstRunTitle">${ot("created_title")}</h2><p class="first-run-copy">${ot("created_copy")}</p><div class="cardio-note">💡 ${ot("created_tip")}</div>`;
+  }
+  if(step===3){
+    return `<div class="first-run-icon">📊</div><h2 class="first-run-title" id="firstRunTitle">${ot("progress_title")}</h2><p class="first-run-copy">${ot("progress_copy")}</p>
+      <div class="first-run-feature-grid">
+        <div class="first-run-feature"><span>⚖️</span><b>${ot("progress_weight")}</b><small>${ot("progress_weight_sub")}</small></div>
+        <div class="first-run-feature"><span>📏</span><b>${ot("progress_measures")}</b><small>${ot("progress_measures_sub")}</small></div>
+        <div class="first-run-feature"><span>📷</span><b>${ot("progress_photos")}</b><small>${ot("progress_photos_sub")}</small></div>
+        <div class="first-run-feature"><span>🍽️</span><b>${ot("progress_food")}</b><small>${ot("progress_food_sub")}</small></div>
+      </div>
+      <div class="first-run-weight-demo"><div class="first-run-demo-head"><b>${ot("weight_example")}</b><span>${ot("weight_example_note")}</span></div>
+        <div class="first-run-demo-chart"><svg viewBox="0 0 320 82" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="tourArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4dc3ff" stop-opacity=".32"/><stop offset="1" stop-color="#4dc3ff" stop-opacity="0"/></linearGradient></defs><path d="M4 14 C48 18 68 28 102 30 S158 47 191 45 S247 63 316 70 L316 82 L4 82 Z" fill="url(#tourArea)"/><path d="M4 14 C48 18 68 28 102 30 S158 47 191 45 S247 63 316 70" fill="none" stroke="#4dc3ff" stroke-width="4" stroke-linecap="round"/><circle cx="4" cy="14" r="4" fill="#d7ff3d"/><circle cx="316" cy="70" r="4" fill="#d7ff3d"/></svg></div>
+        <span class="first-run-example-badge">ℹ️ ${ot("example_only")}</span></div>
+      <div class="cardio-note">📌 ${ot("progress_tip")}</div>`;
+  }
+  return `<div class="first-run-icon">🚀</div><h2 class="first-run-title" id="firstRunTitle">${ot("finish_title")}</h2><p class="first-run-copy">${ot("finish_copy")}</p>`;
+}
+
+function renderFirstRunOnboarding(){
+  const overlay=document.getElementById("firstRunOnboarding");
+  if(!overlay || !firstRunTourState.open) return;
+  const total=5, step=Math.max(0,Math.min(total-1,firstRunTourState.step));
+  firstRunTourState.step=step;
+  document.getElementById("firstRunBody").innerHTML=onboardingStepBody(step);
+  document.getElementById("firstRunCount").textContent=`${step+1}/${total}`;
+  document.getElementById("firstRunProgressFill").style.width=`${((step+1)/total)*100}%`;
+  document.getElementById("firstRunSkip").textContent=ot("skip");
+  const back=document.getElementById("firstRunBack");
+  back.textContent=ot("back"); back.style.visibility=step===0?"hidden":"visible";
+  const next=document.getElementById("firstRunNext");
+  next.textContent=step===4?ot("finish_cta"):(step===1?ot("routine_later"):ot("next"));
+  overlay.hidden=false;
+  overlay.querySelectorAll("[data-onboarding-mode]").forEach(btn=>btn.addEventListener("click",()=>beginRoutineOnboarding(btn.dataset.onboardingMode)));
+  if(step===1){ switchPage("rotinas"); setTimeout(()=>{ clearOnboardingFocus(); const el=document.getElementById("rotinasContent"); if(el) el.classList.add("onboarding-focus"); },60); }
+  else if(step===3) activateProgressWeightForTour();
+  else clearOnboardingFocus();
+}
+
+function startFirstRunOnboarding(force=false){
+  firstRunTourState.step=0; firstRunTourState.open=true; firstRunTourState.awaitingRoutine=false;
+  firstRunTourState.justCreated=false; firstRunTourState.mode=null;
+  document.getElementById("onboardingCoach").hidden=true;
+  switchPage("home");
+  renderFirstRunOnboarding();
+  setTimeout(()=>document.getElementById("firstRunSkip")?.focus(),100);
+}
+
+async function completeFirstRunOnboarding(){
+  firstRunTourState.open=false; firstRunTourState.awaitingRoutine=false;
+  document.getElementById("firstRunOnboarding").hidden=true;
+  document.getElementById("onboardingCoach").hidden=true;
+  clearOnboardingFocus();
+  await store.set("onboardingVersion",FIRST_RUN_ONBOARDING_VERSION);
+  switchPage("home");
+}
+
+async function maybeStartFirstRunOnboarding(){
+  try{
+    const saved=Number(await store.get("onboardingVersion"))||0;
+    if(saved>=FIRST_RUN_ONBOARDING_VERSION) return;
+    if(onboardingHasMeaningfulData()){
+      await store.set("onboardingVersion",FIRST_RUN_ONBOARDING_VERSION);
+      return;
+    }
+    startFirstRunOnboarding(false);
+  }catch(e){
+    console.warn("onboarding check failed",e);
+  }
+}
+
+function renderOnboardingCoach(){
+  const coach=document.getElementById("onboardingCoach");
+  if(!coach || !firstRunTourState.awaitingRoutine) return;
+  document.getElementById("onboardingCoachTitle").textContent=ot("coach_title");
+  const key=firstRunTourState.mode==="auto"?"coach_auto":firstRunTourState.mode==="template"?"coach_template":"coach_manual";
+  document.getElementById("onboardingCoachText").textContent=ot(key);
+  document.getElementById("onboardingCoachBack").textContent=ot("coach_back");
+  document.getElementById("onboardingCoachSkip").textContent=ot("coach_skip");
+  coach.hidden=false;
+}
+
+function beginRoutineOnboarding(mode){
+  firstRunTourState.open=false; firstRunTourState.awaitingRoutine=true; firstRunTourState.mode=mode;
+  document.getElementById("firstRunOnboarding").hidden=true;
+  switchPage("rotinas"); renderRotinas(); renderOnboardingCoach();
+  setTimeout(()=>{
+    clearOnboardingFocus();
+    const el=document.getElementById("rotinasContent"); if(el) el.classList.add("onboarding-focus");
+    if(mode==="auto") openAutoGenModal();
+    else if(mode==="template") openTemplateModal();
+    else document.getElementById("newRoutineTitle")?.focus();
+  },120);
+}
+
+function notifyFirstRunRoutineCreated(){
+  if(!firstRunTourState.awaitingRoutine) return;
+  firstRunTourState.awaitingRoutine=false; firstRunTourState.open=true; firstRunTourState.justCreated=true; firstRunTourState.step=2;
+  document.getElementById("onboardingCoach").hidden=true;
+  renderFirstRunOnboarding();
+  fireConfetti(); haptic([40,35,70]);
+}
+
+function bindFirstRunOnboardingEvents(){
+  if(firstRunTourState.bound) return;
+  firstRunTourState.bound=true;
+  document.getElementById("firstRunSkip").addEventListener("click",completeFirstRunOnboarding);
+  document.getElementById("firstRunBack").addEventListener("click",()=>{
+    const s=firstRunTourState.step;
+    firstRunTourState.step = s===4?3:s===3?(firstRunTourState.justCreated?2:1):Math.max(0,s-1);
+    renderFirstRunOnboarding();
+  });
+  document.getElementById("firstRunNext").addEventListener("click",()=>{
+    const s=firstRunTourState.step;
+    if(s===4){ completeFirstRunOnboarding(); return; }
+    firstRunTourState.step = s===1?3:s+1;
+    renderFirstRunOnboarding();
+  });
+  document.getElementById("onboardingCoachBack").addEventListener("click",()=>{
+    document.querySelectorAll(".modal-overlay.show").forEach(m=>m.classList.remove("show"));
+    firstRunTourState.awaitingRoutine=false; firstRunTourState.open=true; firstRunTourState.step=1;
+    document.getElementById("onboardingCoach").hidden=true; renderFirstRunOnboarding();
+  });
+  document.getElementById("onboardingCoachSkip").addEventListener("click",()=>{
+    document.querySelectorAll(".modal-overlay.show").forEach(m=>m.classList.remove("show"));
+    firstRunTourState.awaitingRoutine=false; firstRunTourState.open=true; firstRunTourState.step=3;
+    document.getElementById("onboardingCoach").hidden=true; renderFirstRunOnboarding();
+  });
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape" && firstRunTourState.open){ e.preventDefault(); completeFirstRunOnboarding(); }
+  });
+}
+
 function setText(id, key){ const el=document.getElementById(id); if(el) el.textContent=t(key); }
 function setHtml(id, key){ const el=document.getElementById(id); if(el) el.innerHTML=t(key); }
 function setAttr(id, attr, key){ const el=document.getElementById(id); if(el) el.setAttribute(attr,t(key)); }
@@ -2921,7 +3239,7 @@ const CACHEABLE_KEYS = new Set([
   "workouts","state","history","completedSessions","bodyWeights","bodyMeasures",
   "photoIndex","exerciseHistory","exerciseRecords","sessionLog","nutritionLog",
   "profile","language","readinessLog","mySupplements","supplementLog","unitSystem",
-  "__migrated_from_local__"
+  "onboardingVersion","__migrated_from_local__"
 ]);
 const LOCAL_SENSITIVE_KEYS = new Set(["fcmToken"]);
 let pendingSyncRunning = false;
@@ -3180,6 +3498,10 @@ async function teardownSession(){
   nutritionLog = {}; profile = { height: null, sex: "M" };
   readinessLog = {}; mySupplements = []; supplementLog = {};
   completedSessions = 0;
+  firstRunTourState.open=false; firstRunTourState.awaitingRoutine=false; firstRunTourState.justCreated=false;
+  const firstRunEl=document.getElementById("firstRunOnboarding"); if(firstRunEl) firstRunEl.hidden=true;
+  const coachEl=document.getElementById("onboardingCoach"); if(coachEl) coachEl.hidden=true;
+  clearOnboardingFocus();
 }
 
 // Admin only: list every registered user.
@@ -4236,6 +4558,7 @@ async function init(){
   bindTrainoEvents();
   bindProgressoEvents();
   bindAjustesEvents();
+  bindFirstRunOnboardingEvents();
   buildDaySwitch();
   renderDay();
   renderReadinessCard();
@@ -4444,6 +4767,7 @@ function applyStaticTranslations(){
   document.getElementById("lblUnitRow").textContent = t("unit_system_label");
   document.getElementById("lblDadosGroup").textContent = t("lbl_dados_group");
   document.getElementById("clearCacheBtn").textContent = t("clear_cache");
+  document.getElementById("replayOnboardingBtn").textContent = ot("replay");
   document.getElementById("exportBtn").textContent = t("export_backup");
   document.getElementById("exportCsvBtn").textContent = t("export_csv");
   document.querySelector('label[for="importInput"]').textContent = t("import_data");
@@ -4462,6 +4786,8 @@ function applyStaticTranslations(){
   const manageUsersBtnEl = document.getElementById("manageUsersBtn"); if(manageUsersBtnEl) manageUsersBtnEl.textContent = t("manage_users");
 
   document.querySelectorAll("#langSwitch button").forEach(b=> b.classList.toggle("active", b.dataset.lang===currentLang));
+  if(firstRunTourState.open) renderFirstRunOnboarding();
+  if(firstRunTourState.awaitingRoutine) renderOnboardingCoach();
 }
 
 function bindAjustesEvents(){
@@ -4479,6 +4805,7 @@ function bindAjustesEvents(){
   document.getElementById("exportCsvBtn").addEventListener("click", exportAllCsv);
   document.getElementById("importInput").addEventListener("change", e=>{ if(e.target.files && e.target.files[0]) importData(e.target.files[0]); e.target.value=""; });
   document.getElementById("resetAllBtn").addEventListener("click", resetAllData);
+  document.getElementById("replayOnboardingBtn").addEventListener("click",()=>startFirstRunOnboarding(true));
   document.querySelectorAll("#langSwitch button").forEach(btn=>{
     btn.classList.toggle("active", btn.dataset.lang===currentLang);
     btn.addEventListener("click", async ()=>{
@@ -5278,6 +5605,7 @@ window.openTemplateModal = function(){
       renderRotinas();
       closeTemplateModal();
       haptic([40,40,40]);
+      notifyFirstRunRoutineCreated();
     });
     list.appendChild(card);
   });
@@ -5406,6 +5734,7 @@ function renderAutoGenBody(){
     renderRotinas();
     closeAutoGenModal();
     haptic([40,40,40]);
+    notifyFirstRunRoutineCreated();
   });
 }
 
@@ -6000,6 +6329,7 @@ function renderRotinas(){
       await store.set("state", state);
       buildDaySwitch();
       renderRotinas();
+      notifyFirstRunRoutineCreated();
     });
     return;
   }
@@ -8297,7 +8627,10 @@ window.openExerciseConfig = function(dayKey, listType, index, dbEx, forceDbDefau
   document.getElementById("cfgSets").value = source.sets;
   document.getElementById("cfgReps").value = source.reps;
   document.getElementById("cfgRest").value = source.rest || 60;
-  document.getElementById("cfgVideo").value = source.videoUrl || "";
+  const sourceVideoUrl = source.videoUrl || "";
+  document.getElementById("configContextVideo").value = sourceVideoUrl;
+  document.getElementById("cfgVideo").value = sourceVideoUrl;
+  document.getElementById("cfgVideoField").style.display = isAdmin() ? "block" : "none";
   document.getElementById("cfgNotes").value = source.notes || "";
   document.getElementById("cfgDelete").style.display = (index!=null && !forceDbDefaults) ? "block" : "none";
   document.getElementById("exerciseConfigModal").classList.add("show");
@@ -8318,7 +8651,9 @@ window.saveExerciseConfig = async function(){
   const sets = (()=>{ const n=parseStrictInteger(document.getElementById("cfgSets").value); return Number.isFinite(n) ? Math.min(20, Math.max(1, n)) : 1; })();
   const reps = document.getElementById("cfgReps").value.trim().slice(0,20) || "10";
   const rest = (()=>{ const n=parseStrictInteger(document.getElementById("cfgRest").value); return Number.isFinite(n) ? Math.min(1800, Math.max(0, n)) : 0; })();
-  let videoUrl = document.getElementById("cfgVideo").value.trim();
+  let videoUrl = isAdmin()
+    ? document.getElementById("cfgVideo").value.trim()
+    : document.getElementById("configContextVideo").value.trim();
   if(videoUrl){
     if(!/^[a-z][a-z0-9+.-]*:\/\//i.test(videoUrl)) videoUrl = "https://" + videoUrl; // no scheme typed — assume https
     if(!isSafeHttpUrl(videoUrl)){ alert(t("alert_video_must_be_url")); return; }
@@ -9321,7 +9656,11 @@ if(firebaseReady){
         }
         clearTimeout(watchdog);
         loadingEl.classList.add("fade-out");
-        setTimeout(()=>{ loadingEl.style.display = "none"; loadingEl.classList.remove("fade-out"); }, 400);
+        setTimeout(()=>{
+          loadingEl.style.display = "none";
+          loadingEl.classList.remove("fade-out");
+          maybeStartFirstRunOnboarding();
+        }, 400);
       }
     } else {
       await teardownSession();
