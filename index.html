@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>KYRO</title>
-<meta name="kyro-build" content="2026-08-01-account-deletion-storage-v12">
+<meta name="kyro-build" content="2026-08-01-runtime-recovery-v13">
 <meta name="apple-mobile-web-app-title" content="KYRO">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
@@ -3877,44 +3877,117 @@ function canSeeDebugDetails(){
   return APP_ENV.name === "development" || isSuperAdmin();
 }
 function shortErrorId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
+let kyroCoreBootCompleted = false;
+let kyroFatalScreenActive = false;
+
+function isRecoverableRuntimeIssue(message){
+  const text=String(message||"").toLowerCase();
+  return /load failed|failed to fetch|network request failed|networkerror|aborterror|cancelled|canceled|app[ -]?check|recaptcha|internet connection appears to be offline|operation couldn.t be completed|temporarily unavailable/.test(text);
+}
+function rememberRuntimeDiagnostic(id,message){
+  try{
+    localStorage.setItem("kyro_last_runtime_diagnostic",JSON.stringify({
+      id,
+      build:(document.querySelector('meta[name="kyro-build"]')||{}).content||"unknown",
+      at:new Date().toISOString(),
+      online:navigator.onLine,
+      userAgent:navigator.userAgent||"",
+      message:String(message||"").slice(0,2500)
+    }));
+  }catch(_){}
+}
 function showDebugError(msg){
-  const el = document.getElementById("debugErrorBanner");
-  const txt = document.getElementById("debugErrorText");
-  if(!el || !txt) return;
-  if(!canSeeDebugDetails()){
-    const id = shortErrorId();
-    console.error("[" + id + "]", msg);
-    el.style.display = "block";
-    txt.textContent = tFmt("generic_error_with_id",{id});
+  const id=shortErrorId();
+  console.error("["+id+"]",msg);
+  rememberRuntimeDiagnostic(id,msg);
+
+  // Background network, App Check, reCAPTCHA and update-check failures must never
+  // replace the whole app with a fatal screen. They are transient on iOS and can be retried.
+  if(isRecoverableRuntimeIssue(msg)){
+    console.warn("KYRO recoverable runtime issue ignored:",id);
     return;
   }
-  el.style.display = "block";
-  txt.textContent = (txt.textContent ? txt.textContent + "\n\n---\n\n" : "") + msg;
+
+  const el=document.getElementById("debugErrorBanner");
+  const txt=document.getElementById("debugErrorText");
+  if(!el||!txt)return;
+
+  // Once the main UI is already usable, preserve it instead of blanking the whole app.
+  // The diagnostic remains available in localStorage for support.
+  if(kyroCoreBootCompleted){
+    console.warn("KYRO non-fatal post-boot error:",id);
+    return;
+  }
+
+  kyroFatalScreenActive=true;
+  if(!canSeeDebugDetails()){
+    el.style.display="block";
+    txt.textContent=tFmt("generic_error_with_id",{id});
+    return;
+  }
+  el.style.display="block";
+  txt.textContent=(txt.textContent?txt.textContent+"\n\n---\n\n":"")+msg+"\n\nSupport ID: "+id;
 }
 
-window.addEventListener("error", (e)=>{
-  showDebugError(t("js_error_prefix") + " " + e.message + (e.error && e.error.stack ? "\n" + e.error.stack : ""));
+window.addEventListener("error",e=>{
+  const message=t("js_error_prefix")+" "+e.message+(e.error&&e.error.stack?"\n"+e.error.stack:"");
+  showDebugError(message);
 });
-window.addEventListener("unhandledrejection", (e)=>{
-  const reason = e.reason;
-  showDebugError(t("promise_rejected_prefix") + " " + (reason && reason.message ? reason.message : String(reason)) + (reason && reason.stack ? "\n" + reason.stack : ""));
+window.addEventListener("unhandledrejection",e=>{
+  const reason=e.reason;
+  const message=t("promise_rejected_prefix")+" "+(reason&&reason.message?reason.message:String(reason))+(reason&&reason.stack?"\n"+reason.stack:"");
+  if(isRecoverableRuntimeIssue(message))e.preventDefault();
+  showDebugError(message);
 });
+
+async function repairKyroTechnicalState(){
+  const btn=document.getElementById("debugReloadBtn");
+  if(btn){btn.disabled=true;btn.textContent=currentLang==="en"?"Repairing…":"Reparando…";}
+  try{
+    if("serviceWorker" in navigator){
+      const registrations=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(reg=>reg.unregister().catch(()=>false)));
+    }
+    if("caches" in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(key=>key.startsWith("kyro-shell-")||key.startsWith("ramon-log-")).map(key=>caches.delete(key)));
+    }
+    try{
+      sessionStorage.removeItem("kyro_sw_update_started_v7");
+      sessionStorage.removeItem("kyro_sw_update_target_v7");
+    }catch(_){}
+  }catch(error){
+    console.warn("KYRO repair warning",error);
+  }
+  const url=new URL(location.href);
+  url.searchParams.set("kyro_repair",String(Date.now()));
+  location.replace(url.href);
+}
 
 try{
   if(typeof firebase !== "undefined"){
     firebase.initializeApp(FIREBASE_CONFIG);
     if(APP_CHECK_CONFIG.enabled){
-      if(!firebase.appCheck || !firebase.appCheck.ReCaptchaEnterpriseProvider){
-        throw new Error(t("appcheck_provider_missing"));
+      try{
+        if(!firebase.appCheck || !firebase.appCheck.ReCaptchaEnterpriseProvider){
+          throw new Error(t("appcheck_provider_missing"));
+        }
+        if(!APP_CHECK_CONFIG.enterpriseSiteKey || APP_CHECK_CONFIG.enterpriseSiteKey.startsWith("REPLACE_")){
+          throw new Error(t("appcheck_key_missing"));
+        }
+        fbAppCheck=firebase.appCheck();
+        fbAppCheck.activate(
+          new firebase.appCheck.ReCaptchaEnterpriseProvider(APP_CHECK_CONFIG.enterpriseSiteKey),
+          true
+        );
+      }catch(appCheckError){
+        // App Check is currently monitored rather than enforced. A content blocker,
+        // old iOS WebView, temporary reCAPTCHA failure or damaged local token must not
+        // prevent the rest of KYRO from starting on this device.
+        fbAppCheck=null;
+        console.warn("Firebase App Check could not start on this device; continuing safely.",appCheckError);
+        rememberRuntimeDiagnostic("APPCHECK",appCheckError&&appCheckError.message?appCheckError.message:String(appCheckError));
       }
-      if(!APP_CHECK_CONFIG.enterpriseSiteKey || APP_CHECK_CONFIG.enterpriseSiteKey.startsWith("REPLACE_")){
-        throw new Error(t("appcheck_key_missing"));
-      }
-      fbAppCheck = firebase.appCheck();
-      fbAppCheck.activate(
-        new firebase.appCheck.ReCaptchaEnterpriseProvider(APP_CHECK_CONFIG.enterpriseSiteKey),
-        true
-      );
     }
     fbAuth = firebase.auth();
     fbDb = firebase.firestore();
@@ -10459,7 +10532,7 @@ async function softRefreshCurrentView(){
 // ---- CSP-compatible event bindings (no inline onclick attributes) ----
 function bindStaticSecurityEvents(){
   const bind=(id,fn)=>{ const el=document.getElementById(id); if(el) el.addEventListener("click",fn); };
-  bind("debugReloadBtn",()=>location.reload());
+  bind("debugReloadBtn",repairKyroTechnicalState);
   bind("exerciseBrowserCloseBtn",closeExerciseBrowser);
   bind("exerciseConfigCloseBtn",closeExerciseConfig);
   bind("cfgDelete",deleteExerciseConfig);
@@ -10728,6 +10801,9 @@ if(firebaseReady){
           }, 15000);
           await maybeMigrateLocalData();
           await init();
+          kyroCoreBootCompleted=true;
+          kyroFatalScreenActive=false;
+          document.getElementById("debugErrorBanner").style.display="none";
           retryPendingSync();
           retryPendingPhotoUploads();
         }catch(e){
