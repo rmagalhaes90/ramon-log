@@ -1,10 +1,10 @@
 {
   "id": "./",
-  "name": "KYRO — Treino e Progresso",
+  "name": "KYRO — Training and Progress",
   "short_name": "KYRO",
-  "description": "Treinos, progresso corporal, nutrição e acompanhamento de performance.",
-  "lang": "pt-BR",
-  "start_url": "./index.html?lang=pt",
+  "description": "Workouts, body progress, nutrition, and performance tracking.",
+  "lang": "en",
+  "start_url": "./index.html?lang=en",
   "scope": "./",
   "display": "standalone",
   "display_override": [
@@ -35,9 +35,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Abrir treino",
-      "short_name": "Treino",
-      "url": "./index.html?lang=pt#treino",
+      "name": "Open workout",
+      "short_name": "Workout",
+      "url": "./index.html?lang=en#treino",
       "icons": [
         {
           "src": "icon-192.png",
@@ -46,9 +46,9 @@
       ]
     },
     {
-      "name": "Registrar nutrição",
-      "short_name": "Nutrição",
-      "url": "./index.html?lang=pt#nutricao",
+      "name": "Log nutrition",
+      "short_name": "Nutrition",
+      "url": "./index.html?lang=en#nutricao",
       "icons": [
         {
           "src": "icon-192.png",

@@ -5,11 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>KYRO</title>
 <meta name="apple-mobile-web-app-title" content="KYRO">
-<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://www.google.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://*.firebasestorage.app https://world.openfoodfacts.org https://www.google.com https://www.recaptcha.net; frame-src https://www.youtube-nocookie.com https://accounts.google.com https://www.google.com https://www.recaptcha.net; upgrade-insecure-requests">
+<link rel="manifest" id="appManifest" href="./manifest.json">
+<script>
+(()=>{
+  let lang="pt";
+  try{
+    const q=new URLSearchParams(location.search).get("lang");
+    const saved=localStorage.getItem("kyro_public_language");
+    lang=(q==="en"||q==="pt")?q:((saved==="en"||saved==="pt")?saved:(/^en/i.test(navigator.language||"")?"en":"pt"));
+    localStorage.setItem("kyro_public_language",lang);
+  }catch(e){ lang=/^en/i.test(navigator.language||"")?"en":"pt"; }
+  document.documentElement.lang=lang==="en"?"en":"pt-BR";
+  const manifest=document.getElementById("appManifest");
+  if(manifest) manifest.href=lang==="en"?"./manifest-en.json":"./manifest.json";
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -692,8 +706,8 @@
 </div>
 
 <div id="debugErrorBanner" style="display:none;position:fixed;inset:0;z-index:10000;background:#3a0d10;color:#fff;padding:24px 18px;font-family:monospace;font-size:12.5px;overflow:auto;white-space:pre-wrap;line-height:1.5">
-  <div style="font-size:16px;font-weight:700;margin-bottom:10px">⚠️ O app encontrou um erro</div>
-  <div style="margin-bottom:14px;font-size:12px;opacity:.8">Tire um print desta tela e mande pro suporte. Detalhes técnicos abaixo:</div>
+  <div style="font-size:16px;font-weight:700;margin-bottom:10px" data-i18n-fatal-title>⚠️ O app encontrou um erro</div>
+  <div style="margin-bottom:14px;font-size:12px;opacity:.8" data-i18n-fatal-help>Tire um print desta tela e mande pro suporte. Detalhes técnicos abaixo:</div>
   <div id="debugErrorText"></div>
   <button id="debugReloadBtn" style="margin-top:18px;background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-family:inherit">🔄 Tentar de novo</button>
 </div>
@@ -722,7 +736,7 @@
 
   <!-- TREINO -->
   <section class="page" data-page="home">
-    <div class="page-header"><h2>INÍCIO<span>.</span></h2></div>
+    <div class="page-header"><h2 id="pageHomeTitle">INÍCIO<span>.</span></h2></div>
     <div id="homeContent"></div>
   </section>
 
@@ -758,13 +772,13 @@
 
   <!-- ROTINAS -->
   <section class="page" data-page="rotinas">
-    <div class="page-header"><h2>ROTINAS<span>.</span></h2></div>
+    <div class="page-header"><h2 id="pageRoutinesTitle">ROTINAS<span>.</span></h2></div>
     <div class="content" id="rotinasContent"></div>
   </section>
 
   <!-- PROGRESSO -->
   <section class="page" data-page="progresso">
-    <div class="page-header"><h2>PROGRESSO<span>.</span></h2></div>
+    <div class="page-header"><h2 id="pageProgressTitle">PROGRESSO<span>.</span></h2></div>
     <div class="content">
       <div class="segmented" id="progressoSegmented">
         <button data-sub="semana" class="active" id="subSemana">📅 Semana</button>
@@ -886,7 +900,7 @@
             </svg>
           </div>
         </div>
-        <div class="heat-legend">leve <div class="heat-bar"></div> pesado</div>
+        <div class="heat-legend" id="heatLegend">leve <div class="heat-bar"></div> pesado</div>
         <div class="vol-list" id="volList"></div>
       </div>
 
@@ -896,7 +910,7 @@
 
   <!-- AJUSTES -->
   <section class="page" data-page="ajustes">
-    <div class="page-header"><h2>AJUSTES<span>.</span></h2></div>
+    <div class="page-header"><h2 id="pageSettingsTitle">AJUSTES<span>.</span></h2></div>
     <div class="content">
       <div class="settings-group">
         <div class="settings-group-title" id="lblContaGroup">Conta</div>
@@ -905,9 +919,9 @@
       </div>
 
       <div class="settings-group">
-        <div class="settings-group-title">App</div>
-        <div class="settings-row" id="installRow"><div class="settings-label">Verificando…</div></div>
-        <div class="settings-row" id="langRow"><div class="settings-label">Idioma / Language</div></div>
+        <div class="settings-group-title" id="settingsAppGroupTitle">App</div>
+        <div class="settings-row" id="installRow"><div class="settings-label" id="installCheckingLabel">Verificando…</div></div>
+        <div class="settings-row" id="langRow"><div class="settings-label" id="languageLabel">Idioma / Language</div></div>
         <div class="lang-switch" id="langSwitch">
           <button data-lang="pt" class="active" aria-label="Português" title="Português">🇧🇷</button>
           <button data-lang="en" aria-label="English" title="English">🇺🇸</button>
@@ -957,16 +971,16 @@
 <div class="modal-overlay" id="exerciseBrowserModal">
   <div class="modal-content">
     <div class="modal-head">
-      <h3>Adicionar Exercício</h3>
+      <h3 id="exerciseBrowserTitle">Adicionar Exercício</h3>
       <button class="close-btn" id="exerciseBrowserCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <input type="text" class="search-input" id="exerciseSearch" placeholder="Buscar exercício...">
     <div class="muscle-select">
-      <label class="label">Filtrar por Equipamento</label>
+      <label class="label" id="filterEquipmentLabel">Filtrar por Equipamento</label>
       <div class="muscle-buttons" id="equipmentFilterButtons"></div>
     </div>
     <div class="muscle-select">
-      <label class="label">Filtrar por Músculo</label>
+      <label class="label" id="filterMuscleLabel">Filtrar por Músculo</label>
       <div class="muscle-buttons" id="muscleFilterButtons"></div>
     </div>
     <div class="exercise-list" id="exerciseList"></div>
@@ -1020,10 +1034,10 @@
 <div class="modal-overlay" id="templateModal">
   <div class="modal-content">
     <div class="modal-head">
-      <h3>Templates Prontos</h3>
+      <h3 id="templateModalTitle">Templates Prontos</h3>
       <button class="close-btn" id="templateCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
-    <div class="about-block" style="padding:0 0 14px;text-align:left">Isso substitui toda a rotina da semana atual. Seus pesos, medidas e histórico não são afetados.</div>
+    <div class="about-block" id="templateModalWarning" style="padding:0 0 14px;text-align:left">Isso substitui toda a rotina da semana atual. Seus pesos, medidas e histórico não são afetados.</div>
     <div id="templateList"></div>
   </div>
 </div>
@@ -1031,7 +1045,7 @@
 <div class="modal-overlay" id="autoGenModal">
   <div class="modal-content">
     <div class="modal-head">
-      <h3>Gerador de Treino</h3>
+      <h3 id="autoGenModalTitle">Gerador de Treino</h3>
       <button class="close-btn" id="autoGenCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div id="autoGenBody"></div>
@@ -1041,7 +1055,7 @@
 <div class="modal-overlay" id="comparePhotoModal">
   <div class="modal-content">
     <div class="modal-head">
-      <h3>Antes / Depois</h3>
+      <h3 id="compareModalTitle">Antes / Depois</h3>
       <button class="close-btn" id="compareCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div class="compare-dates">
@@ -1071,7 +1085,7 @@
       </svg>
       <div class="ring-center">
         <div class="ring-num mono" id="ringNum">90</div>
-        <div class="ring-sub">descanso</div>
+        <div class="ring-sub" id="restTimerLabel">descanso</div>
       </div>
     </div>
     <div class="timer-ex" id="timerExName">Exercício</div>
@@ -1185,8 +1199,33 @@ const SUPPLEMENT_DB = [
   {name:"Cafeína + L-Teanina", nameEn:"Caffeine + L-Theanine", category:"cognicao", suggestedTiming:"Manhã"},
   {name:"Ginkgo Biloba", nameEn:"Ginkgo Biloba", category:"cognicao", suggestedTiming:"Manhã"}
 ];
+const SUPPLEMENT_TIMING_EN = Object.freeze({
+  "Pós-treino":"Post-workout",
+  "Antes de dormir":"Before bed",
+  "Entre refeições":"Between meals",
+  "Qualquer horário":"Any time",
+  "30-40 min antes do treino":"30–40 min before training",
+  "Antes do treino":"Before training",
+  "Durante ou pós-treino":"During or after training",
+  "Pós-treino ou antes de dormir":"Post-workout or before bed",
+  "Manhã ou antes do treino":"Morning or before training",
+  "Com refeições":"With meals",
+  "Manhã, com café da manhã":"Morning, with breakfast",
+  "Manhã, com alguma gordura":"Morning, with some dietary fat",
+  "Manhã":"Morning",
+  "Noite, longe de cálcio":"Evening, away from calcium",
+  "Noite":"Evening",
+  "Com vitamina C, longe de café":"With vitamin C, away from coffee",
+  "Manhã, em jejum":"Morning, on an empty stomach",
+  "30 min antes de dormir":"30 min before bed",
+  "Antes de dormir, estômago vazio":"Before bed, on an empty stomach"
+});
 function tSupplementName(sup){ return currentLang==="en" ? (sup.nameEn||sup.name) : sup.name; }
 function tSupplementCategory(key){ const c=SUPPLEMENT_CATEGORIES[key]; if(!c) return key; return currentLang==="en" ? c.labelEn : c.label; }
+function tSupplementTiming(sup){
+  const timing=sup&&sup.suggestedTiming ? sup.suggestedTiming : "";
+  return currentLang==="en" ? (sup.suggestedTimingEn||SUPPLEMENT_TIMING_EN[timing]||timing) : timing;
+}
 
 const EXERCISE_DB = [
   {name:"Agachamento Livre",muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},sets:"4",reps:"8-10",rest:90,equipment:"barbell"},
@@ -1362,7 +1401,18 @@ const EXERCISE_DB = [
 ];
 
 // ==================== I18N (idioma) ====================
-let currentLang = (typeof navigator !== "undefined" && /^en/i.test(navigator.language||"")) ? "en" : "pt";
+let currentLang = (()=>{
+  const queryLang = new URLSearchParams(location.search).get("lang");
+  if(queryLang === "en" || queryLang === "pt"){
+    try{ localStorage.setItem("kyro_public_language", queryLang); }catch(e){}
+    return queryLang;
+  }
+  try{
+    const savedPublicLang = localStorage.getItem("kyro_public_language");
+    if(savedPublicLang === "en" || savedPublicLang === "pt") return savedPublicLang;
+  }catch(e){}
+  return (typeof navigator !== "undefined" && /^en/i.test(navigator.language||"")) ? "en" : "pt";
+})();
 let unitSystem = "metric"; // "metric" (kg/cm) or "imperial" (lb/in) — a display preference only.
 
 // All weight/length data is ALWAYS stored internally in kg/cm, regardless of this setting —
@@ -1984,7 +2034,159 @@ const UI_STRINGS = {
     readiness_label_normal:"Treino normal", readiness_advice_normal:"Siga o plano como está hoje.",
     readiness_label_reduce:"Reduzir volume", readiness_advice_reduce:"Considere cortar uma ou duas séries por exercício.",
     readiness_label_light:"Sessão leve", readiness_advice_light:"Foque em técnica e cargas mais leves hoje.",
-    readiness_label_rest:"Descanso recomendado", readiness_advice_rest:"Seu corpo pode estar pedindo recuperação — considere descansar."
+    readiness_label_rest:"Descanso recomendado", readiness_advice_rest:"Seu corpo pode estar pedindo recuperação — considere descansar.",
+    close_aria:"Fechar",
+    edit_aria:"Editar",
+    delete_aria:"Excluir",
+    open_youtube:"▶️ Abrir no YouTube",
+    supplement_default_title:"Suplemento",
+    import_merge:"➕ Mesclar (adicionar sem apagar nada)",
+    import_replace:"⚠️ Substituir tudo",
+    barcode_title:"Escanear código de barras",
+    fatal_title:"⚠️ O app encontrou um erro",
+    fatal_help:"Tire um print desta tela e mande para o suporte. Detalhes técnicos abaixo:",
+    reload_btn:"🔄 Tentar de novo",
+    update_available:"Uma atualização segura do KYRO está disponível.",
+    update_now:"Atualizar",
+    page_home_title:"INÍCIO<span>.</span>",
+    page_routines_title:"ROTINAS<span>.</span>",
+    page_progress_title:"PROGRESSO<span>.</span>",
+    page_settings_title:"AJUSTES<span>.</span>",
+    heat_light:"leve",
+    heat_heavy:"pesado",
+    settings_app_group:"App",
+    checking_status:"Verificando…",
+    language_bilingual_label:"Idioma / Language",
+    unit_system_label:"Unidade de peso e medidas",
+    exercise_browser_title:"Adicionar exercício",
+    filter_equipment:"Filtrar por equipamento",
+    filter_muscle:"Filtrar por músculo",
+    add_selected_exercises:"+ Adicionar selecionados",
+    template_modal_title:"Templates prontos",
+    template_modal_warning:"Isso substitui toda a rotina da semana atual. Seus pesos, medidas e histórico não são afetados.",
+    autogen_modal_title:"Gerador de treino",
+    compare_modal_title:"Antes / Depois",
+    rest_timer_label:"descanso",
+    excellent_work:"Excelente trabalho.",
+    share_btn:"📤 Compartilhar",
+    notes_placeholder:"ex.: cuidado com o ombro",
+    reset_title:"Reiniciar",
+    reset_workout_aria:"Reiniciar treino do dia",
+    photo_alt:"Foto",
+    compare_before_alt:"Antes",
+    compare_after_alt:"Depois",
+    empty_routine_for_day:"Nenhuma rotina criada para {day} ainda.",
+    create_routine_for_day:"+ Criar rotina para este dia",
+    exercises_label:"Exercícios",
+    move_up:"Mover para cima",
+    move_down:"Mover para baixo",
+    drag_reorder:"Segurar e arrastar",
+    remove_exercise_title:"Remover exercício",
+    autogen_day:"Dia",
+    autogen_groups:"Grupos musculares (escolha um ou mais)",
+    autogen_equipment:"Equipamento (filtro opcional)",
+    autogen_intensity:"Intensidade",
+    autogen_preview:"Prévia — {title}",
+    autogen_reroll:"🔄 Gerar outro",
+    autogen_apply:"✅ Aplicar",
+    workout_short:"treino",
+    rest_short:"descanso",
+    session_finish:"⏹ Finalizar treino",
+    session_restart:"🔁 Reiniciar cronômetro",
+    session_start:"▶ Iniciar treino",
+    chart_not_enough_data:"sem dados suficientes ainda",
+    chart_no_data:"sem dados",
+    measure_waist:"Cintura",
+    measure_chest:"Peito",
+    measure_right_arm:"Braço dir.",
+    measure_left_arm:"Braço esq.",
+    measure_hips:"Quadril",
+    measure_thigh:"Coxa",
+    measure_calf:"Panturrilha",
+    measure_neck:"Pescoço",
+    exercise_add_title:"Adicionar exercício",
+    exercise_edit_title:"Editar exercício",
+    csv_date:"Data",
+    csv_day:"Dia",
+    csv_title:"Título",
+    csv_duration_min:"Duração (min)",
+    csv_volume_kg:"Volume (kg)",
+    csv_exercises:"Exercícios",
+    csv_weight_kg:"Peso (kg)",
+    csv_protein_g:"Proteína (g)",
+    csv_target_protein_g:"Meta proteína (g)",
+    csv_water_l:"Água (L)",
+    csv_target_water_l:"Meta água (L)",
+    csv_meal:"Refeição",
+    csv_carbs_g:"Carboidrato (g)",
+    csv_fat_g:"Gordura (g)",
+    csv_supplement:"Suplemento",
+    csv_category:"Categoria",
+    csv_times:"Horários",
+    csv_note:"Observação",
+    import_invalid_object:"O arquivo não contém um objeto JSON válido.",
+    import_no_recognized_data:"Nenhum dado reconhecido foi encontrado neste arquivo — não parece ser um backup do KYRO.",
+    import_invalid_json_inline:"o arquivo não é um JSON válido",
+    import_rollback_safe:"Uma cópia de segurança dos seus dados anteriores foi baixada antes da tentativa, então nada foi perdido.",
+    share_volume_label:"VOLUME",
+    share_duration_label:"DURAÇÃO",
+    share_sets_label:"SÉRIES",
+    share_exercises_label:"EXERCÍCIOS",
+    invalid_value:"Valor inválido",
+    firebase_setup_missing:"⚙️ Este app ainda não foi configurado com uma conta Firebase. Veja o guia de configuração para ativar contas.",
+    debug_import_timeout:"A importação/carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet e a configuração do Firebase.",
+    debug_load_timeout:"O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet e a configuração do Firebase.",
+    debug_load_error:"Erro ao carregar o app: {msg}",
+    template_ppl_desc:"6x por semana — empurrar, puxar e pernas alternados",
+    template_upper_lower_desc:"4x por semana — parte superior e inferior alternadas",
+    template_full_body_desc:"3x por semana — corpo inteiro em cada sessão, com exercícios variados entre os dias",
+    template_premium_desc:"5x por semana — peito/tríceps, costas/bíceps, pernas, ombros e upper body",
+    cardio_20_30:"Cardio: 20–30 min após a musculação.",
+    cardio_15_20:"Cardio: 15–20 min após a musculação.",
+    reps_each:"cada",
+    photo_upload_label:"📷 Adicionar foto",
+    drag_to_compare:"Arraste para comparar — esquerda é o “antes”, direita é o “depois”",
+    template_apply_name:"Aplicar o template “{name}”? Isso substituirá a rotina da semana atual.",
+    supp_empty_search:"Nenhum suplemento encontrado",
+    install_checking:"Verificando instalação…",
+    workout_generator_preview_title:"Prévia — {title}",
+    supp_search_ph:"Buscar suplemento...",
+    swipe_delete:"Excluir",
+    macro_remaining_g:"{n}g restantes",
+    macro_goal_hit:"meta batida ✓",
+    quick_eggs_name:"Ovos (3)",
+    quick_eggs_label:"🍳 3 ovos",
+    quick_chicken_name:"Frango 150g",
+    quick_chicken_label:"🍗 Frango 150g",
+    quick_rice_name:"Arroz 100g",
+    quick_rice_label:"🍚 Arroz 100g",
+    macro_protein_short:"P",
+    macro_carb_short:"C",
+    macro_fat_short:"G",
+    js_error_prefix:"Erro JavaScript:",
+    promise_rejected_prefix:"Promise rejeitada:",
+    appcheck_provider_missing:"O App Check está ativado, mas a biblioteca ou o provedor não carregou.",
+    appcheck_key_missing:"O App Check está ativado sem uma chave reCAPTCHA Enterprise válida.",
+    firebase_library_missing:"A biblioteca do Firebase não carregou. Verifique sua conexão e tente novamente.",
+    firebase_init_failed:"Falha ao iniciar o Firebase: {msg}",
+    profile_missing_debug:"O perfil de acesso sharedUsers/{uid} não existe após a tentativa de criação. Confira as regras publicadas do Firestore e o formato email/createdAt/blocked.",
+    profile_read_failed_debug:"Falha ao ler sharedUsers/{uid}: {msg}",
+    timer_default_exercise:"Exercício",
+    template_ppl_name:"Empurrar / Puxar / Pernas",
+    template_upper_lower_name:"Superior / Inferior",
+    template_full_body_name:"Corpo inteiro",
+    template_premium_name:"Premium 5x",
+    quick_meals_label:"Refeições rápidas",
+    file_workouts:"treinos",
+    file_measurements:"medidas",
+    file_nutrition:"nutricao",
+    file_meals:"refeicoes",
+    file_supplements:"suplementos",
+    file_workout_image:"treino",
+    video_label:"vídeo",
+    cache_key_not_allowed:"store.set: chave não permitida",
+    confirmed_write_unavailable:"setConfirmed indisponível",
+    migration_validation_failed:"Falha ao validar a migração de {key}"
   },
   en: {
     tab_treino:"Workout", tab_rotinas:"Routines", tab_progresso:"Progress", tab_ajustes:"Settings",
@@ -2188,7 +2390,159 @@ const UI_STRINGS = {
     readiness_label_normal:"Normal training", readiness_advice_normal:"Stick to today's plan as-is.",
     readiness_label_reduce:"Reduce volume", readiness_advice_reduce:"Consider cutting a set or two per exercise.",
     readiness_label_light:"Light session", readiness_advice_light:"Focus on technique and lighter loads today.",
-    readiness_label_rest:"Rest recommended", readiness_advice_rest:"Your body may be asking for recovery — consider resting."
+    readiness_label_rest:"Rest recommended", readiness_advice_rest:"Your body may be asking for recovery — consider resting.",
+    close_aria:"Close",
+    edit_aria:"Edit",
+    delete_aria:"Delete",
+    open_youtube:"▶️ Open on YouTube",
+    supplement_default_title:"Supplement",
+    import_merge:"➕ Merge (add without deleting anything)",
+    import_replace:"⚠️ Replace everything",
+    barcode_title:"Scan barcode",
+    fatal_title:"⚠️ The app encountered an error",
+    fatal_help:"Take a screenshot of this screen and send it to support. Technical details are below:",
+    reload_btn:"🔄 Try again",
+    update_available:"A secure KYRO update is available.",
+    update_now:"Update",
+    page_home_title:"HOME<span>.</span>",
+    page_routines_title:"ROUTINES<span>.</span>",
+    page_progress_title:"PROGRESS<span>.</span>",
+    page_settings_title:"SETTINGS<span>.</span>",
+    heat_light:"light",
+    heat_heavy:"heavy",
+    settings_app_group:"App",
+    checking_status:"Checking…",
+    language_bilingual_label:"Language / Idioma",
+    unit_system_label:"Weight and measurement units",
+    exercise_browser_title:"Add exercise",
+    filter_equipment:"Filter by equipment",
+    filter_muscle:"Filter by muscle",
+    add_selected_exercises:"+ Add selected",
+    template_modal_title:"Ready-made templates",
+    template_modal_warning:"This replaces the entire routine for the current week. Your weights, measurements, and history are not affected.",
+    autogen_modal_title:"Workout generator",
+    compare_modal_title:"Before / After",
+    rest_timer_label:"rest",
+    excellent_work:"Excellent work.",
+    share_btn:"📤 Share",
+    notes_placeholder:"e.g. be careful with the shoulder",
+    reset_title:"Restart",
+    reset_workout_aria:"Restart today’s workout",
+    photo_alt:"Photo",
+    compare_before_alt:"Before",
+    compare_after_alt:"After",
+    empty_routine_for_day:"No routine has been created for {day} yet.",
+    create_routine_for_day:"+ Create a routine for this day",
+    exercises_label:"Exercises",
+    move_up:"Move up",
+    move_down:"Move down",
+    drag_reorder:"Hold and drag",
+    remove_exercise_title:"Remove exercise",
+    autogen_day:"Day",
+    autogen_groups:"Muscle groups (choose one or more)",
+    autogen_equipment:"Equipment (optional filter)",
+    autogen_intensity:"Intensity",
+    autogen_preview:"Preview — {title}",
+    autogen_reroll:"🔄 Generate another",
+    autogen_apply:"✅ Apply",
+    workout_short:"workout",
+    rest_short:"rest",
+    session_finish:"⏹ Finish workout",
+    session_restart:"🔁 Restart timer",
+    session_start:"▶ Start workout",
+    chart_not_enough_data:"not enough data yet",
+    chart_no_data:"no data",
+    measure_waist:"Waist",
+    measure_chest:"Chest",
+    measure_right_arm:"Right arm",
+    measure_left_arm:"Left arm",
+    measure_hips:"Hips",
+    measure_thigh:"Thigh",
+    measure_calf:"Calf",
+    measure_neck:"Neck",
+    exercise_add_title:"Add exercise",
+    exercise_edit_title:"Edit exercise",
+    csv_date:"Date",
+    csv_day:"Day",
+    csv_title:"Title",
+    csv_duration_min:"Duration (min)",
+    csv_volume_kg:"Volume (kg)",
+    csv_exercises:"Exercises",
+    csv_weight_kg:"Weight (kg)",
+    csv_protein_g:"Protein (g)",
+    csv_target_protein_g:"Protein target (g)",
+    csv_water_l:"Water (L)",
+    csv_target_water_l:"Water target (L)",
+    csv_meal:"Meal",
+    csv_carbs_g:"Carbohydrate (g)",
+    csv_fat_g:"Fat (g)",
+    csv_supplement:"Supplement",
+    csv_category:"Category",
+    csv_times:"Times",
+    csv_note:"Note",
+    import_invalid_object:"The file does not contain a valid JSON object.",
+    import_no_recognized_data:"No recognized data was found in this file — it does not look like a KYRO backup.",
+    import_invalid_json_inline:"the file is not valid JSON",
+    import_rollback_safe:"A backup of your previous data was downloaded before the attempt, so nothing was lost.",
+    share_volume_label:"VOLUME",
+    share_duration_label:"DURATION",
+    share_sets_label:"SETS",
+    share_exercises_label:"EXERCISES",
+    invalid_value:"Invalid value",
+    firebase_setup_missing:"⚙️ This app has not been configured with a Firebase account yet. See the setup guide to enable accounts.",
+    debug_import_timeout:"Importing/loading took too long (more than 15 seconds). The app may not be able to reach Firestore — check your internet connection and Firebase configuration.",
+    debug_load_timeout:"Loading took too long (more than 15 seconds). The app may not be able to reach Firestore — check your internet connection and Firebase configuration.",
+    debug_load_error:"Error loading the app: {msg}",
+    template_ppl_desc:"6 days per week — alternating push, pull, and legs",
+    template_upper_lower_desc:"4 days per week — alternating upper and lower body",
+    template_full_body_desc:"3 days per week — full body each session, with varied exercises across the days",
+    template_premium_desc:"5 days per week — chest/triceps, back/biceps, legs, shoulders, and upper body",
+    cardio_20_30:"Cardio: 20–30 min after weight training.",
+    cardio_15_20:"Cardio: 15–20 min after weight training.",
+    reps_each:"each",
+    photo_upload_label:"📷 Add photo",
+    drag_to_compare:"Drag to compare — left is “before”, right is “after”",
+    template_apply_name:"Apply the “{name}” template? This will replace the current week’s routine.",
+    supp_empty_search:"No supplements found",
+    install_checking:"Checking installation…",
+    workout_generator_preview_title:"Preview — {title}",
+    supp_search_ph:"Search supplements...",
+    swipe_delete:"Delete",
+    macro_remaining_g:"{n}g remaining",
+    macro_goal_hit:"goal reached ✓",
+    quick_eggs_name:"Eggs (3)",
+    quick_eggs_label:"🍳 3 eggs",
+    quick_chicken_name:"Chicken 150g",
+    quick_chicken_label:"🍗 Chicken 150g",
+    quick_rice_name:"Rice 100g",
+    quick_rice_label:"🍚 Rice 100g",
+    macro_protein_short:"P",
+    macro_carb_short:"C",
+    macro_fat_short:"F",
+    js_error_prefix:"JavaScript error:",
+    promise_rejected_prefix:"Rejected promise:",
+    appcheck_provider_missing:"App Check is enabled, but its library or provider did not load.",
+    appcheck_key_missing:"App Check is enabled without a valid reCAPTCHA Enterprise site key.",
+    firebase_library_missing:"The Firebase library did not load. Check your connection and try again.",
+    firebase_init_failed:"Failed to start Firebase: {msg}",
+    profile_missing_debug:"The sharedUsers/{uid} access profile does not exist after the creation attempt. Check the published Firestore rules and the email/createdAt/blocked format.",
+    profile_read_failed_debug:"Failed to read sharedUsers/{uid}: {msg}",
+    timer_default_exercise:"Exercise",
+    template_ppl_name:"Push / Pull / Legs",
+    template_upper_lower_name:"Upper / Lower",
+    template_full_body_name:"Full body",
+    template_premium_name:"Premium 5x",
+    quick_meals_label:"Quick meals",
+    file_workouts:"workouts",
+    file_measurements:"measurements",
+    file_nutrition:"nutrition",
+    file_meals:"meals",
+    file_supplements:"supplements",
+    file_workout_image:"workout",
+    video_label:"video",
+    cache_key_not_allowed:"store.set: key is not allowed",
+    confirmed_write_unavailable:"setConfirmed is unavailable",
+    migration_validation_failed:"Failed to validate migration of {key}"
   }
 };
 function t(key){ return (UI_STRINGS[currentLang] && UI_STRINGS[currentLang][key]) || UI_STRINGS.pt[key] || key; }
@@ -2196,6 +2550,38 @@ function tFmt(key, vars){
   let str = t(key);
   Object.entries(vars||{}).forEach(([k,v])=>{ str = str.split("{"+k+"}").join(v); });
   return str;
+}
+function setText(id, key){ const el=document.getElementById(id); if(el) el.textContent=t(key); }
+function setHtml(id, key){ const el=document.getElementById(id); if(el) el.innerHTML=t(key); }
+function setAttr(id, attr, key){ const el=document.getElementById(id); if(el) el.setAttribute(attr,t(key)); }
+function tRepsText(value){
+  const raw=String(value??"");
+  if(currentLang!=="en") return raw;
+  return raw.replace(/\bcada\b/gi,t("reps_each")).replace(/\bpor lado\b/gi,"per side");
+}
+const CARDIO_TRANSLATIONS = Object.freeze({
+  "Cardio: 20-30 min após a musculação.":"cardio_20_30",
+  "Cardio: 15-20 min após a musculação.":"cardio_15_20",
+  "Cardio: 20–30 min após a musculação.":"cardio_20_30",
+  "Cardio: 15–20 min após a musculação.":"cardio_15_20"
+});
+function tCardioNote(workout){
+  if(!workout || !workout.cardioNote) return "";
+  if(currentLang!=="en") return workout.cardioNote;
+  const key=CARDIO_TRANSLATIONS[workout.cardioNote];
+  return key ? t(key) : (workout.cardioNoteEn || workout.cardioNote);
+}
+function updateDocumentLanguage(){
+  const locale=currentLang==="en"?"en":"pt-BR";
+  document.documentElement.lang=locale;
+  const manifest=document.getElementById("appManifest");
+  if(manifest) manifest.href=currentLang==="en"?"./manifest-en.json":"./manifest.json";
+  try{ localStorage.setItem("kyro_public_language",currentLang); }catch(e){}
+  const sendLanguage=worker=>{ try{ worker&&worker.postMessage({type:"SET_LANGUAGE",language:currentLang}); }catch(e){} };
+  if("serviceWorker" in navigator){
+    sendLanguage(navigator.serviceWorker.controller);
+    navigator.serviceWorker.ready.then(reg=>sendLanguage(reg.active)).catch(()=>{});
+  }
 }
 
 const MUSCLE_NAMES = {shoulders:"Ombros",traps:"Trapézio",chest:"Peito",biceps:"Bíceps",triceps:"Tríceps",forearms:"Antebraço",abs:"Abdômen",obliques:"Oblíquos",upperback:"Costas (superior)",lowerback:"Lombar",glutes:"Glúteos",quads:"Quadríceps",hamstrings:"Posteriores",calves:"Panturrilha",lats:"Costas (lateral)"};
@@ -2210,7 +2596,28 @@ function tDayFull(key){ return currentLang==="en" ? DAY_LABELS_FULL_EN[key] : DA
 // Translates a workout's display title. Built-in plan templates carry a titleEn field;
 // custom routines the person typed themselves don't (there's no reliable way to auto-translate
 // free text), so this just falls back to the original title in that case.
-function tWorkoutTitle(w){ if(!w) return ""; return (currentLang==="en" && w.titleEn) ? w.titleEn : (w.title||""); }
+const BUILTIN_WORKOUT_TITLES = Object.freeze({
+  "Push A (Peito/Ombro/Tríceps)":{pt:"Empurrar A (Peito/Ombro/Tríceps)",en:"Push A (Chest/Shoulders/Triceps)"},
+  "Pull A (Costas/Bíceps)":{pt:"Puxar A (Costas/Bíceps)",en:"Pull A (Back/Biceps)"},
+  "Legs A":{pt:"Pernas A",en:"Legs A"},
+  "Push B (Ombro/Peito/Tríceps)":{pt:"Empurrar B (Ombro/Peito/Tríceps)",en:"Push B (Shoulders/Chest/Triceps)"},
+  "Pull B (Costas/Bíceps)":{pt:"Puxar B (Costas/Bíceps)",en:"Pull B (Back/Biceps)"},
+  "Legs B":{pt:"Pernas B",en:"Legs B"},
+  "Upper A":{pt:"Superior A",en:"Upper A"}, "Upper B":{pt:"Superior B",en:"Upper B"},
+  "Lower A":{pt:"Inferior A",en:"Lower A"}, "Lower B":{pt:"Inferior B",en:"Lower B"},
+  "Full Body A":{pt:"Corpo inteiro A",en:"Full Body A"},
+  "Full Body B":{pt:"Corpo inteiro B",en:"Full Body B"},
+  "Full Body C":{pt:"Corpo inteiro C",en:"Full Body C"},
+  "Upper Body (Volume)":{pt:"Parte superior (Volume)",en:"Upper Body (Volume)"}
+});
+function tWorkoutTitle(w){
+  if(!w) return "";
+  if(currentLang==="en" && w.titleEn) return w.titleEn;
+  if(currentLang!=="en" && w.titlePt) return w.titlePt;
+  const raw=w.title||"";
+  const known=BUILTIN_WORKOUT_TITLES[raw];
+  return known ? known[currentLang==="en"?"en":"pt"] : raw;
+}
 const LS_PREFIX = "ramon_log_";
 
 // ==================== FIREBASE ====================
@@ -2418,7 +2825,7 @@ function showDebugError(msg){
     const id = shortErrorId();
     console.error("[" + id + "]", msg);
     el.style.display = "block";
-    txt.textContent = t("generic_error_with_id") ? tFmt("generic_error_with_id",{id}) : ("Ocorreu um erro (" + id + "). Tente novamente.");
+    txt.textContent = tFmt("generic_error_with_id",{id});
     return;
   }
   el.style.display = "block";
@@ -2426,11 +2833,11 @@ function showDebugError(msg){
 }
 
 window.addEventListener("error", (e)=>{
-  showDebugError("Erro JS: " + e.message + (e.error && e.error.stack ? "\n" + e.error.stack : ""));
+  showDebugError(t("js_error_prefix") + " " + e.message + (e.error && e.error.stack ? "\n" + e.error.stack : ""));
 });
 window.addEventListener("unhandledrejection", (e)=>{
   const reason = e.reason;
-  showDebugError("Promise rejeitada: " + (reason && reason.message ? reason.message : String(reason)) + (reason && reason.stack ? "\n" + reason.stack : ""));
+  showDebugError(t("promise_rejected_prefix") + " " + (reason && reason.message ? reason.message : String(reason)) + (reason && reason.stack ? "\n" + reason.stack : ""));
 });
 
 try{
@@ -2438,10 +2845,10 @@ try{
     firebase.initializeApp(FIREBASE_CONFIG);
     if(APP_CHECK_CONFIG.enabled){
       if(!firebase.appCheck || !firebase.appCheck.ReCaptchaEnterpriseProvider){
-        throw new Error("App Check foi habilitado, mas a biblioteca/provider não carregou.");
+        throw new Error(t("appcheck_provider_missing"));
       }
       if(!APP_CHECK_CONFIG.enterpriseSiteKey || APP_CHECK_CONFIG.enterpriseSiteKey.startsWith("REPLACE_")){
-        throw new Error("App Check foi habilitado sem uma chave reCAPTCHA Enterprise válida.");
+        throw new Error(t("appcheck_key_missing"));
       }
       fbAppCheck = firebase.appCheck();
       fbAppCheck.activate(
@@ -2474,9 +2881,9 @@ try{
       }
     }catch(e){ console.warn("Firebase Messaging não disponível neste navegador:", e); }
   } else {
-    showDebugError("A biblioteca do Firebase não carregou (sem internet, ou bloqueada). Verifique sua conexão e tente de novo.");
+    showDebugError(t("firebase_library_missing"));
   }
-}catch(e){ console.error("Firebase init failed:", e); showDebugError("Falha ao iniciar o Firebase: " + e.message); }
+}catch(e){ console.error("Firebase init failed:", e); showDebugError(tFmt("firebase_init_failed",{msg:e.message})); }
 
 async function enablePushNotifications(){
   if(!fbMessaging){ alert(t("alert_push_unsupported")); return false; }
@@ -2666,14 +3073,14 @@ const store = {
       try{ await withTimeout(personalDocRef(key).set({value}), 10000, "set-sensitive:"+key); return {confirmed:true,queued:false}; }
       catch(e){ return {confirmed:false,queued:false}; }
     }
-    if(!isCacheableKey(key)) throw new Error("store.set: key não permitida");
+    if(!isCacheableKey(key)) throw new Error(t("cache_key_not_allowed"));
     writeCache(key, value);
     queuePendingSync(key, "set", value); // queue FIRST; remove only after server confirmation
     retryPendingSync();
     return {confirmed:false, queued:true};
   },
   async setConfirmed(key, value){
-    if(!currentUser || !fbDb || !isCacheableKey(key)) throw new Error("setConfirmed indisponível");
+    if(!currentUser || !fbDb || !isCacheableKey(key)) throw new Error(t("confirmed_write_unavailable"));
     writeCache(key,value);
     queuePendingSync(key,"set",value);
     await withTimeout(personalDocRef(key).set({value}), 12000, "set-confirmed:"+key);
@@ -2732,7 +3139,7 @@ async function checkAccountStatus(){
       if(!doc.exists){
         // The profile should already have been created by registerSharedUserProfile() before
         // this ever runs. If it's still missing, something is wrong — don't assume "not blocked".
-        showDebugError("checkAccountStatus: o documento sharedUsers/"+currentUser.uid+" não existe, mesmo depois de registerSharedUserProfile() ter rodado. Isso normalmente indica que a escrita de criação do perfil foi rejeitada pelas Firestore Rules — confira se as regras publicadas realmente batem com o formato que o app grava (email, createdAt, blocked).");
+        showDebugError(tFmt("profile_missing_debug",{uid:currentUser.uid}));
         return { status: "error" };
       }
       const data = doc.data() || {};
@@ -2745,7 +3152,7 @@ async function checkAccountStatus(){
         continue;
       }
       console.error("checkAccountStatus error", e);
-      showDebugError("checkAccountStatus falhou ao ler sharedUsers/"+currentUser.uid+": " + (e && e.code ? e.code+" — " : "") + (e && e.message ? e.message : String(e)));
+      showDebugError(tFmt("profile_read_failed_debug",{uid:currentUser.uid,msg:(e && e.code ? e.code+" — " : "") + (e && e.message ? e.message : String(e))}));
       return { status: "error" };
     }
   }
@@ -2883,7 +3290,7 @@ async function maybeMigrateLocalData(){
       const clean = sanitizeStoredValueByKey(shortKey, parsed);
       await store.setConfirmed(shortKey, clean);
       const verify = await withTimeout(personalDocRef(shortKey).get({source:"server"}),12000,"migration-verify:"+shortKey);
-      if(!verify.exists || JSON.stringify(verify.data().value)!==JSON.stringify(clean)) throw new Error("Falha ao validar migração de "+shortKey);
+      if(!verify.exists || JSON.stringify(verify.data().value)!==JSON.stringify(clean)) throw new Error(tFmt("migration_validation_failed",{key:shortKey}));
       completed.add(lk);
       if(stateKey) localStorage.setItem(stateKey, JSON.stringify({completed:[...completed],updatedAt:Date.now()}));
     }
@@ -3058,7 +3465,7 @@ function showAuthScreen(){
   document.getElementById("authScreen").classList.remove("hide");
   if(FIREBASE_CONFIG.apiKey.startsWith("COLE_")){
     const el = document.getElementById("authError");
-    el.textContent = "⚙️ Este app ainda não foi configurado com uma conta Firebase. Veja o guia de configuração para ativar contas.";
+    el.textContent = t("firebase_setup_missing");
     el.classList.add("show");
     document.getElementById("authForm").style.display = "none";
     document.getElementById("authGoogle").style.display = "none";
@@ -3232,18 +3639,22 @@ function generateAutoWorkout(groupKeys, intensityKey, equipmentFilter){
     }));
   }
 
-  const groupLabel = groups.map(g=> currentLang==="en"?g.labelEn:g.label).join(" + ");
+  const groupLabelPt = groups.map(g=>g.label).join(" + ");
+  const groupLabelEn = groups.map(g=>g.labelEn).join(" + ");
   return {
-    title: `${groupLabel} — ${level.icon} ${currentLang==="en"?level.labelEn:level.label}`,
-    cardioNote: currentLang==="en" ? "Cardio: 15-20 min after weight training." : "Cardio: 15-20 min após a musculação.",
+    title: `${groupLabelPt} — ${level.icon} ${level.label}`,
+    titlePt: `${groupLabelPt} — ${level.icon} ${level.label}`,
+    titleEn: `${groupLabelEn} — ${level.icon} ${level.labelEn}`,
+    cardioNote: "Cardio: 15-20 min após a musculação.",
+    cardioNoteEn: "Cardio: 15-20 min after weight training.",
     exercises, abs
   };
 }
 
 const WORKOUT_TEMPLATES = {
   ppl: {
-    label: "Push / Pull / Legs",
-    desc: "6x por semana — empurrar, puxar e pernas alternados",
+    label: "Empurrar / Puxar / Pernas", labelEn: "Push / Pull / Legs",
+    desc: "6x por semana — empurrar, puxar e pernas alternados", descEn: "6 days per week — alternating push, pull, and legs",
     build(){
       const cardio = "Cardio: 20-30 min após a musculação.";
       return {
@@ -3287,34 +3698,34 @@ const WORKOUT_TEMPLATES = {
     }
   },
   upperLower: {
-    label: "Upper / Lower",
-    desc: "4x por semana — parte superior e inferior alternadas",
+    label: "Superior / Inferior", labelEn: "Upper / Lower",
+    desc: "4x por semana — parte superior e inferior alternadas", descEn: "4 days per week — alternating upper and lower body",
     build(){
       const cardio = "Cardio: 20-30 min após a musculação.";
       return {
         domingo: null,
-        segunda: { title:"Upper A", cardioNote: cardio, exercises:[
+        segunda: { title:"Superior A", titleEn:"Upper A", cardioNote: cardio, exercises:[
           {name:"Supino Reto",sets:4,reps:"6-8",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:"https://www.youtube.com/watch?v=vIGvt-vgrvY"},
           {name:"Puxada Frente",sets:4,reps:"8-10",rest:90,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=yzlQK3s-a_Y"},
           {name:"Desenvolvimento",sets:3,reps:"8-10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
           {name:"Rosca Direta",sets:3,reps:"10",rest:60,muscles:{biceps:1,forearms:.3},videoUrl:"https://www.youtube.com/watch?v=Et1wgGMGW8w"},
           {name:"Tríceps Corda",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=YQ6MRBeyIAE"}
         ], abs:[]},
-        terca: { title:"Lower A", cardioNote: cardio, exercises:[
+        terca: { title:"Inferior A", titleEn:"Lower A", cardioNote: cardio, exercises:[
           {name:"Agachamento",sets:4,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
           {name:"Agachamento Búlgaro",sets:3,reps:"10-12 cada",rest:75,muscles:{quads:1,glutes:.7},videoUrl:"https://www.youtube.com/watch?v=a3-bQbTdA_0"},
           {name:"Stiff",sets:3,reps:"10",rest:90,muscles:{hamstrings:1,glutes:.6,lowerback:.5},videoUrl:"https://www.youtube.com/watch?v=BHfY5-jGNDA"},
           {name:"Panturrilha em Pé",sets:4,reps:"15-20",rest:45,muscles:{calves:1},videoUrl:"https://www.youtube.com/watch?v=qWHH0We_9r0"}
         ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]},
         quarta: null,
-        quinta: { title:"Upper B", cardioNote: cardio, exercises:[
+        quinta: { title:"Superior B", titleEn:"Upper B", cardioNote: cardio, exercises:[
           {name:"Supino Inclinado",sets:4,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
           {name:"Remada Baixa",sets:4,reps:"10",rest:90,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=2YebbYuuBJQ"},
           {name:"Elevação Lateral",sets:3,reps:"15",rest:60,muscles:{shoulders:1},videoUrl:"https://www.youtube.com/watch?v=W5hRdgwEoEA"},
           {name:"Rosca Martelo",sets:3,reps:"10-12",rest:60,muscles:{biceps:1,forearms:.6},videoUrl:"https://www.youtube.com/watch?v=5vPGH1uTtbs"},
           {name:"Tríceps Testa",sets:3,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=r0Xf7A3k5e4"}
         ], abs:[]},
-        sexta: { title:"Lower B", cardioNote: cardio, exercises:[
+        sexta: { title:"Inferior B", titleEn:"Lower B", cardioNote: cardio, exercises:[
           {name:"Extensora",sets:3,reps:"15",rest:60,muscles:{quads:1},videoUrl:"https://www.youtube.com/watch?v=Svq2T3L9oKo"},
           {name:"Mesa Flexora",sets:3,reps:"12",rest:60,muscles:{hamstrings:1},videoUrl:"https://www.youtube.com/watch?v=8Nat6GRiEoc"},
           {name:"Leg Press",sets:4,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
@@ -3325,11 +3736,11 @@ const WORKOUT_TEMPLATES = {
     }
   },
   fullBody: {
-    label: "Full Body",
-    desc: "3x por semana — corpo inteiro em cada sessão, com exercícios variados entre os dias",
+    label: "Corpo inteiro", labelEn: "Full Body",
+    desc: "3x por semana — corpo inteiro em cada sessão, com exercícios variados entre os dias", descEn: "3 days per week — full body each session, with varied exercises across the days",
     build(){
       const cardio = "Cardio: 20-30 min após a musculação.";
-      const dayA = { title:"Full Body A", cardioNote: cardio, exercises:[
+      const dayA = { title:"Corpo inteiro A", titleEn:"Full Body A", cardioNote: cardio, exercises:[
         {name:"Agachamento",sets:3,reps:"8-10",rest:90,muscles:{quads:1,glutes:1,hamstrings:.5,lowerback:.3},videoUrl:"https://www.youtube.com/watch?v=rM6SDUdl9fs"},
         {name:"Supino Reto",sets:3,reps:"8-10",rest:90,muscles:{chest:1,triceps:.4,shoulders:.3},videoUrl:"https://www.youtube.com/watch?v=vIGvt-vgrvY"},
         {name:"Remada Baixa",sets:3,reps:"10",rest:75,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=2YebbYuuBJQ"},
@@ -3337,7 +3748,7 @@ const WORKOUT_TEMPLATES = {
         {name:"Rosca Direta",sets:2,reps:"10",rest:60,muscles:{biceps:1,forearms:.3},videoUrl:"https://www.youtube.com/watch?v=Et1wgGMGW8w"},
         {name:"Tríceps Corda",sets:2,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=YQ6MRBeyIAE"}
       ], abs:[ {name:"Prancha",sets:3,reps:"45-60s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"} ]};
-      const dayB = { title:"Full Body B", cardioNote: cardio, exercises:[
+      const dayB = { title:"Corpo inteiro B", titleEn:"Full Body B", cardioNote: cardio, exercises:[
         {name:"Levantamento Terra Romeno",sets:3,reps:"8-10",rest:90,muscles:{hamstrings:1,glutes:.7,lowerback:.4},videoUrl:"https://www.youtube.com/watch?v=jSomWOwLiGE"},
         {name:"Supino Inclinado com Halteres",sets:3,reps:"8-10",rest:90,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=RGeSgQmO1EU"},
         {name:"Puxada Frente",sets:3,reps:"10",rest:75,muscles:{lats:1,biceps:.4},videoUrl:"https://www.youtube.com/watch?v=yzlQK3s-a_Y"},
@@ -3345,7 +3756,7 @@ const WORKOUT_TEMPLATES = {
         {name:"Rosca Martelo",sets:2,reps:"10-12",rest:60,muscles:{biceps:1,forearms:.6},videoUrl:"https://www.youtube.com/watch?v=5vPGH1uTtbs"},
         {name:"Tríceps Testa",sets:2,reps:"10-12",rest:60,muscles:{triceps:1},videoUrl:"https://www.youtube.com/watch?v=r0Xf7A3k5e4"}
       ], abs:[ {name:"Cable Crunch",sets:3,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"} ]};
-      const dayC = { title:"Full Body C", cardioNote: cardio, exercises:[
+      const dayC = { title:"Corpo inteiro C", titleEn:"Full Body C", cardioNote: cardio, exercises:[
         {name:"Leg Press",sets:3,reps:"12",rest:90,muscles:{quads:1,glutes:.6},videoUrl:"https://www.youtube.com/watch?v=YmKd0StxtXQ"},
         {name:"Crucifixo Cabos",sets:3,reps:"12-15",rest:60,muscles:{chest:1},videoUrl:"https://www.youtube.com/watch?v=mNWyWEJNCDM"},
         {name:"Puxada Triângulo",sets:3,reps:"10-12",rest:75,muscles:{lats:1,upperback:.4,biceps:.3},videoUrl:"https://www.youtube.com/watch?v=SIyWK5Uy1yM"},
@@ -3360,8 +3771,8 @@ const WORKOUT_TEMPLATES = {
     }
   },
   premium: {
-    label: "Premium 5x",
-    desc: "5x por semana — peito/tríceps, costas/bíceps, pernas, ombros, upper body",
+    label: "Premium 5x", labelEn: "Premium 5x",
+    desc: "5x por semana — peito/tríceps, costas/bíceps, pernas, ombros, upper body", descEn: "5 days per week — chest/triceps, back/biceps, legs, shoulders, and upper body",
     build(){ return buildDefaultWorkouts(); }
   }
 };
@@ -3409,7 +3820,7 @@ function buildDefaultWorkouts(){
       {name:"Cable Crunch",sets:4,reps:"15",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=I64bjVbs7XI"},
       {name:"Prancha",sets:3,reps:"60-90s",muscles:{abs:1},videoUrl:"https://www.youtube.com/watch?v=Yu0wjtD5FkU"}
     ] },
-    sexta: { title: "Upper Body (Volume)", titleEn: "Upper Body (Volume)", cardioNote: cardio, exercises: [
+    sexta: { title: "Parte superior (Volume)", titleEn: "Upper Body (Volume)", cardioNote: cardio, exercises: [
       {name:"Supino Inclinado",sets:3,reps:"8-10",rest:75,muscles:{chest:1,shoulders:.5},videoUrl:"https://www.youtube.com/watch?v=rCPwrZkrVVQ"},
       {name:"Remada",sets:3,reps:"8-10",rest:75,muscles:{upperback:1,lats:.5},videoUrl:"https://www.youtube.com/watch?v=mxvS-iwm53o"},
       {name:"Desenvolvimento Halteres",sets:3,reps:"10",rest:75,muscles:{shoulders:1,triceps:.4},videoUrl:"https://www.youtube.com/watch?v=dgnvHzvNOIk"},
@@ -3761,7 +4172,7 @@ async function loadUserData(isInitialLoad){
     cleanSharedList.forEach(ex => EXERCISE_DB.push(ex));
   }
 
-  currentLang = (savedLang === "en") ? "en" : "pt";
+  currentLang = (savedLang === "en" || savedLang === "pt") ? savedLang : currentLang;
   readinessLog = safely(()=> sanitizeReadinessLog(savedReadinessLog), {});
   mySupplements = safely(()=> sanitizeSupplements(savedSupplements), []);
   supplementLog = safely(()=> sanitizeSupplementLog(savedSupplementLog), {});
@@ -3906,6 +4317,52 @@ function refreshNotifStatus(){
 }
 
 function applyStaticTranslations(){
+  updateDocumentLanguage();
+  applyAuthScreenTranslations();
+  setAuthMode(authMode);
+  setHtml("pageHomeTitle","page_home_title");
+  setHtml("pageRoutinesTitle","page_routines_title");
+  setHtml("pageProgressTitle","page_progress_title");
+  setHtml("pageSettingsTitle","page_settings_title");
+  const heatLegend=document.getElementById("heatLegend"); if(heatLegend) heatLegend.innerHTML=`${t("heat_light")} <div class="heat-bar"></div> ${t("heat_heavy")}`;
+  setText("settingsAppGroupTitle","settings_app_group");
+  setText("installCheckingLabel","checking_status");
+  setText("languageLabel","language_bilingual_label");
+  setText("progLabel","progress_label_default");
+  setText("lblNotifRow","lbl_notifications");
+  setAttr("exerciseSearch","placeholder","ex_mgr_search_ph");
+  setAttr("suppSearch","placeholder","supp_search_ph");
+  setText("exerciseBrowserTitle","exercise_browser_title");
+  setText("filterEquipmentLabel","filter_equipment");
+  setText("filterMuscleLabel","filter_muscle");
+  setText("addSelectedExercisesBtn","add_selected_exercises");
+  setText("templateModalTitle","template_modal_title");
+  setText("templateModalWarning","template_modal_warning");
+  setText("autoGenModalTitle","autogen_modal_title");
+  setText("compareModalTitle","compare_modal_title");
+  setText("restTimerLabel","rest_timer_label");
+  const timerName=document.getElementById("timerExName");
+  if(timerName) timerName.textContent=restExName?tExerciseName(restExName):t("timer_default_exercise");
+  setText("celebrateSub","excellent_work");
+  setText("celebrateShare","share_btn");
+  setText("videoPlayerExternalLink","open_youtube");
+  setText("suppEditTitle","supplement_default_title");
+  setText("importMergeBtn","import_merge");
+  setText("importReplaceBtn","import_replace");
+  setText("barcodeModalTitle","barcode_title");
+  setText("debugReloadBtn","reload_btn");
+  setText("pwaUpdateBtn","update_now");
+  setText("bootstrapErrorRetryBtn","reload_btn");
+  setAttr("resetBtn","title","reset_title");
+  setAttr("resetBtn","aria-label","reset_workout_aria");
+  setAttr("cfgNotes","placeholder","notes_placeholder");
+  setAttr("compareBeforeImg","alt","compare_before_alt");
+  setAttr("compareAfterImg","alt","compare_after_alt");
+  setAttr("pvImg","alt","photo_alt");
+  document.querySelectorAll(".close-btn").forEach(el=>el.setAttribute("aria-label",t("close_aria")));
+  const fatalTitle=document.querySelector("#debugErrorScreen [data-i18n-fatal-title]"); if(fatalTitle) fatalTitle.textContent=t("fatal_title");
+  const fatalHelp=document.querySelector("#debugErrorScreen [data-i18n-fatal-help]"); if(fatalHelp) fatalHelp.textContent=t("fatal_help");
+  const updateText=document.querySelector("#pwaUpdateToast span"); if(updateText) updateText.textContent=t("update_available");
   document.getElementById("navHome").textContent = t("nav_home");
   document.getElementById("navTreino").textContent = t("tab_treino");
   document.getElementById("navRotinas").textContent = t("tab_rotinas");
@@ -3923,7 +4380,7 @@ function applyStaticTranslations(){
   document.getElementById("subConquistas").textContent = "🏅 " + t("achievements_label");
   document.getElementById("subSuplementos").textContent = "💊 " + t("supplements_label");
   document.getElementById("suppBrowserTitle").textContent = t("supp_browser_title");
-  document.getElementById("suppSearch").placeholder = t("ex_mgr_search_ph");
+  document.getElementById("suppSearch").placeholder = t("supp_search_ph");
   document.getElementById("lblSuppTimes").textContent = t("lbl_supp_times");
   document.getElementById("suppSaveBtn").textContent = t("lbl_save");
   document.getElementById("photoAddLabel").textContent = t("add_photo");
@@ -3948,7 +4405,7 @@ function applyStaticTranslations(){
   document.getElementById("lblPcBar").textContent = t("lbl_pc_bar");
 
   // Exercise history modal
-  if(document.getElementById("historyExName").textContent === "Exercício"){
+  if(["Exercício","Exercise"].includes(document.getElementById("historyExName").textContent)){
     document.getElementById("historyExName").textContent = t("cfg_default_ex_name");
   }
 
@@ -4027,12 +4484,17 @@ function bindAjustesEvents(){
     btn.addEventListener("click", async ()=>{
       if(btn.dataset.lang===currentLang) return;
       currentLang = btn.dataset.lang;
+      try{ localStorage.setItem("kyro_public_language",currentLang); }catch(e){}
       await store.set("language", currentLang);
       applyStaticTranslations();
       buildDaySwitch();
       renderDay();
       renderRotinas();
       renderHomePage();
+      renderProgSub();
+      if(document.getElementById("exerciseBrowserModal").classList.contains("show")){ buildBrowserFilters(); renderExerciseList(); }
+      if(document.getElementById("exerciseManagerModal").classList.contains("show")) renderExerciseManagerList(document.getElementById("exMgrSearch").value);
+      if(document.getElementById("supplementBrowserModal").classList.contains("show")) openSupplementBrowser();
       if(!document.querySelector(".readiness-prompt-title")) renderReadinessCard(); // don't wipe an in-progress answer
     });
   });
@@ -4145,7 +4607,7 @@ function renderDay(){
       return;
     }
 
-    empty.innerHTML = `Nenhuma rotina criada para <b style="color:var(--text)">${tDayFull(currentDay)}</b> ainda.<br><br><button class="settings-btn primary" style="display:inline-block;width:auto;padding:12px 22px" id="goCreateRoutine">+ Criar rotina para este dia</button>`;
+    empty.innerHTML = `${tFmt("empty_routine_for_day",{day:`<b style="color:var(--text)">${tDayFull(currentDay)}</b>`})}<br><br><button class="settings-btn primary" style="display:inline-block;width:auto;padding:12px 22px" id="goCreateRoutine">${t("create_routine_for_day")}</button>`;
     content.appendChild(empty);
     document.getElementById("goCreateRoutine").addEventListener("click", ()=>{
       rotinaSelectedDay = currentDay;
@@ -4158,7 +4620,7 @@ function renderDay(){
   document.getElementById("progLabel").textContent = tWorkoutTitle(w) || t("progress_label_default");
   const mainLabel = document.createElement("div");
   mainLabel.className = "section-label";
-  mainLabel.textContent = "Exercícios";
+  mainLabel.textContent = t("exercises_label");
   content.appendChild(mainLabel);
   
   if(w.exercises){
@@ -4206,7 +4668,7 @@ function renderDay(){
   if(w.cardioNote){
     const cardioCard = document.createElement("div");
     cardioCard.className = "cardio-note";
-    cardioCard.innerHTML = `🏃 ${w.cardioNote}`;
+    cardioCard.textContent = `🏃 ${tCardioNote(w)}`;
     content.appendChild(cardioCard);
   }
   
@@ -4422,16 +4884,16 @@ function buildExCard(ex, i){
     <div class="card-top">
       <div class="idx-col">
         <div class="idx">${i+1}</div>
-        <button class="move-btn" data-role="moveup" title="Mover para cima">▲</button>
-        <button class="move-btn" data-role="movedown" title="Mover para baixo">▼</button>
-        <div class="drag-handle" data-role="draghandle" title="Segurar e arrastar">⠿</div>
+        <button class="move-btn" data-role="moveup" title="${t("move_up")}">▲</button>
+        <button class="move-btn" data-role="movedown" title="${t("move_down")}">▼</button>
+        <div class="drag-handle" data-role="draghandle" title="${t("drag_reorder")}">⠿</div>
       </div>
       <div style="flex:1">
         <div class="ex-name" data-role="exname" style="cursor:pointer">${tExerciseName(ex.name)} <span class="ex-history-icon">📈</span></div>
         ${ex.notes ? `<div class="ex-note">"${escapeHtml(ex.notes)}"</div>` : ''}
         <div class="ex-meta">
           <div class="meta-chip">${t("meta_sets")} <b>${ex.sets}</b></div>
-          <div class="meta-chip">${t("meta_target_reps")} <b>${ex.reps}</b></div>
+          <div class="meta-chip">${t("meta_target_reps")} <b>${tRepsText(ex.reps)}</b></div>
           <div class="meta-chip">${t("meta_rest")} <b>${ex.rest}s</b></div>
           ${ex.equipment ? `<div class="meta-chip equip-chip">${tEquipmentName(ex.equipment)}</div>` : ''}
         </div>
@@ -4455,7 +4917,7 @@ function buildExCard(ex, i){
       <button class="rest-btn" data-role="notes">📝</button>
       <button class="rest-btn" data-role="shuffle" title="Trocar automaticamente">🔀</button>
       <button class="ex-replace" data-role="replace">↔️ ${t("swap_btn")}</button>
-      <button class="rest-btn danger-chip" data-role="deleteex" title="Remover exercício">🗑️</button>
+      <button class="rest-btn danger-chip" data-role="deleteex" title="${t("remove_exercise_title")}">🗑️</button>
     </div>
     <div class="notes-panel" data-role="notespanel" style="display:none"></div>
   `;
@@ -4512,7 +4974,7 @@ function buildExCard(ex, i){
     reps.type = "text";
     reps.inputMode = "numeric";
     reps.maxLength = 3;
-    reps.placeholder = ex.reps;
+    reps.placeholder = tRepsText(ex.reps);
     reps.value = (s.exReps && s.exReps[i] && s.exReps[i][k]) || "";
 
     const checkWrap = document.createElement("div");
@@ -4801,12 +5263,12 @@ window.openTemplateModal = function(){
     const card = document.createElement("div");
     card.className = "template-card";
     card.innerHTML = `
-      <div class="template-name">${tpl.label}</div>
-      <div class="template-desc">${tpl.desc}</div>
+      <div class="template-name">${currentLang==="en"?(tpl.labelEn||tpl.label):tpl.label}</div>
+      <div class="template-desc">${currentLang==="en"?(tpl.descEn||tpl.desc):tpl.desc}</div>
       <button class="settings-btn primary" style="margin:10px 0 0" data-tpl="${key}">${t("use_this_template")}</button>
     `;
     card.querySelector("[data-tpl]").addEventListener("click", async ()=>{
-      if(!confirm(tFmt("confirm_apply_template",{name:tpl.label}))) return;
+      if(!confirm(tFmt("template_apply_name",{name:currentLang==="en"?(tpl.labelEn||tpl.label):tpl.label}))) return;
       workouts = tpl.build();
       await store.set("workouts", workouts);
       DAY_KEYS.forEach(dk=> reconcileStateForDay(dk));
@@ -4836,23 +5298,23 @@ window.closeAutoGenModal = function(){ document.getElementById("autoGenModal").c
 function renderAutoGenBody(){
   const el = document.getElementById("autoGenBody");
   const dayHtml = `
-    <div class="section-label" style="margin-top:0">Dia</div>
+    <div class="section-label" style="margin-top:0">${t("autogen_day")}</div>
     <div class="dayswitch" id="autoGenDaySwitch" style="margin-top:0"></div>
   `;
   const groupHtml = `
-    <div class="section-label">${currentLang==="en"?"Muscle groups (choose one or more)":"Grupos musculares (escolha um ou mais)"}</div>
+    <div class="section-label">${t("autogen_groups")}</div>
     <div class="autogen-grid" id="autoGenGroups">
       ${Object.entries(MUSCLE_GROUPS).map(([key,g])=>`<button class="autogen-chip ${autoGenState.groups.includes(key)?'active':''}" data-group="${key}">${currentLang==="en"?g.labelEn:g.label}</button>`).join('')}
     </div>
   `;
   const equipmentHtml = `
-    <div class="section-label">${currentLang==="en"?"Equipment (optional filter)":"Equipamento (filtro opcional)"}</div>
+    <div class="section-label">${t("autogen_equipment")}</div>
     <div class="autogen-grid" id="autoGenEquipment">
       ${Object.entries(EQUIPMENT_NAMES).map(([key])=>`<button class="autogen-chip ${autoGenState.equipment.includes(key)?'active':''}" data-equipment="${key}">${currentLang==="en"?EQUIPMENT_NAMES_EN[key]:EQUIPMENT_NAMES[key]}</button>`).join('')}
     </div>
   `;
   const intensityHtml = `
-    <div class="section-label">${currentLang==="en"?"Intensity":"Intensidade"}</div>
+    <div class="section-label">${t("autogen_intensity")}</div>
     <div class="autogen-intensity" id="autoGenIntensity">
       ${Object.entries(INTENSITY_LEVELS).map(([key,lv])=>`
         <button class="intensity-btn ${autoGenState.intensity===key?'active':''}" data-intensity="${key}">
@@ -4869,14 +5331,14 @@ function renderAutoGenBody(){
   if(autoGenState.preview){
     const p = autoGenState.preview;
     previewHtml = `
-      <div class="section-label">Prévia — ${p.title}</div>
+      <div class="section-label">${tFmt("autogen_preview",{title:tWorkoutTitle(p)})}</div>
       <div class="autogen-preview">
-        ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${tExerciseName(ex.name)}</span><span class="mono">${ex.sets}×${ex.reps}</span></div>`).join('')}
+        ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${tExerciseName(ex.name)}</span><span class="mono">${ex.sets}×${tRepsText(ex.reps)}</span></div>`).join('')}
         ${p.abs.length ? `<div class="autogen-ex-row" style="opacity:.7"><span>${tFmt("autogen_plus_abs",{n:p.abs.length})}</span><span></span></div>` : ''}
       </div>
       <div class="input-row" style="margin-top:14px">
-        <button class="settings-btn" id="autoGenReroll" style="margin:0">🔄 Gerar outro</button>
-        <button class="add-btn" id="autoGenApply" style="flex:1">✅ Aplicar</button>
+        <button class="settings-btn" id="autoGenReroll" style="margin:0">${t("autogen_reroll")}</button>
+        <button class="add-btn" id="autoGenApply" style="flex:1">${t("autogen_apply")}</button>
       </div>
     `;
   }
@@ -4887,7 +5349,7 @@ function renderAutoGenBody(){
   DAY_KEYS.forEach(dayKey=>{
     const btn = document.createElement("button");
     if(dayKey===autoGenState.day) btn.classList.add("active");
-    btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${workouts[dayKey]?'treino':'descanso'}</span>`;
+    btn.innerHTML = `${tDayShort(dayKey)}<span class="sub">${workouts[dayKey]?t('workout_short'):t('rest_short')}</span>`;
     btn.addEventListener("click", ()=>{ autoGenState.day = dayKey; renderAutoGenBody(); });
     daySwitch.appendChild(btn);
   });
@@ -4996,8 +5458,8 @@ function buildAbsCard(ex, i){
       <div style="flex:1">
         <div class="ex-name" style="cursor:default">${tExerciseName(ex.name)}</div>
         <div class="ex-meta">
-          <div class="meta-chip">${t("series_short")||"séries"} <b>${ex.sets||3}</b></div>
-          <div class="meta-chip">${t("reps_short")||"reps"} <b>${ex.reps}</b></div>
+          <div class="meta-chip">${t("series_short")} <b>${ex.sets||3}</b></div>
+          <div class="meta-chip">${t("reps_short")} <b>${tRepsText(ex.reps)}</b></div>
           ${ex.equipment ? `<div class="meta-chip equip-chip">${tEquipmentName(ex.equipment)}</div>` : ''}
         </div>
         ${ex.videoUrl ? `<button type="button" class="ex-video-link" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}">${t("how_to")}</button>` : ''}
@@ -5010,7 +5472,7 @@ function buildAbsCard(ex, i){
     </div>
     <button class="add-set-btn" data-role="addabsset">${t("add_set")}</button>
     <div class="card-controls">
-      <button class="rest-btn" data-role="shuffleabs" title="${t("shuffle_title")||"Trocar automaticamente"}">🔀</button>
+      <button class="rest-btn" data-role="shuffleabs" title="${t("shuffle_title")}">🔀</button>
       <button class="rest-btn" data-role="replaceabs">↔️ ${t("swap_btn")}</button>
       <button class="rest-btn danger-chip" data-role="deleteabsex" title="${t("remove_exercise")}">🗑️</button>
     </div>
@@ -5033,7 +5495,7 @@ function buildAbsCard(ex, i){
 
     const reps = document.createElement("input");
     reps.className = "set-input"; reps.type = "text"; reps.inputMode = "numeric"; reps.maxLength = 3;
-    reps.placeholder = ex.reps; reps.value = s.absReps[i][k] || "";
+    reps.placeholder = tRepsText(ex.reps); reps.value = s.absReps[i][k] || "";
 
     const checkWrap = document.createElement("div");
     checkWrap.className = "set-check-cell";
@@ -5200,14 +5662,14 @@ function renderSessionTimer(){
   widget.classList.remove("running");
   if(s.startedAt && !s.endedAt){
     widget.classList.add("running");
-    btn.textContent = "⏹ Finalizar treino";
+    btn.textContent = t("session_finish");
     btn.className = "st-btn running";
     sessionTimerInterval = setInterval(tick, 1000);
   } else if(s.startedAt && s.endedAt){
-    btn.textContent = "🔁 Reiniciar cronômetro";
+    btn.textContent = t("session_restart");
     btn.className = "st-btn done";
   } else {
-    btn.textContent = "▶ Iniciar treino";
+    btn.textContent = t("session_start");
     btn.className = "st-btn";
   }
 }
@@ -5590,12 +6052,12 @@ function renderRotinas(){
 function buildRoutineExerciseItem(dayKey, listType, i, ex){
   const div = document.createElement("div");
   div.className = "routine-exercise-item";
-  const videoTag = ex.videoUrl ? `<button type="button" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}" class="video-tag" onclick="event.stopPropagation()">▶ ${currentLang==="en"?"video":"vídeo"}</button>` : "";
+  const videoTag = ex.videoUrl ? `<button type="button" data-video-trigger data-video-url="${escapeHtml(tVideoUrl(ex))}" data-video-title="${escapeHtml(tExerciseName(ex.name))}" class="video-tag" onclick="event.stopPropagation()">▶ ${t("video_label")}</button>` : "";
   const supersetTag = ex.supersetGroup ? `<span class="superset-tag">🔗 ${ex.supersetGroup}</span>` : "";
   div.innerHTML = `
     <div class="routine-exercise-info">
       <div class="routine-exercise-name">${tExerciseName(ex.name)} ${supersetTag}</div>
-      <div class="routine-exercise-meta">${ex.sets}×${ex.reps}${ex.rest?` | ${ex.rest}s`:""} ${videoTag}</div>
+      <div class="routine-exercise-meta">${ex.sets}×${tRepsText(ex.reps)}${ex.rest?` | ${ex.rest}s`:""} ${videoTag}</div>
     </div>
     <div class="routine-exercise-actions">
       ${listType==="exercises" ? `<button class="superset-btn" title="${t("group_superset")}">🔗</button>` : ""}
@@ -5760,8 +6222,8 @@ function renderSupplementsTab(){
           <div class="supp-item-meta">${tSupplementCategory(sup.category)} · ${(sup.times||[]).join(', ')||t('supp_no_times')}</div>
         </div>
         <div style="display:flex;gap:6px">
-          <button class="icon-btn" data-role="editSupp" data-id="${sup.id}" aria-label="Editar">✎</button>
-          <button class="icon-btn" data-role="deleteSupp" data-id="${sup.id}" aria-label="Excluir">🗑</button>
+          <button class="icon-btn" data-role="editSupp" data-id="${sup.id}" aria-label="${t("edit_aria")}">✎</button>
+          <button class="icon-btn" data-role="deleteSupp" data-id="${sup.id}" aria-label="${t("delete_aria")}">🗑</button>
         </div>
       </div>
     `).join('')}
@@ -5831,12 +6293,12 @@ function renderSupplementBrowserList(){
   let filtered = SUPPLEMENT_DB.filter(s => !q || tSupplementName(s).toLowerCase().includes(q));
   if(suppCategoryFilter) filtered = filtered.filter(s => s.category === suppCategoryFilter);
 
-  if(!filtered.length){ list.innerHTML = `<div class="vol-empty">${t("empty_no_exercise_found")}</div>`; return; }
+  if(!filtered.length){ list.innerHTML = `<div class="vol-empty">${t("supp_empty_search")}</div>`; return; }
   list.innerHTML = filtered.map(s=>`
     <div class="exercise-item" data-name="${escapeHtml(s.name)}">
       <div class="ex-item-body">
         <div class="ex-item-name">${escapeHtml(tSupplementName(s))}</div>
-        <div class="ex-item-meta">${tSupplementCategory(s.category)} · ${s.suggestedTiming}</div>
+        <div class="ex-item-meta">${tSupplementCategory(s.category)} · ${tSupplementTiming(s)}</div>
       </div>
     </div>
   `).join('');
@@ -5860,7 +6322,7 @@ function openSupplementEditModal(existingId, dbSup){
   suppDraft = JSON.parse(JSON.stringify(sourceSup)); // deep copy — edits here never touch mySupplements until Save
 
   document.getElementById("suppEditTitle").textContent = tSupplementName(suppDraft);
-  document.getElementById("suppEditSuggestedTiming").textContent = dbSup ? `💡 ${t("supp_suggested")}: ${dbSup.suggestedTiming}` : "";
+  document.getElementById("suppEditSuggestedTiming").textContent = dbSup ? `💡 ${t("supp_suggested")}: ${tSupplementTiming(dbSup)}` : "";
   renderSuppTimesChips(suppDraft);
   document.getElementById("supplementEditModal").classList.add("show");
 }
@@ -5948,7 +6410,7 @@ function buildSwipeRow(innerNode, onDelete){
 
   const deleteBtn = document.createElement("button");
   deleteBtn.className = "swipe-delete-btn";
-  deleteBtn.textContent = "Excluir";
+  deleteBtn.textContent = t("swipe_delete");
 
   const content = document.createElement("div");
   content.className = "swipe-content";
@@ -6044,7 +6506,7 @@ function drawMultiWeekChart(){
   const hasData = weeks.some(w=>w.vol>0);
   if(!hasData){
     ctx.fillStyle = "#565b61"; ctx.font = "22px 'JetBrains Mono', monospace"; ctx.textAlign = "center";
-    ctx.fillText("sem dados suficientes ainda", W/2, H/2);
+    ctx.fillText(t("chart_not_enough_data"), W/2, H/2);
     return;
   }
 
@@ -6505,7 +6967,7 @@ function drawWeightChart(){
   ctx.clearRect(0,0,W,H);
   if(bodyWeights.length===0){
     ctx.fillStyle = "#565b61"; ctx.font = "24px 'JetBrains Mono', monospace"; ctx.textAlign = "center";
-    ctx.fillText("sem dados", W/2, H/2);
+    ctx.fillText(t("chart_no_data"), W/2, H/2);
     return;
   }
   const pad = {l:64, r:20, t:24, b:44};
@@ -6547,11 +7009,19 @@ function drawWeightChart(){
 }
 
 // MEASUREMENTS
-const MEAS_FIELDS = [{key:"cintura",label:"Cintura (cm)"},{key:"peito",label:"Peito (cm)"},{key:"braco_d",label:"Braço dir. (cm)"},{key:"braco_e",label:"Braço esq. (cm)"},{key:"quadril",label:"Quadril (cm)"},{key:"coxa",label:"Coxa (cm)"},{key:"panturrilha",label:"Panturrilha (cm)"},{key:"pescoco",label:"Pescoço (cm)"}];
+const MEAS_FIELDS = [
+  {key:"cintura",labelKey:"measure_waist"},{key:"peito",labelKey:"measure_chest"},
+  {key:"braco_d",labelKey:"measure_right_arm"},{key:"braco_e",labelKey:"measure_left_arm"},
+  {key:"quadril",labelKey:"measure_hips"},{key:"coxa",labelKey:"measure_thigh"},
+  {key:"panturrilha",labelKey:"measure_calf"},{key:"pescoco",labelKey:"measure_neck"}
+];
+function measurementLabel(field, includeUnit=true){
+  const base=t(field.labelKey);
+  return includeUnit ? `${base} (${lengthUnitLabel()})` : base;
+}
 function tMeasLabel(key){
-  const map = {cintura:"waist",peito:"chest_measure",braco_d:"right_arm",braco_e:"left_arm",quadril:"hip",coxa:"thigh",panturrilha:"calf_measure",pescoco:"neck"};
-  const base = currentLang==="en" ? t(map[key]) : (MEAS_FIELDS.find(f=>f.key===key)||{}).label.replace(" (cm)","");
-  return `${base} (${lengthUnitLabel()})`;
+  const field=MEAS_FIELDS.find(f=>f.key===key);
+  return field ? measurementLabel(field) : `${key} (${lengthUnitLabel()})`;
 }
 
 function buildMeasGrid(){
@@ -7116,7 +7586,7 @@ function macroBar(name, val, goal, color){
         <span class="macro-nums mono">${Math.round(val)}<span class="macro-goal">/${goal}g</span></span>
       </div>
       <div class="macro-track"><div class="macro-fill" style="width:${pct}%;background:${color}"></div></div>
-      <div class="macro-left mono">${left>0? Math.round(left)+'g restantes' : 'meta batida ✓'}</div>
+      <div class="macro-left mono">${left>0?tFmt('macro_remaining_g',{n:Math.round(left)}):t('macro_goal_hit')}</div>
     </div>`;
 }
 
@@ -7154,11 +7624,11 @@ function renderNutricaoTab(){
         <div class="meal-field"><label>${t("fat_g")}</label><input type="text" inputmode="numeric" id="mealFat" placeholder="0"></div>
       </div>
       <button class="add-btn" id="mealAdd" style="width:100%">${t("add_meal_btn")}</button>
-      <div class="quick-meals">
+      <div class="quick-meals" aria-label="${t('quick_meals_label')}">
         <button class="chip-btn" data-quick="Whey|120|25|3|1">🥤 Whey</button>
-        <button class="chip-btn" data-quick="Ovos (3)|215|19|1|15">🍳 3 Ovos</button>
-        <button class="chip-btn" data-quick="Frango 150g|248|46|0|5">🍗 Frango 150g</button>
-        <button class="chip-btn" data-quick="Arroz 100g|130|2|28|0">🍚 Arroz 100g</button>
+        <button class="chip-btn" data-quick="${t('quick_eggs_name')}|215|19|1|15">${t('quick_eggs_label')}</button>
+        <button class="chip-btn" data-quick="${t('quick_chicken_name')}|248|46|0|5">${t('quick_chicken_label')}</button>
+        <button class="chip-btn" data-quick="${t('quick_rice_name')}|130|2|28|0">${t('quick_rice_label')}</button>
       </div>
     </div>
 
@@ -7195,7 +7665,7 @@ function renderNutricaoTab(){
       row.innerHTML = `
         <div class="meal-row-main">
           <div class="meal-row-name">${escapeHtml(meal.name)}</div>
-          <div class="meal-row-macros mono">P ${meal.prot}g · C ${meal.carb}g · G ${meal.fat}g</div>
+          <div class="meal-row-macros mono">${t('macro_protein_short')} ${meal.prot}g · ${t('macro_carb_short')} ${meal.carb}g · ${t('macro_fat_short')} ${meal.fat}g</div>
         </div>
         <div class="meal-row-kcal mono">${meal.kcal}<span>kcal</span></div>`;
       const wrap = buildSwipeRow(row, async ()=>{
@@ -7426,14 +7896,14 @@ function closeExerciseManager(){ document.getElementById("exerciseManagerModal")
 function renderExerciseManagerList(filterText){
   const list = document.getElementById("exMgrList");
   const q = (filterText||"").toLowerCase();
-  const filtered = EXERCISE_DB.filter(ex => !q || ex.name.toLowerCase().includes(q));
+  const filtered = EXERCISE_DB.filter(ex => !q || ex.name.toLowerCase().includes(q) || tExerciseName(ex.name).toLowerCase().includes(q));
   if(!filtered.length){
     list.innerHTML = `<div class="vol-empty">${t("empty_no_exercise_found")}</div>`;
     return;
   }
   list.innerHTML = filtered.map(ex=>{
     const realIdx = EXERCISE_DB.indexOf(ex);
-    return `<div class="exercise-item" data-idx="${realIdx}"><div class="ex-item-name">${escapeHtml(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} · ${tEquipmentName(ex.equipment)}</div></div>`;
+    return `<div class="exercise-item" data-idx="${realIdx}"><div class="ex-item-name">${escapeHtml(tExerciseName(ex.name))}</div><div class="ex-item-meta">${ex.sets}×${tRepsText(ex.reps)} · ${tEquipmentName(ex.equipment)}</div></div>`;
   }).join('');
   list.querySelectorAll('.exercise-item').forEach(el=>{
     el.addEventListener("click", ()=> openExerciseEditModal(parseInt(el.dataset.idx)));
@@ -7445,7 +7915,7 @@ function openExerciseEditModal(idx){
   const isNew = idx === null;
   const ex = isNew ? { name:"", sets:4, reps:"10", rest:60, equipment:"machine", videoUrl:"", muscles:{} } : EXERCISE_DB[idx];
 
-  document.getElementById("exEditTitle").textContent = isNew ? "Adicionar exercício" : "Editar exercício";
+  document.getElementById("exEditTitle").textContent = isNew ? t("exercise_add_title") : t("exercise_edit_title");
   document.getElementById("exEditName").value = ex.name;
   document.getElementById("exEditSets").value = ex.sets;
   document.getElementById("exEditReps").value = ex.reps;
@@ -7718,7 +8188,7 @@ function renderExerciseList(){
   const searchVal = document.getElementById("exerciseSearch").value.toLowerCase();
   const list = document.getElementById("exerciseList");
   list.innerHTML = "";
-  let filtered = EXERCISE_DB.filter(ex=> !searchVal || ex.name.toLowerCase().includes(searchVal));
+  let filtered = EXERCISE_DB.filter(ex=> !searchVal || ex.name.toLowerCase().includes(searchVal) || tExerciseName(ex.name).toLowerCase().includes(searchVal));
   if(currentMuscleFilter) filtered = filtered.filter(ex=> currentMuscleFilter in (ex.muscles||{}));
   if(currentEquipmentFilter) filtered = filtered.filter(ex=> ex.equipment === currentEquipmentFilter);
 
@@ -7735,10 +8205,10 @@ function renderExerciseList(){
     const isSelected = selectedExercisesForAdd.has(ex.name);
     div.className = "exercise-item" + (isSelected ? " selected" : "");
     const muscleStr = Object.keys(ex.muscles||{}).map(k=>tMuscleName(k)).join(", ");
-    const equipBadge = ex.equipment ? `<div class="equip-badge">${EQUIPMENT_NAMES[ex.equipment]||ex.equipment}</div>` : '';
+    const equipBadge = ex.equipment ? `<div class="equip-badge">${tEquipmentName(ex.equipment)}</div>` : '';
     const simBadge = (replaceContext && ex._simScore>0) ? `<div class="sim-badge">🔗 ${t("similar_alternative")}</div>` : '';
     const checkbox = multiSelectEnabled ? `<div class="ex-item-checkbox" data-role="checkbox">${isSelected ? '✓' : ''}</div>` : '';
-    div.innerHTML = `${checkbox}<div class="ex-item-body" data-role="body"><div class="ex-item-name">${tExerciseName(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${ex.reps} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}</div>`;
+    div.innerHTML = `${checkbox}<div class="ex-item-body" data-role="body"><div class="ex-item-name">${tExerciseName(ex.name)}</div><div class="ex-item-meta">${ex.sets}×${tRepsText(ex.reps)} | ${ex.rest}s</div><div class="ex-item-muscles">${muscleStr}</div>${equipBadge}${simBadge}</div>`;
 
     const checkboxEl = div.querySelector('[data-role="checkbox"]');
     if(checkboxEl){
@@ -7918,14 +8388,14 @@ function downloadCsv(filename, rows){
   URL.revokeObjectURL(url);
 }
 function exportWorkoutsCsv(){
-  const rows = [["Data","Dia","Título","Duração (min)","Volume (kg)","Exercícios"]];
+  const rows = [[t("csv_date"),t("csv_day"),t("csv_title"),t("csv_duration_min"),t("csv_volume_kg"),t("csv_exercises")]];
   sessionLog.forEach(s=>{
-    rows.push([s.date, s.day||"", s.title||"", s.durationSec?Math.round(s.durationSec/60):"", s.volume||"", s.exerciseCount||""]);
+    rows.push([s.date, DAY_KEYS.includes(s.day)?tDayFull(s.day):(s.day||""), tWorkoutTitle({title:s.title||"",titleEn:s.titleEn||"",titlePt:s.titlePt||""}), s.durationSec?Math.round(s.durationSec/60):"", s.volume||"", s.exerciseCount||""]);
   });
-  downloadCsv("kyro-treinos-"+todayKey()+".csv", rows);
+  downloadCsv("kyro-"+t("file_workouts")+"-"+todayKey()+".csv", rows);
 }
 function exportMeasuresCsv(){
-  const rows = [["Data","Peso (kg)", ...MEAS_FIELDS.map(f=>f.label)]];
+  const rows = [[t("csv_date"),t("csv_weight_kg"), ...MEAS_FIELDS.map(f=>measurementLabel(f))]];
   const byDate = {};
   bodyWeights.forEach(w=>{ byDate[w.d] = byDate[w.d]||{}; byDate[w.d].kg = w.kg; });
   bodyMeasures.forEach(m=>{ byDate[m.d] = byDate[m.d]||{}; byDate[m.d].vals = m.vals; });
@@ -7935,35 +8405,35 @@ function exportMeasuresCsv(){
     MEAS_FIELDS.forEach(f=> row.push(entry.vals && entry.vals[f.key]!=null ? entry.vals[f.key] : ""));
     rows.push(row);
   });
-  downloadCsv("kyro-medidas-"+todayKey()+".csv", rows);
+  downloadCsv("kyro-"+t("file_measurements")+"-"+todayKey()+".csv", rows);
 }
 function exportNutritionCsv(){
-  const rows = [["Data","Proteína (g)","Meta proteína (g)","Água (L)","Meta água (L)"]];
+  const rows = [[t("csv_date"),t("csv_protein_g"),t("csv_target_protein_g"),t("csv_water_l"),t("csv_target_water_l")]];
   Object.keys(nutritionLog).sort().forEach(d=>{
     const n = nutritionLog[d];
     rows.push([d, n.protein||"", n.proteinGoal||"", n.water||"", n.waterGoal||""]);
   });
-  downloadCsv("kyro-nutricao-"+todayKey()+".csv", rows);
+  downloadCsv("kyro-"+t("file_nutrition")+"-"+todayKey()+".csv", rows);
 
   // Meal-level detail is a separate file since it has a different shape (one row per meal,
   // not per day) — meal names are free text the person typed, so they go through the exact
   // same injection-safe export path as everything else.
-  const mealRows = [["Data","Refeição","kcal","Proteína (g)","Carboidrato (g)","Gordura (g)"]];
+  const mealRows = [[t("csv_date"),t("csv_meal"),"kcal",t("csv_protein_g"),t("csv_carbs_g"),t("csv_fat_g")]];
   Object.keys(nutritionLog).sort().forEach(d=>{
     const n = nutritionLog[d];
     (n.meals||[]).forEach(m=>{
       mealRows.push([d, m.name||"", m.kcal||"", m.prot||"", m.carb||"", m.fat||""]);
     });
   });
-  if(mealRows.length > 1) downloadCsv("kyro-refeicoes-"+todayKey()+".csv", mealRows);
+  if(mealRows.length > 1) downloadCsv("kyro-"+t("file_meals")+"-"+todayKey()+".csv", mealRows);
 }
 function exportSupplementsCsv(){
   if(!mySupplements.length) return;
-  const rows = [["Suplemento","Categoria","Horários","Observação"]];
+  const rows = [[t("csv_supplement"),t("csv_category"),t("csv_times"),t("csv_note")]];
   mySupplements.forEach(s=>{
     rows.push([s.name||"", s.category||"", (s.times||[]).join(" / "), s.timing||""]);
   });
-  downloadCsv("kyro-suplementos-"+todayKey()+".csv", rows);
+  downloadCsv("kyro-"+t("file_supplements")+"-"+todayKey()+".csv", rows);
 }
 function exportAllCsv(){
   exportWorkoutsCsv();
@@ -8031,7 +8501,7 @@ function typeOf(v){ if(Array.isArray(v)) return "array"; if(v===null) return "nu
 
 function validateBackupData(data){
   const errors = [];
-  if(typeOf(data) !== "object"){ errors.push("O arquivo não contém um objeto JSON válido."); return errors; }
+  if(typeOf(data) !== "object"){ errors.push(t("import_invalid_object")); return errors; }
   let recognizedFields = 0;
   Object.keys(BACKUP_FIELD_TYPES).forEach(key=>{
     if(!(key in data)) return; // field is optional — importing a partial backup is fine
@@ -8043,7 +8513,7 @@ function validateBackupData(data){
     }
   });
   if(recognizedFields === 0){
-    errors.push("Nenhum dado reconhecido foi encontrado neste arquivo — não parece ser um backup do KYRO.");
+    errors.push(t("import_no_recognized_data"));
   }
   return errors;
 }
@@ -8120,7 +8590,7 @@ async function importData(file){
     const text = await file.text();
     data = JSON.parse(text);
   }catch(e){
-    alert(t("alert_import_error") + " (o arquivo não é um JSON válido)");
+    alert(t("alert_import_error") + " (" + t("import_invalid_json_inline") + ")");
     return;
   }
 
@@ -8206,7 +8676,7 @@ async function applyImport(mode){
     alert(t("alert_import_success"));
     location.reload();
   }catch(e){
-    alert(t("alert_import_error") + " Uma cópia de segurança dos seus dados anteriores foi baixada antes da tentativa, então nada foi perdido.");
+    alert(t("alert_import_error") + " " + t("import_rollback_safe"));
   }finally{
     pendingImportData = null;
   }
@@ -8235,7 +8705,7 @@ function startRestTimer(seconds, exName){
   restTotal = seconds;
   restEndTime = Date.now() + seconds*1000;
   restExName = exName;
-  document.getElementById("timerExName").textContent = exName;
+  document.getElementById("timerExName").textContent = tExerciseName(exName);
   document.getElementById("ringFg").style.strokeDasharray = 2*Math.PI*106;
   updateRingDisplay();
   document.getElementById("timerOverlay").classList.add("show");
@@ -8251,13 +8721,13 @@ function startRestTimer(seconds, exName){
           if(navigator.serviceWorker && navigator.serviceWorker.ready){
             navigator.serviceWorker.ready.then(reg=>{
               if(reg && reg.showNotification){
-                reg.showNotification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}), tag:"rest-timer", vibrate:[100,50,100] });
+                reg.showNotification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:tExerciseName(exName)}), tag:"rest-timer", vibrate:[100,50,100] });
               } else {
-                new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}) });
+                new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:tExerciseName(exName)}) });
               }
-            }).catch(()=>{ try{ new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}) }); }catch(e){} });
+            }).catch(()=>{ try{ new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:tExerciseName(exName)}) }); }catch(e){} });
           } else {
-            new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:exName}) });
+            new Notification(t("rest_over_title"), { body: tFmt("rest_over_body",{ex:tExerciseName(exName)}) });
           }
         }catch(e){}
       }, seconds*1000);
@@ -8453,9 +8923,9 @@ async function shareWorkoutImage(){
 
   // ---- Stat cards with icons ----
   const stats = [
-    { icon:"📊", label: "VOLUME", value: Math.round(volume).toLocaleString(currentLang==="en"?"en-US":"pt-BR"), unit:"kg", color:"#d7ff3d" },
-    { icon:"⏱️", label: "DURAÇÃO", value: durationStr, unit:"", color:"#4dc3ff" },
-    { icon:"✅", label: "SÉRIES", value: setsCompleted+"/"+setsTotal, unit:"", color:"#ff9f4d" }
+    { icon:"📊", label: t("share_volume_label"), value: Math.round(volume).toLocaleString(currentLang==="en"?"en-US":"pt-BR"), unit:"kg", color:"#d7ff3d" },
+    { icon:"⏱️", label: t("share_duration_label"), value: durationStr, unit:"", color:"#4dc3ff" },
+    { icon:"✅", label: t("share_sets_label"), value: setsCompleted+"/"+setsTotal, unit:"", color:"#ff9f4d" }
   ];
   const boxW = 296, boxH = 210, boxGap = 20, startX = W/2 - (boxW*3+boxGap*2)/2;
   stats.forEach((st,idx)=>{
@@ -8483,7 +8953,7 @@ async function shareWorkoutImage(){
   ctx.textAlign = "left";
   ctx.fillStyle = "#6b7076";
   ctx.font = "700 26px 'JetBrains Mono', monospace";
-  ctx.fillText("EXERCÍCIOS", 72, ly);
+  ctx.fillText(t("share_exercises_label"), 72, ly);
   ctx.strokeStyle = "rgba(255,255,255,.08)"; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(280, ly-8); ctx.lineTo(W-72, ly-8); ctx.stroke();
   ly += 46;
@@ -8515,13 +8985,13 @@ async function shareWorkoutImage(){
   ctx.fillText(t("share_image_footer"), W/2, H-70);
 
   canvas.toBlob(async (blob)=>{
-    const file = new File([blob], "treino.png", {type:"image/png"});
+    const file = new File([blob], t("file_workout_image")+".png", {type:"image/png"});
     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
       try{ await navigator.share({ files:[file], title: tWorkoutTitle(w), text: tFmt("share_workout_done_text",{title:tWorkoutTitle(w)}) }); return; }catch(e){ /* user cancelled or unsupported, fall through to download */ }
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "treino-"+todayKey()+".png";
+    a.href = url; a.download = t("file_workout_image")+"-"+todayKey()+".png";
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
   }, "image/png");
@@ -8750,7 +9220,7 @@ function setFieldValidity(input,message=""){
   const bad=!!message; input.setAttribute("aria-invalid",bad?"true":"false"); el.textContent=message; el.classList.toggle("show",bad);
   if(bad) input.focus({preventScroll:false});
 }
-document.addEventListener("invalid",e=>{ if(e.target instanceof HTMLInputElement){ e.preventDefault(); setFieldValidity(e.target,e.target.validationMessage||"Valor inválido"); } },true);
+document.addEventListener("invalid",e=>{ if(e.target instanceof HTMLInputElement){ e.preventDefault(); setFieldValidity(e.target,e.target.validationMessage||t("invalid_value")); } },true);
 document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&e.target.getAttribute("aria-invalid")==="true"&&e.target.checkValidity()) setFieldValidity(e.target,""); },true);
 
 // ---- Versioned Service Worker / controlled update flow ----
@@ -8790,7 +9260,9 @@ function runSecuritySelfTests(){
 
 bindStaticSecurityEvents();
 initAuthScreenEvents();
+updateDocumentLanguage();
 applyAuthScreenTranslations();
+applyStaticTranslations();
 runSecuritySelfTests();
 
 let appInitialized = false;
@@ -8807,7 +9279,7 @@ if(firebaseReady){
         const loadingEl = document.getElementById("appLoadingScreen");
         loadingEl.style.display = "flex";
         let watchdog = setTimeout(()=>{
-          showDebugError("A importação/carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
+          showDebugError(t("debug_import_timeout"));
         }, 15000);
         try{
           // Step 1: the shared profile MUST exist before any personal data is touched —
@@ -8834,7 +9306,7 @@ if(firebaseReady){
 
           // Step 3: only now — with a confirmed, unblocked profile — proceed to migration and init.
           watchdog = setTimeout(()=>{
-            showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
+            showDebugError(t("debug_load_timeout"));
           }, 15000);
           await maybeMigrateLocalData();
           await init();
@@ -8844,7 +9316,7 @@ if(firebaseReady){
           clearTimeout(watchdog);
           loadingEl.style.display = "none";
           showBootstrapError(t("bootstrap_check_failed_msg"));
-          showDebugError("Erro ao carregar o app: " + e.message + (e.stack ? "\n"+e.stack : ""));
+          showDebugError(tFmt("debug_load_error",{msg:e.message + (e.stack ? "\n"+e.stack : "")}));
           return;
         }
         clearTimeout(watchdog);
