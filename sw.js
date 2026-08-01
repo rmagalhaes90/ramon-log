@@ -1,5 +1,5 @@
 /* KYRO service worker — bilingual fast-start build */
-const SW_VERSION = "2026-08-01-account-delete-v8";
+const SW_VERSION = "2026-08-01-onboarding-update-v9";
 const CACHE_VERSION = "kyro-shell-" + SW_VERSION;
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));

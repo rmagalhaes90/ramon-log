@@ -3214,7 +3214,7 @@ function bindDeleteAccountEvents(){
 
 
 // ==================== FIRST-RUN ONBOARDING ====================
-const FIRST_RUN_ONBOARDING_VERSION = 1;
+const FIRST_RUN_ONBOARDING_VERSION = 2;
 const FIRST_RUN_COPY = Object.freeze({
   pt: Object.freeze({
     skip:"Pular", back:"Voltar", next:"Continuar", done:"Começar a usar",
@@ -3395,11 +3395,15 @@ async function completeFirstRunOnboarding(){
   switchPage("home");
 }
 
-async function maybeStartFirstRunOnboarding(){
+async function maybeStartFirstRunOnboarding(options={}){
   try{
     const saved=Number(await store.get("onboardingVersion"))||0;
     if(saved>=FIRST_RUN_ONBOARDING_VERSION) return;
-    if(onboardingHasMeaningfulData()){
+
+    // A newly-created account must always receive the guided introduction, even when
+    // this device still contains old local data or the person chose to migrate it.
+    const forceForNewAccount = options && options.newAccount === true;
+    if(!forceForNewAccount && onboardingHasMeaningfulData()){
       await store.set("onboardingVersion",FIRST_RUN_ONBOARDING_VERSION);
       return;
     }
@@ -4212,8 +4216,13 @@ async function saveSharedExerciseDB(list){
 // ---- Two-phase migration of pre-account localStorage data ----
 function legacyDataKeys(){
   const blockedPrefixes = ["ramon_log_cache_","ramon_log_pending_sync_","ramon_log_pending_photos_",LOCAL_DATA_CONFIG.namespace+":"];
-  return Object.keys(localStorage).filter(k=> k.startsWith(LS_PREFIX) && !blockedPrefixes.some(p=>k.startsWith(p)))
-    .filter(k=>isCacheableKey(k.slice(LS_PREFIX.length)));
+  const accountLifecycleKeys = new Set(["onboardingVersion","__migrated_from_local__"]);
+  return Object.keys(localStorage)
+    .filter(k=> k.startsWith(LS_PREFIX) && !blockedPrefixes.some(p=>k.startsWith(p)))
+    .filter(k=>{
+      const shortKey = k.slice(LS_PREFIX.length);
+      return isCacheableKey(shortKey) && !accountLifecycleKeys.has(shortKey);
+    });
 }
 function migrationStateKey(){ const uid=activeUid(); return uid ? `${LOCAL_DATA_CONFIG.namespace}:migration:${uid}` : null; }
 function sanitizeStoredValueByKey(key, value){
@@ -4274,6 +4283,30 @@ async function maybeMigrateLocalData(){
   } finally {
     brandEl.innerHTML = originalBrandHtml;
   }
+}
+
+// ---- New-account onboarding detection ----
+const FORCE_ONBOARDING_SESSION_KEY = "kyro_force_onboarding_next_auth_v2";
+function flagNextAuthForOnboarding(){
+  try{ sessionStorage.setItem(FORCE_ONBOARDING_SESSION_KEY,"1"); }catch(_){}
+}
+function clearNextAuthOnboardingFlag(){
+  try{ sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY); }catch(_){}
+}
+function consumeNextAuthOnboardingFlag(){
+  try{
+    const flagged = sessionStorage.getItem(FORCE_ONBOARDING_SESSION_KEY) === "1";
+    sessionStorage.removeItem(FORCE_ONBOARDING_SESSION_KEY);
+    return flagged;
+  }catch(_){ return false; }
+}
+function isRecentlyCreatedFirebaseAccount(user){
+  const createdAt = Date.parse(user && user.metadata && user.metadata.creationTime || "");
+  if(!Number.isFinite(createdAt)) return false;
+  // Seven days gives a newly-created account enough time to receive the tour even if
+  // its first session was interrupted before the app finished loading.
+  const ageMs = Date.now() - createdAt;
+  return ageMs >= -60000 && ageMs <= 7*24*60*60*1000;
 }
 
 // ---- Auth screen UI ----
@@ -4378,9 +4411,13 @@ function initAuthScreenEvents(){
         await fbAuth.signInWithEmailAndPassword(email, password);
       } else {
         if(!AUTH_CONFIG.signupEnabled){ setAuthError(t("auth_err_signup_disabled")); return; }
+        // Set this before createUser: Firebase can emit onAuthStateChanged before the
+        // createUser promise resolves, especially on fast mobile connections.
+        flagNextAuthForOnboarding();
         await fbAuth.createUserWithEmailAndPassword(email, password);
       }
     }catch(err){
+      if(authMode === "signup") clearNextAuthOnboardingFlag();
       console.error("auth error", err && err.code); // never logs the password/credential itself
       setAuthError(err && (err.code || err.message));
     }finally{
@@ -10317,23 +10354,35 @@ document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&
 async function registerKyroServiceWorker(){
   if(!("serviceWorker" in navigator)||location.protocol!=="https:")return;
 
-  const ACCEPTED_VERSION_KEY="kyro_sw_accepted_version_v4";
-  const RELOADED_VERSION_KEY="kyro_sw_reloaded_version_v4";
+  const UPDATE_STARTED_KEY="kyro_sw_update_started_v6";
+  const UPDATE_TARGET_KEY="kyro_sw_update_target_v6";
   const toast=document.getElementById("pwaUpdateToast");
   const btn=document.getElementById("pwaUpdateBtn");
   let registration=null;
   let waitingWorker=null;
-  let waitingVersion="";
   let applying=false;
+  let reloadTriggered=false;
   let fallbackTimer=null;
 
   const hideToast=()=>{
     if(toast)toast.classList.remove("show");
     if(btn){btn.disabled=false;btn.removeAttribute("aria-busy");btn.textContent=t("update_now");}
   };
-  const setBusy=busy=>{
-    if(!btn)return;
-    btn.disabled=busy;btn.setAttribute("aria-busy",busy?"true":"false");btn.textContent=busy?t("update_installing"):t("update_now");
+  const updateIsInProgress=()=>{
+    const started=Number(sessionStorage.getItem(UPDATE_STARTED_KEY))||0;
+    return started>0 && Date.now()-started<30000;
+  };
+  const markUpdateStarted=version=>{
+    try{
+      sessionStorage.setItem(UPDATE_STARTED_KEY,String(Date.now()));
+      sessionStorage.setItem(UPDATE_TARGET_KEY,version||"waiting-worker");
+    }catch(_){}
+  };
+  const clearUpdateState=()=>{
+    try{
+      sessionStorage.removeItem(UPDATE_STARTED_KEY);
+      sessionStorage.removeItem(UPDATE_TARGET_KEY);
+    }catch(_){}
   };
   const getVersion=worker=>new Promise(resolve=>{
     if(!worker){resolve("");return;}
@@ -10343,61 +10392,82 @@ async function registerKyroServiceWorker(){
     channel.port1.onmessage=event=>finish(event.data&&event.data.version);
     try{worker.postMessage({type:"GET_VERSION"},[channel.port2]);}catch(_){finish("");}
   });
-  const reloadForVersion=async version=>{
+  const reloadNow=()=>{
+    if(reloadTriggered)return;
+    reloadTriggered=true;
     hideToast();
-    const normalized=version||await getVersion(navigator.serviceWorker.controller)||"active";
-    if(sessionStorage.getItem(RELOADED_VERSION_KEY)===normalized)return;
-    sessionStorage.setItem(RELOADED_VERSION_KEY,normalized);
-    location.reload();
+    setTimeout(()=>location.reload(),60);
   };
-  const silentlyFinishAccepted=worker=>{
+  const activateWaitingWorker=async worker=>{
+    if(!worker||worker.state!=="installed")return false;
+    const version=await getVersion(worker)||"waiting-worker";
+    waitingWorker=worker;
+    markUpdateStarted(version);
+    // The banner must disappear the instant the person taps Update.
     hideToast();
     try{worker.postMessage({type:"SKIP_WAITING"});}catch(_){}
     if(fallbackTimer)clearTimeout(fallbackTimer);
-    fallbackTimer=setTimeout(()=>reloadForVersion(waitingVersion),5000);
+    fallbackTimer=setTimeout(async()=>{
+      // iOS standalone occasionally misses/delays controllerchange. Re-send the message
+      // once, then reload. The next page stays banner-free via UPDATE_STARTED_KEY.
+      try{
+        const latest=await navigator.serviceWorker.getRegistration("./");
+        if(latest&&latest.waiting)latest.waiting.postMessage({type:"SKIP_WAITING"});
+      }catch(_){}
+      reloadNow();
+    },2200);
+    return true;
   };
   const reconcileUpdateState=async()=>{
     if(!registration){hideToast();return;}
     const worker=registration.waiting;
     if(!worker||worker.state!=="installed"){
-      waitingWorker=null;waitingVersion="";hideToast();
-      localStorage.removeItem(ACCEPTED_VERSION_KEY);
+      waitingWorker=null;
+      hideToast();
+      if(updateIsInProgress()){
+        const target=sessionStorage.getItem(UPDATE_TARGET_KEY)||"";
+        const active=await getVersion(navigator.serviceWorker.controller);
+        if(!target||!active||target===active)clearUpdateState();
+      }else{
+        clearUpdateState();
+      }
       return;
     }
-    const [candidateVersion,activeVersion]=await Promise.all([getVersion(worker),getVersion(navigator.serviceWorker.controller)]);
-    const candidate=candidateVersion||"waiting-worker";
-    if(activeVersion&&candidateVersion&&activeVersion===candidateVersion){
-      hideToast();return;
+
+    waitingWorker=worker;
+    const [candidate,active]=await Promise.all([
+      getVersion(worker),
+      getVersion(navigator.serviceWorker.controller)
+    ]);
+    if(candidate&&active&&candidate===active){
+      hideToast();clearUpdateState();return;
     }
-    waitingWorker=worker;waitingVersion=candidate;
-    const accepted=localStorage.getItem(ACCEPTED_VERSION_KEY);
-    if(accepted===candidate||accepted==="waiting-worker"){
-      silentlyFinishAccepted(worker);return;
+    if(updateIsInProgress()){
+      hideToast();
+      await activateWaitingWorker(worker);
+      return;
     }
     if(toast)toast.classList.add("show");
-    setBusy(false);
   };
   const applyUpdate=async()=>{
     if(applying)return;
-    applying=true;setBusy(true);
+    applying=true;
+    // Immediate visual response: never leave the update banner sitting on screen.
+    hideToast();
+    markUpdateStarted("");
     try{
-      await registration.update().catch(()=>{});
-      const worker=registration.waiting||waitingWorker;
-      if(!worker||worker.state!=="installed"){
-        localStorage.removeItem(ACCEPTED_VERSION_KEY);
-        hideToast();
-        await reloadForVersion(await getVersion(navigator.serviceWorker.controller));
-        return;
+      let worker=registration&&registration.waiting||waitingWorker;
+      if(!worker&&registration){
+        await registration.update().catch(()=>{});
+        worker=registration.waiting;
       }
-      const version=await getVersion(worker)||waitingVersion||"waiting-worker";
-      waitingVersion=version;
-      localStorage.setItem(ACCEPTED_VERSION_KEY,version);
-      hideToast();
-      worker.postMessage({type:"SKIP_WAITING"});
-      if(fallbackTimer)clearTimeout(fallbackTimer);
-      fallbackTimer=setTimeout(()=>reloadForVersion(version),5000);
+      if(worker&&await activateWaitingWorker(worker))return;
+      // The update may already have activated between the tap and this line.
+      reloadNow();
     }catch(error){
-      applying=false;localStorage.removeItem(ACCEPTED_VERSION_KEY);setBusy(false);
+      applying=false;
+      clearUpdateState();
+      hideToast();
       if(APP_ENV.name==="development")console.warn("Falha ao aplicar atualização",error);
     }
   };
@@ -10405,32 +10475,40 @@ async function registerKyroServiceWorker(){
   hideToast();
   if(btn)btn.onclick=applyUpdate;
   try{
-    // Keep the script URL stable. Changing query strings creates distinct worker
-    // candidates in Safari and was the main reason the same update banner returned.
     registration=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
-    await reconcileUpdateState();
+
+    // Continue an update silently after an iOS fallback reload.
+    if(updateIsInProgress()&&registration.waiting){
+      await activateWaitingWorker(registration.waiting);
+    }else{
+      await reconcileUpdateState();
+    }
 
     registration.addEventListener("updatefound",()=>{
       const worker=registration.installing;if(!worker)return;
       worker.addEventListener("statechange",()=>{
         if(worker.state==="installed")reconcileUpdateState().catch(hideToast);
-        else if(["activating","activated","redundant"].includes(worker.state)&&registration.waiting!==worker)hideToast();
+        else if(worker.state==="redundant")hideToast();
       });
     });
 
-    navigator.serviceWorker.addEventListener("controllerchange",async()=>{
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
       if(fallbackTimer)clearTimeout(fallbackTimer);
-      hideToast();localStorage.removeItem(ACCEPTED_VERSION_KEY);
-      const version=await getVersion(navigator.serviceWorker.controller);
-      await reloadForVersion(version||waitingVersion);
+      hideToast();
+      clearUpdateState();
+      reloadNow();
     });
 
-    window.addEventListener("pageshow",()=>{reconcileUpdateState().catch(hideToast);});
-    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reconcileUpdateState().catch(hideToast);});
+    window.addEventListener("pageshow",()=>{
+      if(!reloadTriggered)reconcileUpdateState().catch(hideToast);
+    });
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible"&&!reloadTriggered)reconcileUpdateState().catch(hideToast);
+    });
     setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);
     registration.update().catch(()=>{});
   }catch(error){
-    hideToast();localStorage.removeItem(ACCEPTED_VERSION_KEY);
+    hideToast();clearUpdateState();
     if(APP_ENV.name==="development")console.warn("Service Worker não registrado",error);
   }
 }
@@ -10466,6 +10544,7 @@ let appInitialized = false;
 if(firebaseReady){
   fbAuth.onAuthStateChanged(async (user)=>{
     if(user){
+      const shouldForceNewAccountOnboarding = consumeNextAuthOnboardingFlag() || isRecentlyCreatedFirebaseAccount(user);
       currentUser = user;
       currentUserGrantedAdmin = false; // reset immediately — never trust a stale admin state
       hideAuthScreen();
@@ -10520,7 +10599,7 @@ if(firebaseReady){
         setTimeout(()=>{
           loadingEl.style.display = "none";
           loadingEl.classList.remove("fade-out");
-          maybeStartFirstRunOnboarding();
+          maybeStartFirstRunOnboarding({newAccount:shouldForceNewAccountOnboarding});
         }, 400);
       }
     } else {
