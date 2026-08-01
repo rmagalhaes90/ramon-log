@@ -556,10 +556,23 @@
   .first-run-demo-chart{height:82px;position:relative;margin:10px 2px 2px;background:linear-gradient(180deg,transparent,rgba(77,195,255,.04));border-bottom:1px solid var(--line)}
   .first-run-demo-chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
   .first-run-example-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 8px;border-radius:99px;background:var(--panel-2);color:var(--dim);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em}
-  .onboarding-coach{position:fixed;left:14px;right:14px;bottom:104px;z-index:760;max-width:560px;margin:auto;background:rgba(23,25,29,.97);border:1px solid var(--volt-dim);border-radius:18px;padding:13px 14px;box-shadow:0 16px 45px rgba(0,0,0,.5);animation:coachIn .35s cubic-bezier(.16,1,.3,1)}
-  .onboarding-coach-row{display:flex;align-items:flex-start;gap:11px}.onboarding-coach-icon{font-size:23px}.onboarding-coach-copy{flex:1}.onboarding-coach-copy b{display:block;font-size:12.5px;color:var(--text);margin-bottom:3px}.onboarding-coach-copy span{display:block;color:var(--dim);font-size:11px;line-height:1.4}
-  .onboarding-coach-actions{display:flex;gap:8px;margin-top:10px}.onboarding-coach-actions button{flex:1;border-radius:11px;padding:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:11px;font-weight:700}.onboarding-coach-actions .primary{background:var(--volt);border-color:var(--volt);color:#0b0c0e}
-  .onboarding-focus{position:relative;z-index:45;box-shadow:0 0 0 3px rgba(215,255,61,.45),0 0 34px rgba(215,255,61,.18);border-radius:18px;animation:tourPulse 1.6s ease-in-out infinite}
+  .onboarding-coach-slot:empty{display:none}
+  .onboarding-coach-slot:not(:empty){padding:0 20px 6px}
+  .modal-content>.onboarding-coach-slot:not(:empty){padding:0 0 12px}
+  .onboarding-coach{position:fixed;left:14px;right:14px;top:calc(env(safe-area-inset-top) + 12px);z-index:760;max-width:560px;margin:auto;background:rgba(23,25,29,.98);border:1px solid var(--volt-dim);border-radius:18px;padding:12px 13px;box-shadow:0 16px 45px rgba(0,0,0,.5);animation:coachIn .35s cubic-bezier(.16,1,.3,1)}
+  .onboarding-coach.embedded{position:sticky;left:auto;right:auto;top:0;z-index:18;max-width:none;margin:0;background:linear-gradient(155deg,rgba(31,34,38,.99),rgba(20,22,25,.99));box-shadow:0 10px 28px rgba(0,0,0,.28)}
+  .onboarding-coach-row{display:flex;align-items:flex-start;gap:10px}
+  .onboarding-coach-icon{font-size:22px;line-height:1.1}
+  .onboarding-coach-copy{flex:1;min-width:0}
+  .onboarding-coach-copy b{display:block;font-size:12.5px;color:var(--text);margin-bottom:3px}
+  .onboarding-coach-copy span{display:block;color:var(--dim);font-size:11px;line-height:1.42}
+  .onboarding-coach-dismiss{flex:0 0 auto;border:0;background:transparent;color:var(--dim);font-size:10.5px;font-weight:700;padding:2px 0 2px 8px;cursor:pointer;white-space:nowrap}
+  .onboarding-coach-actions{display:flex;gap:8px;margin-top:10px}
+  .onboarding-coach-actions button{flex:1;border-radius:11px;padding:9px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:11px;font-weight:700;cursor:pointer}
+  .onboarding-coach-actions .primary{background:var(--volt);border-color:var(--volt);color:#0b0c0e}
+  .onboarding-focus{position:relative;z-index:45;box-shadow:0 0 0 3px rgba(215,255,61,.45),0 0 34px rgba(215,255,61,.18);border-radius:18px;animation:tourPulse 1.6s ease-in-out infinite;scroll-margin-top:150px;scroll-margin-bottom:150px}
+  .autogen-action-bar{position:sticky;bottom:-1px;z-index:16;margin:14px -2px 0;padding:11px;background:rgba(23,25,29,.98);border:1px solid var(--volt-dim);border-radius:14px;box-shadow:0 -10px 30px rgba(0,0,0,.35);backdrop-filter:blur(12px)}
+  .autogen-action-bar .add-btn{min-height:46px;font-size:14px}
   @keyframes tourFadeIn{from{opacity:0}to{opacity:1}}
   @keyframes tourCardIn{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
   @keyframes coachIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -799,14 +812,15 @@
   </div>
 </div>
 
-<div class="onboarding-coach" id="onboardingCoach" hidden role="status" aria-live="polite">
+<div class="onboarding-coach" id="onboardingCoach" hidden role="region" aria-live="polite">
   <div class="onboarding-coach-row">
     <div class="onboarding-coach-icon">✨</div>
     <div class="onboarding-coach-copy"><b id="onboardingCoachTitle"></b><span id="onboardingCoachText"></span></div>
+    <button type="button" class="onboarding-coach-dismiss" id="onboardingCoachSkip"></button>
   </div>
   <div class="onboarding-coach-actions">
     <button type="button" id="onboardingCoachBack"></button>
-    <button type="button" class="primary" id="onboardingCoachSkip"></button>
+    <button type="button" class="primary" id="onboardingCoachAction"></button>
   </div>
 </div>
 
@@ -855,6 +869,7 @@
   <!-- ROTINAS -->
   <section class="page" data-page="rotinas">
     <div class="page-header"><h2 id="pageRoutinesTitle">ROTINAS<span>.</span></h2></div>
+    <div class="onboarding-coach-slot" id="routineOnboardingCoachSlot"></div>
     <div class="content" id="rotinasContent"></div>
   </section>
 
@@ -1121,6 +1136,7 @@
       <h3 id="templateModalTitle">Templates Prontos</h3>
       <button class="close-btn" id="templateCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
+    <div class="onboarding-coach-slot" id="templateOnboardingCoachSlot"></div>
     <div class="about-block" id="templateModalWarning" style="padding:0 0 14px;text-align:left">Isso substitui toda a rotina da semana atual. Seus pesos, medidas e histórico não são afetados.</div>
     <div id="templateList"></div>
   </div>
@@ -1132,6 +1148,7 @@
       <h3 id="autoGenModalTitle">Gerador de Treino</h3>
       <button class="close-btn" id="autoGenCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
+    <div class="onboarding-coach-slot" id="autoGenOnboardingCoachSlot"></div>
     <div id="autoGenBody"></div>
   </div>
 </div>
@@ -2666,8 +2683,16 @@ const FIRST_RUN_COPY = Object.freeze({
     routine_template:"Usar template pronto", routine_template_sub:"Comece rápido com uma semana já estruturada.",
     routine_manual:"Criar manualmente", routine_manual_sub:"Escolha o dia, dê um nome e adicione exercícios.",
     routine_later:"Continuar sem criar agora",
-    coach_title:"Agora é com você", coach_auto:"Escolha os grupos musculares e a intensidade, veja a prévia e toque em Aplicar.", coach_template:"Escolha um template e toque em Usar este template.", coach_manual:"Escolha um dia, escreva o nome da rotina e toque em Criar rotina.",
+    coach_title:"Agora é com você",
+    coach_auto_groups:"1 de 3 · Escolha um ou mais grupos musculares.",
+    coach_auto_intensity:"2 de 3 · Agora escolha a intensidade.",
+    coach_auto_apply:"3 de 3 · A prévia está pronta. Toque em Aplicar para criar a rotina.",
+    coach_template:"Escolha um template e toque em Usar este template.",
+    coach_manual:"Escolha um dia, escreva o nome da rotina e toque em Criar rotina.",
     coach_back:"Voltar ao guia", coach_skip:"Fazer depois",
+    coach_action_groups:"Escolher músculos", coach_action_intensity:"Escolher intensidade",
+    coach_action_apply:"Mostrar Aplicar", coach_action_template:"Mostrar templates",
+    coach_action_manual:"Começar agora",
     created_title:"Rotina criada!", created_copy:"Excelente começo. Seu plano já está salvo e você pode ajustar exercícios, séries, repetições e descanso a qualquer momento.",
     created_tip:"Dica: durante o treino, marque cada série para o KYRO calcular sua evolução.",
     progress_title:"Acompanhe sua evolução", progress_copy:"Na aba <strong>Progresso</strong>, registre dados reais e compare tendências ao longo das semanas — não apenas um número isolado.",
@@ -2693,8 +2718,16 @@ const FIRST_RUN_COPY = Object.freeze({
     routine_template:"Use a ready-made template", routine_template_sub:"Start quickly with a structured week.",
     routine_manual:"Build manually", routine_manual_sub:"Choose a day, name the routine, and add exercises.",
     routine_later:"Continue without creating now",
-    coach_title:"Your turn", coach_auto:"Choose muscle groups and intensity, review the preview, then tap Apply.", coach_template:"Choose a template and tap Use this template.", coach_manual:"Choose a day, enter the routine name, then tap Create routine.",
+    coach_title:"Your turn",
+    coach_auto_groups:"1 of 3 · Choose one or more muscle groups.",
+    coach_auto_intensity:"2 of 3 · Now choose the intensity.",
+    coach_auto_apply:"3 of 3 · Your preview is ready. Tap Apply to create the routine.",
+    coach_template:"Choose a template and tap Use this template.",
+    coach_manual:"Choose a day, enter the routine name, then tap Create routine.",
     coach_back:"Back to guide", coach_skip:"Do it later",
+    coach_action_groups:"Choose muscles", coach_action_intensity:"Choose intensity",
+    coach_action_apply:"Show Apply", coach_action_template:"Show templates",
+    coach_action_manual:"Start now",
     created_title:"Routine created!", created_copy:"Great start. Your plan is saved, and you can adjust exercises, sets, reps, and rest time whenever you need.",
     created_tip:"Tip: mark every completed set so KYRO can calculate your progress.",
     progress_title:"Track your progress", progress_copy:"In <strong>Progress</strong>, record real data and compare trends over several weeks — not just one isolated number.",
@@ -2830,27 +2863,75 @@ async function maybeStartFirstRunOnboarding(){
   }
 }
 
-function renderOnboardingCoach(){
+function onboardingCoachTarget(){
+  const mode=firstRunTourState.mode;
+  if(mode==="auto"){
+    if(!autoGenState.groups || !autoGenState.groups.length) return document.getElementById("autoGenGroups");
+    if(!autoGenState.intensity) return document.getElementById("autoGenIntensity");
+    return document.getElementById("autoGenApply") || document.querySelector(".autogen-preview");
+  }
+  if(mode==="template") return document.querySelector("#templateList [data-tpl]") || document.getElementById("templateList");
+  return document.getElementById("newRoutineTitle") || document.getElementById("createRoutineBtn") || document.getElementById("rotinasContent");
+}
+
+function placeOnboardingCoach(){
   const coach=document.getElementById("onboardingCoach");
-  if(!coach || !firstRunTourState.awaitingRoutine) return;
+  if(!coach) return null;
+  const mode=firstRunTourState.mode;
+  const slot=document.getElementById(mode==="auto"?"autoGenOnboardingCoachSlot":mode==="template"?"templateOnboardingCoachSlot":"routineOnboardingCoachSlot");
+  if(slot && coach.parentElement!==slot) slot.appendChild(coach);
+  coach.classList.toggle("embedded",!!slot);
+  return coach;
+}
+
+function scrollToOnboardingTarget(){
+  const target=onboardingCoachTarget();
+  if(!target) return;
+  clearOnboardingFocus();
+  target.classList.add("onboarding-focus");
+  target.scrollIntoView({behavior:"smooth",block:"center",inline:"nearest"});
+  if(target.id==="newRoutineTitle"){
+    setTimeout(()=>target.focus({preventScroll:true}),320);
+  }
+  setTimeout(()=>target.classList.remove("onboarding-focus"),2600);
+}
+
+function renderOnboardingCoach(){
+  if(!firstRunTourState.awaitingRoutine) return;
+  const coach=placeOnboardingCoach();
+  if(!coach) return;
   document.getElementById("onboardingCoachTitle").textContent=ot("coach_title");
-  const key=firstRunTourState.mode==="auto"?"coach_auto":firstRunTourState.mode==="template"?"coach_template":"coach_manual";
-  document.getElementById("onboardingCoachText").textContent=ot(key);
   document.getElementById("onboardingCoachBack").textContent=ot("coach_back");
   document.getElementById("onboardingCoachSkip").textContent=ot("coach_skip");
+
+  let textKey="coach_manual", actionKey="coach_action_manual";
+  if(firstRunTourState.mode==="auto"){
+    if(!autoGenState.groups || !autoGenState.groups.length){
+      textKey="coach_auto_groups"; actionKey="coach_action_groups";
+    }else if(!autoGenState.intensity){
+      textKey="coach_auto_intensity"; actionKey="coach_action_intensity";
+    }else{
+      textKey="coach_auto_apply"; actionKey="coach_action_apply";
+    }
+  }else if(firstRunTourState.mode==="template"){
+    textKey="coach_template"; actionKey="coach_action_template";
+  }
+  document.getElementById("onboardingCoachText").textContent=ot(textKey);
+  document.getElementById("onboardingCoachAction").textContent=ot(actionKey);
   coach.hidden=false;
 }
 
 function beginRoutineOnboarding(mode){
   firstRunTourState.open=false; firstRunTourState.awaitingRoutine=true; firstRunTourState.mode=mode;
   document.getElementById("firstRunOnboarding").hidden=true;
-  switchPage("rotinas"); renderRotinas(); renderOnboardingCoach();
+  switchPage("rotinas");
+  renderRotinas();
   setTimeout(()=>{
     clearOnboardingFocus();
-    const el=document.getElementById("rotinasContent"); if(el) el.classList.add("onboarding-focus");
     if(mode==="auto") openAutoGenModal();
     else if(mode==="template") openTemplateModal();
-    else document.getElementById("newRoutineTitle")?.focus();
+    renderOnboardingCoach();
+    if(mode==="manual") setTimeout(scrollToOnboardingTarget,80);
   },120);
 }
 
@@ -2887,6 +2968,7 @@ function bindFirstRunOnboardingEvents(){
     firstRunTourState.awaitingRoutine=false; firstRunTourState.open=true; firstRunTourState.step=3;
     document.getElementById("onboardingCoach").hidden=true; renderFirstRunOnboarding();
   });
+  document.getElementById("onboardingCoachAction").addEventListener("click",scrollToOnboardingTarget);
   document.addEventListener("keydown",e=>{
     if(e.key==="Escape" && firstRunTourState.open){ e.preventDefault(); completeFirstRunOnboarding(); }
   });
@@ -5634,6 +5716,9 @@ window.openTemplateModal = function(){
     list.appendChild(card);
   });
   document.getElementById("templateModal").classList.add("show");
+  if(firstRunTourState.awaitingRoutine && firstRunTourState.mode==="template"){
+    setTimeout(()=>{ renderOnboardingCoach(); scrollToOnboardingTarget(); },40);
+  }
 };
 window.closeTemplateModal = function(){ document.getElementById("templateModal").classList.remove("show"); };
 
@@ -5688,7 +5773,7 @@ function renderAutoGenBody(){
         ${p.exercises.map(ex=>`<div class="autogen-ex-row"><span>${tExerciseName(ex.name)}</span><span class="mono">${ex.sets}×${tRepsText(ex.reps)}</span></div>`).join('')}
         ${p.abs.length ? `<div class="autogen-ex-row" style="opacity:.7"><span>${tFmt("autogen_plus_abs",{n:p.abs.length})}</span><span></span></div>` : ''}
       </div>
-      <div class="input-row" style="margin-top:14px">
+      <div class="input-row autogen-action-bar">
         <button class="settings-btn" id="autoGenReroll" style="margin:0">${t("autogen_reroll")}</button>
         <button class="add-btn" id="autoGenApply" style="flex:1">${t("autogen_apply")}</button>
       </div>
@@ -5733,10 +5818,17 @@ function renderAutoGenBody(){
   });
 
   function maybeGenerate(){
+    const hadPreview=!!autoGenState.preview;
     if(autoGenState.groups.length && autoGenState.intensity){
       autoGenState.preview = generateAutoWorkout(autoGenState.groups, autoGenState.intensity, autoGenState.equipment);
     }
     renderAutoGenBody();
+    if(firstRunTourState.awaitingRoutine && firstRunTourState.mode==="auto"){
+      setTimeout(()=>{
+        renderOnboardingCoach();
+        if(!hadPreview && autoGenState.preview) scrollToOnboardingTarget();
+      },40);
+    }
   }
 
   const rerollBtn = document.getElementById("autoGenReroll");
@@ -5760,6 +5852,10 @@ function renderAutoGenBody(){
     haptic([40,40,40]);
     notifyFirstRunRoutineCreated();
   });
+
+  if(firstRunTourState.awaitingRoutine && firstRunTourState.mode==="auto"){
+    setTimeout(renderOnboardingCoach,0);
+  }
 }
 
 function computePlates(){
@@ -6355,6 +6451,9 @@ function renderRotinas(){
       renderRotinas();
       notifyFirstRunRoutineCreated();
     });
+    if(firstRunTourState.awaitingRoutine && firstRunTourState.mode==="manual"){
+      setTimeout(renderOnboardingCoach,0);
+    }
     return;
   }
 
@@ -6401,6 +6500,10 @@ function renderRotinas(){
     buildDaySwitch();
     renderRotinas();
   });
+
+  if(firstRunTourState.awaitingRoutine && firstRunTourState.mode==="manual"){
+    setTimeout(renderOnboardingCoach,0);
+  }
 }
 
 function buildRoutineExerciseItem(dayKey, listType, i, ex){
