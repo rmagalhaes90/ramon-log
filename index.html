@@ -6790,8 +6790,8 @@ function compressImage(file){ return new Promise(async (resolve, reject) => {
 // Progress photos are compressed client-side (compressImage, above — this also strips
 // EXIF metadata since re-encoding through canvas never carries it over), then uploaded
 // to Storage under the user's own folder instead of being kept as base64 inside Firestore.
-// If Storage isn't available (offline, or the project isn't on a plan with Storage enabled),
-// we fall back to the old base64-in-Firestore behavior so the feature never breaks.
+// If the Storage upload fails, the JPEG stays only on this device as a clearly marked
+// pending item and is retried automatically; base64 photo data is never sent to Firestore.
 function dataUrlToBlob(dataUrl){
   const [header, base64] = dataUrl.split(",");
   const mimeMatch = header.match(/data:(.*?);/);
@@ -6853,7 +6853,7 @@ async function uploadPhotoToStorage(dataUrl, id){
     return await ref.getDownloadURL();
   }catch(e){
     console.error("uploadPhotoToStorage error", e);
-    return null; // caller falls back to storing the base64 data URL directly
+    return null; // caller keeps the compressed JPEG locally as a pending upload
   }
 }
 
@@ -6861,6 +6861,105 @@ async function deletePhotoFromStorage(id){
   if(!fbStorage || !currentUser) return;
   try{ await fbStorage.ref().child(`users/${currentUser.uid}/photos/${id}.jpg`).delete(); }
   catch(e){ /* best-effort — file may not exist (older photo saved before Storage was enabled) */ }
+}
+
+let photoUploadInProgress = false;
+
+function createPhotoId(){
+  const bytes = new Uint32Array(2);
+  try{ crypto.getRandomValues(bytes); }
+  catch(e){ bytes[0] = Math.floor(Math.random()*0xFFFFFFFF); bytes[1] = Math.floor(Math.random()*0xFFFFFFFF); }
+  return `${Date.now().toString(36)}_${bytes[0].toString(36)}${bytes[1].toString(36)}`;
+}
+
+async function addPhoto(file){
+  if(photoUploadInProgress){ alert(t("alert_photo_upload_in_progress")); return; }
+  photoUploadInProgress = true;
+  let photoId = null;
+  let uploadedToStorage = false;
+
+  try{
+    const validation = await validatePhotoFile(file);
+    if(!validation.ok){ alert(validation.reason); return; }
+
+    let dataUrl;
+    try{ dataUrl = await compressImage(file); }
+    catch(e){
+      alert(e && e.message === "image_too_large_dimensions" ? t("alert_photo_too_large") : t("alert_photo_invalid_format"));
+      return;
+    }
+
+    if(typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/jpeg;base64,")){
+      alert(t("alert_photo_invalid_format"));
+      return;
+    }
+    const outputBlob = dataUrlToBlob(dataUrl);
+    if(outputBlob.size <= 0 || outputBlob.size > PHOTO_MAX_OUTPUT_BYTES){
+      alert(t("alert_photo_too_large"));
+      return;
+    }
+
+    photoId = createPhotoId();
+    const date = todayKey();
+    const downloadUrl = await uploadPhotoToStorage(dataUrl, photoId);
+
+    if(downloadUrl){
+      uploadedToStorage = true;
+      const newIndex = photoIndex.concat({ id: photoId, d: date });
+      try{
+        const photoRef = personalDocRef("photo_"+photoId);
+        const indexRef = personalDocRef("photoIndex");
+        if(!photoRef || !indexRef) throw new Error("photo_refs_unavailable");
+        const batch = fbDb.batch();
+        batch.set(photoRef, { value: downloadUrl });
+        batch.set(indexRef, { value: newIndex });
+        await withTimeout(batch.commit(), 12000, "photo:add");
+
+        photoIndex = newIndex;
+        writeCache("photo_"+photoId, downloadUrl);
+        writeCache("photoIndex", newIndex);
+        removePendingSync("photo_"+photoId);
+        removePendingSync("photoIndex");
+        haptic();
+        await renderPhotoTab();
+        return;
+      }catch(e){
+        console.error("addPhoto: failed to persist uploaded photo", e);
+        await deletePhotoFromStorage(photoId); // prevent an orphan if Firestore did not commit
+        uploadedToStorage = false;
+        alert(t("alert_photo_save_error"));
+        return;
+      }
+    }
+
+    // Storage failed: keep the compressed JPEG only on this device and mark the index
+    // entry pending. Never place the data URL itself in Firestore.
+    const pendingEntry = { id: photoId, d: date, dataUrl };
+    const pending = getPendingPhotos().filter(p=>p.id!==photoId);
+    savePendingPhotos(pending.concat(pendingEntry));
+    if(!getPendingPhotoDataUrl(photoId)){
+      alert(t("alert_photo_save_error"));
+      return;
+    }
+
+    const newIndex = photoIndex.concat({ id: photoId, d: date, pending: true });
+    photoIndex = newIndex;
+    try{ await store.setConfirmed("photoIndex", newIndex); }
+    catch(e){
+      // setConfirmed already cached and queued the metadata before waiting for the server.
+      // The local pending JPEG therefore remains recoverable and retryable.
+      console.error("addPhoto: pending photoIndex queued", e);
+    }
+    haptic();
+    await renderPhotoTab();
+    alert(t("alert_photo_upload_pending"));
+  }catch(e){
+    console.error("addPhoto error", e);
+    if(uploadedToStorage && photoId) await deletePhotoFromStorage(photoId);
+    alert(t("alert_photo_save_error"));
+  }finally{
+    photoUploadInProgress = false;
+  }
 }
 
 
