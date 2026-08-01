@@ -690,6 +690,12 @@
   <div class="app-loading-ring"></div>
 </div>
 
+<div id="bootstrapErrorScreen" style="display:none;position:fixed;inset:0;z-index:9999;background:#0b0c0e;color:#f5f6f7;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;font-family:'Space Grotesk',sans-serif;">
+  <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+  <div id="bootstrapErrorText" style="max-width:340px;margin-bottom:20px;color:#c7c9cc;font-size:14px;line-height:1.5"></div>
+  <button id="bootstrapErrorRetryBtn" style="background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 24px;font-weight:700;font-family:inherit;cursor:pointer">🔄 Tentar de novo</button>
+</div>
+
 <div class="pull-refresh" id="pullRefresh">
   <div class="pull-spinner" id="pullSpinner"></div>
 </div>
@@ -1358,6 +1364,70 @@ function fmtWeight(kg, decimals){
 }
 function weightUnitLabel(){ return unitSystem === "imperial" ? "lb" : "kg"; }
 // Converts a value the person TYPED (already in their chosen display unit) back to kg for storage.
+// ==== Centralized strict numeric parsing (used by every numeric field in the app) ====
+// Plain parseFloat()/parseInt() silently accept things like "123abc", "1e5", "0x10", or
+// "1_000" (stopping at the first invalid character rather than rejecting the whole string).
+// Every parser here requires the ENTIRE trimmed input to match a strict, unambiguous pattern
+// before any parsing happens — partial matches are never accepted.
+
+// Invisible/zero-width unicode characters can visually hide inside what looks like a normal
+// number. Rather than silently stripping them (which could mask a copy-paste problem), any
+// occurrence causes the whole value to be rejected outright.
+function containsInvisibleUnicode(s){ return /[\u200B-\u200D\uFEFF\u00AD]/.test(s); }
+
+// Strict decimal parser: optional single leading sign, digits, and AT MOST one decimal
+// separator (. or , — never both, never more than one). Rejects scientific notation ("1e5"),
+// hex ("0x10"), underscores ("1_000"), multiple signs ("--1"), multiple separators ("1.2.3",
+// "5,000.5"), internal spaces, and literal "NaN"/"Infinity" text.
+function parseStrictDecimal(raw){
+  if(raw === null || raw === undefined) return NaN;
+  const s = String(raw);
+  if(containsInvisibleUnicode(s)) return NaN;
+  const trimmed = s.trim();
+  if(trimmed === "") return NaN;
+  if(!/^[+-]?(\d+([.,]\d+)?|[.,]\d+)$/.test(trimmed)) return NaN;
+  const n = parseFloat(trimmed.replace(",", "."));
+  return Number.isFinite(n) ? n : NaN;
+}
+
+// Strict integer parser — same rules as parseStrictDecimal, but no decimal part allowed at all.
+function parseStrictInteger(raw){
+  if(raw === null || raw === undefined) return NaN;
+  const s = String(raw);
+  if(containsInvisibleUnicode(s)) return NaN;
+  const trimmed = s.trim();
+  if(trimmed === "") return NaN;
+  if(!/^[+-]?\d+$/.test(trimmed)) return NaN;
+  const n = parseInt(trimmed, 10);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+// Clamps a value into [min,max]. Returns null (not a fallback default) when the input isn't
+// a finite number at all — callers decide what "invalid" means for their own field.
+function clampFiniteNumber(n, min, max){
+  if(!Number.isFinite(n)) return null;
+  return Math.min(max, Math.max(min, n));
+}
+
+// Strict weight parser: strict decimal -> unit conversion (kg/lb) -> range check. Returns
+// null on ANY failure — bad format or out of [min,max] — never a silently-adjusted number.
+function parseStrictWeight(raw, min, max){
+  const n = parseStrictDecimal(raw);
+  if(!Number.isFinite(n)) return null;
+  const kg = unitSystem === "imperial" ? lbToKg(n) : n;
+  if(!Number.isFinite(kg) || kg < min || kg > max) return null;
+  return kg;
+}
+
+// Strict length parser: strict decimal -> unit conversion (cm/in) -> range check.
+function parseStrictLength(raw, min, max){
+  const n = parseStrictDecimal(raw);
+  if(!Number.isFinite(n)) return null;
+  const cm = unitSystem === "imperial" ? inToCm(n) : n;
+  if(!Number.isFinite(cm) || cm < min || cm > max) return null;
+  return cm;
+}
+
 function parseWeightToKg(displayValue){
   const n = parseFloat(String(displayValue).replace(",", "."));
   if(isNaN(n)) return NaN;
@@ -1553,6 +1623,24 @@ const EXERCISE_NAME_EN = {
   "Pulo de Corda (Panturrilha)":"Jump Rope (Calves)"
 };
 
+// Strict allowlist check: only genuine http/https URLs, no embedded credentials, no
+// javascript:/data:/file: schemes, and a sane max length. Used before ANY untrusted string
+// (video links, photo URLs, backup content, etc.) is ever assigned to href/src.
+function isSafeHttpUrl(url){
+  if(!url || typeof url !== "string" || url.length > 2048) return false;
+  try{
+    const u = new URL(url, location.href);
+    if(u.protocol !== "https:" && u.protocol !== "http:") return false;
+    if(u.username || u.password) return false;
+    return true;
+  }catch(e){ return false; }
+}
+const YOUTUBE_HOSTS = ["youtube.com","www.youtube.com","m.youtube.com","youtu.be"];
+function isValidYouTubeUrl(url){
+  if(!isSafeHttpUrl(url)) return false;
+  try{ return YOUTUBE_HOSTS.includes(new URL(url).hostname.toLowerCase()); }catch(e){ return false; }
+}
+
 function tVideoUrl(ex){
   if(currentLang==="en"){
     const q = encodeURIComponent(tExerciseName(ex.name) + " how to exercise tutorial");
@@ -1603,17 +1691,34 @@ function openVideoPlayer(videoUrl, title){
   document.getElementById("videoPlayerTitle").textContent = title || "";
 
   const videoId = extractYouTubeId(videoUrl);
+  frameWrap.innerHTML = "";
   if(videoId){
-    frameWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1" title="${escapeHtml(title||"")}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1`;
+    iframe.title = title || "";
+    iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.loading = "lazy";
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    frameWrap.appendChild(iframe);
     frameWrap.style.display = "block";
     fallback.style.display = "none";
   } else {
-    // No single video to embed (e.g., the English search-results fallback) — offer an external link instead.
-    frameWrap.innerHTML = "";
+    // No single video to embed (e.g., the English search-results fallback) — offer an
+    // external link instead, but only ever if it's a genuinely safe http(s) URL.
     frameWrap.style.display = "none";
     fallback.style.display = "block";
     document.getElementById("videoPlayerFallbackText").textContent = t("video_no_embed_fallback");
-    fallback.querySelector("a").href = videoUrl;
+    const link = fallback.querySelector("a");
+    if(isSafeHttpUrl(videoUrl)){
+      link.href = videoUrl;
+      link.rel = "noopener noreferrer";
+      link.target = "_blank";
+      link.style.display = "";
+    } else {
+      link.removeAttribute("href");
+      link.style.display = "none";
+    }
   }
   modal.classList.add("show");
 }
@@ -1692,7 +1797,7 @@ const UI_STRINGS = {
     alert_notif_enabled:"Notificações ativadas! Você vai receber um aviso quando o descanso entre séries terminar.",
     confirm_delete_all_1:"Apagar TODOS os dados?", confirm_delete_all_2:"Tem certeza? Não dá para desfazer.",
     alert_backup_before_delete:"Por segurança, baixamos um backup dos seus dados antes de apagar. Confira a pasta de Downloads se precisar recuperar algo depois.",
-    alert_import_error:"Erro ao importar", alert_import_success:"Importado com sucesso", alert_photo_save_error:"Erro ao salvar foto",
+    alert_import_error:"Erro ao importar", alert_import_success:"Importado com sucesso", alert_photo_save_error:"Erro ao salvar foto", alert_photo_no_file:"Nenhum arquivo de imagem válido foi selecionado.", alert_photo_too_large:"Essa imagem é grande demais (máximo 20MB).", alert_photo_svg_rejected:"Arquivos SVG não são aceitos como foto.", alert_photo_invalid_format:"Esse arquivo não parece ser uma imagem válida.", alert_photo_upload_pending:"Sua foto foi salva no aparelho, mas ainda não terminou de subir pra nuvem. Vamos tentar de novo quando a conexão melhorar.", alert_photo_upload_in_progress:"Já tem um envio de foto em andamento — aguarde terminar.", photo_pending_tag:"(enviando...)", alert_photo_delete_error:"Não foi possível apagar a foto agora. Tente de novo.", alert_duplicate_exercise_name:"Já existe um exercício chamado \"{name}\" no banco. Escolha um nome diferente.", alert_invalid_exercise_in_list:"O exercício #{index} (\"{name}\") está com dados inválidos. Corrija antes de salvar.", confirm_exercise_db_size_warning:"O banco de exercícios está ficando grande ({kb}KB). Isso ainda funciona, mas está se aproximando do limite do Firestore. Continuar mesmo assim?",
     confirm_remove_exercise_named:"Remover \"{name}\" do treino de hoje?", confirm_remove_day_routine:"Remover toda a rotina de {day}?",
     confirm_apply_generated:"Aplicar esse treino gerado para {day}? Isso substitui a rotina atual desse dia.",
     confirm_apply_template:"Substituir toda a rotina da semana pelo template \"{name}\"? Seus pesos e histórico continuam salvos.",
@@ -1776,7 +1881,7 @@ const UI_STRINGS = {
     loading_generic:"Carregando...",
     error_loading_users:"Erro ao carregar usuários: {msg}",
     empty_no_users_found:"Nenhum usuário encontrado",
-    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}", alert_weight_too_high:"Peso inválido — o máximo permitido é 500 kg (1102 lb). Confira o valor digitado.", alert_weight_too_low:"Peso inválido — o mínimo permitido é 20 kg (44 lb). Confira o valor digitado.", alert_weight_invalid_format:"Formato de peso inválido. Digite apenas números, como 82.5.", alert_measure_out_of_range:"Uma ou mais medidas parecem fora do normal (entre 5 e 250 cm) e não foram salvas.", alert_height_out_of_range:"Altura inválida — deve estar entre 50 e 250 cm.",
+    alert_reset_pw_sent:"Enviamos um link de redefinição de senha para {email}", alert_weight_too_high:"Peso inválido — o máximo permitido é 500 kg (1102 lb). Confira o valor digitado.", alert_weight_too_low:"Peso inválido — o mínimo permitido é 20 kg (44 lb). Confira o valor digitado.", alert_weight_invalid_format:"Formato de peso inválido. Digite apenas números, como 82.5.", alert_measure_out_of_range:"Uma ou mais medidas parecem fora do normal (entre 5 e 250 cm) e não foram salvas.", alert_height_out_of_range:"Altura inválida — deve estar entre 50 e 250 cm.", bootstrap_check_failed_msg:"Não foi possível confirmar o status da sua conta. Isso costuma ser um problema de conexão. Verifique sua internet e tente de novo.", generic_error_with_id:"Ocorreu um erro inesperado (código {id}). Tente novamente ou volte mais tarde.",
     alert_cache_clear_error:"Não foi possível limpar o cache: {msg}",
     alert_enter_ex_name:"Digite um nome para o exercício.",
     alert_no_angle_brackets:"O nome não pode conter os caracteres < ou >.",
@@ -1890,7 +1995,7 @@ const UI_STRINGS = {
     alert_notif_enabled:"Notifications enabled! You'll get an alert when your rest between sets ends.",
     confirm_delete_all_1:"Delete ALL data?", confirm_delete_all_2:"Are you sure? This can't be undone.",
     alert_backup_before_delete:"For safety, we downloaded a backup of your data before deleting. Check your Downloads folder if you need to recover anything later.",
-    alert_import_error:"Import error", alert_import_success:"Imported successfully", alert_photo_save_error:"Error saving photo",
+    alert_import_error:"Import error", alert_import_success:"Imported successfully", alert_photo_save_error:"Error saving photo", alert_photo_no_file:"No valid image file was selected.", alert_photo_too_large:"This image is too large (20MB max).", alert_photo_svg_rejected:"SVG files aren't accepted as photos.", alert_photo_invalid_format:"This file doesn't look like a valid image.", alert_photo_upload_pending:"Your photo was saved on this device but hasn't finished uploading to the cloud yet. We'll retry once your connection improves.", alert_photo_upload_in_progress:"A photo upload is already in progress — please wait for it to finish.", photo_pending_tag:"(uploading...)", alert_photo_delete_error:"Couldn't delete the photo right now. Please try again.", alert_duplicate_exercise_name:"There's already an exercise named \"{name}\" in the database. Choose a different name.", alert_invalid_exercise_in_list:"Exercise #{index} (\"{name}\") has invalid data. Fix it before saving.", confirm_exercise_db_size_warning:"The exercise database is getting large ({kb}KB). It still works, but it's approaching Firestore's limit. Continue anyway?",
     confirm_remove_exercise_named:"Remove \"{name}\" from today's workout?", confirm_remove_day_routine:"Remove the entire routine for {day}?",
     confirm_apply_generated:"Apply this generated workout to {day}? This replaces the current routine for that day.",
     confirm_apply_template:"Replace the whole week's routine with the \"{name}\" template? Your weights and history stay saved.",
@@ -1974,7 +2079,7 @@ const UI_STRINGS = {
     loading_generic:"Loading...",
     error_loading_users:"Error loading users: {msg}",
     empty_no_users_found:"No users found",
-    alert_reset_pw_sent:"We sent a password reset link to {email}", alert_weight_too_high:"Invalid weight — the maximum allowed is 500 kg (1102 lb). Check the value you entered.", alert_weight_too_low:"Invalid weight — the minimum allowed is 20 kg (44 lb). Check the value you entered.", alert_weight_invalid_format:"Invalid weight format. Enter numbers only, like 82.5.", alert_measure_out_of_range:"One or more measurements look out of range (between 5 and 250 cm) and weren't saved.", alert_height_out_of_range:"Invalid height — must be between 50 and 250 cm.",
+    alert_reset_pw_sent:"We sent a password reset link to {email}", alert_weight_too_high:"Invalid weight — the maximum allowed is 500 kg (1102 lb). Check the value you entered.", alert_weight_too_low:"Invalid weight — the minimum allowed is 20 kg (44 lb). Check the value you entered.", alert_weight_invalid_format:"Invalid weight format. Enter numbers only, like 82.5.", alert_measure_out_of_range:"One or more measurements look out of range (between 5 and 250 cm) and weren't saved.", alert_height_out_of_range:"Invalid height — must be between 50 and 250 cm.", bootstrap_check_failed_msg:"We could not confirm your account status. This is usually a connection issue. Check your internet and try again.", generic_error_with_id:"An unexpected error occurred (code {id}). Please try again or come back later.",
     alert_cache_clear_error:"Couldn't clear the cache: {msg}",
     alert_enter_ex_name:"Enter a name for the exercise.",
     alert_no_angle_brackets:"The name can't contain the characters < or >.",
@@ -2218,10 +2323,37 @@ let currentUserGrantedAdmin = false; // set after loading the user's own sharedU
 function isSuperAdmin(){ return !!(currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase())); }
 function isAdmin(){ return isSuperAdmin() || currentUserGrantedAdmin; }
 
+// Shown when the account-status check fails closed (network error, timeout, or an
+// unreadable/missing profile). Deliberately does NOT reveal the app underneath — the only
+// way forward is a clean retry, never a silent fallback to "assume it's fine".
+function showBootstrapError(msg){
+  const el = document.getElementById("bootstrapErrorScreen");
+  document.getElementById("bootstrapErrorText").textContent = msg;
+  el.style.display = "flex";
+}
+document.getElementById("bootstrapErrorRetryBtn").addEventListener("click", ()=> location.reload());
+
+// Detailed technical errors (stack traces, internal messages) are only ever shown to the
+// super admin's own account or on localhost during development. Any other signed-in user —
+// including granted admins — only ever sees a short, generic message with an error ID, so
+// internal details (paths, Firestore structure, stack traces) are never exposed to them.
+function canSeeDebugDetails(){
+  const host = (typeof location !== "undefined") ? location.hostname : "";
+  if(host === "localhost" || host === "127.0.0.1") return true;
+  return isSuperAdmin();
+}
+function shortErrorId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 function showDebugError(msg){
   const el = document.getElementById("debugErrorBanner");
   const txt = document.getElementById("debugErrorText");
   if(!el || !txt) return;
+  if(!canSeeDebugDetails()){
+    const id = shortErrorId();
+    console.error("[" + id + "]", msg);
+    el.style.display = "block";
+    txt.textContent = t("generic_error_with_id") ? tFmt("generic_error_with_id",{id}) : ("Ocorreu um erro (" + id + "). Tente novamente.");
+    return;
+  }
   el.style.display = "block";
   txt.textContent = (txt.textContent ? txt.textContent + "\n\n---\n\n" : "") + msg;
 }
@@ -2347,25 +2479,66 @@ const store = {
 // ==================== SHARED DATA (admin-managed) ====================
 // Registers/updates the current user's entry in the shared "who has access" directory.
 // This is a small, non-sensitive profile doc — separate from the user's private data.
+// Creates the account's shared profile document if it doesn't exist yet. This MUST complete
+// successfully before any personal data (users/{uid}/data/*) is read or written, since the
+// Firestore rules require the profile to exist first. Throws on real failure — the caller
+// must not proceed to load personal data if this fails, rather than swallowing the error.
 async function registerSharedUserProfile(){
-  if(!currentUser || !fbDb) return;
-  try{
-    const ref = fbDb.collection("sharedUsers").doc(currentUser.uid);
-    const doc = await withTimeout(ref.get(), 8000, "sharedUsers:get");
-    if(!doc.exists){
-      await withTimeout(ref.set({ email: currentUser.email||"", createdAt: new Date().toISOString(), blocked: false }), 8000, "sharedUsers:create");
-    }
-  }catch(e){ console.error("registerSharedUserProfile error", e); }
+  if(!currentUser || !fbDb) throw new Error("registerSharedUserProfile: no signed-in user or no database connection");
+  const email = (currentUser.email || "").trim();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    throw new Error("registerSharedUserProfile: signed-in account has no valid email");
+  }
+  const ref = fbDb.collection("sharedUsers").doc(currentUser.uid);
+  const doc = await withTimeout(ref.get(), 8000, "sharedUsers:get");
+  if(doc.exists) return; // never touch blocked/isAdmin of an existing profile
+  // Only these three fields are ever written here — matches exactly what the Firestore
+  // rules allow on document creation.
+  await withTimeout(ref.set({ email, createdAt: new Date().toISOString(), blocked: false }), 8000, "sharedUsers:create");
 }
 
-// Returns true if the current account was blocked by an admin.
-async function checkIfBlocked(){
-  if(!currentUser || !fbDb) return false;
+// Reads the account's own shared profile to determine block/admin status. Fails CLOSED:
+// any read error, timeout, or missing profile is treated as 'error' (not "not blocked").
+// Only a confirmed successful read can ever return 'ok' or 'blocked'.
+async function checkAccountStatus(){
+  if(!currentUser || !fbDb) return { status: "error" };
   try{
-    const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 4000, "sharedUsers:checkBlocked");
-    currentUserGrantedAdmin = doc.exists && doc.data().isAdmin === true;
-    return doc.exists && doc.data().blocked === true;
-  }catch(e){ return false; }
+    const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 8000, "sharedUsers:checkStatus");
+    if(!doc.exists){
+      // The profile should already have been created by registerSharedUserProfile() before
+      // this ever runs. If it's still missing, something is wrong — don't assume "not blocked".
+      return { status: "error" };
+    }
+    const data = doc.data() || {};
+    currentUserGrantedAdmin = data.isAdmin === true;
+    return { status: data.blocked === true ? "blocked" : "ok" };
+  }catch(e){
+    console.error("checkAccountStatus error", e);
+    return { status: "error" };
+  }
+}
+
+// Full teardown of everything tied to the current signed-in session: timers, camera/scanner,
+// open modals, admin state, and every in-memory copy of personal data. Runs on logout AND
+// before showing the auth screen again, so a new account can never see a flash of stale data
+// left over from the previous one.
+async function teardownSession(){
+  if(sessionTimerInterval){ clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
+  if(restTimerHandle){ clearInterval(restTimerHandle); restTimerHandle = null; }
+  if(restNotifyHandle){ clearTimeout(restNotifyHandle); restNotifyHandle = null; }
+  try{ closeBarcodeScanner(); }catch(e){}
+  document.querySelectorAll(".modal-overlay.show").forEach(m=> m.classList.remove("show"));
+
+  currentUserGrantedAdmin = false;
+  currentUser = null;
+  appInitialized = false;
+
+  state = {}; history = {}; workouts = {};
+  bodyWeights = []; bodyMeasures = []; photoIndex = [];
+  exerciseHistory = {}; exerciseRecords = {}; sessionLog = [];
+  nutritionLog = {}; profile = { height: null, sex: "M" };
+  readinessLog = {}; mySupplements = []; supplementLog = {};
+  completedSessions = 0;
 }
 
 // Admin only: list every registered user.
@@ -2921,6 +3094,307 @@ function isAbsExercise(muscles){
 // in-memory state. Safe to call more than once — unlike init(), it never re-binds event
 // listeners and, on a reload, it deliberately leaves `currentDay` alone so a refresh
 // doesn't yank the person away from the day they're currently looking at.
+// ==== Fase 7: deep validation of everything loaded from Firestore ====
+// Nothing coming back from the database is trusted just because the app itself normally
+// writes it — a corrupted document, a stale schema from an older app version, a sync race,
+// or a compromised account could all produce data that doesn't match what the rest of the
+// app expects. Every structure gets validated and defaulted at this single boundary where
+// remote data enters the app, so one malformed field can never crash initialization or
+// silently feed a bad number into a calculation.
+
+function sanitizeString(v, maxLen){
+  if(typeof v !== "string") return "";
+  return v.replace(/[\u200B-\u200D\uFEFF]/g, "").slice(0, maxLen);
+}
+function sanitizeFiniteNumber(v, min, max, fallback){
+  const n = typeof v === "number" ? v : parseStrictDecimal(v);
+  if(!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+function sanitizeDateKey(v){
+  return (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)) ? v : null;
+}
+function sanitizeIsoDateOrNull(v){
+  if(typeof v !== "string") return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : v;
+}
+// Safe id: used to build Firebase Storage paths (users/{uid}/photos/{id}.jpg) — must never
+// contain path separators or traversal sequences, even though the uid portion is fixed.
+function sanitizeSafeId(v, maxLen){
+  if(typeof v !== "string") return null;
+  const s = v.slice(0, maxLen);
+  return /^[A-Za-z0-9_-]+$/.test(s) ? s : null;
+}
+
+function sanitizeBodyWeights(raw){
+  if(!Array.isArray(raw)) return [];
+  const seen = new Set();
+  return raw.map(entry=>{
+    if(!entry || typeof entry !== "object") return null;
+    const d = sanitizeDateKey(entry.d);
+    const kg = sanitizeFiniteNumber(entry.kg, 0, 1000, null);
+    if(!d || kg === null || seen.has(d)) return null;
+    seen.add(d);
+    return { d, kg };
+  }).filter(Boolean).sort((a,b)=>a.d.localeCompare(b.d));
+}
+
+function sanitizeBodyMeasures(raw){
+  if(!Array.isArray(raw)) return [];
+  const seen = new Set();
+  return raw.map(entry=>{
+    if(!entry || typeof entry !== "object") return null;
+    const d = sanitizeDateKey(entry.d);
+    if(!d || seen.has(d)) return null;
+    seen.add(d);
+    const vals = {};
+    if(entry.vals && typeof entry.vals === "object"){
+      MEAS_FIELDS.forEach(f=>{
+        const v = sanitizeFiniteNumber(entry.vals[f.key], 0, 300, null);
+        if(v !== null) vals[f.key] = v;
+      });
+    }
+    return { d, vals };
+  }).filter(Boolean).sort((a,b)=>a.d.localeCompare(b.d));
+}
+
+function sanitizePhotoIndex(raw){
+  if(!Array.isArray(raw)) return [];
+  const seen = new Set();
+  return raw.map(entry=>{
+    if(!entry || typeof entry !== "object") return null;
+    const id = sanitizeSafeId(entry.id, 200);
+    if(!id || seen.has(id)) return null;
+    seen.add(id);
+    const d = sanitizeDateKey(entry.d) || todayKey();
+    return { id, d };
+  }).filter(Boolean);
+}
+
+// One exercise's logged set — used both for exerciseHistory entries and validated the same
+// way sets get validated live (isRealisticSet), so history can never hold what a live set
+// wouldn't have been allowed to count as a PR/volume in the first place.
+function sanitizeLoggedSet(set){
+  if(!set || typeof set !== "object") return null;
+  const kg = sanitizeFiniteNumber(set.kg, 0, 1000, null);
+  const reps = sanitizeFiniteNumber(set.reps, 0, 1000, null);
+  if(kg === null || reps === null || kg<=0 || reps<=0) return null;
+  return { kg, reps };
+}
+
+function sanitizeExerciseHistory(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  Object.keys(raw).forEach(name=>{
+    const cleanName = sanitizeString(name, 120);
+    const entries = raw[name];
+    if(!cleanName || !Array.isArray(entries)) return;
+    const cleanEntries = entries.map(e=>{
+      if(!e || typeof e !== "object") return null;
+      const date = sanitizeDateKey(e.date);
+      const sets = Array.isArray(e.sets) ? e.sets.map(sanitizeLoggedSet).filter(Boolean) : [];
+      if(!date || !sets.length) return null;
+      const e1rm = sanitizeFiniteNumber(e.e1rm, 0, 2000, Math.max(...sets.map(s=>calcE1RM(s.kg,s.reps))));
+      return { date, sets, e1rm };
+    }).filter(Boolean).slice(-60);
+    if(cleanEntries.length) out[cleanName] = cleanEntries;
+  });
+  return out;
+}
+
+function sanitizeExerciseRecords(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  Object.keys(raw).forEach(name=>{
+    const cleanName = sanitizeString(name, 120);
+    const r = raw[name];
+    if(!cleanName || !r || typeof r !== "object") return;
+    const maxWeight = sanitizeFiniteNumber(r.maxWeight, 0, 1000, 0);
+    const maxWeightReps = sanitizeFiniteNumber(r.maxWeightReps, 0, 1000, 0);
+    const maxE1rm = sanitizeFiniteNumber(r.maxE1rm, 0, 2000, 0);
+    out[cleanName] = {
+      maxWeight, maxWeightReps, maxE1rm,
+      maxWeightDate: sanitizeDateKey(r.maxWeightDate),
+      maxE1rmDate: sanitizeDateKey(r.maxE1rmDate)
+    };
+  });
+  return out;
+}
+
+function sanitizeSessionLog(raw){
+  if(!Array.isArray(raw)) return [];
+  return raw.map(e=>{
+    if(!e || typeof e !== "object") return null;
+    const date = sanitizeDateKey(e.date);
+    if(!date) return null;
+    return {
+      id: sanitizeString(e.id, 60) || (Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+      date, day: sanitizeString(e.day, 20),
+      title: sanitizeString(e.title, 200),
+      startedAt: sanitizeIsoDateOrNull(e.startedAt),
+      endedAt: sanitizeIsoDateOrNull(e.endedAt),
+      durationSec: sanitizeFiniteNumber(e.durationSec, 0, 86400, null),
+      volume: sanitizeFiniteNumber(e.volume, 0, 10000000, 0),
+      exerciseCount: sanitizeFiniteNumber(e.exerciseCount, 0, 200, 0)
+    };
+  }).filter(Boolean).slice(-450);
+}
+
+function sanitizeNutritionLog(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  Object.keys(raw).forEach(dateKey=>{
+    const d = sanitizeDateKey(dateKey);
+    const n = raw[dateKey];
+    if(!d || !n || typeof n !== "object") return;
+    const meals = Array.isArray(n.meals) ? n.meals.map(m=>{
+      if(!m || typeof m !== "object") return null;
+      return {
+        id: sanitizeString(m.id, 60) || (Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+        name: sanitizeString(m.name, 120),
+        kcal: sanitizeFiniteNumber(m.kcal, 0, 10000, 0),
+        prot: sanitizeFiniteNumber(m.prot, 0, 1000, 0),
+        carb: sanitizeFiniteNumber(m.carb, 0, 1000, 0),
+        fat: sanitizeFiniteNumber(m.fat, 0, 1000, 0),
+        t: sanitizeIsoDateOrNull(m.t) || new Date().toISOString()
+      };
+    }).filter(Boolean) : [];
+    out[d] = {
+      kcal: sanitizeFiniteNumber(n.kcal, 0, 50000, 0),
+      protein: sanitizeFiniteNumber(n.protein, 0, 5000, 0),
+      carb: sanitizeFiniteNumber(n.carb, 0, 5000, 0),
+      fat: sanitizeFiniteNumber(n.fat, 0, 5000, 0),
+      water: sanitizeFiniteNumber(n.water, 0, 50, 0),
+      meals,
+      kcalGoal: sanitizeFiniteNumber(n.kcalGoal, 1, 10000, NUTRI_DEFAULTS.kcalGoal),
+      proteinGoal: sanitizeFiniteNumber(n.proteinGoal, 1, 1000, NUTRI_DEFAULTS.proteinGoal),
+      carbGoal: sanitizeFiniteNumber(n.carbGoal, 1, 1000, NUTRI_DEFAULTS.carbGoal),
+      fatGoal: sanitizeFiniteNumber(n.fatGoal, 1, 1000, NUTRI_DEFAULTS.fatGoal),
+      waterGoal: sanitizeFiniteNumber(n.waterGoal, 0.5, 20, NUTRI_DEFAULTS.waterGoal)
+    };
+  });
+  return out;
+}
+
+function sanitizeProfile(raw){
+  if(!raw || typeof raw !== "object") return { height: null, sex: "M" };
+  const height = sanitizeFiniteNumber(raw.height, 50, 250, null);
+  const sex = (raw.sex === "F") ? "F" : "M";
+  return { height, sex };
+}
+
+function sanitizeReadinessLog(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  Object.keys(raw).forEach(dateKey=>{
+    const d = sanitizeDateKey(dateKey);
+    const e = raw[dateKey];
+    if(!d || !e || typeof e !== "object") return;
+    const sleep = sanitizeFiniteNumber(e.sleep, 1, 5, null);
+    const energy = sanitizeFiniteNumber(e.energy, 1, 5, null);
+    const soreness = sanitizeFiniteNumber(e.soreness, 1, 5, null);
+    const stress = sanitizeFiniteNumber(e.stress, 1, 5, null);
+    const score = sanitizeFiniteNumber(e.score, 0, 100, null);
+    if(sleep===null || energy===null || soreness===null || stress===null || score===null) return;
+    out[d] = { sleep, energy, soreness, stress, score,
+      classification: sanitizeString(e.classification, 60),
+      recordedAt: sanitizeIsoDateOrNull(e.recordedAt) || new Date().toISOString() };
+  });
+  return out;
+}
+
+function sanitizeSupplements(raw){
+  if(!Array.isArray(raw)) return [];
+  return raw.map(s=>{
+    if(!s || typeof s !== "object") return null;
+    const name = sanitizeString(s.name, 100);
+    if(!name) return null;
+    const times = Array.isArray(s.times) ? s.times.filter(t=> typeof t === "string" && /^\d{2}:\d{2}$/.test(t)).slice(0,10) : [];
+    return {
+      id: sanitizeString(s.id, 60) || (Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+      name, category: sanitizeString(s.category, 60), timing: sanitizeString(s.timing, 200), times
+    };
+  }).filter(Boolean).slice(0,100);
+}
+
+function sanitizeSupplementLog(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  Object.keys(raw).forEach(dateKey=>{
+    const d = sanitizeDateKey(dateKey);
+    const dayLog = raw[dateKey];
+    if(!d || !dayLog || typeof dayLog !== "object") return;
+    const cleanDay = {};
+    Object.keys(dayLog).forEach(suppId=>{
+      const id = sanitizeSafeId(suppId, 60) || sanitizeString(suppId, 60);
+      const timesTaken = dayLog[suppId];
+      if(id && timesTaken && typeof timesTaken === "object") cleanDay[id] = timesTaken;
+    });
+    out[d] = cleanDay;
+  });
+  return out;
+}
+
+// One exercise definition as it appears inside a workout day or the shared exercise
+// database — validated identically in both places, since both ultimately render the same way.
+function sanitizeExerciseDef(ex){
+  if(!ex || typeof ex !== "object") return null;
+  const name = sanitizeString(ex.name, 120);
+  if(!name) return null;
+  const muscles = {};
+  if(ex.muscles && typeof ex.muscles === "object"){
+    Object.keys(ex.muscles).forEach(mk=>{
+      if(!(mk in MUSCLE_NAMES)) return; // only known muscle keys are ever accepted
+      const v = sanitizeFiniteNumber(ex.muscles[mk], 0, 1, null);
+      if(v !== null) muscles[mk] = v;
+    });
+  }
+  const equipment = (typeof ex.equipment === "string" && ex.equipment in EQUIPMENT_NAMES) ? ex.equipment : "";
+  const videoUrl = (typeof ex.videoUrl === "string" && isValidYouTubeUrl(ex.videoUrl)) ? ex.videoUrl.slice(0,2048) : "";
+  return {
+    name,
+    sets: Math.round(sanitizeFiniteNumber(ex.sets, 1, 20, 4)),
+    reps: sanitizeString(ex.reps, 20) || "10",
+    rest: Math.round(sanitizeFiniteNumber(ex.rest, 0, 1800, 90)),
+    equipment,
+    muscles,
+    videoUrl,
+    notes: sanitizeString(ex.notes, 1000)
+  };
+}
+
+function sanitizeWorkouts(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  Object.keys(raw).forEach(dayKey=>{
+    if(!DAY_KEYS.includes(dayKey)) return;
+    const w = raw[dayKey];
+    if(!w || typeof w !== "object") return;
+    const exercises = Array.isArray(w.exercises) ? w.exercises.map(sanitizeExerciseDef).filter(Boolean).slice(0,60) : [];
+    const abs = Array.isArray(w.abs) ? w.abs.map(sanitizeExerciseDef).filter(Boolean).slice(0,30) : [];
+    out[dayKey] = {
+      title: sanitizeString(w.title, 80) || dayKey,
+      titleEn: sanitizeString(w.titleEn, 80),
+      cardioNote: sanitizeString(w.cardioNote, 300),
+      exercises, abs
+    };
+  });
+  return out;
+}
+
+function sanitizeSharedExerciseList(raw){
+  if(!Array.isArray(raw)) return null;
+  const seen = new Set();
+  const clean = raw.map(sanitizeExerciseDef).filter(ex=>{
+    if(!ex) return false;
+    if(seen.has(ex.name)) return false;
+    seen.add(ex.name);
+    return true;
+  }).slice(0, 2000);
+  return clean.length ? clean : null;
+}
+
 async function loadUserData(isInitialLoad){
   const [
     savedWorkouts, savedState, savedHistory, savedCompletedSessions,
@@ -2934,23 +3408,29 @@ async function loadUserData(isInitialLoad){
     fetchSharedExerciseDB(), store.get("readinessLog"), store.get("mySupplements"), store.get("supplementLog"), store.get("unitSystem")
   ]);
 
+  // Every field below is wrapped individually: if a sanitizer somehow throws on truly
+  // unexpected input, that ONE field falls back to a safe empty/default value instead of
+  // aborting the entire load — one corrupted document can never take down the whole app.
+  const safely = (fn, fallback) => { try{ const v = fn(); return v === undefined ? fallback : v; }catch(e){ console.error("data sanitization error:", e); return fallback; } };
+
   // If an admin has ever published a shared exercise database, it becomes the source
   // of truth for everyone (keeps additions/edits/removals consistent across accounts).
-  if(Array.isArray(sharedExerciseList) && sharedExerciseList.length){
+  const cleanSharedList = safely(()=> sanitizeSharedExerciseList(sharedExerciseList), null);
+  if(cleanSharedList){
     EXERCISE_DB.length = 0;
-    sharedExerciseList.forEach(ex => EXERCISE_DB.push(ex));
+    cleanSharedList.forEach(ex => EXERCISE_DB.push(ex));
   }
 
-  currentLang = savedLang || "pt";
-  readinessLog = savedReadinessLog || {};
-  mySupplements = savedSupplements || [];
-  supplementLog = savedSupplementLog || {};
-  unitSystem = savedUnitSystem || "metric";
+  currentLang = (savedLang === "en") ? "en" : "pt";
+  readinessLog = safely(()=> sanitizeReadinessLog(savedReadinessLog), {});
+  mySupplements = safely(()=> sanitizeSupplements(savedSupplements), []);
+  supplementLog = safely(()=> sanitizeSupplementLog(savedSupplementLog), {});
+  unitSystem = (savedUnitSystem === "imperial") ? "imperial" : "metric";
 
-  workouts = savedWorkouts || {};
+  workouts = safely(()=> sanitizeWorkouts(savedWorkouts), {});
 
-  DAY_KEYS.forEach(k=>{ history[k]={lastKg:{}}; if(savedHistory && savedHistory[k]) history[k]=savedHistory[k]; });
-  DAY_KEYS.forEach(k=>{ state[k]=(savedState && savedState[k] && savedState[k].date===todayKey()) ? savedState[k] : emptyDayState(k); });
+  DAY_KEYS.forEach(k=>{ history[k]={lastKg:{}}; if(savedHistory && savedHistory[k] && typeof savedHistory[k]==="object") history[k]=savedHistory[k]; });
+  DAY_KEYS.forEach(k=>{ state[k]=(savedState && savedState[k] && typeof savedState[k]==="object" && savedState[k].date===todayKey()) ? savedState[k] : emptyDayState(k); });
   // Defensive migration: accounts with data saved before per-set abs tracking existed
   // won't have these fields yet. Guarantee they always exist so nothing crashes.
   DAY_KEYS.forEach(k=>{
@@ -2970,10 +3450,10 @@ async function loadUserData(isInitialLoad){
     }
   });
 
-  completedSessions = savedCompletedSessions || 0;
-  bodyWeights = savedBodyWeights || [];
-  bodyMeasures = savedBodyMeasures || [];
-  photoIndex = savedPhotoIndex || [];
+  completedSessions = safely(()=> sanitizeFiniteNumber(savedCompletedSessions, 0, 100000, 0), 0);
+  bodyWeights = safely(()=> sanitizeBodyWeights(savedBodyWeights), []);
+  bodyMeasures = safely(()=> sanitizeBodyMeasures(savedBodyMeasures), []);
+  photoIndex = safely(()=> sanitizePhotoIndex(savedPhotoIndex), []);
   {
     const seenIds = new Set();
     const dedupedPhotoIndex = photoIndex.filter(p=>{
@@ -2986,11 +3466,11 @@ async function loadUserData(isInitialLoad){
       store.set("photoIndex", photoIndex); // persist the cleanup, fire-and-forget
     }
   }
-  exerciseHistory = savedExerciseHistory || {};
-  exerciseRecords = savedExerciseRecords || {};
-  sessionLog = savedSessionLog || [];
-  nutritionLog = savedNutritionLog || {};
-  profile = savedProfile || { height: null, sex: "M" };
+  exerciseHistory = safely(()=> sanitizeExerciseHistory(savedExerciseHistory), {});
+  exerciseRecords = safely(()=> sanitizeExerciseRecords(savedExerciseRecords), {});
+  sessionLog = safely(()=> sanitizeSessionLog(savedSessionLog), []);
+  nutritionLog = safely(()=> sanitizeNutritionLog(savedNutritionLog), {});
+  profile = safely(()=> sanitizeProfile(savedProfile), { height: null, sex: "M" });
 
   if(isInitialLoad) currentDay = DAY_KEYS[new Date().getDay()];
 }
@@ -3244,6 +3724,7 @@ function bindAjustesEvents(){
   });
   document.getElementById("logoutBtn").addEventListener("click", async ()=>{
     if(!confirm(t("confirm_logout"))) return;
+    await teardownSession();
     await fbAuth.signOut();
   });
   refreshAccountRow();
@@ -3726,6 +4207,18 @@ function buildExCard(ex, i){
         if(prTypes){ showPRBadge(row, checkWrap); haptic([40,30,40,30,90]); }
       }
     });
+    kg.addEventListener("blur", async ()=>{
+      if(kg.value.trim() === "") return; // empty is fine — nothing to normalize
+      const n = parseStrictDecimal(kg.value);
+      const clean = (Number.isFinite(n) && n>0 && n<=1000) ? n : null;
+      if(clean === null){
+        flashInvalidField(kg);
+        kg.value = "";
+        if(!s.exKg[i]) s.exKg[i]=[];
+        s.exKg[i][k] = "";
+        await store.set("state", state);
+      }
+    });
 
     reps.addEventListener("input", async (e)=>{
       if(!s.exReps) s.exReps={};
@@ -3735,6 +4228,19 @@ function buildExCard(ex, i){
       if(setsDone[k]){
         const prTypes = recheckExerciseRecord(ex.name, "exercises", i);
         if(prTypes){ showPRBadge(row, checkWrap); haptic([40,30,40,30,90]); }
+      }
+    });
+    reps.addEventListener("blur", async ()=>{
+      if(reps.value.trim() === "") return;
+      const n = parseStrictInteger(reps.value);
+      const clean = (Number.isFinite(n) && n>0 && n<=1000) ? n : null;
+      if(clean === null){
+        flashInvalidField(reps);
+        reps.value = "";
+        if(!s.exReps) s.exReps={};
+        if(!s.exReps[i]) s.exReps[i]=[];
+        s.exReps[i][k] = "";
+        await store.set("state", state);
       }
     });
 
@@ -4102,10 +4608,13 @@ function renderAutoGenBody(){
 }
 
 function computePlates(){
-  const target = parseFloat(document.getElementById("pcTarget").value.replace(",","."));
-  const bar = parseFloat(document.getElementById("pcBar").value.replace(",",".")) || 20;
+  const targetRaw = document.getElementById("pcTarget").value;
+  const barRaw = document.getElementById("pcBar").value;
+  const target = parseStrictDecimal(targetRaw);
+  const barParsed = parseStrictDecimal(barRaw);
+  const bar = Number.isFinite(barParsed) ? barParsed : 20;
   const result = document.getElementById("pcResult");
-  if(!isFinite(target) || !isFinite(bar) || target<=bar || target>1000 || bar>1000 || bar<0){
+  if(!Number.isFinite(target) || !Number.isFinite(bar) || target<=bar || target>1000 || bar>1000 || bar<0){
     result.innerHTML = `<div class="vol-empty" style="padding:16px 4px">${t("pc_enter_target")}</div>`;
     return;
   }
@@ -4216,12 +4725,32 @@ function buildAbsCard(ex, i){
         if(prTypes){ showPRBadge(row, checkWrap); haptic([40,30,40,30,90]); }
       }
     });
+    kg.addEventListener("blur", async ()=>{
+      if(kg.value.trim() === "") return;
+      const n = parseStrictDecimal(kg.value);
+      if(!(Number.isFinite(n) && n>0 && n<=1000)){
+        flashInvalidField(kg);
+        kg.value = "";
+        s.absKg[i][k] = "";
+        await store.set("state", state);
+      }
+    });
     reps.addEventListener("input", async (e)=>{
       s.absReps[i][k] = e.target.value.replace(/[^0-9]/g,"");
       await store.set("state", state);
       if(setsDone[k] && kg.value && reps.value){
         const prTypes = recheckExerciseRecord(ex.name, "abs", i);
         if(prTypes){ showPRBadge(row, checkWrap); haptic([40,30,40,30,90]); }
+      }
+    });
+    reps.addEventListener("blur", async ()=>{
+      if(reps.value.trim() === "") return;
+      const n = parseStrictInteger(reps.value);
+      if(!(Number.isFinite(n) && n>0 && n<=1000)){
+        flashInvalidField(reps);
+        reps.value = "";
+        s.absReps[i][k] = "";
+        await store.set("state", state);
       }
     });
 
@@ -4386,6 +4915,15 @@ function calcE1RM(kg, reps){ return kg * (1 + reps/30); }
 // and within a generous-but-sane real-world range. This guards derived stats (PRs, weekly
 // volume, share images) from garbage/mistyped input without interrupting live typing —
 // nothing blocks the person from typing, a wildly out-of-range set just silently doesn't count.
+// Brief red-border flash on a field whose value just got cleared for being invalid —
+// a lightweight, non-blocking visual cue (no alert(), doesn't interrupt anything).
+function flashInvalidField(el){
+  el.style.transition = "border-color .15s";
+  const prevBorder = el.style.borderColor;
+  el.style.borderColor = "#ff4d4d";
+  setTimeout(()=>{ el.style.borderColor = prevBorder; }, 600);
+}
+
 function isRealisticSet(kg, reps){
   return isFinite(kg) && isFinite(reps) && kg>0 && kg<=1000 && reps>0 && reps<=200;
 }
@@ -5028,13 +5566,10 @@ async function saveSupplementEdit(){
 // alert and returns null on any failure; returns a clean, 1-decimal kg value on success.
 function validateAndParseWeightInput(rawValue){
   if(rawValue === null || rawValue === undefined) return null;
-  const trimmed = String(rawValue).replace(/[\u200B-\u200D\uFEFF]/g, "").trim(); // strip invisible unicode too
+  const trimmed = String(rawValue).trim();
   if(trimmed === "") return null; // empty submit — no need to nag, just do nothing
-  const separatorCount = (trimmed.match(/[.,]/g) || []).length;
-  const looksNumeric = /^[+-]?\d*[.,]?\d*$/.test(trimmed) && /\d/.test(trimmed);
-  if(separatorCount > 1 || !looksNumeric){ alert(t("alert_weight_invalid_format")); return null; }
-  const n = parseFloat(trimmed.replace(",", "."));
-  if(!isFinite(n)){ alert(t("alert_weight_invalid_format")); return null; }
+  const n = parseStrictDecimal(trimmed);
+  if(!Number.isFinite(n)){ alert(t("alert_weight_invalid_format")); return null; }
   const kg = unitSystem === "imperial" ? lbToKg(n) : n;
   if(kg < 20){ alert(t("alert_weight_too_low")); return null; }
   if(kg > 500){ alert(t("alert_weight_too_high")); return null; }
@@ -5700,10 +6235,9 @@ async function addMeasures(){
   const vals = {}; let any = false; let rejectedAny = false;
   document.querySelectorAll("[data-meas]").forEach(inp=>{
     if(!inp.value.trim()) return;
-    const v = parseLengthToCm(inp.value);
-    if(!isFinite(v) || v<=0){ return; } // garbage/empty — just skip this one field silently
-    if(v < 5 || v > 250){ rejectedAny = true; return; } // clearly not a real body-part circumference
-    vals[inp.dataset.meas] = v; any = true;
+    const cm = parseStrictLength(inp.value, 5, 250);
+    if(cm === null){ rejectedAny = true; return; } // malformed or clearly not a real body-part circumference
+    vals[inp.dataset.meas] = cm; any = true;
   });
   if(rejectedAny) alert(t("alert_measure_out_of_range"));
   if(!any) return;
@@ -5754,13 +6288,15 @@ function renderMeasTab(){
         : `<div class="vol-empty" style="padding:12px 4px">${tFmt("bodyfat_fill_prompt",{extra: profile.sex==='F' ? (', '+t("hip").toLowerCase()) : ''})}</div>`}
     `;
     document.getElementById("profHeight").addEventListener("change", async (e)=>{
-      const v = parseLengthToCm(e.target.value);
-      if(e.target.value.trim() && (!isFinite(v) || v<50 || v>250)){
+      const raw = e.target.value.trim();
+      if(!raw){ profile.height = null; await store.set("profile", profile); renderMeasTab(); return; }
+      const cm = parseStrictLength(raw, 50, 250);
+      if(cm === null){
         alert(t("alert_height_out_of_range"));
         e.target.value = profile.height ? fmtLength(profile.height,0) : "";
         return;
       }
-      profile.height = (isFinite(v) && v>0) ? v : null;
+      profile.height = cm;
       await store.set("profile", profile);
       renderMeasTab();
     });
@@ -5799,7 +6335,120 @@ function renderMeasTab(){
 }
 
 // PHOTOS
-function compressImage(file){ return new Promise((resolve, reject)=>{ const reader = new FileReader(); reader.onload = ()=>{ const img = new Image(); img.onload = ()=>{ const MAXW = 900, scale = Math.min(1, MAXW / img.width), c = document.createElement("canvas"); c.width = Math.round(img.width*scale); c.height = Math.round(img.height*scale); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); resolve(c.toDataURL("image/jpeg", 0.8)); }; img.onerror = reject; img.src = reader.result; }; reader.onerror = reject; reader.readAsDataURL(file); }); }
+// ==================== PHOTO UPLOAD HARDENING ====================
+const PHOTO_MAX_INPUT_BYTES = 20 * 1024 * 1024;   // reject absurdly large source files before ever touching them
+const PHOTO_MAX_RAW_DIMENSION = 8000;              // decode-bomb protection: refuse to even decode a huge image
+const PHOTO_MAX_OUTPUT_BYTES = 3 * 1024 * 1024;    // sanity cap on the final compressed JPEG
+const PHOTO_TARGET_WIDTH = 900;
+
+// Checks the file's actual first bytes (magic numbers) against known image signatures,
+// rather than trusting the browser-reported MIME type or file extension alone — both of
+// which can be trivially spoofed by renaming any file.
+function detectImageSignature(bytes){
+  const b = Array.from(bytes.slice(0,12));
+  const hex = b.map(x=>x.toString(16).padStart(2,"0")).join("");
+  if(hex.startsWith("ffd8ff")) return "image/jpeg";
+  if(hex.startsWith("89504e470d0a1a0a")) return "image/png";
+  if(hex.startsWith("52494646") && String.fromCharCode(...b.slice(8,12))==="WEBP") return "image/webp";
+  if(String.fromCharCode(...b.slice(4,8))==="ftyp") return "image/heic"; // HEIC/HEIF container box
+  return null;
+}
+
+// Validates a selected file BEFORE any processing: must exist, be within size limits,
+// never be an SVG (which can carry active/script content even though it's "an image"),
+// and its actual bytes must match a real, known image format.
+async function validatePhotoFile(file){
+  if(!file || !(file instanceof Blob)) return { ok:false, reason: t("alert_photo_no_file") };
+  if(file.size <= 0) return { ok:false, reason: t("alert_photo_no_file") };
+  if(file.size > PHOTO_MAX_INPUT_BYTES) return { ok:false, reason: t("alert_photo_too_large") };
+  if(/svg/i.test(file.type||"") || /\.svg$/i.test(file.name||"")) return { ok:false, reason: t("alert_photo_svg_rejected") };
+  let head;
+  try{ head = new Uint8Array(await file.slice(0,16).arrayBuffer()); }
+  catch(e){ return { ok:false, reason: t("alert_photo_invalid_format") }; }
+  if(!detectImageSignature(head)) return { ok:false, reason: t("alert_photo_invalid_format") };
+  return { ok:true };
+}
+
+// Reads the EXIF orientation tag (1-8) from a JPEG so photos taken in portrait on a phone
+// don't come out sideways after being re-drawn onto a canvas (which ignores EXIF entirely).
+// Defaults to 1 (normal) for non-JPEGs or on any parse failure — never throws.
+async function readExifOrientation(file){
+  try{
+    const buf = await file.slice(0, 128*1024).arrayBuffer();
+    const view = new DataView(buf);
+    if(view.getUint16(0) !== 0xFFD8) return 1;
+    let offset = 2;
+    while(offset + 4 <= view.byteLength){
+      const marker = view.getUint16(offset);
+      if(marker === 0xFFE1){
+        const exifStart = offset + 4;
+        if(exifStart + 6 > view.byteLength || view.getUint32(exifStart) !== 0x45786966) return 1;
+        const tiffStart = exifStart + 6;
+        const little = view.getUint16(tiffStart) === 0x4949;
+        const firstIfdOffset = view.getUint32(tiffStart+4, little);
+        const ifdStart = tiffStart + firstIfdOffset;
+        if(ifdStart + 2 > view.byteLength) return 1;
+        const entries = view.getUint16(ifdStart, little);
+        for(let i=0;i<entries;i++){
+          const entryOffset = ifdStart + 2 + i*12;
+          if(entryOffset + 10 > view.byteLength) break;
+          if(view.getUint16(entryOffset, little) === 0x0112) return view.getUint16(entryOffset+8, little);
+        }
+        return 1;
+      }
+      if((marker & 0xFF00) !== 0xFF00) break;
+      offset += 2 + view.getUint16(offset+2);
+    }
+  }catch(e){ /* fall through to default */ }
+  return 1;
+}
+function applyExifTransform(ctx, orientation, w, h){
+  switch(orientation){
+    case 2: ctx.transform(-1,0,0,1,w,0); break;
+    case 3: ctx.transform(-1,0,0,-1,w,h); break;
+    case 4: ctx.transform(1,0,0,-1,0,h); break;
+    case 5: ctx.transform(0,1,1,0,0,0); break;
+    case 6: ctx.transform(0,1,-1,0,h,0); break;
+    case 7: ctx.transform(0,-1,-1,0,h,w); break;
+    case 8: ctx.transform(0,-1,1,0,0,w); break;
+    default: break;
+  }
+}
+
+function compressImage(file){ return new Promise(async (resolve, reject) => {
+  const orientation = await readExifOrientation(file);
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      if(img.width > PHOTO_MAX_RAW_DIMENSION || img.height > PHOTO_MAX_RAW_DIMENSION){
+        reject(new Error("image_too_large_dimensions"));
+        return;
+      }
+      const swapDims = orientation >= 5 && orientation <= 8; // these orientations rotate 90°
+      const scale = Math.min(1, PHOTO_TARGET_WIDTH / img.width);
+      const drawW = Math.round(img.width*scale), drawH = Math.round(img.height*scale);
+      const c = document.createElement("canvas");
+      c.width = swapDims ? drawH : drawW;
+      c.height = swapDims ? drawW : drawH;
+      const ctx = c.getContext("2d");
+      applyExifTransform(ctx, orientation, drawW, drawH);
+      ctx.drawImage(img, 0, 0, drawW, drawH);
+      // Re-encode at decreasing quality until the output fits the size cap, or we hit a floor.
+      let quality = 0.8;
+      let out = c.toDataURL("image/jpeg", quality);
+      while(out.length * 0.75 > PHOTO_MAX_OUTPUT_BYTES && quality > 0.3){
+        quality -= 0.15;
+        out = c.toDataURL("image/jpeg", quality);
+      }
+      resolve(out);
+    };
+    img.onerror = reject;
+    img.src = reader.result;
+  };
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+}); }
 
 // ==================== PHOTO STORAGE (Firebase Storage) ====================
 // Progress photos are compressed client-side (compressImage, above — this also strips
@@ -5815,6 +6464,48 @@ function dataUrlToBlob(dataUrl){
   const bytes = new Uint8Array(binary.length);
   for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
   return new Blob([bytes], { type: mime });
+}
+
+// A photo whose Storage upload failed is kept ONLY on this device — deliberately never
+// routed through store.set(), which would otherwise sync a multi-megabyte base64 string
+// into Firestore in the background. It's clearly marked "pending" in the UI and retried
+// automatically; the person is never told it's safely in the cloud when it isn't.
+function pendingPhotosKey(){ return currentUser ? `kyro_pending_photos_${currentUser.uid}` : "kyro_pending_photos_anon"; }
+function getPendingPhotos(){
+  try{ const raw = localStorage.getItem(pendingPhotosKey()); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; }
+  catch(e){ return []; }
+}
+function savePendingPhotos(list){
+  try{ localStorage.setItem(pendingPhotosKey(), JSON.stringify(list)); }
+  catch(e){ console.error("savePendingPhotos failed (localStorage full?)", e); }
+}
+function getPendingPhotoDataUrl(id){
+  const entry = getPendingPhotos().find(p=>p.id===id);
+  return entry ? entry.dataUrl : null;
+}
+
+// Retries uploading any photos that got stuck on-device after an earlier failed Storage
+// upload — called after a successful (re)connection, alongside the other pending-sync retries.
+async function retryPendingPhotoUploads(){
+  if(!currentUser || !fbStorage) return;
+  const pending = getPendingPhotos();
+  if(!pending.length) return;
+  const stillPending = [];
+  let anySucceeded = false;
+  for(const p of pending){
+    const url = await uploadPhotoToStorage(p.dataUrl, p.id);
+    if(url){
+      await store.set("photo_"+p.id, url);
+      const idx = photoIndex.findIndex(x=>x.id===p.id);
+      if(idx>=0) delete photoIndex[idx].pending;
+      else photoIndex.push({id:p.id, d:p.d});
+      anySucceeded = true;
+    } else {
+      stillPending.push(p);
+    }
+  }
+  savePendingPhotos(stillPending);
+  if(anySucceeded){ await store.set("photoIndex", photoIndex); renderPhotoTab(); }
 }
 
 async function uploadPhotoToStorage(dataUrl, id){
@@ -5917,17 +6608,54 @@ window.lookupBarcodeProduct = async function(code){
   }
 }
 
+let photoUploadInProgress = false;
 async function addPhoto(file){
+  if(photoUploadInProgress){ alert(t("alert_photo_upload_in_progress")); return; }
+  const validation = await validatePhotoFile(file);
+  if(!validation.ok){ alert(validation.reason); return; }
+
+  photoUploadInProgress = true;
   try{
     const dataUrl = await compressImage(file);
     const id = Date.now().toString(36)+Math.random().toString(36).slice(2,8);
     const storageUrl = await uploadPhotoToStorage(dataUrl, id);
-    await store.set("photo_"+id, storageUrl || dataUrl); // falls back to base64 if Storage upload failed
-    photoIndex.push({id, d: todayKey()});
-    await store.set("photoIndex", photoIndex);
-    haptic();
-    renderPhotoTab();
-  }catch(e){ alert(t("alert_photo_save_error")); }
+
+    if(storageUrl){
+      await store.set("photo_"+id, storageUrl);
+      const newIndex = photoIndex.concat([{id, d: todayKey()}]);
+      try{
+        // A direct, awaited write (not the app's usual non-blocking store.set) — this is
+        // the one write that MUST be confirmed before we can trust the index, since a
+        // silent failure here would leave an orphaned file in Storage with nothing
+        // pointing to it (and nothing to ever clean it up later).
+        await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc("photoIndex").set({ value: newIndex }), 8000, "photoIndex:confirm");
+        photoIndex = newIndex;
+        writeCache("photoIndex", newIndex);
+      }catch(indexErr){
+        // The upload succeeded but we couldn't confirm the index write — clean up the
+        // now-orphaned Storage file rather than leaving a file nothing will ever point to.
+        await deletePhotoFromStorage(id);
+        await store.delete("photo_"+id);
+        throw indexErr;
+      }
+      haptic();
+      renderPhotoTab();
+    } else {
+      // Storage upload failed — the photo stays on THIS DEVICE ONLY (never synced to
+      // Firestore as base64) and is clearly marked pending until a retry succeeds.
+      const pending = getPendingPhotos();
+      pending.push({ id, dataUrl, d: todayKey() });
+      savePendingPhotos(pending);
+      photoIndex.push({id, d: todayKey(), pending: true});
+      renderPhotoTab();
+      alert(t("alert_photo_upload_pending"));
+    }
+  }catch(e){
+    console.error("addPhoto error", e);
+    alert(t("alert_photo_save_error"));
+  }finally{
+    photoUploadInProgress = false;
+  }
 }
 
 // ---- Nutrition tracker (premium: calories + macros + water) ----
@@ -6094,8 +6822,8 @@ function renderNutricaoTab(){
   }
 
   document.getElementById("mealAdd").addEventListener("click", ()=>{
-    const num = (id, max) => Math.min(max, Math.max(0, parseInt(document.getElementById(id).value)||0));
-    addMeal(document.getElementById("mealName").value.trim(), num("mealKcal",10000), num("mealProt",1000), num("mealCarb",1000), num("mealFat",1000));
+    const num = (id, max) => { const n = parseStrictInteger(document.getElementById(id).value); return Number.isFinite(n) ? Math.min(max, Math.max(0, n)) : 0; };
+    addMeal(document.getElementById("mealName").value.trim().slice(0,120), num("mealKcal",10000), num("mealProt",1000), num("mealCarb",1000), num("mealFat",1000));
   });
 
   document.getElementById("scanBarcodeBtn").addEventListener("click", openBarcodeScanner);
@@ -6122,9 +6850,9 @@ function renderNutricaoTab(){
   Object.entries(goalMap).forEach(([id,key])=>{
     document.getElementById(id).addEventListener("change", async (e)=>{
       const nn = getTodayNutrition();
-      const v = parseFloat(e.target.value.replace(",","."));
+      const v = parseStrictDecimal(e.target.value);
       const [min,max] = goalBounds[key];
-      const clean = (isFinite(v) && v>=min) ? Math.min(v,max) : NUTRI_DEFAULTS[key];
+      const clean = (Number.isFinite(v) && v>=min) ? Math.min(v,max) : NUTRI_DEFAULTS[key];
       nn[key] = clean;
       e.target.value = clean;
       await store.set("nutritionLog", nutritionLog);
@@ -6159,12 +6887,24 @@ async function renderPhotoTab(){
   }
 
   for(const p of rev){
-    const dataUrl = await store.get("photo_"+p.id);
+    const dataUrl = p.pending ? getPendingPhotoDataUrl(p.id) : await store.get("photo_"+p.id);
     if(!dataUrl) continue;
     const cell = document.createElement("div");
     cell.className = "photo-cell";
     const selected = compareSelection.includes(p.id);
-    cell.innerHTML = `<img src="${dataUrl}" alt="Photo"><div class="p-date">${fmtDate(p.d)}</div>${comparingPhotos ? `<div class="p-select ${selected?'on':''}">${selected?'✓':''}</div>` : ''}`;
+    const img = document.createElement("img");
+    img.alt = "Photo";
+    img.src = dataUrl; // set as a property, never via innerHTML string interpolation
+    const dateDiv = document.createElement("div");
+    dateDiv.className = "p-date";
+    dateDiv.textContent = fmtDate(p.d) + (p.pending ? " " + t("photo_pending_tag") : "");
+    cell.append(img, dateDiv);
+    if(comparingPhotos){
+      const selDiv = document.createElement("div");
+      selDiv.className = "p-select" + (selected ? " on" : "");
+      selDiv.textContent = selected ? "✓" : "";
+      cell.appendChild(selDiv);
+    }
     if(comparingPhotos){
       cell.addEventListener("click", async ()=>{
         if(compareSelection.includes(p.id)) compareSelection = compareSelection.filter(x=>x!==p.id);
@@ -6209,12 +6949,32 @@ window.closeCompareModal = function(){ document.getElementById("comparePhotoModa
 async function deleteCurrentPhoto(){
   if(!currentPhotoId || !confirm(t("confirm_delete_generic"))) return;
   const idToDelete = currentPhotoId;
-  photoIndex = photoIndex.filter(p=>p.id!==idToDelete);
-  store.set("photoIndex", photoIndex); // non-blocking — local cache updates immediately
-  store.delete("photo_"+idToDelete);   // non-blocking
-  deletePhotoFromStorage(idToDelete);  // non-blocking, best-effort
+  const entry = photoIndex.find(p=>p.id===idToDelete);
+  const wasPending = !!(entry && entry.pending);
+  const newIndex = photoIndex.filter(p=>p.id!==idToDelete);
+
   currentPhotoId = null;
   document.getElementById("photoViewer").classList.remove("show");
+
+  try{
+    // Same reasoning as in addPhoto: a direct, awaited write so a real failure is
+    // actually caught here, rather than the app's normal non-blocking store.set
+    // (which never rejects — it logs and queues a retry instead).
+    await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc("photoIndex").set({ value: newIndex }), 8000, "photoIndex:delete");
+    photoIndex = newIndex;
+    writeCache("photoIndex", newIndex);
+  }catch(e){
+    console.error("deleteCurrentPhoto: failed to update photoIndex", e);
+    alert(t("alert_photo_delete_error"));
+    return; // don't touch the underlying file if we couldn't even remove the reference
+  }
+
+  if(wasPending){
+    savePendingPhotos(getPendingPhotos().filter(p=>p.id!==idToDelete));
+  } else {
+    store.delete("photo_"+idToDelete);   // best-effort, non-blocking
+    deletePhotoFromStorage(idToDelete);  // best-effort, non-blocking
+  }
   renderPhotoTab();
 }
 
@@ -6309,22 +7069,48 @@ async function saveExerciseEditModal(){
   const name = document.getElementById("exEditName").value.trim();
   if(!name){ alert(t("alert_enter_ex_name")); return; }
   if(/[<>]/.test(name)){ alert(t("alert_no_angle_brackets")); return; }
-  const sets = Math.min(20, Math.max(1, parseInt(document.getElementById("exEditSets").value)||4));
+  const sets = (()=>{ const n=parseStrictInteger(document.getElementById("exEditSets").value); return Number.isFinite(n) ? Math.min(20, Math.max(1, n)) : 4; })();
   const reps = document.getElementById("exEditReps").value.trim().slice(0,20)||"10";
-  const rest = Math.min(1800, Math.max(0, parseInt(document.getElementById("exEditRest").value)||60));
+  const rest = (()=>{ const n=parseStrictInteger(document.getElementById("exEditRest").value); return Number.isFinite(n) ? Math.min(1800, Math.max(0, n)) : 60; })();
   const equipment = document.getElementById("exEditEquip").value;
   const videoUrl = document.getElementById("exEditVideo").value.trim();
-  if(videoUrl && !/^https?:\/\//i.test(videoUrl)){ alert(t("alert_video_must_be_url")); return; }
+  if(videoUrl && !isSafeHttpUrl(videoUrl)){ alert(t("alert_video_must_be_url")); return; }
   const muscles = {};
   document.querySelectorAll('#exEditMuscles .muscle-btn.active').forEach(btn=>{ muscles[btn.dataset.muscle] = 1; });
 
-  const newEx = { name, sets, reps, rest, equipment, videoUrl, muscles };
+  // Route through the exact same sanitizer used when loading data — a single source of
+  // truth for "what does a valid exercise look like", so save-time and load-time can never
+  // silently disagree with each other.
+  const newEx = sanitizeExerciseDef({ name, sets, reps, rest, equipment, videoUrl, muscles });
+  if(!newEx){ alert(t("alert_enter_ex_name")); return; }
 
-  if(exMgrEditingIndex === null){
-    EXERCISE_DB.push(newEx);
-  } else {
-    EXERCISE_DB[exMgrEditingIndex] = newEx;
+  // Duplicate names are confusing (which one wins when a workout references it by name?)
+  // and easy to create by accident — block it outright rather than silently allowing two
+  // exercises with the same name to coexist.
+  const dupIdx = EXERCISE_DB.findIndex((ex,i)=> i!==exMgrEditingIndex && ex.name.toLowerCase() === newEx.name.toLowerCase());
+  if(dupIdx >= 0){ alert(tFmt("alert_duplicate_exercise_name",{name:newEx.name})); return; }
+
+  const candidateList = EXERCISE_DB.slice();
+  if(exMgrEditingIndex === null) candidateList.push(newEx);
+  else candidateList[exMgrEditingIndex] = newEx;
+
+  // Validate the ENTIRE resulting list before writing anything — if any other entry in
+  // the shared database is somehow malformed, the admin is told exactly which one and
+  // nothing gets saved, rather than silently corrupting the version everyone else reads.
+  for(let i=0;i<candidateList.length;i++){
+    const clean = sanitizeExerciseDef(candidateList[i]);
+    if(!clean){ alert(tFmt("alert_invalid_exercise_in_list",{index:i+1, name:(candidateList[i]&&candidateList[i].name)||"?"})); return; }
   }
+
+  // Firestore documents are capped at ~1MB — warn well before that becomes a real risk,
+  // since this whole list lives in a single document (shared/exerciseDatabase).
+  const estimatedBytes = new Blob([JSON.stringify(candidateList)]).size;
+  if(estimatedBytes > 800*1024){
+    if(!confirm(tFmt("confirm_exercise_db_size_warning",{kb:Math.round(estimatedBytes/1024)}))) return;
+  }
+
+  EXERCISE_DB.length = 0;
+  candidateList.forEach(ex=>EXERCISE_DB.push(ex));
 
   const ok = await saveSharedExerciseDB(EXERCISE_DB);
   if(!ok){ alert(t("alert_save_failed_admin")); return; }
@@ -6359,41 +7145,90 @@ async function openUserManager(){
   }
   if(!users.length){ list.innerHTML = `<div class="vol-empty">${t("empty_no_users_found")}</div>`; return; }
   const showAdminControls = isSuperAdmin();
-  list.innerHTML = users.map(u=>{
-    const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString(currentLang==="en"?"en-US":"pt-BR") : "—";
-    const isSelf = currentUser && u.uid === currentUser.uid;
-    const isUserAdmin = u.isAdmin === true || (u.email && ADMIN_EMAILS.includes(u.email.toLowerCase()));
-    const adminTag = isUserAdmin ? ` · <span style="color:var(--volt)">${t('admin_tag')}</span>` : '';
-    const blockBtn = isSelf ? '' : `<button class="settings-btn${u.blocked?' primary':' danger'}" data-action="block" data-uid="${u.uid}" data-blocked="${!!u.blocked}" style="width:auto;margin:0;padding:8px 14px">${u.blocked?t('unblock_btn'):t('block_btn')}</button>`;
-    const adminBtn = (showAdminControls && !isSelf) ? `<button class="settings-btn" data-action="admin" data-uid="${u.uid}" data-isadmin="${!!u.isAdmin}" style="width:auto;margin:0;padding:8px 14px">${u.isAdmin?t('revoke_admin_btn'):t('grant_admin_btn')}</button>` : '';
-    return `
-      <div class="pr-feed-row">
-        <div class="pr-feed-info">
-          <div class="pr-feed-name">${u.email||u.uid}${isSelf?' '+t('you_tag'):''}${adminTag}</div>
-          <div class="pr-feed-date">${tFmt('since_date',{date:joined})}${u.blocked?' · '+t('blocked_tag'):''}</div>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${adminBtn}${blockBtn}</div>
-      </div>`;
-  }).join('');
-  list.querySelectorAll('button[data-action="block"]').forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const uid = btn.dataset.uid;
-      const currentlyBlocked = btn.dataset.blocked === "true";
-      const ok = await setUserBlocked(uid, !currentlyBlocked);
-      if(ok) openUserManager(); // refresh
-      else alert(t("alert_user_update_failed"));
-    });
-  });
-  list.querySelectorAll('button[data-action="admin"]').forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const uid = btn.dataset.uid;
-      const currentlyAdmin = btn.dataset.isadmin === "true";
-      const confirmMsg = currentlyAdmin ? t("confirm_revoke_admin") : t("confirm_grant_admin");
-      if(!confirm(confirmMsg)) return;
-      const ok = await setUserAdmin(uid, !currentlyAdmin);
-      if(ok) openUserManager(); // refresh
-      else alert(t("alert_user_update_failed"));
-    });
+  list.innerHTML = "";
+  users.forEach(u=>{
+    // Every field below comes from Firestore — treated as untrusted, never interpolated
+    // into HTML. Built entirely via DOM APIs (createElement/textContent), so nothing in
+    // email/uid/createdAt can ever be interpreted as markup, no matter what it contains.
+    const uidStr = typeof u.uid === "string" ? u.uid.slice(0,128) : "";
+    const emailStr = (typeof u.email === "string" && u.email) ? u.email.slice(0,254) : uidStr;
+    let joined = "—";
+    if(u.createdAt){
+      const d = new Date(u.createdAt);
+      if(!isNaN(d.getTime())) joined = d.toLocaleDateString(currentLang==="en"?"en-US":"pt-BR");
+    }
+    const isSelf = !!(currentUser && uidStr && uidStr === currentUser.uid);
+    const isUserAdmin = u.isAdmin === true || (typeof u.email === "string" && ADMIN_EMAILS.includes(u.email.toLowerCase()));
+
+    const row = document.createElement("div");
+    row.className = "pr-feed-row";
+
+    const info = document.createElement("div");
+    info.className = "pr-feed-info";
+
+    const nameLine = document.createElement("div");
+    nameLine.className = "pr-feed-name";
+    nameLine.append(document.createTextNode(emailStr));
+    if(isSelf) nameLine.append(document.createTextNode(" " + t("you_tag")));
+    if(isUserAdmin){
+      nameLine.append(document.createTextNode(" · "));
+      const tag = document.createElement("span");
+      tag.style.color = "var(--volt)";
+      tag.textContent = t("admin_tag");
+      nameLine.appendChild(tag);
+    }
+
+    const dateLine = document.createElement("div");
+    dateLine.className = "pr-feed-date";
+    dateLine.textContent = tFmt("since_date",{date:joined}) + (u.blocked ? " · " + t("blocked_tag") : "");
+
+    info.append(nameLine, dateLine);
+
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;gap:6px;flex-wrap:wrap";
+
+    if(showAdminControls && !isSelf){
+      const adminBtn = document.createElement("button");
+      adminBtn.className = "settings-btn";
+      adminBtn.style.cssText = "width:auto;margin:0;padding:8px 14px";
+      adminBtn.textContent = u.isAdmin ? t('revoke_admin_btn') : t('grant_admin_btn');
+      adminBtn.dataset.action = "admin";
+      adminBtn.dataset.uid = uidStr;
+      adminBtn.addEventListener("click", async ()=>{
+        const currentlyAdmin = u.isAdmin === true;
+        const confirmMsg = currentlyAdmin ? t("confirm_revoke_admin") : t("confirm_grant_admin");
+        if(!confirm(confirmMsg)) return;
+        adminBtn.disabled = true;
+        const ok = await setUserAdmin(uidStr, !currentlyAdmin);
+        if(ok) openUserManager(); // refresh
+        else { alert(t("alert_user_update_failed")); adminBtn.disabled = false; }
+      });
+      actions.appendChild(adminBtn);
+    }
+
+    // A granted (non-super) admin can never block another admin or the super admin — the
+    // server rules reject it outright, so the button is hidden here to avoid a confusing
+    // silent failure. The super admin has no such restriction (besides never blocking self).
+    if(!isSelf && (showAdminControls || !isUserAdmin)){
+      const blockBtn = document.createElement("button");
+      blockBtn.className = "settings-btn" + (u.blocked ? " primary" : " danger");
+      blockBtn.style.cssText = "width:auto;margin:0;padding:8px 14px";
+      blockBtn.textContent = u.blocked ? t('unblock_btn') : t('block_btn');
+      blockBtn.dataset.action = "block";
+      blockBtn.dataset.uid = uidStr;
+      blockBtn.dataset.blocked = String(!!u.blocked);
+      blockBtn.addEventListener("click", async ()=>{
+        const currentlyBlocked = u.blocked === true;
+        blockBtn.disabled = true;
+        const ok = await setUserBlocked(uidStr, !currentlyBlocked);
+        if(ok) openUserManager(); // refresh
+        else { alert(t("alert_user_update_failed")); blockBtn.disabled = false; }
+      });
+      actions.appendChild(blockBtn);
+    }
+
+    row.append(info, actions);
+    list.appendChild(row);
   });
 }
 function closeUserManager(){ document.getElementById("userManagerModal").classList.remove("show"); }
@@ -6608,11 +7443,14 @@ window.saveExerciseConfig = async function(){
   const name = document.getElementById("configContextName").value;
   const muscles = JSON.parse(document.getElementById("configContextMuscles").value || "{}");
   const equipment = document.getElementById("configContextEquipment").value || "";
-  const sets = Math.min(20, Math.max(1, parseInt(document.getElementById("cfgSets").value) || 1));
+  const sets = (()=>{ const n=parseStrictInteger(document.getElementById("cfgSets").value); return Number.isFinite(n) ? Math.min(20, Math.max(1, n)) : 1; })();
   const reps = document.getElementById("cfgReps").value.trim().slice(0,20) || "10";
-  const rest = Math.min(1800, Math.max(0, parseInt(document.getElementById("cfgRest").value) || 0));
+  const rest = (()=>{ const n=parseStrictInteger(document.getElementById("cfgRest").value); return Number.isFinite(n) ? Math.min(1800, Math.max(0, n)) : 0; })();
   let videoUrl = document.getElementById("cfgVideo").value.trim();
-  if(videoUrl && !/^https?:\/\//i.test(videoUrl)) videoUrl = "https://" + videoUrl;
+  if(videoUrl){
+    if(!/^[a-z][a-z0-9+.-]*:\/\//i.test(videoUrl)) videoUrl = "https://" + videoUrl; // no scheme typed — assume https
+    if(!isSafeHttpUrl(videoUrl)){ alert(t("alert_video_must_be_url")); return; }
+  }
   const notes = document.getElementById("cfgNotes").value.trim();
 
   if(!workouts[day]) workouts[day] = { title: tDayFull(day), exercises: [], abs: [] };
@@ -6655,11 +7493,18 @@ function updateInstallRow(){
 }
 
 // ==================== CSV EXPORT ====================
+// Neutralizes spreadsheet formula injection: if a text cell starts with =, +, -, @, tab,
+// or carriage return, Excel/Sheets/Numbers can interpret it as a formula when the CSV is
+// opened. Prefixing with a single quote forces it to display as literal text instead.
+// Real JS numbers are left completely untouched — this only ever applies to strings.
+function csvSanitizeCell(cell){
+  if(typeof cell === "number") return isFinite(cell) ? String(cell) : "";
+  let s = String(cell ?? "");
+  if(/^[\s]*[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
 function toCsv(rows){
-  return rows.map(row => row.map(cell=>{
-    const s = String(cell ?? "");
-    return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
-  }).join(",")).join("\r\n");
+  return rows.map(row => row.map(csvSanitizeCell).join(",")).join("\r\n");
 }
 function downloadCsv(filename, rows){
   // Leading BOM so Excel opens UTF-8 accented characters (á, ç, ã...) correctly.
@@ -6697,11 +7542,68 @@ function exportNutritionCsv(){
     rows.push([d, n.protein||"", n.proteinGoal||"", n.water||"", n.waterGoal||""]);
   });
   downloadCsv("kyro-nutricao-"+todayKey()+".csv", rows);
+
+  // Meal-level detail is a separate file since it has a different shape (one row per meal,
+  // not per day) — meal names are free text the person typed, so they go through the exact
+  // same injection-safe export path as everything else.
+  const mealRows = [["Data","Refeição","kcal","Proteína (g)","Carboidrato (g)","Gordura (g)"]];
+  Object.keys(nutritionLog).sort().forEach(d=>{
+    const n = nutritionLog[d];
+    (n.meals||[]).forEach(m=>{
+      mealRows.push([d, m.name||"", m.kcal||"", m.prot||"", m.carb||"", m.fat||""]);
+    });
+  });
+  if(mealRows.length > 1) downloadCsv("kyro-refeicoes-"+todayKey()+".csv", mealRows);
+}
+function exportSupplementsCsv(){
+  if(!mySupplements.length) return;
+  const rows = [["Suplemento","Categoria","Horários","Observação"]];
+  mySupplements.forEach(s=>{
+    rows.push([s.name||"", s.category||"", (s.times||[]).join(" / "), s.timing||""]);
+  });
+  downloadCsv("kyro-suplementos-"+todayKey()+".csv", rows);
 }
 function exportAllCsv(){
   exportWorkoutsCsv();
   exportMeasuresCsv();
   exportNutritionCsv();
+  exportSupplementsCsv();
+}
+
+// Recursively strips dangerous keys (__proto__, constructor, prototype) from a parsed JSON
+// structure and enforces sane limits on depth/array length/string length/object key count/
+// total node count — so a maliciously crafted backup can't pollute the object model or
+// exhaust memory before any field-level validation even runs. Builds an entirely new,
+// clean copy rather than mutating the parsed input.
+const IMPORT_LIMITS = { maxDepth: 12, maxArrayLength: 5000, maxStringLength: 20000, maxObjectKeys: 2000, maxTotalNodes: 200000 };
+function sanitizeImportedJson(value){
+  let nodeCount = 0;
+  function walk(v, depth){
+    nodeCount++;
+    if(nodeCount > IMPORT_LIMITS.maxTotalNodes) throw new Error("too_many_nodes");
+    if(depth > IMPORT_LIMITS.maxDepth) throw new Error("too_deep");
+    if(v === null || v === undefined) return null;
+    if(typeof v === "string") return v.length > IMPORT_LIMITS.maxStringLength ? v.slice(0, IMPORT_LIMITS.maxStringLength) : v;
+    if(typeof v === "number") return Number.isFinite(v) ? v : null;
+    if(typeof v === "boolean") return v;
+    if(Array.isArray(v)){
+      if(v.length > IMPORT_LIMITS.maxArrayLength) throw new Error("array_too_long");
+      return v.map(item => walk(item, depth+1));
+    }
+    if(typeof v === "object"){
+      const keys = Object.keys(v);
+      if(keys.length > IMPORT_LIMITS.maxObjectKeys) throw new Error("too_many_keys");
+      const out = {};
+      keys.forEach(k=>{
+        if(k === "__proto__" || k === "constructor" || k === "prototype") return; // stripped, never copied
+        out[k] = walk(v[k], depth+1);
+      });
+      return out;
+    }
+    return null; // functions/symbols/etc shouldn't appear from JSON.parse anyway
+  }
+  try{ return { ok: true, value: walk(value, 0) }; }
+  catch(e){ return { ok: false, reason: e.message }; }
 }
 
 async function exportData(){
@@ -6820,6 +7722,13 @@ async function importData(file){
     return;
   }
 
+  const sanitized = sanitizeImportedJson(data);
+  if(!sanitized.ok){
+    alert(t("alert_import_error") + " (arquivo excede os limites de tamanho/profundidade seguros: " + sanitized.reason + ")");
+    return;
+  }
+  data = sanitized.value;
+
   const errors = validateBackupData(data);
   if(errors.length){
     alert(tFmt("alert_import_failed_list",{list:errors.join("\n")}));
@@ -6833,9 +7742,37 @@ async function importData(file){
 }
 
 async function applyImport(mode){
-  const data = pendingImportData;
-  if(!data) return;
+  const rawData = pendingImportData;
+  if(!rawData) return;
   document.getElementById("importChoiceModal").classList.remove("show");
+
+  // Every field is routed through the same deep sanitizers used for data loaded from
+  // Firestore (Fase 7) — a backup file is exactly as untrusted as a corrupted cloud
+  // document, and gets exactly the same treatment before it ever touches app state.
+  const data = {};
+  if(rawData.bodyWeights) data.bodyWeights = sanitizeBodyWeights(rawData.bodyWeights);
+  if(rawData.bodyMeasures) data.bodyMeasures = sanitizeBodyMeasures(rawData.bodyMeasures);
+  if(rawData.photoIndex) data.photoIndex = sanitizePhotoIndex(rawData.photoIndex);
+  if(rawData.exerciseHistory) data.exerciseHistory = sanitizeExerciseHistory(rawData.exerciseHistory);
+  if(rawData.exerciseRecords) data.exerciseRecords = sanitizeExerciseRecords(rawData.exerciseRecords);
+  if(rawData.sessionLog) data.sessionLog = sanitizeSessionLog(rawData.sessionLog);
+  if(rawData.nutritionLog) data.nutritionLog = sanitizeNutritionLog(rawData.nutritionLog);
+  if(rawData.profile) data.profile = sanitizeProfile(rawData.profile);
+  if(rawData.workouts) data.workouts = sanitizeWorkouts(rawData.workouts);
+  if(rawData.completedSessions !== undefined) data.completedSessions = sanitizeFiniteNumber(rawData.completedSessions, 0, 100000, 0);
+  if(rawData.history && typeof rawData.history === "object" && !Array.isArray(rawData.history)){
+    const cleanHistory = {};
+    Object.keys(rawData.history).forEach(day=>{ if(DAY_KEYS.includes(day) && rawData.history[day] && typeof rawData.history[day]==="object") cleanHistory[day] = rawData.history[day]; });
+    data.history = cleanHistory;
+  }
+  // "state" carries today's in-progress workout — importing someone else's (or a malformed
+  // one) is high-risk for low benefit, so a replace only accepts it if it's genuinely shaped
+  // like per-day state; anything else is silently skipped rather than applied.
+  if(rawData.state && typeof rawData.state === "object" && !Array.isArray(rawData.state)){
+    const cleanState = {};
+    DAY_KEYS.forEach(day=>{ if(rawData.state[day] && typeof rawData.state[day]==="object") cleanState[day] = rawData.state[day]; });
+    if(Object.keys(cleanState).length) data.state = cleanState;
+  }
 
   // Safety net: back up whatever is currently loaded before changing anything.
   try{ await exportData(); }catch(e){ /* best-effort — don't block the import on this */ }
@@ -7356,7 +8293,9 @@ if(firebaseReady){
   fbAuth.onAuthStateChanged(async (user)=>{
     if(user){
       currentUser = user;
+      currentUserGrantedAdmin = false; // reset immediately — never trust a stale admin state
       hideAuthScreen();
+      document.getElementById("bootstrapErrorScreen").style.display = "none";
       if(!appInitialized){
         appInitialized = true;
         const loadingEl = document.getElementById("appLoadingScreen");
@@ -7365,31 +8304,49 @@ if(firebaseReady){
           showDebugError("A importação/carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
         }, 15000);
         try{
-          const [blocked] = await Promise.all([ checkIfBlocked(), maybeMigrateLocalData() ]);
-          if(blocked){
-            clearTimeout(watchdog);
+          // Step 1: the shared profile MUST exist before any personal data is touched —
+          // the Firestore rules require it. This is awaited on purpose (never fire-and-forget).
+          await registerSharedUserProfile();
+
+          // Step 2: confirm the account is actually clear to proceed. Fails closed: on any
+          // error we stop here and show a retry screen, we never fall through to loading data.
+          const accountStatus = await checkAccountStatus();
+          clearTimeout(watchdog);
+
+          if(accountStatus.status === "blocked"){
             loadingEl.style.display = "none";
             alert(t("account_blocked_msg"));
+            await teardownSession();
             await fbAuth.signOut();
             return;
           }
-          registerSharedUserProfile(); // fire-and-forget, non-blocking
-          clearTimeout(watchdog);
+          if(accountStatus.status === "error"){
+            loadingEl.style.display = "none";
+            showBootstrapError(t("bootstrap_check_failed_msg"));
+            return;
+          }
+
+          // Step 3: only now — with a confirmed, unblocked profile — proceed to migration and init.
           watchdog = setTimeout(()=>{
             showDebugError("O carregamento demorou demais (mais de 15s). Isso geralmente significa que o app não conseguiu falar com o banco de dados (Firestore) — verifique sua internet, ou se as Regras de Segurança / o banco de dados foram configurados corretamente no Firebase Console.");
           }, 15000);
+          await maybeMigrateLocalData();
           await init();
           retryPendingSync();
+          retryPendingPhotoUploads();
         }catch(e){
+          clearTimeout(watchdog);
+          loadingEl.style.display = "none";
+          showBootstrapError(t("bootstrap_check_failed_msg"));
           showDebugError("Erro ao carregar o app: " + e.message + (e.stack ? "\n"+e.stack : ""));
+          return;
         }
         clearTimeout(watchdog);
         loadingEl.classList.add("fade-out");
         setTimeout(()=>{ loadingEl.style.display = "none"; loadingEl.classList.remove("fade-out"); }, 400);
       }
     } else {
-      currentUser = null;
-      appInitialized = false;
+      await teardownSession();
       showAuthScreen();
     }
   });
