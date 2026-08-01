@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
@@ -12,16 +12,26 @@
 <link rel="manifest" id="appManifest" href="./manifest.json">
 <script>
 (()=>{
-  let lang="pt";
+  const normalize=value=>value==="pt"||value==="en"?value:null;
+  const detectDeviceLanguage=()=>{
+    const preferred=(Array.isArray(navigator.languages)&&navigator.languages.length
+      ? navigator.languages[0]
+      : (navigator.language||navigator.userLanguage||""));
+    return /^pt(?:[-_]|$)/i.test(String(preferred).trim()) ? "pt" : "en";
+  };
+
+  let lang="en";
   try{
-    const q=new URLSearchParams(location.search).get("lang");
-    const saved=localStorage.getItem("kyro_public_language");
-    lang=(q==="en"||q==="pt")?q:((saved==="en"||saved==="pt")?saved:(/^en/i.test(navigator.language||"")?"en":"pt"));
-    localStorage.setItem("kyro_public_language",lang);
-  }catch(e){ lang=/^en/i.test(navigator.language||"")?"en":"pt"; }
-  document.documentElement.lang=lang==="en"?"en":"pt-BR";
+    const queryLanguage=normalize(new URLSearchParams(location.search).get("lang"));
+    const manualOverride=normalize(localStorage.getItem("kyro_language_override_v2"));
+    lang=queryLanguage||manualOverride||detectDeviceLanguage();
+  }catch(e){
+    lang=detectDeviceLanguage();
+  }
+
+  document.documentElement.lang=lang==="pt"?"pt-BR":"en";
   const manifest=document.getElementById("appManifest");
-  if(manifest) manifest.href=lang==="en"?"./manifest-en.json":"./manifest.json";
+  if(manifest) manifest.href=lang==="pt"?"./manifest.json":"./manifest-en.json";
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1475,18 +1485,31 @@ const EXERCISE_DB = [
 ];
 
 // ==================== I18N (idioma) ====================
-let currentLang = (()=>{
-  const queryLang = new URLSearchParams(location.search).get("lang");
-  if(queryLang === "en" || queryLang === "pt"){
-    try{ localStorage.setItem("kyro_public_language", queryLang); }catch(e){}
-    return queryLang;
-  }
-  try{
-    const savedPublicLang = localStorage.getItem("kyro_public_language");
-    if(savedPublicLang === "en" || savedPublicLang === "pt") return savedPublicLang;
-  }catch(e){}
-  return (typeof navigator !== "undefined" && /^en/i.test(navigator.language||"")) ? "en" : "pt";
-})();
+// Portuguese is selected only when the browser/device primary language is a
+// Portuguese locale (pt, pt-BR, pt-PT, etc.). Every other language uses English.
+// A choice made in Settings remains a manual override on this device. The legacy
+// kyro_public_language value is intentionally ignored because older builds saved an
+// automatic guess there, which could lock users into the wrong language.
+const KYRO_LANGUAGE_OVERRIDE_KEY = "kyro_language_override_v2";
+function normalizeKyroLanguage(value){ return value==="pt" || value==="en" ? value : null; }
+function detectKyroDeviceLanguage(){
+  if(typeof navigator === "undefined") return "en";
+  const preferred = (Array.isArray(navigator.languages) && navigator.languages.length)
+    ? navigator.languages[0]
+    : (navigator.language || navigator.userLanguage || "");
+  return /^pt(?:[-_]|$)/i.test(String(preferred).trim()) ? "pt" : "en";
+}
+function getKyroManualLanguage(){
+  try{ return normalizeKyroLanguage(localStorage.getItem(KYRO_LANGUAGE_OVERRIDE_KEY)); }
+  catch(e){ return null; }
+}
+function resolveKyroLanguage(){
+  let queryLanguage=null;
+  try{ queryLanguage=normalizeKyroLanguage(new URLSearchParams(location.search).get("lang")); }
+  catch(e){}
+  return queryLanguage || getKyroManualLanguage() || detectKyroDeviceLanguage();
+}
+let currentLang = resolveKyroLanguage();
 let unitSystem = "metric"; // "metric" (kg/cm) or "imperial" (lb/in) — a display preference only.
 
 // All weight/length data is ALWAYS stored internally in kg/cm, regardless of this setting —
@@ -2890,11 +2913,10 @@ function tCardioNote(workout){
   return key ? t(key) : (workout.cardioNoteEn || workout.cardioNote);
 }
 function updateDocumentLanguage(){
-  const locale=currentLang==="en"?"en":"pt-BR";
+  const locale=currentLang==="pt"?"pt-BR":"en";
   document.documentElement.lang=locale;
   const manifest=document.getElementById("appManifest");
-  if(manifest) manifest.href=currentLang==="en"?"./manifest-en.json":"./manifest.json";
-  try{ localStorage.setItem("kyro_public_language",currentLang); }catch(e){}
+  if(manifest) manifest.href=currentLang==="pt"?"./manifest.json":"./manifest-en.json";
   const sendLanguage=worker=>{ try{ worker&&worker.postMessage({type:"SET_LANGUAGE",language:currentLang}); }catch(e){} };
   if("serviceWorker" in navigator){
     sendLanguage(navigator.serviceWorker.controller);
@@ -4494,7 +4516,9 @@ async function loadUserData(isInitialLoad){
     cleanSharedList.forEach(ex => EXERCISE_DB.push(ex));
   }
 
-  currentLang = (savedLang === "en" || savedLang === "pt") ? savedLang : currentLang;
+  // Language follows this device/browser (or an explicit Settings override), not a
+  // legacy account value that may have been saved automatically by an older build.
+  currentLang = resolveKyroLanguage();
   readinessLog = safely(()=> sanitizeReadinessLog(savedReadinessLog), {});
   mySupplements = safely(()=> sanitizeSupplements(savedSupplements), []);
   supplementLog = safely(()=> sanitizeSupplementLog(savedSupplementLog), {});
@@ -4811,8 +4835,8 @@ function bindAjustesEvents(){
     btn.addEventListener("click", async ()=>{
       if(btn.dataset.lang===currentLang) return;
       currentLang = btn.dataset.lang;
-      try{ localStorage.setItem("kyro_public_language",currentLang); }catch(e){}
-      await store.set("language", currentLang);
+      // Only an intentional tap in Settings creates a persistent override.
+      try{ localStorage.setItem(KYRO_LANGUAGE_OVERRIDE_KEY,currentLang); }catch(e){}
       applyStaticTranslations();
       buildDaySwitch();
       renderDay();
