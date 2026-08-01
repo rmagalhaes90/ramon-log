@@ -2520,6 +2520,7 @@ async function checkAccountStatus(){
     if(!doc.exists){
       // The profile should already have been created by registerSharedUserProfile() before
       // this ever runs. If it's still missing, something is wrong — don't assume "not blocked".
+      showDebugError("checkAccountStatus: o documento sharedUsers/"+currentUser.uid+" não existe, mesmo depois de registerSharedUserProfile() ter rodado. Isso normalmente indica que a escrita de criação do perfil foi rejeitada pelas Firestore Rules — confira se as regras publicadas realmente batem com o formato que o app grava (email, createdAt, blocked).");
       return { status: "error" };
     }
     const data = doc.data() || {};
@@ -2527,6 +2528,7 @@ async function checkAccountStatus(){
     return { status: data.blocked === true ? "blocked" : "ok" };
   }catch(e){
     console.error("checkAccountStatus error", e);
+    showDebugError("checkAccountStatus falhou ao ler sharedUsers/"+currentUser.uid+": " + (e && e.code ? e.code+" — " : "") + (e && e.message ? e.message : String(e)));
     return { status: "error" };
   }
 }
