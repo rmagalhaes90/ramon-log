@@ -1,5 +1,6 @@
-/* KYRO service worker — security build v13–21 */
-const CACHE_VERSION = "kyro-shell-2026-08-01-v13-21-photo-fix";
+/* KYRO service worker — fast startup build */
+const CACHE_VERSION = "kyro-shell-2026-08-01-v13-21-startup-fix-2";
+
 const SHELL_ASSETS = [
   "./",
   "./index.html",
@@ -10,12 +11,15 @@ const SHELL_ASSETS = [
 
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
-    try {
-      const cache = await caches.open(CACHE_VERSION);
-      await cache.addAll(SHELL_ASSETS);
-    } catch (_) {
-      // Continue activation even if an optional shell asset cannot be pre-cached.
-    }
+    const cache = await caches.open(CACHE_VERSION);
+
+    // Cache each asset independently. One missing optional asset must not prevent
+    // index.html from being available for an instant PWA launch.
+    await Promise.allSettled(
+      SHELL_ASSETS.map(asset =>
+        cache.add(new Request(asset, { cache: "reload" }))
+      )
+    );
 
     await self.skipWaiting();
   })());
@@ -34,9 +38,15 @@ self.addEventListener("activate", event => {
         .map(key => caches.delete(key))
     );
 
+    if ("navigationPreload" in self.registration) {
+      try {
+        await self.registration.navigationPreload.enable();
+      } catch (_) {}
+    }
+
     await self.clients.claim();
 
-    // Force open KYRO windows to load the corrected index.html once this release activates.
+    // Reload open KYRO windows once so this startup fix becomes active immediately.
     const windows = await self.clients.matchAll({
       type: "window",
       includeUncontrolled: true
@@ -47,7 +57,6 @@ self.addEventListener("activate", event => {
         if ("navigate" in client) {
           return client.navigate(client.url).catch(() => undefined);
         }
-
         return undefined;
       })
     );
@@ -64,41 +73,82 @@ function isCacheableResponse(response) {
   return response && response.ok && response.type !== "opaque";
 }
 
-async function networkFirst(request) {
+async function updateNavigationCache(request) {
   const cache = await caches.open(CACHE_VERSION);
 
   try {
     const response = await fetch(request, { cache: "no-store" });
 
     if (isCacheableResponse(response)) {
-      await cache.put(request, response.clone());
+      // Store both the exact navigation URL and the canonical app shell.
+      await Promise.all([
+        cache.put(request, response.clone()),
+        cache.put("./index.html", response.clone())
+      ]);
     }
 
     return response;
   } catch (_) {
-    return (
-      (await cache.match(request)) ||
-      (await cache.match("./index.html")) ||
-      Response.error()
-    );
+    return null;
   }
+}
+
+async function fastNavigation(request, preloadResponsePromise) {
+  const cache = await caches.open(CACHE_VERSION);
+
+  const cached =
+    (await cache.match(request, { ignoreSearch: true })) ||
+    (await cache.match("./index.html", { ignoreSearch: true })) ||
+    (await cache.match("./", { ignoreSearch: true }));
+
+  // Start refreshing immediately, but do not block the first paint when a shell
+  // is already cached.
+  const refreshPromise = (async () => {
+    try {
+      const preload = await preloadResponsePromise;
+
+      if (isCacheableResponse(preload)) {
+        await Promise.all([
+          cache.put(request, preload.clone()),
+          cache.put("./index.html", preload.clone())
+        ]);
+        return preload;
+      }
+    } catch (_) {}
+
+    return updateNavigationCache(request);
+  })();
+
+  if (cached) {
+    // Keep the worker alive long enough to refresh the cache in the background.
+    return { response: cached, refreshPromise };
+  }
+
+  const networkResponse = await refreshPromise;
+
+  return {
+    response: networkResponse || Response.error(),
+    refreshPromise: Promise.resolve()
+  };
 }
 
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_VERSION);
-  const cached = await cache.match(request);
+  const cached = await cache.match(request, { ignoreSearch: true });
 
   const update = fetch(request, { cache: "no-store" })
     .then(async response => {
       if (isCacheableResponse(response)) {
         await cache.put(request, response.clone());
       }
-
       return response;
     })
     .catch(() => null);
 
-  return cached || update || Response.error();
+  return {
+    response: cached || (await update) || Response.error(),
+    update
+  };
 }
 
 self.addEventListener("fetch", event => {
@@ -124,7 +174,10 @@ self.addEventListener("fetch", event => {
     request.destination === "document";
 
   if (isNavigation) {
-    event.respondWith(networkFirst(request));
+    const task = fastNavigation(request, event.preloadResponse);
+
+    event.respondWith(task.then(result => result.response));
+    event.waitUntil(task.then(result => result.refreshPromise).catch(() => undefined));
     return;
   }
 
@@ -137,7 +190,10 @@ self.addEventListener("fetch", event => {
   ]);
 
   if (allowedStatic.has(request.destination)) {
-    event.respondWith(staleWhileRevalidate(request));
+    const task = staleWhileRevalidate(request);
+
+    event.respondWith(task.then(result => result.response));
+    event.waitUntil(task.then(result => result.update).catch(() => undefined));
   }
 });
 
