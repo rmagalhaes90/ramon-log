@@ -2385,7 +2385,12 @@ try{
     fbAuth = firebase.auth();
     fbDb = firebase.firestore();
     fbDb.settings({ experimentalAutoDetectLongPolling: true, merge: true });
-    fbDb.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    // Deliberately NOT calling fbDb.enablePersistence() here. Firestore's built-in IndexedDB
+    // persistence is a known source of "Failed to get document because the client is offline"
+    // errors on iOS Safari — the persistence layer can get stuck reporting offline even with
+    // a real connection, especially on the very first read right after init. The app already
+    // has its own complete local-cache + pending-sync-retry system (writeCache/store), so
+    // Firestore's native persistence is redundant here and not worth the reliability risk.
     try{ fbStorage = firebase.storage(); }catch(e){ console.warn("Firebase Storage não disponível:", e); }
     firebaseReady = true;
     try{
@@ -2503,7 +2508,17 @@ async function registerSharedUserProfile(){
     throw new Error("registerSharedUserProfile: signed-in account has no valid email");
   }
   const ref = fbDb.collection("sharedUsers").doc(currentUser.uid);
-  const doc = await withTimeout(ref.get(), 8000, "sharedUsers:get");
+  let doc;
+  try{
+    doc = await withTimeout(ref.get(), 8000, "sharedUsers:get");
+  }catch(e){
+    if(/client is offline/i.test((e && e.message)||"")){
+      await new Promise(r=>setTimeout(r, 1200));
+      doc = await withTimeout(ref.get({source:"server"}), 8000, "sharedUsers:get-retry");
+    } else {
+      throw e;
+    }
+  }
   if(doc.exists) return; // never touch blocked/isAdmin of an existing profile
   // Only these three fields are ever written here — matches exactly what the Firestore
   // rules allow on document creation.
@@ -2515,22 +2530,31 @@ async function registerSharedUserProfile(){
 // Only a confirmed successful read can ever return 'ok' or 'blocked'.
 async function checkAccountStatus(){
   if(!currentUser || !fbDb) return { status: "error" };
-  try{
-    const doc = await withTimeout(fbDb.collection("sharedUsers").doc(currentUser.uid).get(), 8000, "sharedUsers:checkStatus");
-    if(!doc.exists){
-      // The profile should already have been created by registerSharedUserProfile() before
-      // this ever runs. If it's still missing, something is wrong — don't assume "not blocked".
-      showDebugError("checkAccountStatus: o documento sharedUsers/"+currentUser.uid+" não existe, mesmo depois de registerSharedUserProfile() ter rodado. Isso normalmente indica que a escrita de criação do perfil foi rejeitada pelas Firestore Rules — confira se as regras publicadas realmente batem com o formato que o app grava (email, createdAt, blocked).");
+  const ref = fbDb.collection("sharedUsers").doc(currentUser.uid);
+  for(let attempt=1; attempt<=2; attempt++){
+    try{
+      const doc = await withTimeout(ref.get(attempt>1 ? {source:"server"} : undefined), 8000, "sharedUsers:checkStatus");
+      if(!doc.exists){
+        // The profile should already have been created by registerSharedUserProfile() before
+        // this ever runs. If it's still missing, something is wrong — don't assume "not blocked".
+        showDebugError("checkAccountStatus: o documento sharedUsers/"+currentUser.uid+" não existe, mesmo depois de registerSharedUserProfile() ter rodado. Isso normalmente indica que a escrita de criação do perfil foi rejeitada pelas Firestore Rules — confira se as regras publicadas realmente batem com o formato que o app grava (email, createdAt, blocked).");
+        return { status: "error" };
+      }
+      const data = doc.data() || {};
+      currentUserGrantedAdmin = data.isAdmin === true;
+      return { status: data.blocked === true ? "blocked" : "ok" };
+    }catch(e){
+      const isTransientOfflineGlitch = attempt===1 && /client is offline/i.test((e && e.message)||"");
+      if(isTransientOfflineGlitch){
+        await new Promise(r=>setTimeout(r, 1200)); // brief pause, then force a real server round-trip
+        continue;
+      }
+      console.error("checkAccountStatus error", e);
+      showDebugError("checkAccountStatus falhou ao ler sharedUsers/"+currentUser.uid+": " + (e && e.code ? e.code+" — " : "") + (e && e.message ? e.message : String(e)));
       return { status: "error" };
     }
-    const data = doc.data() || {};
-    currentUserGrantedAdmin = data.isAdmin === true;
-    return { status: data.blocked === true ? "blocked" : "ok" };
-  }catch(e){
-    console.error("checkAccountStatus error", e);
-    showDebugError("checkAccountStatus falhou ao ler sharedUsers/"+currentUser.uid+": " + (e && e.code ? e.code+" — " : "") + (e && e.message ? e.message : String(e)));
-    return { status: "error" };
   }
+  return { status: "error" }; // defensive fallback — normal control flow always returns from within the loop
 }
 
 // Full teardown of everything tied to the current signed-in session: timers, camera/scanner,
