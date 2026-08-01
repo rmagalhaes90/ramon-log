@@ -1,5 +1,5 @@
 /* KYRO service worker — bilingual fast-start build */
-const SW_VERSION = "2026-08-01-onboarding-update-v9";
+const SW_VERSION = "2026-08-01-email-verify-live-update-v11";
 const CACHE_VERSION = "kyro-shell-" + SW_VERSION;
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));
@@ -51,6 +51,22 @@ self.addEventListener("message",event=>{
     return;
   }
   if(event.data&&event.data.type==="SKIP_WAITING") event.waitUntil(self.skipWaiting());
+  if(event.data&&event.data.type==="REFRESH_SHELL"){
+    const port=event.ports&&event.ports[0];
+    event.waitUntil((async()=>{
+      let ok=false;
+      try{
+        const cache=await caches.open(CACHE_VERSION);
+        const url=new URL("./index.html",self.location.href);url.searchParams.set("kyro_refresh",String(Date.now()));
+        const response=await fetch(url.href,{cache:"no-store",credentials:"same-origin"});
+        if(isCacheableResponse(response)){
+          await Promise.all([cache.put("./index.html",response.clone()),cache.put("./",response.clone())]);
+          ok=true;
+        }
+      }catch(_){}
+      if(port)port.postMessage({ok});
+    })());
+  }
   if(event.data&&event.data.type==="SET_LANGUAGE") event.waitUntil(saveLanguage(event.data.language));
 });
 

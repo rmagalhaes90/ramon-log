@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>KYRO</title>
+<meta name="kyro-build" content="2026-08-01-email-verify-live-update-v11">
 <meta name="apple-mobile-web-app-title" content="KYRO">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
@@ -496,6 +497,22 @@
   .segmented button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
 
   /* ---- Auth screen ---- */
+  .email-verify-panel{display:none;width:100%;max-width:520px;margin:0 auto;padding:25px 20px 20px;border:1px solid rgba(215,255,61,.48);border-radius:24px;background:radial-gradient(circle at 50% 0,rgba(215,255,61,.12),transparent 42%),linear-gradient(145deg,#181b1f,#101114);box-shadow:0 22px 55px rgba(0,0,0,.46),0 0 30px rgba(215,255,61,.07);text-align:center}
+  .email-verify-panel.show{display:block;animation:pagein .32s cubic-bezier(.16,1,.3,1)}
+  .email-verify-icon{width:62px;height:62px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-size:29px;background:#101214;border:1px solid var(--volt);box-shadow:0 0 24px rgba(215,255,61,.22)}
+  .email-verify-title{font:700 29px/1.05 'Bebas Neue',sans-serif;letter-spacing:.035em;margin:0 0 10px;color:var(--text)}
+  .email-verify-copy{font-size:13.5px;line-height:1.55;color:var(--dim);margin:0 auto 12px;max-width:410px}
+  .email-verify-address{display:block;margin:10px auto 15px;padding:10px 12px;border-radius:11px;background:rgba(215,255,61,.07);border:1px solid rgba(215,255,61,.2);color:var(--volt);font:600 12px 'JetBrains Mono',monospace;overflow-wrap:anywhere}
+  .email-verify-status{min-height:20px;margin:3px 0 12px;color:var(--dim);font-size:12px;line-height:1.4}
+  .email-verify-status.error{color:#ff8d98}.email-verify-status.success{color:var(--volt)}
+  .email-verify-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:9px}
+  .email-verify-actions button{min-height:49px;border-radius:13px;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer}
+  .email-verify-resend{background:var(--panel-2);border:1px solid var(--line);color:var(--text)}
+  .email-verify-check{border:1px solid var(--volt);background:var(--volt);color:#0b0c0e;box-shadow:0 10px 25px rgba(215,255,61,.13)}
+  .email-verify-signout{margin-top:13px;border:0;background:transparent;color:var(--blue);font:600 12.5px 'Space Grotesk',sans-serif;cursor:pointer;padding:8px}
+  .email-verify-actions button:disabled{opacity:.45;cursor:wait}
+  @media(max-width:390px){.email-verify-actions{grid-template-columns:1fr}.email-verify-panel{padding:22px 16px 18px}}
+
   #authScreen{position:fixed;inset:0;z-index:20000;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:28px;overflow-y:auto;pointer-events:auto;touch-action:manipulation;isolation:isolate;-webkit-overflow-scrolling:touch}
   #authScreen.hide{display:none;pointer-events:none}
   #authScreen input,#authScreen button,#authScreen form{pointer-events:auto;touch-action:manipulation}
@@ -532,9 +549,14 @@
   .field-error{display:none;color:var(--red);font-size:11.5px;line-height:1.35;margin-top:6px}
   .field-error.show{display:block}
   .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-  .update-toast{position:fixed;left:16px;right:16px;bottom:100px;z-index:900;background:var(--panel);border:1px solid var(--volt-dim);border-radius:14px;padding:12px 14px;display:none;align-items:center;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
-  .update-toast.show{display:flex}
+  .update-toast{position:fixed;left:16px;right:16px;bottom:100px;z-index:900;background:linear-gradient(145deg,rgba(23,25,29,.98),rgba(12,13,15,.98));border:1px solid var(--volt-dim);border-radius:18px;padding:13px 14px;display:none;align-items:center;gap:12px;box-shadow:0 16px 38px rgba(0,0,0,.46),0 0 24px rgba(215,255,61,.07);backdrop-filter:blur(16px)}
+  .update-toast.show{display:flex;animation:updateToastIn .28s cubic-bezier(.16,1,.3,1)}
   .update-toast span{flex:1;font-size:12.5px;line-height:1.4}
+  .update-toast-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .update-later-btn{min-height:40px;padding:8px 11px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--dim);font:700 11px 'Space Grotesk',sans-serif;cursor:pointer}
+  .update-toast .add-btn{min-height:40px;padding:8px 15px;white-space:nowrap}
+  @keyframes updateToastIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+  @media(max-width:390px){.update-toast{align-items:flex-start;flex-wrap:wrap}.update-toast span{flex-basis:100%}.update-toast-actions{width:100%;justify-content:flex-end}}
 
   /* ---- First-run guided onboarding ---- */
   .first-run-tour[hidden],.onboarding-coach[hidden]{display:none!important}
@@ -685,6 +707,18 @@
     <h1>KYRO<span>.</span></h1>
     <p id="authSubtitle">Entre com sua conta pra acessar seu treino</p>
   </div>
+  <section id="emailVerificationPanel" class="email-verify-panel" aria-live="polite" aria-labelledby="emailVerifyTitle">
+    <div class="email-verify-icon" aria-hidden="true">✉️</div>
+    <h2 class="email-verify-title" id="emailVerifyTitle">Verifique seu email</h2>
+    <p class="email-verify-copy" id="emailVerifyCopy"></p>
+    <strong class="email-verify-address" id="emailVerifyAddress"></strong>
+    <div class="email-verify-status" id="emailVerifyStatus" role="status"></div>
+    <div class="email-verify-actions">
+      <button type="button" class="email-verify-resend" id="emailVerifyResend">Reenviar email</button>
+      <button type="button" class="email-verify-check" id="emailVerifyCheck">Já verifiquei</button>
+    </div>
+    <button type="button" class="email-verify-signout" id="emailVerifySignOut">Usar outra conta</button>
+  </section>
   <div class="auth-tabs">
     <button class="auth-tab active" data-authtab="login" id="authTabLogin">Entrar</button>
     <button class="auth-tab" data-authtab="signup" id="authTabSignup">Criar conta</button>
@@ -863,7 +897,10 @@
 
 <div id="pwaUpdateToast" class="update-toast" role="status" aria-live="polite">
   <span>Uma atualização segura do KYRO está disponível.</span>
-  <button type="button" class="add-btn" id="pwaUpdateBtn">Atualizar</button>
+  <div class="update-toast-actions">
+    <button type="button" class="update-later-btn" id="pwaUpdateLaterBtn">Depois</button>
+    <button type="button" class="add-btn" id="pwaUpdateBtn">Atualizar</button>
+  </div>
 </div>
 
 <div id="appLoadingScreen" style="display:none">
@@ -2131,6 +2168,10 @@ const UI_STRINGS = {
     alert_backup_before_delete:"Por segurança, baixamos um backup dos seus dados antes de apagar. Confira a pasta de Downloads se precisar recuperar algo depois.",
     alert_import_error:"Erro ao importar", alert_import_success:"Importado com sucesso", alert_photo_save_error:"Erro ao salvar foto", alert_photo_no_file:"Nenhum arquivo de imagem válido foi selecionado.", alert_photo_too_large:"Essa imagem é grande demais (máximo 20MB).", alert_photo_svg_rejected:"Arquivos SVG não são aceitos como foto.", alert_photo_invalid_format:"Esse arquivo não parece ser uma imagem válida.", alert_photo_upload_pending:"Sua foto foi salva no aparelho, mas ainda não terminou de subir pra nuvem. Vamos tentar de novo quando a conexão melhorar.", alert_photo_upload_in_progress:"Já tem um envio de foto em andamento — aguarde terminar.", photo_pending_tag:"(enviando...)", alert_photo_delete_error:"Não foi possível apagar a foto agora. Tente de novo.", alert_duplicate_exercise_name:"Já existe um exercício chamado \"{name}\" no banco. Escolha um nome diferente.", alert_invalid_exercise_in_list:"O exercício #{index} (\"{name}\") está com dados inválidos. Corrija antes de salvar.", confirm_exercise_db_size_warning:"O banco de exercícios está ficando grande ({kb}KB). Isso ainda funciona, mas está se aproximando do limite do Firestore. Continuar mesmo assim?",
     auth_password_requirements:"A senha precisa ter pelo menos {min} caracteres, com letra maiúscula, letra minúscula e número.",
+    auth_verify_title:"Verifique seu email", auth_verify_copy:"Enviamos um link de verificação. Confirme que este endereço realmente pertence a você antes de acessar o KYRO.",
+    auth_verify_sent:"Email de verificação enviado. Confira também a caixa de spam.", auth_verify_resend:"Reenviar email", auth_verify_check:"Já verifiquei", auth_verify_signout:"Usar outra conta",
+    auth_verify_checking:"Verificando…", auth_verify_not_yet:"O email ainda não foi verificado. Abra o link enviado e tente novamente.", auth_verify_success:"Email verificado! Abrindo o KYRO…", auth_verify_send_error:"Não foi possível enviar o email agora. Tente novamente em alguns instantes.",
+    auth_verify_wait:"Aguarde {seconds}s para reenviar.",
     auth_err_too_many_requests:"Muitas tentativas seguidas. Aguarde um pouco antes de tentar de novo.",
     auth_err_popup_blocked:"O navegador bloqueou a janela do Google. Permita pop-ups para este site e tente de novo.",
     auth_err_user_disabled:"Esta conta foi desativada. Entre em contato se acha que isso é um engano.",
@@ -2312,6 +2353,7 @@ const UI_STRINGS = {
     reload_btn:"🔄 Tentar de novo",
     update_available:"Uma atualização segura do KYRO está disponível.",
     update_now:"Atualizar",
+    update_later:"Depois",
     update_installing:"Atualizando…",
     page_home_title:"INÍCIO<span>.</span>",
     page_routines_title:"ROTINAS<span>.</span>",
@@ -2496,6 +2538,10 @@ const UI_STRINGS = {
     alert_backup_before_delete:"For safety, we downloaded a backup of your data before deleting. Check your Downloads folder if you need to recover anything later.",
     alert_import_error:"Import error", alert_import_success:"Imported successfully", alert_photo_save_error:"Error saving photo", alert_photo_no_file:"No valid image file was selected.", alert_photo_too_large:"This image is too large (20MB max).", alert_photo_svg_rejected:"SVG files aren't accepted as photos.", alert_photo_invalid_format:"This file doesn't look like a valid image.", alert_photo_upload_pending:"Your photo was saved on this device but hasn't finished uploading to the cloud yet. We'll retry once your connection improves.", alert_photo_upload_in_progress:"A photo upload is already in progress — please wait for it to finish.", photo_pending_tag:"(uploading...)", alert_photo_delete_error:"Couldn't delete the photo right now. Please try again.", alert_duplicate_exercise_name:"There's already an exercise named \"{name}\" in the database. Choose a different name.", alert_invalid_exercise_in_list:"Exercise #{index} (\"{name}\") has invalid data. Fix it before saving.", confirm_exercise_db_size_warning:"The exercise database is getting large ({kb}KB). It still works, but it's approaching Firestore's limit. Continue anyway?",
     auth_password_requirements:"Password must be at least {min} characters, with uppercase, lowercase, and a number.",
+    auth_verify_title:"Verify your email", auth_verify_copy:"We sent a verification link. Confirm that this address really belongs to you before accessing KYRO.",
+    auth_verify_sent:"Verification email sent. Check your spam folder too.", auth_verify_resend:"Resend email", auth_verify_check:"I've verified", auth_verify_signout:"Use another account",
+    auth_verify_checking:"Checking…", auth_verify_not_yet:"Your email hasn't been verified yet. Open the link we sent and try again.", auth_verify_success:"Email verified! Opening KYRO…", auth_verify_send_error:"We couldn't send the email right now. Try again in a moment.",
+    auth_verify_wait:"Wait {seconds}s before resending.",
     auth_err_too_many_requests:"Too many attempts in a row. Please wait a bit before trying again.",
     auth_err_popup_blocked:"Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.",
     auth_err_user_disabled:"This account has been disabled. Contact support if you think this is a mistake.",
@@ -2677,6 +2723,7 @@ const UI_STRINGS = {
     reload_btn:"🔄 Try again",
     update_available:"A secure KYRO update is available.",
     update_now:"Update",
+    update_later:"Later",
     update_installing:"Updating…",
     page_home_title:"HOME<span>.</span>",
     page_routines_title:"ROUTINES<span>.</span>",
@@ -4318,7 +4365,7 @@ let authMode = "login";
 // always be bypassed by calling the Firebase SDK directly.
 const AUTH_CONFIG = {
   signupEnabled: true,
-  requireEmailVerification: false,
+  requireEmailVerification: true,
   minPasswordLength: 12
 };
 
@@ -4383,6 +4430,83 @@ function applyAuthScreenTranslations(){
   document.getElementById("authGoogleLabel").textContent = t("auth_google_btn");
 }
 
+const EMAIL_VERIFY_RESEND_KEY="kyro_email_verify_resend_v1";
+function isPasswordProviderUser(user){
+  return !!(user&&Array.isArray(user.providerData)&&user.providerData.some(p=>p&&p.providerId==="password"));
+}
+function requiresEmailVerification(user){
+  return !!(AUTH_CONFIG.requireEmailVerification&&isPasswordProviderUser(user)&&!user.emailVerified);
+}
+function setVerificationStatus(message,type=""){
+  const el=document.getElementById("emailVerifyStatus");if(!el)return;
+  el.textContent=message||"";el.className="email-verify-status"+(type?" "+type:"");
+}
+function setStandardAuthControlsVisible(visible){
+  [".auth-tabs","#authError","#authForm","#authForgot",".auth-divider","#authGoogle"].forEach(selector=>{
+    const el=document.querySelector(selector);if(el)el.style.display=visible?"":"none";
+  });
+}
+function hideEmailVerificationScreen(){
+  const panel=document.getElementById("emailVerificationPanel");if(panel)panel.classList.remove("show");
+  setStandardAuthControlsVisible(true);setVerificationStatus("");
+}
+function showEmailVerificationScreen(user,{sent=false}={}){
+  if(!user)return;
+  showAuthScreen();
+  setStandardAuthControlsVisible(false);
+  const panel=document.getElementById("emailVerificationPanel");if(panel)panel.classList.add("show");
+  document.getElementById("emailVerifyTitle").textContent=t("auth_verify_title");
+  document.getElementById("emailVerifyCopy").textContent=t("auth_verify_copy");
+  document.getElementById("emailVerifyAddress").textContent=user.email||"";
+  document.getElementById("emailVerifyResend").textContent=t("auth_verify_resend");
+  document.getElementById("emailVerifyCheck").textContent=t("auth_verify_check");
+  document.getElementById("emailVerifySignOut").textContent=t("auth_verify_signout");
+  setVerificationStatus(sent?t("auth_verify_sent"):"");
+}
+async function sendVerificationEmail(user,{force=false}={}){
+  if(!user||!requiresEmailVerification(user))return false;
+  const now=Date.now(),last=Number(localStorage.getItem(EMAIL_VERIFY_RESEND_KEY))||0;
+  const wait=Math.ceil((60000-(now-last))/1000);
+  if(!force&&wait>0){setVerificationStatus(tFmt("auth_verify_wait",{seconds:wait}),"error");return false;}
+  try{
+    fbAuth.languageCode=currentLang==="pt"?"pt-BR":"en";
+    await user.sendEmailVerification();
+    localStorage.setItem(EMAIL_VERIFY_RESEND_KEY,String(Date.now()));
+    setVerificationStatus(t("auth_verify_sent"),"success");
+    return true;
+  }catch(error){
+    console.error("email verification send error",error&&error.code);
+    setVerificationStatus(error&&error.code==="auth/too-many-requests"?t("auth_err_too_many_requests"):t("auth_verify_send_error"),"error");
+    return false;
+  }
+}
+function bindEmailVerificationEvents(){
+  const resend=document.getElementById("emailVerifyResend"),check=document.getElementById("emailVerifyCheck"),signout=document.getElementById("emailVerifySignOut");
+  if(resend)resend.addEventListener("click",async()=>{
+    const user=fbAuth&&fbAuth.currentUser;if(!user)return;
+    resend.disabled=true;await sendVerificationEmail(user);resend.disabled=false;
+  });
+  if(check)check.addEventListener("click",async()=>{
+    const user=fbAuth&&fbAuth.currentUser;if(!user)return;
+    check.disabled=true;check.textContent=t("auth_verify_checking");setVerificationStatus(t("auth_verify_checking"));
+    try{
+      await user.reload();
+      const refreshed=fbAuth.currentUser;
+      if(refreshed&&refreshed.emailVerified){
+        setVerificationStatus(t("auth_verify_success"),"success");
+        setTimeout(()=>location.reload(),450);
+        return;
+      }
+      setVerificationStatus(t("auth_verify_not_yet"),"error");
+    }catch(error){setVerificationStatus(t("auth_err_no_connection"),"error");}
+    check.disabled=false;check.textContent=t("auth_verify_check");
+  });
+  if(signout)signout.addEventListener("click",async()=>{
+    hideEmailVerificationScreen();
+    try{await fbAuth.signOut();}catch(_){}
+  });
+}
+
 function initAuthScreenEvents(){
   document.querySelectorAll(".auth-tab").forEach(tab=>{
     tab.addEventListener("click", ()=> setAuthMode(tab.dataset.authtab));
@@ -4414,7 +4538,11 @@ function initAuthScreenEvents(){
         // Set this before createUser: Firebase can emit onAuthStateChanged before the
         // createUser promise resolves, especially on fast mobile connections.
         flagNextAuthForOnboarding();
-        await fbAuth.createUserWithEmailAndPassword(email, password);
+        const credential=await fbAuth.createUserWithEmailAndPassword(email, password);
+        if(AUTH_CONFIG.requireEmailVerification&&credential&&credential.user){
+          await sendVerificationEmail(credential.user,{force:true});
+          showEmailVerificationScreen(credential.user,{sent:true});
+        }
       }
     }catch(err){
       if(authMode === "signup") clearNextAuthOnboardingFlag();
@@ -5388,6 +5516,10 @@ function applyStaticTranslations(){
   setText("barcodeModalTitle","barcode_title");
   setText("debugReloadBtn","reload_btn");
   setText("pwaUpdateBtn","update_now");
+  setText("pwaUpdateLaterBtn","update_later");
+  if(document.getElementById("emailVerificationPanel")?.classList.contains("show") && fbAuth?.currentUser){
+    showEmailVerificationScreen(fbAuth.currentUser);
+  }
   setText("bootstrapErrorRetryBtn","reload_btn");
   setAttr("resetBtn","title","reset_title");
   setAttr("resetBtn","aria-label","reset_workout_aria");
@@ -10350,167 +10482,127 @@ function setFieldValidity(input,message=""){
 document.addEventListener("invalid",e=>{ if(e.target instanceof HTMLInputElement){ e.preventDefault(); setFieldValidity(e.target,e.target.validationMessage||t("invalid_value")); } },true);
 document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&e.target.getAttribute("aria-invalid")==="true"&&e.target.checkValidity()) setFieldValidity(e.target,""); },true);
 
-// ---- Versioned Service Worker / controlled update flow ----
+// ---- Live app version checks + controlled Service Worker update flow ----
 async function registerKyroServiceWorker(){
   if(!("serviceWorker" in navigator)||location.protocol!=="https:")return;
 
-  const UPDATE_STARTED_KEY="kyro_sw_update_started_v6";
-  const UPDATE_TARGET_KEY="kyro_sw_update_target_v6";
+  const CURRENT_APP_BUILD=document.querySelector('meta[name="kyro-build"]')?.content||"";
+  const UPDATE_STARTED_KEY="kyro_sw_update_started_v7";
+  const UPDATE_TARGET_KEY="kyro_sw_update_target_v7";
+  const DEFERRED_TARGET_KEY="kyro_update_deferred_target_v1";
+  const DEFERRED_UNTIL_KEY="kyro_update_deferred_until_v1";
+  const CHECK_INTERVAL_MS=60000;
+  const DEFER_MS=30*60*1000;
   const toast=document.getElementById("pwaUpdateToast");
   const btn=document.getElementById("pwaUpdateBtn");
-  let registration=null;
-  let waitingWorker=null;
-  let applying=false;
-  let reloadTriggered=false;
-  let fallbackTimer=null;
+  const laterBtn=document.getElementById("pwaUpdateLaterBtn");
+  let registration=null,waitingWorker=null,remoteBuild="",applying=false,reloadTriggered=false,fallbackTimer=null,checkTimer=null,deferTimer=null,checkInFlight=false;
 
   const hideToast=()=>{
     if(toast)toast.classList.remove("show");
     if(btn){btn.disabled=false;btn.removeAttribute("aria-busy");btn.textContent=t("update_now");}
+    if(laterBtn){laterBtn.disabled=false;laterBtn.textContent=t("update_later");}
   };
-  const updateIsInProgress=()=>{
-    const started=Number(sessionStorage.getItem(UPDATE_STARTED_KEY))||0;
-    return started>0 && Date.now()-started<30000;
+  const targetId=()=>remoteBuild||"waiting-worker";
+  const isDeferred=target=>{
+    try{return localStorage.getItem(DEFERRED_TARGET_KEY)===target&&Date.now()<(Number(localStorage.getItem(DEFERRED_UNTIL_KEY))||0);}catch(_){return false;}
   };
-  const markUpdateStarted=version=>{
-    try{
-      sessionStorage.setItem(UPDATE_STARTED_KEY,String(Date.now()));
-      sessionStorage.setItem(UPDATE_TARGET_KEY,version||"waiting-worker");
-    }catch(_){}
+  const clearDeferred=()=>{try{localStorage.removeItem(DEFERRED_TARGET_KEY);localStorage.removeItem(DEFERRED_UNTIL_KEY);}catch(_){}};
+  const scheduleDeferredRecheck=()=>{
+    if(deferTimer)clearTimeout(deferTimer);
+    let until=0;try{until=Number(localStorage.getItem(DEFERRED_UNTIL_KEY))||0;}catch(_){}
+    if(until>Date.now())deferTimer=setTimeout(()=>checkForUpdates({force:true}),Math.min(until-Date.now()+200,DEFER_MS));
   };
-  const clearUpdateState=()=>{
-    try{
-      sessionStorage.removeItem(UPDATE_STARTED_KEY);
-      sessionStorage.removeItem(UPDATE_TARGET_KEY);
-    }catch(_){}
-  };
+  const updateIsInProgress=()=>{const started=Number(sessionStorage.getItem(UPDATE_STARTED_KEY))||0;return started>0&&Date.now()-started<30000;};
+  const markUpdateStarted=version=>{try{sessionStorage.setItem(UPDATE_STARTED_KEY,String(Date.now()));sessionStorage.setItem(UPDATE_TARGET_KEY,version||targetId());}catch(_){}};
+  const clearUpdateState=()=>{try{sessionStorage.removeItem(UPDATE_STARTED_KEY);sessionStorage.removeItem(UPDATE_TARGET_KEY);}catch(_){}};
   const getVersion=worker=>new Promise(resolve=>{
-    if(!worker){resolve("");return;}
-    const channel=new MessageChannel();let done=false;
+    if(!worker){resolve("");return;}const channel=new MessageChannel();let done=false;
     const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(typeof value==="string"?value:"");};
-    const timer=setTimeout(()=>finish(""),1200);
-    channel.port1.onmessage=event=>finish(event.data&&event.data.version);
+    const timer=setTimeout(()=>finish(""),1200);channel.port1.onmessage=e=>finish(e.data&&e.data.version);
     try{worker.postMessage({type:"GET_VERSION"},[channel.port2]);}catch(_){finish("");}
   });
-  const reloadNow=()=>{
-    if(reloadTriggered)return;
-    reloadTriggered=true;
-    hideToast();
-    setTimeout(()=>location.reload(),60);
+  const showToast=target=>{
+    if(!target||isDeferred(target)){hideToast();scheduleDeferredRecheck();return;}
+    if(toast)toast.classList.add("show");
   };
+  const reloadNow=()=>{if(reloadTriggered)return;reloadTriggered=true;hideToast();setTimeout(()=>location.reload(),80);};
+  const requestShellRefresh=(worker,build)=>new Promise(resolve=>{
+    if(!worker){resolve(false);return;}const channel=new MessageChannel();let done=false;
+    const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(!!value);};
+    const timer=setTimeout(()=>finish(false),5000);channel.port1.onmessage=e=>finish(e.data&&e.data.ok);
+    try{worker.postMessage({type:"REFRESH_SHELL",build:build||""},[channel.port2]);}catch(_){finish(false);}
+  });
   const activateWaitingWorker=async worker=>{
     if(!worker||worker.state!=="installed")return false;
-    const version=await getVersion(worker)||"waiting-worker";
-    waitingWorker=worker;
-    markUpdateStarted(version);
-    // The banner must disappear the instant the person taps Update.
-    hideToast();
+    const version=await getVersion(worker)||targetId();waitingWorker=worker;markUpdateStarted(version);hideToast();clearDeferred();
     try{worker.postMessage({type:"SKIP_WAITING"});}catch(_){}
     if(fallbackTimer)clearTimeout(fallbackTimer);
-    fallbackTimer=setTimeout(async()=>{
-      // iOS standalone occasionally misses/delays controllerchange. Re-send the message
-      // once, then reload. The next page stays banner-free via UPDATE_STARTED_KEY.
-      try{
-        const latest=await navigator.serviceWorker.getRegistration("./");
-        if(latest&&latest.waiting)latest.waiting.postMessage({type:"SKIP_WAITING"});
-      }catch(_){}
-      reloadNow();
-    },2200);
+    fallbackTimer=setTimeout(async()=>{try{const latest=await navigator.serviceWorker.getRegistration("./");if(latest&&latest.waiting)latest.waiting.postMessage({type:"SKIP_WAITING"});}catch(_){}reloadNow();},2500);
     return true;
+  };
+  const readRemoteBuild=async()=>{
+    try{
+      const url=new URL("./index.html",location.href);url.searchParams.set("kyro_update_check",String(Date.now()));
+      const response=await fetch(url.href,{cache:"no-store",credentials:"same-origin",headers:{"Cache-Control":"no-cache"}});
+      if(!response.ok)return "";const text=await response.text();
+      return (text.match(/<meta\s+name=["']kyro-build["']\s+content=["']([^"']+)["']/i)||[])[1]||"";
+    }catch(_){return "";}
   };
   const reconcileUpdateState=async()=>{
     if(!registration){hideToast();return;}
     const worker=registration.waiting;
-    if(!worker||worker.state!=="installed"){
-      waitingWorker=null;
-      hideToast();
-      if(updateIsInProgress()){
-        const target=sessionStorage.getItem(UPDATE_TARGET_KEY)||"";
-        const active=await getVersion(navigator.serviceWorker.controller);
-        if(!target||!active||target===active)clearUpdateState();
-      }else{
-        clearUpdateState();
-      }
-      return;
+    if(worker&&worker.state==="installed"){
+      waitingWorker=worker;
+      const [candidate,active]=await Promise.all([getVersion(worker),getVersion(navigator.serviceWorker.controller)]);
+      if(candidate&&active&&candidate===active&&!remoteBuild){hideToast();clearUpdateState();return;}
+      if(updateIsInProgress()){hideToast();await activateWaitingWorker(worker);return;}
+      showToast(remoteBuild||candidate||"waiting-worker");return;
     }
-
-    waitingWorker=worker;
-    const [candidate,active]=await Promise.all([
-      getVersion(worker),
-      getVersion(navigator.serviceWorker.controller)
-    ]);
-    if(candidate&&active&&candidate===active){
-      hideToast();clearUpdateState();return;
-    }
-    if(updateIsInProgress()){
-      hideToast();
-      await activateWaitingWorker(worker);
-      return;
-    }
-    if(toast)toast.classList.add("show");
+    waitingWorker=null;
+    if(remoteBuild&&remoteBuild!==CURRENT_APP_BUILD){showToast(remoteBuild);return;}
+    hideToast();clearUpdateState();
   };
-  const applyUpdate=async()=>{
-    if(applying)return;
-    applying=true;
-    // Immediate visual response: never leave the update banner sitting on screen.
-    hideToast();
-    markUpdateStarted("");
+  async function checkForUpdates({force=false}={}){
+    if(checkInFlight||reloadTriggered||(!force&&document.visibilityState==="hidden"))return;
+    checkInFlight=true;
     try{
-      let worker=registration&&registration.waiting||waitingWorker;
-      if(!worker&&registration){
-        await registration.update().catch(()=>{});
-        worker=registration.waiting;
-      }
+      if(registration)await registration.update().catch(()=>{});
+      const latestBuild=await readRemoteBuild();
+      remoteBuild=latestBuild&&latestBuild!==CURRENT_APP_BUILD?latestBuild:"";
+      await reconcileUpdateState();
+    }finally{checkInFlight=false;}
+  }
+  const applyUpdate=async()=>{
+    if(applying)return;applying=true;hideToast();clearDeferred();markUpdateStarted(targetId());
+    if(btn){btn.disabled=true;btn.setAttribute("aria-busy","true");btn.textContent=t("update_installing");}
+    if(laterBtn)laterBtn.disabled=true;
+    try{
+      if(registration)await registration.update().catch(()=>{});
+      const worker=registration&&registration.waiting||waitingWorker;
       if(worker&&await activateWaitingWorker(worker))return;
-      // The update may already have activated between the tap and this line.
+      // HTML-only releases are still applied: refresh the cached shell before reloading.
+      await requestShellRefresh(navigator.serviceWorker.controller,remoteBuild||CURRENT_APP_BUILD);
       reloadNow();
-    }catch(error){
-      applying=false;
-      clearUpdateState();
-      hideToast();
-      if(APP_ENV.name==="development")console.warn("Falha ao aplicar atualização",error);
-    }
+    }catch(error){applying=false;clearUpdateState();hideToast();if(APP_ENV.name==="development")console.warn("Falha ao aplicar atualização",error);}
+  };
+  const deferUpdate=()=>{
+    const target=targetId();try{localStorage.setItem(DEFERRED_TARGET_KEY,target);localStorage.setItem(DEFERRED_UNTIL_KEY,String(Date.now()+DEFER_MS));}catch(_){}
+    hideToast();scheduleDeferredRecheck();
   };
 
-  hideToast();
-  if(btn)btn.onclick=applyUpdate;
+  hideToast();if(btn)btn.onclick=applyUpdate;if(laterBtn)laterBtn.onclick=deferUpdate;
   try{
     registration=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
-
-    // Continue an update silently after an iOS fallback reload.
-    if(updateIsInProgress()&&registration.waiting){
-      await activateWaitingWorker(registration.waiting);
-    }else{
-      await reconcileUpdateState();
-    }
-
-    registration.addEventListener("updatefound",()=>{
-      const worker=registration.installing;if(!worker)return;
-      worker.addEventListener("statechange",()=>{
-        if(worker.state==="installed")reconcileUpdateState().catch(hideToast);
-        else if(worker.state==="redundant")hideToast();
-      });
-    });
-
-    navigator.serviceWorker.addEventListener("controllerchange",()=>{
-      if(fallbackTimer)clearTimeout(fallbackTimer);
-      hideToast();
-      clearUpdateState();
-      reloadNow();
-    });
-
-    window.addEventListener("pageshow",()=>{
-      if(!reloadTriggered)reconcileUpdateState().catch(hideToast);
-    });
-    document.addEventListener("visibilitychange",()=>{
-      if(document.visibilityState==="visible"&&!reloadTriggered)reconcileUpdateState().catch(hideToast);
-    });
-    setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);
-    registration.update().catch(()=>{});
-  }catch(error){
-    hideToast();clearUpdateState();
-    if(APP_ENV.name==="development")console.warn("Service Worker não registrado",error);
-  }
+    if(updateIsInProgress()&&registration.waiting)await activateWaitingWorker(registration.waiting);else await checkForUpdates({force:true});
+    registration.addEventListener("updatefound",()=>{const worker=registration.installing;if(!worker)return;worker.addEventListener("statechange",()=>{if(worker.state==="installed")reconcileUpdateState().catch(hideToast);else if(worker.state==="redundant")hideToast();});});
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{if(fallbackTimer)clearTimeout(fallbackTimer);hideToast();clearUpdateState();clearDeferred();reloadNow();});
+    const checkNow=()=>{if(!reloadTriggered)checkForUpdates({force:true});};
+    window.addEventListener("pageshow",checkNow);window.addEventListener("focus",checkNow);window.addEventListener("online",checkNow);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkNow();});
+    checkTimer=setInterval(()=>checkForUpdates(),CHECK_INTERVAL_MS);
+    setTimeout(checkNow,4000);
+  }catch(error){hideToast();clearUpdateState();if(APP_ENV.name==="development")console.warn("Service Worker não registrado",error);}
 }
 window.addEventListener("load",registerKyroServiceWorker,{once:true});
 
@@ -10533,6 +10625,7 @@ function runSecuritySelfTests(){
 
 bindStaticSecurityEvents();
 bindDeleteAccountEvents();
+bindEmailVerificationEvents();
 initAuthScreenEvents();
 updateDocumentLanguage();
 applyAuthScreenTranslations();
@@ -10544,6 +10637,15 @@ let appInitialized = false;
 if(firebaseReady){
   fbAuth.onAuthStateChanged(async (user)=>{
     if(user){
+      currentUser=user;
+      if(requiresEmailVerification(user)){
+        appInitialized=false;
+        currentUserGrantedAdmin=false;
+        document.getElementById("appLoadingScreen").style.display="none";
+        showEmailVerificationScreen(user);
+        return;
+      }
+      hideEmailVerificationScreen();
       const shouldForceNewAccountOnboarding = consumeNextAuthOnboardingFlag() || isRecentlyCreatedFirebaseAccount(user);
       currentUser = user;
       currentUserGrantedAdmin = false; // reset immediately — never trust a stale admin state
@@ -10604,6 +10706,7 @@ if(firebaseReady){
       }
     } else {
       await teardownSession();
+      hideEmailVerificationScreen();
       showAuthScreen();
     }
   });
