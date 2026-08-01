@@ -518,11 +518,12 @@
   <form id="authForm">
     <div class="auth-field">
       <label id="authEmailLabel">Email</label>
-      <input type="email" id="authEmail" autocomplete="email" required>
+      <input type="email" id="authEmail" autocomplete="email" maxlength="254" required>
     </div>
     <div class="auth-field">
       <label id="authPasswordLabel">Senha</label>
-      <input type="password" id="authPassword" autocomplete="current-password" required minlength="6">
+      <input type="password" id="authPassword" autocomplete="current-password" required maxlength="128">
+      <div class="auth-pw-hint" id="authPwHint" style="display:none;font-size:12px;color:var(--text-dim,#8b9096);margin-top:6px;line-height:1.4"></div>
     </div>
     <button type="submit" class="auth-submit" id="authSubmit">Entrar</button>
   </form>
@@ -1798,6 +1799,12 @@ const UI_STRINGS = {
     confirm_delete_all_1:"Apagar TODOS os dados?", confirm_delete_all_2:"Tem certeza? Não dá para desfazer.",
     alert_backup_before_delete:"Por segurança, baixamos um backup dos seus dados antes de apagar. Confira a pasta de Downloads se precisar recuperar algo depois.",
     alert_import_error:"Erro ao importar", alert_import_success:"Importado com sucesso", alert_photo_save_error:"Erro ao salvar foto", alert_photo_no_file:"Nenhum arquivo de imagem válido foi selecionado.", alert_photo_too_large:"Essa imagem é grande demais (máximo 20MB).", alert_photo_svg_rejected:"Arquivos SVG não são aceitos como foto.", alert_photo_invalid_format:"Esse arquivo não parece ser uma imagem válida.", alert_photo_upload_pending:"Sua foto foi salva no aparelho, mas ainda não terminou de subir pra nuvem. Vamos tentar de novo quando a conexão melhorar.", alert_photo_upload_in_progress:"Já tem um envio de foto em andamento — aguarde terminar.", photo_pending_tag:"(enviando...)", alert_photo_delete_error:"Não foi possível apagar a foto agora. Tente de novo.", alert_duplicate_exercise_name:"Já existe um exercício chamado \"{name}\" no banco. Escolha um nome diferente.", alert_invalid_exercise_in_list:"O exercício #{index} (\"{name}\") está com dados inválidos. Corrija antes de salvar.", confirm_exercise_db_size_warning:"O banco de exercícios está ficando grande ({kb}KB). Isso ainda funciona, mas está se aproximando do limite do Firestore. Continuar mesmo assim?",
+    auth_password_requirements:"A senha precisa ter pelo menos {min} caracteres, com letras e números.",
+    auth_err_too_many_requests:"Muitas tentativas seguidas. Aguarde um pouco antes de tentar de novo.",
+    auth_err_popup_blocked:"O navegador bloqueou a janela do Google. Permita pop-ups para este site e tente de novo.",
+    auth_err_user_disabled:"Esta conta foi desativada. Entre em contato se acha que isso é um engano.",
+    auth_err_signup_disabled:"A criação de novas contas está temporariamente desativada.",
+    auth_enter_email_first:"Digite seu email no campo acima primeiro.",
     confirm_remove_exercise_named:"Remover \"{name}\" do treino de hoje?", confirm_remove_day_routine:"Remover toda a rotina de {day}?",
     confirm_apply_generated:"Aplicar esse treino gerado para {day}? Isso substitui a rotina atual desse dia.",
     confirm_apply_template:"Substituir toda a rotina da semana pelo template \"{name}\"? Seus pesos e histórico continuam salvos.",
@@ -1996,6 +2003,12 @@ const UI_STRINGS = {
     confirm_delete_all_1:"Delete ALL data?", confirm_delete_all_2:"Are you sure? This can't be undone.",
     alert_backup_before_delete:"For safety, we downloaded a backup of your data before deleting. Check your Downloads folder if you need to recover anything later.",
     alert_import_error:"Import error", alert_import_success:"Imported successfully", alert_photo_save_error:"Error saving photo", alert_photo_no_file:"No valid image file was selected.", alert_photo_too_large:"This image is too large (20MB max).", alert_photo_svg_rejected:"SVG files aren't accepted as photos.", alert_photo_invalid_format:"This file doesn't look like a valid image.", alert_photo_upload_pending:"Your photo was saved on this device but hasn't finished uploading to the cloud yet. We'll retry once your connection improves.", alert_photo_upload_in_progress:"A photo upload is already in progress — please wait for it to finish.", photo_pending_tag:"(uploading...)", alert_photo_delete_error:"Couldn't delete the photo right now. Please try again.", alert_duplicate_exercise_name:"There's already an exercise named \"{name}\" in the database. Choose a different name.", alert_invalid_exercise_in_list:"Exercise #{index} (\"{name}\") has invalid data. Fix it before saving.", confirm_exercise_db_size_warning:"The exercise database is getting large ({kb}KB). It still works, but it's approaching Firestore's limit. Continue anyway?",
+    auth_password_requirements:"Password must be at least {min} characters, with letters and numbers.",
+    auth_err_too_many_requests:"Too many attempts in a row. Please wait a bit before trying again.",
+    auth_err_popup_blocked:"Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.",
+    auth_err_user_disabled:"This account has been disabled. Contact support if you think this is a mistake.",
+    auth_err_signup_disabled:"New account creation is temporarily disabled.",
+    auth_enter_email_first:"Enter your email in the field above first.",
     confirm_remove_exercise_named:"Remove \"{name}\" from today's workout?", confirm_remove_day_routine:"Remove the entire routine for {day}?",
     confirm_apply_generated:"Apply this generated workout to {day}? This replaces the current routine for that day.",
     confirm_apply_template:"Replace the whole week's routine with the \"{name}\" template? Your weights and history stay saved.",
@@ -2632,6 +2645,25 @@ async function maybeMigrateLocalData(){
 // ---- Auth screen UI ----
 let authMode = "login";
 
+// Client-side password policy — this is a courtesy check for immediate feedback only.
+// It is NOT the real authority: the actual minimum password policy must be configured in
+// Firebase Authentication → Settings → Password policy, since a client-side check can
+// always be bypassed by calling the Firebase SDK directly.
+const AUTH_CONFIG = {
+  signupEnabled: true,
+  requireEmailVerification: false,
+  minPasswordLength: 10
+};
+
+function isPasswordStrongEnough(pw){
+  if(typeof pw !== "string" || pw.length < AUTH_CONFIG.minPasswordLength) return false;
+  return /[A-Za-z]/.test(pw) && /[0-9]/.test(pw);
+}
+
+// Maps Firebase Auth error codes to a small set of generic, user-facing messages.
+// Deliberately does NOT distinguish "no account with that email" from "wrong password" —
+// merging those into one message prevents an attacker from using the login form to figure
+// out which emails have accounts (account enumeration).
 function setAuthError(msg){
   const el = document.getElementById("authError");
   if(!msg){ el.classList.remove("show"); el.textContent = ""; return; }
@@ -2641,6 +2673,9 @@ function setAuthError(msg){
 
 function translateAuthError(msg){
   const m = String(msg);
+  if(/too-many-requests/i.test(m)) return t("auth_err_too_many_requests");
+  if(/popup-blocked/i.test(m)) return t("auth_err_popup_blocked");
+  if(/user-disabled/i.test(m)) return t("auth_err_user_disabled");
   if(/user-not-found|wrong-password|invalid-credential/i.test(m)) return t("auth_err_wrong_credentials");
   if(/email-already-in-use/i.test(m)) return t("auth_err_email_in_use");
   if(/weak-password/i.test(m)) return t("auth_err_weak_password");
@@ -2655,7 +2690,17 @@ function setAuthMode(mode){
   document.querySelectorAll(".auth-tab").forEach(t=> t.classList.toggle("active", t.dataset.authtab===mode));
   document.getElementById("authSubmit").textContent = mode==="login" ? t("auth_login_btn") : t("auth_signup_btn");
   document.getElementById("authForgot").style.display = mode==="login" ? "block" : "none";
-  document.getElementById("authPassword").autocomplete = mode==="login" ? "current-password" : "new-password";
+  const pwInput = document.getElementById("authPassword");
+  pwInput.autocomplete = mode==="login" ? "current-password" : "new-password";
+  const hint = document.getElementById("authPwHint");
+  if(mode === "signup"){
+    pwInput.minLength = AUTH_CONFIG.minPasswordLength;
+    hint.textContent = tFmt("auth_password_requirements", {min: AUTH_CONFIG.minPasswordLength});
+    hint.style.display = "block";
+  } else {
+    pwInput.removeAttribute("minlength"); // never block an existing account's login on length
+    hint.style.display = "none";
+  }
   setAuthError(null);
 }
 
@@ -2676,41 +2721,81 @@ function initAuthScreenEvents(){
     tab.addEventListener("click", ()=> setAuthMode(tab.dataset.authtab));
   });
 
+  let authSubmitting = false;
   document.getElementById("authForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
+    if(authSubmitting) return; // guards against a double-tap firing two concurrent requests
     if(!firebaseReady){ setAuthError(null); alert(t("alert_firebase_not_configured")); return; }
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value;
+    const email = document.getElementById("authEmail").value.trim().toLowerCase().slice(0,254);
+    const password = document.getElementById("authPassword").value.slice(0,128);
     setAuthError(null);
+
+    if(authMode === "signup" && !isPasswordStrongEnough(password)){
+      setAuthError(tFmt("auth_password_requirements", {min: AUTH_CONFIG.minPasswordLength}));
+      return;
+    }
+
+    authSubmitting = true;
+    const submitBtn = document.getElementById("authSubmit");
+    submitBtn.disabled = true;
     document.getElementById("authLoading").classList.add("show");
     try{
       if(authMode==="login"){
         await fbAuth.signInWithEmailAndPassword(email, password);
       } else {
+        if(!AUTH_CONFIG.signupEnabled){ setAuthError(t("auth_err_signup_disabled")); return; }
         await fbAuth.createUserWithEmailAndPassword(email, password);
       }
-    }catch(err){ setAuthError(err.message); }
-    document.getElementById("authLoading").classList.remove("show");
+    }catch(err){
+      console.error("auth error", err && err.code); // never logs the password/credential itself
+      setAuthError(err && (err.code || err.message));
+    }finally{
+      authSubmitting = false;
+      submitBtn.disabled = false;
+      document.getElementById("authLoading").classList.remove("show");
+    }
   });
 
+  let googleSubmitting = false;
   document.getElementById("authGoogle").addEventListener("click", async ()=>{
+    if(googleSubmitting) return;
     if(!firebaseReady){ alert(t("alert_firebase_not_configured")); return; }
     setAuthError(null);
+    googleSubmitting = true;
+    document.getElementById("authGoogle").disabled = true;
     document.getElementById("authLoading").classList.add("show");
     try{
       const provider = new firebase.auth.GoogleAuthProvider();
       await fbAuth.signInWithPopup(provider);
-    }catch(err){ setAuthError(err.message); }
-    document.getElementById("authLoading").classList.remove("show");
+    }catch(err){
+      console.error("google auth error", err && err.code);
+      setAuthError(err && (err.code || err.message));
+    }finally{
+      googleSubmitting = false;
+      document.getElementById("authGoogle").disabled = false;
+      document.getElementById("authLoading").classList.remove("show");
+    }
   });
 
+  let forgotSubmitting = false;
   document.getElementById("authForgot").addEventListener("click", async ()=>{
-    const email = document.getElementById("authEmail").value.trim();
-    if(!email){ setAuthError("Digite seu email no campo acima primeiro."); return; }
+    if(forgotSubmitting) return;
+    const email = document.getElementById("authEmail").value.trim().toLowerCase().slice(0,254);
+    if(!email){ setAuthError(t("auth_enter_email_first")); return; }
+    forgotSubmitting = true;
+    document.getElementById("authForgot").disabled = true;
     try{
       await fbAuth.sendPasswordResetEmail(email);
-      alert(tFmt("alert_reset_pw_sent",{email}));
-    }catch(err){ setAuthError(err.message); }
+    }catch(err){
+      console.error("password reset error", err && err.code);
+      // Deliberately shown regardless of success/failure (except for a clearly-malformed
+      // email or a rate limit) — confirming or denying that an email has an account here
+      // would be exactly the enumeration this is meant to avoid.
+      if(err && err.code === "auth/too-many-requests"){ setAuthError(t("auth_err_too_many_requests")); forgotSubmitting=false; document.getElementById("authForgot").disabled=false; return; }
+    }
+    alert(tFmt("alert_reset_pw_sent",{email}));
+    forgotSubmitting = false;
+    document.getElementById("authForgot").disabled = false;
   });
 }
 
