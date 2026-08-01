@@ -1,5 +1,6 @@
 /* KYRO service worker — bilingual fast-start build */
-const CACHE_VERSION = "kyro-shell-2026-08-01-premium-dialogs-v6";
+const SW_VERSION = "2026-08-01-account-delete-v8";
+const CACHE_VERSION = "kyro-shell-" + SW_VERSION;
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));
 const SHELL_ASSETS = [
@@ -44,6 +45,11 @@ self.addEventListener("activate",event=>{
 });
 
 self.addEventListener("message",event=>{
+  if(event.data&&event.data.type==="GET_VERSION"){
+    const port=event.ports&&event.ports[0];
+    if(port) port.postMessage({type:"KYRO_SW_VERSION",version:SW_VERSION});
+    return;
+  }
   if(event.data&&event.data.type==="SKIP_WAITING") event.waitUntil(self.skipWaiting());
   if(event.data&&event.data.type==="SET_LANGUAGE") event.waitUntil(saveLanguage(event.data.language));
 });

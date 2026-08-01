@@ -636,6 +636,35 @@
   .kyro-dialog-spark.s2{right:9%;top:32%;animation:kyroSpark 3.1s .5s ease-in-out infinite}
   .kyro-dialog-spark.s3{right:15%;bottom:31%;animation:kyroSpark 2.5s .9s ease-in-out infinite}
   @keyframes kyroDialogIconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+
+  /* ---- Permanent account deletion ---- */
+  .delete-account-layer[hidden]{display:none!important}
+  .delete-account-layer{position:fixed;inset:0;z-index:12050;display:flex;align-items:center;justify-content:center;padding:18px;isolation:isolate}
+  .delete-account-backdrop{position:absolute;inset:0;background:rgba(2,3,5,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;transition:opacity .24s ease}
+  .delete-account-panel{--delete-accent:#ff4d5e;position:relative;width:min(100%,430px);max-height:min(88dvh,760px);overflow:auto;border:1px solid rgba(255,77,94,.62);border-radius:24px;padding:23px 20px 20px;background:radial-gradient(circle at 50% -15%,rgba(255,77,94,.17),transparent 42%),linear-gradient(165deg,rgba(30,20,24,.98),rgba(11,12,14,.99));box-shadow:0 24px 80px rgba(0,0,0,.72),0 0 38px rgba(255,77,94,.16);transform:translateY(18px) scale(.965);opacity:0;transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .22s ease;-webkit-overflow-scrolling:touch}
+  .delete-account-layer.show .delete-account-backdrop{opacity:1}.delete-account-layer.show .delete-account-panel{transform:none;opacity:1}
+  .delete-account-close{position:absolute;right:13px;top:13px;width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--dim);font-size:20px;display:grid;place-items:center;cursor:pointer}
+  .delete-account-close:disabled{opacity:.25;cursor:not-allowed}
+  .delete-account-icon{width:62px;height:62px;margin:2px auto 15px;border-radius:50%;display:grid;place-items:center;font-size:29px;border:1px solid rgba(255,77,94,.78);background:rgba(255,77,94,.09);box-shadow:0 0 0 8px rgba(255,77,94,.045),0 0 30px rgba(255,77,94,.19);animation:kyroDialogIconFloat 2.4s ease-in-out infinite}
+  .delete-account-title{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1.02;letter-spacing:.035em;text-align:center;margin:0;color:#fff}.delete-account-title span{color:var(--delete-accent)}
+  .delete-account-copy{font-size:13.5px;line-height:1.6;text-align:center;color:#b8bcc1;margin:14px 0 17px}
+  .delete-account-impact{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .delete-account-impact span{display:flex;align-items:center;gap:7px;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.025);font-size:11.5px;color:#d6d8db}
+  .delete-account-field{display:block;margin-top:12px}.delete-account-field>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#aeb2b8;margin:0 0 7px 2px;font-weight:700}
+  .delete-account-field input{width:100%;min-height:48px;border-radius:13px;border:1px solid #353941;background:#111318;color:#fff;padding:12px 14px;font-family:'Space Grotesk',sans-serif;font-size:16px;outline:none;transition:border-color .2s,box-shadow .2s}
+  .delete-account-field input:focus{border-color:rgba(255,77,94,.72);box-shadow:0 0 0 3px rgba(255,77,94,.10)}
+  .delete-account-field input::placeholder{color:#656a72}
+  .delete-account-provider-note{margin:12px 0 0;padding:11px 12px;border-radius:12px;border:1px solid rgba(77,195,255,.22);background:rgba(77,195,255,.055);color:#b9c7d0;font-size:12px;line-height:1.5}
+  .delete-account-progress{margin-top:17px;padding:13px;border-radius:14px;border:1px solid rgba(255,77,94,.18);background:rgba(0,0,0,.19)}
+  .delete-account-progress[hidden]{display:none}.delete-account-progress-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.delete-account-progress-label{font-size:12px;color:#d8dade}.delete-account-progress-pct{font-family:'JetBrains Mono',monospace;font-size:12px;color:#ff7d89}
+  .delete-account-progress-track{height:7px;border-radius:99px;overflow:hidden;background:#262930}.delete-account-progress-bar{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#a52b38,#ff4d5e,#ff8490);box-shadow:0 0 14px rgba(255,77,94,.38);transition:width .28s ease}
+  .delete-account-error{display:none;margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(255,77,94,.09);border:1px solid rgba(255,77,94,.24);color:#ffafb7;font-size:12px;line-height:1.45}.delete-account-error.show{display:block}
+  .delete-account-actions{display:grid;grid-template-columns:1fr 1.2fr;gap:10px;margin-top:18px}.delete-account-actions button{min-height:48px;border-radius:13px;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:13px;cursor:pointer}
+  .delete-account-cancel{background:#17191d;border:1px solid #343840;color:#d9dce0}.delete-account-confirm{border:1px solid #ff5e6e;background:linear-gradient(135deg,#ff4d5e,#d63042);color:#fff;box-shadow:0 10px 25px rgba(255,77,94,.17)}
+  .delete-account-confirm:disabled{opacity:.36;filter:saturate(.5);cursor:not-allowed;box-shadow:none}.delete-account-actions button[aria-busy="true"]{cursor:wait}
+  body.delete-account-open{overflow:hidden;touch-action:none}
+  @media(max-width:390px){.delete-account-impact{grid-template-columns:1fr}.delete-account-panel{padding:21px 16px 17px}.delete-account-actions{grid-template-columns:1fr}}
   @keyframes kyroSpark{0%,100%{opacity:.18;transform:scale(.65)}50%{opacity:1;transform:scale(1.35)}}
   @media(max-width:390px){.kyro-dialog-panel{padding:25px 18px 18px;border-radius:24px}.kyro-dialog-actions{gap:8px}.kyro-dialog-btn{min-height:49px;padding:10px 11px}}
   @media(prefers-reduced-motion:reduce){.kyro-dialog-panel,.kyro-dialog-layer{transition:none}.kyro-dialog-icon,.kyro-dialog-spark{animation:none}}
@@ -865,6 +894,40 @@
   </section>
 </div>
 
+<div id="deleteAccountLayer" class="delete-account-layer" hidden>
+  <div class="delete-account-backdrop" id="deleteAccountBackdrop"></div>
+  <section class="delete-account-panel" id="deleteAccountPanel" role="dialog" aria-modal="true" aria-labelledby="deleteAccountTitle" aria-describedby="deleteAccountBody" tabindex="-1">
+    <button type="button" class="delete-account-close" id="deleteAccountClose" aria-label="Close">×</button>
+    <div class="delete-account-icon" aria-hidden="true">🗑️</div>
+    <h2 class="delete-account-title" id="deleteAccountTitle"></h2>
+    <p class="delete-account-copy" id="deleteAccountBody"></p>
+    <div class="delete-account-impact" aria-hidden="true">
+      <span id="deleteImpactWorkouts">🏋️ Treinos e rotinas</span>
+      <span id="deleteImpactProgress">📈 Peso e progresso</span>
+      <span id="deleteImpactPhotos">📸 Fotos</span>
+      <span id="deleteImpactAccount">👤 Conta de acesso</span>
+    </div>
+    <label class="delete-account-field">
+      <span id="deleteAccountPhraseLabel"></span>
+      <input id="deleteAccountPhrase" type="text" maxlength="16" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    </label>
+    <label class="delete-account-field" id="deleteAccountPasswordWrap" hidden>
+      <span id="deleteAccountPasswordLabel"></span>
+      <input id="deleteAccountPassword" type="password" maxlength="4096" autocomplete="current-password">
+    </label>
+    <p class="delete-account-provider-note" id="deleteAccountProviderNote" hidden></p>
+    <div class="delete-account-progress" id="deleteAccountProgress" hidden>
+      <div class="delete-account-progress-top"><span class="delete-account-progress-label" id="deleteAccountProgressLabel"></span><span class="delete-account-progress-pct" id="deleteAccountProgressPct">0%</span></div>
+      <div class="delete-account-progress-track" role="progressbar" id="deleteAccountProgressTrack" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="delete-account-progress-bar" id="deleteAccountProgressBar"></div></div>
+    </div>
+    <div class="delete-account-error" id="deleteAccountError" role="alert"></div>
+    <div class="delete-account-actions">
+      <button type="button" class="delete-account-cancel" id="deleteAccountCancel"></button>
+      <button type="button" class="delete-account-confirm" id="deleteAccountConfirm" disabled><span id="deleteAccountConfirmText"></span></button>
+    </div>
+  </section>
+</div>
+
 <div class="first-run-tour" id="firstRunOnboarding" hidden role="dialog" aria-modal="true" aria-labelledby="firstRunTitle">
   <div class="first-run-card">
     <div class="first-run-top">
@@ -1090,6 +1153,8 @@
         <div class="settings-group-title" id="lblContaGroup">Conta</div>
         <div class="settings-row" id="accountRow"><div class="settings-label">—</div></div>
         <button class="settings-btn danger" id="logoutBtn">🚪 Sair da conta</button>
+        <button class="settings-btn danger" id="deleteAccountBtn">🗑 Excluir minha conta e dados</button>
+        <div id="deleteAccountHint" style="font-size:11.5px;color:var(--dim);line-height:1.45;padding:1px 3px 3px"></div>
       </div>
 
       <div class="settings-group">
@@ -2032,7 +2097,15 @@ const UI_STRINGS = {
     swap_auto:"Trocar automaticamente", swap:"↔️ Trocar", notes_btn:"📝", shuffle_btn:"🔀",
     remove_exercise:"Remover exercício", warmup_label:"🎯",
     settings_account:"Conta", settings_app:"App", settings_data:"Dados",
-    logout:"🚪 Sair da conta", export_backup:"⬇️ Exportar backup", import_data:"⬆️ Importar dados",
+    logout:"🚪 Sair da conta", delete_account:"🗑 Excluir minha conta e dados", delete_account_hint:"Exclui permanentemente sua conta, treinos, progresso, nutrição e fotos.",
+    delete_account_title:"EXCLUIR <span>CONTA?</span>", delete_account_body:"Esta ação é permanente e apaga suas informações do KYRO. Não será possível recuperar os dados depois.",
+    delete_account_phrase_label:"Digite EXCLUIR para confirmar", delete_account_phrase_placeholder:"EXCLUIR", delete_account_password_label:"Sua senha atual", delete_account_password_placeholder:"Digite sua senha",
+    delete_account_google_note:"Para proteger sua conta, o Google pedirá uma confirmação de identidade antes da exclusão.", delete_account_cancel:"Manter minha conta", delete_account_confirm:"Excluir para sempre",
+    delete_account_impact_workouts:"🏋️ Treinos e rotinas", delete_account_impact_progress:"📈 Peso e progresso", delete_account_impact_photos:"📸 Fotos", delete_account_impact_account:"👤 Conta de acesso",
+    delete_account_progress_auth:"Confirmando sua identidade…", delete_account_progress_photos:"Excluindo suas fotos…", delete_account_progress_data:"Excluindo seus dados…", delete_account_progress_profile:"Removendo seu perfil…", delete_account_progress_account:"Excluindo sua conta…", delete_account_progress_done:"Conta excluída",
+    delete_account_error_phrase:"Digite EXCLUIR exatamente como mostrado.", delete_account_error_password:"Digite sua senha atual.", delete_account_error_wrong_password:"A senha está incorreta. Confira e tente novamente.", delete_account_error_popup:"A confirmação do Google não foi concluída. Tente novamente.", delete_account_error_recent:"Confirme sua identidade novamente para excluir a conta.",
+    delete_account_error_permission:"A regra do Firestore ainda não permite excluir o próprio perfil. Publique a regra de exclusão de conta antes de tentar novamente.", delete_account_error_generic:"Não foi possível concluir a exclusão agora. Nenhuma conta foi removida. Tente novamente.", delete_account_error_partial:"Seus dados foram removidos, mas a conta não pôde ser finalizada. Entre novamente e tente a exclusão mais uma vez.", delete_account_success:"Sua conta e seus dados foram excluídos permanentemente.",
+    export_backup:"⬇️ Exportar backup", import_data:"⬆️ Importar dados",
     delete_all:"🗑 Apagar todos os dados", clear_cache:"🧹 Limpar cache técnico (não apaga seus dados)",
     export_csv:"📊 Exportar CSV (planilha)", about_footer:"KYRO · v3.0 · treino profissional em um app",
     try_again:"Tentar de novo",
@@ -2389,7 +2462,15 @@ const UI_STRINGS = {
     swap_auto:"Auto-swap", swap:"↔️ Swap", notes_btn:"📝", shuffle_btn:"🔀",
     remove_exercise:"Remove exercise", warmup_label:"🎯",
     settings_account:"Account", settings_app:"App", settings_data:"Data",
-    logout:"🚪 Sign out", export_backup:"⬇️ Export backup", import_data:"⬆️ Import data",
+    logout:"🚪 Sign out", delete_account:"🗑 Delete my account and data", delete_account_hint:"Permanently deletes your account, workouts, progress, nutrition, and photos.",
+    delete_account_title:"DELETE <span>ACCOUNT?</span>", delete_account_body:"This action is permanent and removes your KYRO information. Your data cannot be recovered afterward.",
+    delete_account_phrase_label:"Type DELETE to confirm", delete_account_phrase_placeholder:"DELETE", delete_account_password_label:"Your current password", delete_account_password_placeholder:"Enter your password",
+    delete_account_google_note:"To protect your account, Google will ask you to confirm your identity before deletion.", delete_account_cancel:"Keep my account", delete_account_confirm:"Delete forever",
+    delete_account_impact_workouts:"🏋️ Workouts and routines", delete_account_impact_progress:"📈 Weight and progress", delete_account_impact_photos:"📸 Photos", delete_account_impact_account:"👤 Sign-in account",
+    delete_account_progress_auth:"Confirming your identity…", delete_account_progress_photos:"Deleting your photos…", delete_account_progress_data:"Deleting your data…", delete_account_progress_profile:"Removing your profile…", delete_account_progress_account:"Deleting your account…", delete_account_progress_done:"Account deleted",
+    delete_account_error_phrase:"Type DELETE exactly as shown.", delete_account_error_password:"Enter your current password.", delete_account_error_wrong_password:"That password is incorrect. Check it and try again.", delete_account_error_popup:"Google confirmation was not completed. Please try again.", delete_account_error_recent:"Confirm your identity again to delete the account.",
+    delete_account_error_permission:"The Firestore rule does not yet allow users to delete their own profile. Publish the account-deletion rule before trying again.", delete_account_error_generic:"The deletion could not be completed right now. No account was removed. Please try again.", delete_account_error_partial:"Your data was removed, but the account could not be finalized. Sign in again and retry account deletion.", delete_account_success:"Your account and data have been permanently deleted.",
+    export_backup:"⬇️ Export backup", import_data:"⬆️ Import data",
     delete_all:"🗑 Delete all data", clear_cache:"🧹 Clear technical cache (does not delete your data)",
     export_csv:"📊 Export CSV (spreadsheet)", about_footer:"KYRO · v3.0 · professional training in one app",
     try_again:"Try again",
@@ -2930,6 +3011,206 @@ window.kyroAlert=kyroAlert;
 window.kyroConfirm=kyroConfirm;
 // Existing alert() calls throughout KYRO automatically use the premium dialog.
 window.alert=function(message){ void kyroAlert(message); };
+
+
+// ==================== SELF-SERVICE ACCOUNT DELETION ====================
+// The deletion order is deliberate:
+// 1) reauthenticate, 2) delete Storage, 3) delete personal Firestore docs,
+// 4) delete sharedUsers profile, 5) delete Firebase Auth account.
+// Firestore must allow a signed-in user to delete their own sharedUsers/{uid} document.
+let deleteAccountBusy=false;
+let deleteAccountProvider="password";
+let deleteAccountLastFocus=null;
+
+function deleteAccountExpectedPhrase(){ return currentLang==="en" ? "DELETE" : "EXCLUIR"; }
+function deleteAccountElements(){
+  const ids=["deleteAccountLayer","deleteAccountPanel","deleteAccountBackdrop","deleteAccountClose","deleteAccountTitle","deleteAccountBody","deleteAccountPhraseLabel","deleteAccountPhrase","deleteAccountPasswordWrap","deleteAccountPasswordLabel","deleteAccountPassword","deleteAccountProviderNote","deleteAccountProgress","deleteAccountProgressLabel","deleteAccountProgressPct","deleteAccountProgressTrack","deleteAccountProgressBar","deleteAccountError","deleteAccountCancel","deleteAccountConfirm","deleteAccountConfirmText"];
+  return Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
+}
+function updateDeleteAccountTranslations(){
+  const e=deleteAccountElements();
+  if(!e.deleteAccountLayer) return;
+  e.deleteAccountTitle.innerHTML=t("delete_account_title");
+  e.deleteAccountBody.textContent=t("delete_account_body");
+  e.deleteAccountPhraseLabel.textContent=t("delete_account_phrase_label");
+  e.deleteAccountPhrase.placeholder=t("delete_account_phrase_placeholder");
+  e.deleteAccountPasswordLabel.textContent=t("delete_account_password_label");
+  e.deleteAccountPassword.placeholder=t("delete_account_password_placeholder");
+  e.deleteAccountProviderNote.textContent=t("delete_account_google_note");
+  e.deleteAccountCancel.textContent=t("delete_account_cancel");
+  e.deleteAccountConfirmText.textContent=t("delete_account_confirm");
+  const impactMap={deleteImpactWorkouts:"delete_account_impact_workouts",deleteImpactProgress:"delete_account_impact_progress",deleteImpactPhotos:"delete_account_impact_photos",deleteImpactAccount:"delete_account_impact_account"};
+  Object.entries(impactMap).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.textContent=t(key);});
+  e.deleteAccountClose.setAttribute("aria-label",currentLang==="en"?"Close":"Fechar");
+  refreshDeleteAccountConfirmState();
+}
+function setDeleteAccountError(message=""){
+  const el=document.getElementById("deleteAccountError");
+  if(!el)return;el.textContent=message;el.classList.toggle("show",!!message);
+}
+function setDeleteAccountProgress(percent,labelKey){
+  const e=deleteAccountElements();
+  const pct=Math.max(0,Math.min(100,Math.round(Number(percent)||0)));
+  e.deleteAccountProgress.hidden=false;
+  e.deleteAccountProgressLabel.textContent=t(labelKey);
+  e.deleteAccountProgressPct.textContent=pct+"%";
+  e.deleteAccountProgressBar.style.width=pct+"%";
+  e.deleteAccountProgressTrack.setAttribute("aria-valuenow",String(pct));
+}
+function refreshDeleteAccountConfirmState(){
+  const e=deleteAccountElements();
+  if(!e.deleteAccountConfirm)return;
+  const phrase=(e.deleteAccountPhrase.value||"").trim().toLocaleUpperCase(currentLang==="en"?"en-US":"pt-BR");
+  const phraseOk=phrase===deleteAccountExpectedPhrase();
+  const passwordOk=deleteAccountProvider!=="password"||!!e.deleteAccountPassword.value;
+  e.deleteAccountConfirm.disabled=deleteAccountBusy||!phraseOk||!passwordOk;
+}
+function detectDeleteAccountProvider(user){
+  const ids=(user&&Array.isArray(user.providerData)?user.providerData:[]).map(item=>item&&item.providerId).filter(Boolean);
+  if(ids.includes("google.com"))return "google";
+  if(ids.includes("password"))return "password";
+  return ids[0]||"password";
+}
+function openDeleteAccountDialog(){
+  if(!currentUser||deleteAccountBusy)return;
+  const e=deleteAccountElements();if(!e.deleteAccountLayer)return;
+  deleteAccountProvider=detectDeleteAccountProvider(currentUser);
+  deleteAccountLastFocus=document.activeElement;
+  e.deleteAccountPhrase.value="";e.deleteAccountPassword.value="";
+  e.deleteAccountPasswordWrap.hidden=deleteAccountProvider!=="password";
+  e.deleteAccountProviderNote.hidden=deleteAccountProvider!=="google";
+  e.deleteAccountProgress.hidden=true;e.deleteAccountProgressBar.style.width="0%";e.deleteAccountProgressPct.textContent="0%";
+  setDeleteAccountError("");updateDeleteAccountTranslations();
+  e.deleteAccountLayer.hidden=false;document.body.classList.add("delete-account-open");
+  requestAnimationFrame(()=>{e.deleteAccountLayer.classList.add("show");setTimeout(()=>e.deleteAccountPhrase.focus({preventScroll:true}),100);});
+}
+function closeDeleteAccountDialog(force=false){
+  if(deleteAccountBusy&&!force)return;
+  const e=deleteAccountElements();if(!e.deleteAccountLayer)return;
+  e.deleteAccountLayer.classList.remove("show");document.body.classList.remove("delete-account-open");
+  setTimeout(()=>{e.deleteAccountLayer.hidden=true;if(deleteAccountLastFocus&&typeof deleteAccountLastFocus.focus==="function")try{deleteAccountLastFocus.focus({preventScroll:true});}catch(_){}},230);
+}
+function setDeleteAccountBusy(busy){
+  deleteAccountBusy=busy;
+  const e=deleteAccountElements();
+  [e.deleteAccountPhrase,e.deleteAccountPassword,e.deleteAccountCancel,e.deleteAccountClose].forEach(el=>{if(el)el.disabled=busy;});
+  if(e.deleteAccountConfirm){e.deleteAccountConfirm.setAttribute("aria-busy",busy?"true":"false");}
+  refreshDeleteAccountConfirmState();
+}
+async function reauthenticateForAccountDeletion(user){
+  if(deleteAccountProvider==="google"){
+    const provider=new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:"select_account"});
+    await user.reauthenticateWithPopup(provider);
+    return;
+  }
+  if(deleteAccountProvider==="password"){
+    const password=document.getElementById("deleteAccountPassword").value;
+    const credential=firebase.auth.EmailAuthProvider.credential(user.email,password);
+    await user.reauthenticateWithCredential(credential);
+    return;
+  }
+  // Unknown linked provider: force a fresh token check and let Firebase return a
+  // clear requires-recent-login error rather than deleting anything prematurely.
+  await user.getIdToken(true);
+}
+async function deleteStorageTree(ref){
+  const result=await ref.listAll();
+  for(const item of result.items){try{await item.delete();}catch(error){if(!(error&&error.code==="storage/object-not-found"))throw error;}}
+  for(const prefix of result.prefixes)await deleteStorageTree(prefix);
+}
+async function deleteOwnStorageData(uid){
+  if(!fbStorage)return;
+  const root=fbStorage.ref().child(`users/${uid}`);
+  try{await deleteStorageTree(root);}catch(error){if(error&&["storage/object-not-found","storage/unauthorized"].includes(error.code)){if(error.code==="storage/object-not-found")return;}throw error;}
+}
+async function deleteOwnFirestoreData(uid){
+  const collection=fbDb.collection("users").doc(uid).collection("data");
+  // Firestore batches are capped at 500 operations. Use smaller pages and keep
+  // deleting until the personal collection is empty.
+  for(let guard=0;guard<100;guard++){
+    const snapshot=await withTimeout(collection.limit(400).get(),15000,"account-delete:data-list");
+    if(snapshot.empty)return;
+    const batch=fbDb.batch();snapshot.docs.forEach(doc=>batch.delete(doc.ref));
+    await withTimeout(batch.commit(),20000,"account-delete:data-batch");
+  }
+  throw new Error("account-delete:data-limit");
+}
+function clearDeletedAccountLocalData(uid){
+  if(!uid)return;
+  const prefixes=[`${LOCAL_DATA_CONFIG.namespace}:cache:${uid}:`,`${LOCAL_DATA_CONFIG.namespace}:meta:${uid}`,`${LOCAL_DATA_CONFIG.namespace}:pending:${uid}`,`kyro_pending_photos_${uid}`];
+  Object.keys(localStorage).forEach(key=>{if(prefixes.some(prefix=>key===prefix||key.startsWith(prefix)))localStorage.removeItem(key);});
+}
+function accountDeleteErrorMessage(error,stage){
+  const code=error&&error.code||"";
+  if(code==="auth/wrong-password"||code==="auth/invalid-credential")return t("delete_account_error_wrong_password");
+  if(code==="auth/popup-closed-by-user"||code==="auth/cancelled-popup-request"||code==="auth/popup-blocked")return t("delete_account_error_popup");
+  if(code==="auth/requires-recent-login")return t("delete_account_error_recent");
+  if(code==="permission-denied"||code==="firestore/permission-denied")return t("delete_account_error_permission");
+  if(stage==="auth-delete")return t("delete_account_error_partial");
+  return t("delete_account_error_generic");
+}
+async function performAccountDeletion(){
+  const e=deleteAccountElements();
+  if(deleteAccountBusy||!currentUser)return;
+  const expected=deleteAccountExpectedPhrase();
+  if((e.deleteAccountPhrase.value||"").trim().toLocaleUpperCase(currentLang==="en"?"en-US":"pt-BR")!==expected){setDeleteAccountError(t("delete_account_error_phrase"));return;}
+  if(deleteAccountProvider==="password"&&!e.deleteAccountPassword.value){setDeleteAccountError(t("delete_account_error_password"));return;}
+
+  const user=currentUser,uid=user.uid,email=(user.email||"").toLowerCase();
+  let stage="reauth";
+  setDeleteAccountBusy(true);setDeleteAccountError("");setDeleteAccountProgress(5,"delete_account_progress_auth");
+  try{
+    await reauthenticateForAccountDeletion(user);
+    if(!fbAuth.currentUser||fbAuth.currentUser.uid!==uid)throw new Error("account-delete:user-changed");
+
+    stage="storage";setDeleteAccountProgress(22,"delete_account_progress_photos");
+    await deleteOwnStorageData(uid);
+
+    stage="firestore-data";setDeleteAccountProgress(50,"delete_account_progress_data");
+    await deleteOwnFirestoreData(uid);
+
+    stage="profile";setDeleteAccountProgress(76,"delete_account_progress_profile");
+    await withTimeout(fbDb.collection("sharedUsers").doc(uid).delete(),12000,"account-delete:profile");
+
+    stage="auth-delete";setDeleteAccountProgress(90,"delete_account_progress_account");
+    try{
+      await user.delete();
+    }catch(error){
+      // The session was reauthenticated immediately before deletion, so this is
+      // uncommon. Restore only the access profile so the person can sign in and
+      // retry instead of being locked out with an orphaned Auth account.
+      try{await fbDb.collection("sharedUsers").doc(uid).set({email,createdAt:new Date().toISOString(),blocked:false});}catch(_){}
+      throw error;
+    }
+
+    clearDeletedAccountLocalData(uid);
+    setDeleteAccountProgress(100,"delete_account_progress_done");
+    await new Promise(resolve=>setTimeout(resolve,450));
+    setDeleteAccountBusy(false);closeDeleteAccountDialog(true);
+    await teardownSession();showAuthScreen();
+    void kyroAlert(t("delete_account_success"),{type:"success",icon:"✓"});
+  }catch(error){
+    console.error("Account deletion failed at",stage,error&&error.code,error);
+    setDeleteAccountBusy(false);
+    setDeleteAccountError(accountDeleteErrorMessage(error,stage));
+    e.deleteAccountProgress.hidden=true;
+  }
+}
+function bindDeleteAccountEvents(){
+  const e=deleteAccountElements();if(!e.deleteAccountLayer)return;
+  e.deleteAccountPhrase.addEventListener("input",()=>{setDeleteAccountError("");refreshDeleteAccountConfirmState();});
+  e.deleteAccountPassword.addEventListener("input",()=>{setDeleteAccountError("");refreshDeleteAccountConfirmState();});
+  e.deleteAccountCancel.addEventListener("click",()=>closeDeleteAccountDialog());
+  e.deleteAccountClose.addEventListener("click",()=>closeDeleteAccountDialog());
+  e.deleteAccountBackdrop.addEventListener("click",()=>closeDeleteAccountDialog());
+  e.deleteAccountConfirm.addEventListener("click",performAccountDeletion);
+  e.deleteAccountPanel.addEventListener("keydown",event=>{
+    if(event.key==="Escape"){event.preventDefault();closeDeleteAccountDialog();}
+    if(event.key==="Enter"&&!e.deleteAccountConfirm.disabled){event.preventDefault();performAccountDeletion();}
+  });
+  updateDeleteAccountTranslations();
+}
 
 
 // ==================== FIRST-RUN ONBOARDING ====================
@@ -5168,6 +5449,9 @@ function applyStaticTranslations(){
   document.querySelector('label[for="importInput"]').textContent = t("import_data");
   document.getElementById("resetAllBtn").textContent = t("delete_all");
   document.getElementById("logoutBtn").textContent = t("logout");
+  document.getElementById("deleteAccountBtn").textContent = t("delete_account");
+  document.getElementById("deleteAccountHint").textContent = t("delete_account_hint");
+  updateDeleteAccountTranslations();
   document.getElementById("aboutBlockText").textContent = t("about_footer");
   document.getElementById("todayDate").textContent = new Date().toLocaleDateString(currentLang==="en"?"en-US":"pt-BR", {weekday:'long', day:'2-digit', month:'short'});
   document.getElementById("lblContaGroup").textContent = t("lbl_conta_group");
@@ -5251,6 +5535,7 @@ function bindAjustesEvents(){
     await teardownSession();
     await fbAuth.signOut();
   });
+  document.getElementById("deleteAccountBtn").addEventListener("click", openDeleteAccountDialog);
   refreshAccountRow();
 
   const notifRow = document.getElementById("notifRow");
@@ -10030,77 +10315,124 @@ document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&
 
 // ---- Versioned Service Worker / controlled update flow ----
 async function registerKyroServiceWorker(){
-  if(!("serviceWorker" in navigator) || location.protocol!=="https:") return;
-  try{
-    const reg=await navigator.serviceWorker.register("./sw.js?v=login-photo-progress-v5",{scope:"./",updateViaCache:"none"});
-    const toast=document.getElementById("pwaUpdateToast");
-    const btn=document.getElementById("pwaUpdateBtn");
-    let pendingWorker=null;
-    let applyingUpdate=false;
-    let reloadFallback=null;
+  if(!("serviceWorker" in navigator)||location.protocol!=="https:")return;
 
-    const setButtonBusy=busy=>{
-      if(!btn) return;
-      btn.disabled=busy;
-      btn.setAttribute("aria-busy",busy?"true":"false");
-      btn.textContent=busy?t("update_installing"):t("update_now");
-    };
-    const reloadFresh=()=>{
-      const url=new URL(location.href);
-      url.searchParams.set("_kyro_update",Date.now().toString());
-      location.replace(url.toString());
-    };
-    const showUpdate=worker=>{
-      if(!toast||!btn||!worker) return;
-      pendingWorker=worker;
-      setButtonBusy(false);
-      toast.classList.add("show");
-    };
-    const applyUpdate=async()=>{
-      if(applyingUpdate) return;
-      applyingUpdate=true;
-      setButtonBusy(true);
-      try{
-        await reg.update().catch(()=>{});
-        const worker=reg.waiting||pendingWorker;
-        if(worker&&worker.state==="installed"){
-          worker.postMessage({type:"SKIP_WAITING"});
-          reloadFallback=setTimeout(reloadFresh,4000);
-          return;
-        }
-        // Safari/iOS can report the update after the worker has already activated.
-        // In that case a cache-busted navigation is the reliable completion path.
-        reloadFresh();
-      }catch(e){
-        applyingUpdate=false;
-        setButtonBusy(false);
-        if(APP_ENV.name==="development") console.warn("Falha ao aplicar atualização",e);
+  const ACCEPTED_VERSION_KEY="kyro_sw_accepted_version_v4";
+  const RELOADED_VERSION_KEY="kyro_sw_reloaded_version_v4";
+  const toast=document.getElementById("pwaUpdateToast");
+  const btn=document.getElementById("pwaUpdateBtn");
+  let registration=null;
+  let waitingWorker=null;
+  let waitingVersion="";
+  let applying=false;
+  let fallbackTimer=null;
+
+  const hideToast=()=>{
+    if(toast)toast.classList.remove("show");
+    if(btn){btn.disabled=false;btn.removeAttribute("aria-busy");btn.textContent=t("update_now");}
+  };
+  const setBusy=busy=>{
+    if(!btn)return;
+    btn.disabled=busy;btn.setAttribute("aria-busy",busy?"true":"false");btn.textContent=busy?t("update_installing"):t("update_now");
+  };
+  const getVersion=worker=>new Promise(resolve=>{
+    if(!worker){resolve("");return;}
+    const channel=new MessageChannel();let done=false;
+    const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(typeof value==="string"?value:"");};
+    const timer=setTimeout(()=>finish(""),1200);
+    channel.port1.onmessage=event=>finish(event.data&&event.data.version);
+    try{worker.postMessage({type:"GET_VERSION"},[channel.port2]);}catch(_){finish("");}
+  });
+  const reloadForVersion=async version=>{
+    hideToast();
+    const normalized=version||await getVersion(navigator.serviceWorker.controller)||"active";
+    if(sessionStorage.getItem(RELOADED_VERSION_KEY)===normalized)return;
+    sessionStorage.setItem(RELOADED_VERSION_KEY,normalized);
+    location.reload();
+  };
+  const silentlyFinishAccepted=worker=>{
+    hideToast();
+    try{worker.postMessage({type:"SKIP_WAITING"});}catch(_){}
+    if(fallbackTimer)clearTimeout(fallbackTimer);
+    fallbackTimer=setTimeout(()=>reloadForVersion(waitingVersion),5000);
+  };
+  const reconcileUpdateState=async()=>{
+    if(!registration){hideToast();return;}
+    const worker=registration.waiting;
+    if(!worker||worker.state!=="installed"){
+      waitingWorker=null;waitingVersion="";hideToast();
+      localStorage.removeItem(ACCEPTED_VERSION_KEY);
+      return;
+    }
+    const [candidateVersion,activeVersion]=await Promise.all([getVersion(worker),getVersion(navigator.serviceWorker.controller)]);
+    const candidate=candidateVersion||"waiting-worker";
+    if(activeVersion&&candidateVersion&&activeVersion===candidateVersion){
+      hideToast();return;
+    }
+    waitingWorker=worker;waitingVersion=candidate;
+    const accepted=localStorage.getItem(ACCEPTED_VERSION_KEY);
+    if(accepted===candidate||accepted==="waiting-worker"){
+      silentlyFinishAccepted(worker);return;
+    }
+    if(toast)toast.classList.add("show");
+    setBusy(false);
+  };
+  const applyUpdate=async()=>{
+    if(applying)return;
+    applying=true;setBusy(true);
+    try{
+      await registration.update().catch(()=>{});
+      const worker=registration.waiting||waitingWorker;
+      if(!worker||worker.state!=="installed"){
+        localStorage.removeItem(ACCEPTED_VERSION_KEY);
+        hideToast();
+        await reloadForVersion(await getVersion(navigator.serviceWorker.controller));
+        return;
       }
-    };
+      const version=await getVersion(worker)||waitingVersion||"waiting-worker";
+      waitingVersion=version;
+      localStorage.setItem(ACCEPTED_VERSION_KEY,version);
+      hideToast();
+      worker.postMessage({type:"SKIP_WAITING"});
+      if(fallbackTimer)clearTimeout(fallbackTimer);
+      fallbackTimer=setTimeout(()=>reloadForVersion(version),5000);
+    }catch(error){
+      applying=false;localStorage.removeItem(ACCEPTED_VERSION_KEY);setBusy(false);
+      if(APP_ENV.name==="development")console.warn("Falha ao aplicar atualização",error);
+    }
+  };
 
-    if(btn) btn.addEventListener("click",applyUpdate);
-    if(reg.waiting&&navigator.serviceWorker.controller) showUpdate(reg.waiting);
-    reg.addEventListener("updatefound",()=>{
-      const worker=reg.installing;
-      if(!worker) return;
+  hideToast();
+  if(btn)btn.onclick=applyUpdate;
+  try{
+    // Keep the script URL stable. Changing query strings creates distinct worker
+    // candidates in Safari and was the main reason the same update banner returned.
+    registration=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
+    await reconcileUpdateState();
+
+    registration.addEventListener("updatefound",()=>{
+      const worker=registration.installing;if(!worker)return;
       worker.addEventListener("statechange",()=>{
-        if(worker.state==="installed"&&navigator.serviceWorker.controller){
-          showUpdate(reg.waiting||worker);
-        }
+        if(worker.state==="installed")reconcileUpdateState().catch(hideToast);
+        else if(["activating","activated","redundant"].includes(worker.state)&&registration.waiting!==worker)hideToast();
       });
     });
 
-    let refreshing=false;
-    navigator.serviceWorker.addEventListener("controllerchange",()=>{
-      if(refreshing) return;
-      refreshing=true;
-      if(reloadFallback) clearTimeout(reloadFallback);
-      if(toast) toast.classList.remove("show");
-      reloadFresh();
+    navigator.serviceWorker.addEventListener("controllerchange",async()=>{
+      if(fallbackTimer)clearTimeout(fallbackTimer);
+      hideToast();localStorage.removeItem(ACCEPTED_VERSION_KEY);
+      const version=await getVersion(navigator.serviceWorker.controller);
+      await reloadForVersion(version||waitingVersion);
     });
 
-    setInterval(()=>reg.update().catch(()=>{}),6*60*60*1000);
-  }catch(e){ if(APP_ENV.name==="development") console.warn("Service Worker não registrado",e); }
+    window.addEventListener("pageshow",()=>{reconcileUpdateState().catch(hideToast);});
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reconcileUpdateState().catch(hideToast);});
+    setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);
+    registration.update().catch(()=>{});
+  }catch(error){
+    hideToast();localStorage.removeItem(ACCEPTED_VERSION_KEY);
+    if(APP_ENV.name==="development")console.warn("Service Worker não registrado",error);
+  }
 }
 window.addEventListener("load",registerKyroServiceWorker,{once:true});
 
@@ -10122,6 +10454,7 @@ function runSecuritySelfTests(){
 }
 
 bindStaticSecurityEvents();
+bindDeleteAccountEvents();
 initAuthScreenEvents();
 updateDocumentLanguage();
 applyAuthScreenTranslations();
