@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-title" content="KYRO">
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0b0c0e">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://www.google.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://*.firebasestorage.app https://world.openfoodfacts.org https://www.google.com https://www.recaptcha.net; frame-src https://www.youtube-nocookie.com https://accounts.google.com https://www.google.com https://www.recaptcha.net; upgrade-insecure-requests">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -487,6 +490,14 @@
   .app-loading-brand span{color:var(--volt)}
   .app-loading-ring{width:32px;height:32px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);animation:pullSpin .7s linear infinite}
   .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--panel-2);border-top-color:var(--volt);animation:pullSpin .7s linear infinite}
+  :focus-visible{outline:3px solid var(--volt);outline-offset:3px}
+  [aria-invalid="true"]{border-color:var(--red)!important;box-shadow:0 0 0 1px rgba(255,77,94,.25)}
+  .field-error{display:none;color:var(--red);font-size:11.5px;line-height:1.35;margin-top:6px}
+  .field-error.show{display:block}
+  .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+  .update-toast{position:fixed;left:16px;right:16px;bottom:100px;z-index:900;background:var(--panel);border:1px solid var(--volt-dim);border-radius:14px;padding:12px 14px;display:none;align-items:center;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+  .update-toast.show{display:flex}
+  .update-toast span{flex:1;font-size:12.5px;line-height:1.4}
   @media (prefers-reduced-motion: reduce){
     *, *::before, *::after{
       animation-duration: 0.01ms !important;
@@ -496,12 +507,13 @@
     }
   }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" referrerpolicy="no-referrer"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" referrerpolicy="no-referrer"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" referrerpolicy="no-referrer"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js" referrerpolicy="no-referrer"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js" referrerpolicy="no-referrer"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js" referrerpolicy="no-referrer"></script>
+<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -514,7 +526,7 @@
     <button class="auth-tab active" data-authtab="login" id="authTabLogin">Entrar</button>
     <button class="auth-tab" data-authtab="signup" id="authTabSignup">Criar conta</button>
   </div>
-  <div class="auth-error" id="authError"></div>
+  <div class="auth-error" id="authError" role="alert" aria-live="polite"></div>
   <form id="authForm">
     <div class="auth-field">
       <label id="authEmailLabel">Email</label>
@@ -675,7 +687,7 @@
         <div style="width:78%;height:35%;border:2px solid var(--volt);border-radius:12px;box-shadow:0 0 0 1000px rgba(0,0,0,.35)"></div>
       </div>
     </div>
-    <div id="barcodeStatus" class="vol-empty" style="padding:16px"></div>
+    <div id="barcodeStatus" class="vol-empty" role="status" aria-live="polite" style="padding:16px"></div>
   </div>
 </div>
 
@@ -683,7 +695,12 @@
   <div style="font-size:16px;font-weight:700;margin-bottom:10px">⚠️ O app encontrou um erro</div>
   <div style="margin-bottom:14px;font-size:12px;opacity:.8">Tire um print desta tela e mande pro suporte. Detalhes técnicos abaixo:</div>
   <div id="debugErrorText"></div>
-  <button onclick="location.reload()" style="margin-top:18px;background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-family:inherit">🔄 Tentar de novo</button>
+  <button id="debugReloadBtn" style="margin-top:18px;background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-family:inherit">🔄 Tentar de novo</button>
+</div>
+
+<div id="pwaUpdateToast" class="update-toast" role="status" aria-live="polite">
+  <span>Uma atualização segura do KYRO está disponível.</span>
+  <button type="button" class="add-btn" id="pwaUpdateBtn">Atualizar</button>
 </div>
 
 <div id="appLoadingScreen" style="display:none">
@@ -922,7 +939,7 @@
         <button class="settings-btn danger" id="resetAllBtn">🗑 Apagar todos os dados</button>
       </div>
 
-      <div class="about-block" id="aboutBlockText">KYRO · v3.0 · treino profissional em um app</div>
+      <div class="about-block" id="aboutBlockText">KYRO · security v13–20 · treino profissional em um app</div>
     </div>
   </section>
 
@@ -941,7 +958,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Adicionar Exercício</h3>
-      <button class="close-btn" onclick="closeExerciseBrowser()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="exerciseBrowserCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <input type="text" class="search-input" id="exerciseSearch" placeholder="Buscar exercício...">
     <div class="muscle-select">
@@ -961,7 +978,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3 id="configExName">Exercício</h3>
-      <button class="close-btn" onclick="closeExerciseConfig()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="exerciseConfigCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <input type="hidden" id="configContextName">
     <input type="hidden" id="configContextMuscles">
@@ -972,8 +989,8 @@
     <div class="config-field"><label id="lblCfgVideo">Link do vídeo (YouTube)</label><input type="url" id="cfgVideo" placeholder="https://youtube.com/watch?v=..."></div>
     <div class="config-field"><label id="lblCfgNotes">Notas (opcional)</label><input type="text" id="cfgNotes" placeholder="ex: cuidado com o ombro"></div>
     <div style="display:flex;gap:10px;margin-top:18px">
-      <button class="settings-btn danger" id="cfgDelete" style="display:none;flex:1;margin-bottom:0" onclick="deleteExerciseConfig()">Remover</button>
-      <button class="settings-btn primary" id="cfgSave" style="flex:1;margin-bottom:0" onclick="saveExerciseConfig()">Salvar</button>
+      <button class="settings-btn danger" id="cfgDelete" style="display:none;flex:1;margin-bottom:0">Remover</button>
+      <button class="settings-btn primary" id="cfgSave" style="flex:1;margin-bottom:0">Salvar</button>
     </div>
   </div>
 </div>
@@ -982,7 +999,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3 id="historyExName">Exercício</h3>
-      <button class="close-btn" onclick="closeExerciseHistoryModal()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="exerciseHistoryCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div id="historyBody"></div>
   </div>
@@ -992,7 +1009,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3 id="lblPlateCalcTitle">Calculadora de Anilhas</h3>
-      <button class="close-btn" onclick="closePlateCalc()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="plateCalcCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div class="config-field"><label id="lblPcTarget">Peso total alvo (kg)</label><input type="text" inputmode="decimal" maxlength="7" id="pcTarget" placeholder="ex: 80"></div>
     <div class="config-field"><label id="lblPcBar">Peso da barra (kg)</label><input type="text" inputmode="decimal" maxlength="7" id="pcBar" value="20"></div>
@@ -1004,7 +1021,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Templates Prontos</h3>
-      <button class="close-btn" onclick="closeTemplateModal()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="templateCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div class="about-block" style="padding:0 0 14px;text-align:left">Isso substitui toda a rotina da semana atual. Seus pesos, medidas e histórico não são afetados.</div>
     <div id="templateList"></div>
@@ -1015,7 +1032,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Gerador de Treino</h3>
-      <button class="close-btn" onclick="closeAutoGenModal()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="autoGenCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div id="autoGenBody"></div>
   </div>
@@ -1025,7 +1042,7 @@
   <div class="modal-content">
     <div class="modal-head">
       <h3>Antes / Depois</h3>
-      <button class="close-btn" onclick="closeCompareModal()" aria-label="Fechar">✕</button>
+      <button class="close-btn" id="compareCloseBtn" data-modal-close aria-label="Fechar">✕</button>
     </div>
     <div class="compare-dates">
       <span id="compareBeforeDate">—</span>
@@ -1091,7 +1108,7 @@
 
 <canvas id="confetti"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" referrerpolicy="no-referrer"></script>
 <script>
 (function(){
 "use strict";
@@ -1799,7 +1816,7 @@ const UI_STRINGS = {
     confirm_delete_all_1:"Apagar TODOS os dados?", confirm_delete_all_2:"Tem certeza? Não dá para desfazer.",
     alert_backup_before_delete:"Por segurança, baixamos um backup dos seus dados antes de apagar. Confira a pasta de Downloads se precisar recuperar algo depois.",
     alert_import_error:"Erro ao importar", alert_import_success:"Importado com sucesso", alert_photo_save_error:"Erro ao salvar foto", alert_photo_no_file:"Nenhum arquivo de imagem válido foi selecionado.", alert_photo_too_large:"Essa imagem é grande demais (máximo 20MB).", alert_photo_svg_rejected:"Arquivos SVG não são aceitos como foto.", alert_photo_invalid_format:"Esse arquivo não parece ser uma imagem válida.", alert_photo_upload_pending:"Sua foto foi salva no aparelho, mas ainda não terminou de subir pra nuvem. Vamos tentar de novo quando a conexão melhorar.", alert_photo_upload_in_progress:"Já tem um envio de foto em andamento — aguarde terminar.", photo_pending_tag:"(enviando...)", alert_photo_delete_error:"Não foi possível apagar a foto agora. Tente de novo.", alert_duplicate_exercise_name:"Já existe um exercício chamado \"{name}\" no banco. Escolha um nome diferente.", alert_invalid_exercise_in_list:"O exercício #{index} (\"{name}\") está com dados inválidos. Corrija antes de salvar.", confirm_exercise_db_size_warning:"O banco de exercícios está ficando grande ({kb}KB). Isso ainda funciona, mas está se aproximando do limite do Firestore. Continuar mesmo assim?",
-    auth_password_requirements:"A senha precisa ter pelo menos {min} caracteres, com letras e números.",
+    auth_password_requirements:"A senha precisa ter pelo menos {min} caracteres, com letra maiúscula, letra minúscula e número.",
     auth_err_too_many_requests:"Muitas tentativas seguidas. Aguarde um pouco antes de tentar de novo.",
     auth_err_popup_blocked:"O navegador bloqueou a janela do Google. Permita pop-ups para este site e tente de novo.",
     auth_err_user_disabled:"Esta conta foi desativada. Entre em contato se acha que isso é um engano.",
@@ -2003,7 +2020,7 @@ const UI_STRINGS = {
     confirm_delete_all_1:"Delete ALL data?", confirm_delete_all_2:"Are you sure? This can't be undone.",
     alert_backup_before_delete:"For safety, we downloaded a backup of your data before deleting. Check your Downloads folder if you need to recover anything later.",
     alert_import_error:"Import error", alert_import_success:"Imported successfully", alert_photo_save_error:"Error saving photo", alert_photo_no_file:"No valid image file was selected.", alert_photo_too_large:"This image is too large (20MB max).", alert_photo_svg_rejected:"SVG files aren't accepted as photos.", alert_photo_invalid_format:"This file doesn't look like a valid image.", alert_photo_upload_pending:"Your photo was saved on this device but hasn't finished uploading to the cloud yet. We'll retry once your connection improves.", alert_photo_upload_in_progress:"A photo upload is already in progress — please wait for it to finish.", photo_pending_tag:"(uploading...)", alert_photo_delete_error:"Couldn't delete the photo right now. Please try again.", alert_duplicate_exercise_name:"There's already an exercise named \"{name}\" in the database. Choose a different name.", alert_invalid_exercise_in_list:"Exercise #{index} (\"{name}\") has invalid data. Fix it before saving.", confirm_exercise_db_size_warning:"The exercise database is getting large ({kb}KB). It still works, but it's approaching Firestore's limit. Continue anyway?",
-    auth_password_requirements:"Password must be at least {min} characters, with letters and numbers.",
+    auth_password_requirements:"Password must be at least {min} characters, with uppercase, lowercase, and a number.",
     auth_err_too_many_requests:"Too many attempts in a row. Please wait a bit before trying again.",
     auth_err_popup_blocked:"Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.",
     auth_err_user_disabled:"This account has been disabled. Contact support if you think this is a mistake.",
@@ -2213,18 +2230,57 @@ const FIREBASE_CONFIG = {
 // Sem isso preenchido, o app funciona normalmente — só não tenta ativar push.
 const FCM_VAPID_KEY = "BI6go5C9fEaa6fEOXJ9h5dViw3VMsPyfDGI_1qWwxZogEvAvu2skkI8CjuwZrQMMG7gFQGYvIPDv80f55NjmO6s";
 
-let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null, fbStorage = null;
+const APP_ENV = Object.freeze({
+  name: /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? "development" : "production",
+  version: "2026.08.01-security-v13-20",
+  isProduction: !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+});
+
+// App Check is deliberately OFF until a real reCAPTCHA Enterprise site key is created
+// in Firebase Console. After following FIREBASE_SETUP_KYRO.md, paste the key below and
+// change enabled to true. Never use a debug token in the public GitHub repository.
+const APP_CHECK_CONFIG = Object.freeze({
+  enabled: false,
+  enterpriseSiteKey: "REPLACE_WITH_RECAPTCHA_ENTERPRISE_SITE_KEY"
+});
+
+let currentUser = null, fbAuth = null, fbDb = null, firebaseReady = false, fbMessaging = null, fbStorage = null, fbAppCheck = null;
+
+// ==================== SAFE DERIVED MATH ====================
+function finiteNumber(value, fallback=0){
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+function clampNumber(value, min, max, fallback=min){
+  const n = finiteNumber(value, fallback);
+  return Math.min(max, Math.max(min, n));
+}
+function safeDivide(numerator, denominator, fallback=0){
+  const n = finiteNumber(numerator, 0), d = finiteNumber(denominator, 0);
+  return d === 0 ? fallback : n / d;
+}
+function safePercent(part, total){
+  return Math.round(clampNumber(safeDivide(part, total, 0) * 100, 0, 100, 0));
+}
+function validDateMs(value){
+  const ms = new Date(value).getTime();
+  return Number.isFinite(ms) ? ms : null;
+}
 
 // ==================== READINESS SCORE ====================
 // A quick daily check-in (sleep, energy, soreness, stress) turned into a 0-100
 // score with a plain-language recommendation. Never phrased as medical advice —
 // just a nudge the person can accept, adjust, or ignore.
 function computeReadinessScore(sleep, energy, soreness, stress){
-  const normSleep = (sleep-1)/4;
-  const normEnergy = (energy-1)/4;
-  const normSoreness = 1 - (soreness-1)/4; // higher soreness = worse readiness
-  const normStress = 1 - (stress-1)/4;     // higher stress = worse readiness
-  return Math.round(((normSleep + normEnergy + normSoreness + normStress) / 4) * 100);
+  const s = clampNumber(sleep, 1, 5, 1);
+  const e = clampNumber(energy, 1, 5, 1);
+  const so = clampNumber(soreness, 1, 5, 5);
+  const st = clampNumber(stress, 1, 5, 5);
+  const normSleep = safeDivide(s-1, 4, 0);
+  const normEnergy = safeDivide(e-1, 4, 0);
+  const normSoreness = 1 - safeDivide(so-1, 4, 1);
+  const normStress = 1 - safeDivide(st-1, 4, 1);
+  return Math.round(clampNumber(((normSleep + normEnergy + normSoreness + normStress) / 4) * 100, 0, 100, 0));
 }
 
 function classifyReadiness(score){
@@ -2351,13 +2407,7 @@ document.getElementById("bootstrapErrorRetryBtn").addEventListener("click", ()=>
 // including granted admins — only ever sees a short, generic message with an error ID, so
 // internal details (paths, Firestore structure, stack traces) are never exposed to them.
 function canSeeDebugDetails(){
-  // TEMPORARY: always showing full debug detail while actively diagnosing a real connectivity
-  // issue in production. This intentionally bypasses the normal isSuperAdmin()-only gate —
-  // REVERT this back to the commented-out version below once the issue is confirmed fixed.
-  return true;
-  // const host = (typeof location !== "undefined") ? location.hostname : "";
-  // if(host === "localhost" || host === "127.0.0.1") return true;
-  // return isSuperAdmin();
+  return APP_ENV.name === "development" || isSuperAdmin();
 }
 function shortErrorId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 function showDebugError(msg){
@@ -2386,6 +2436,19 @@ window.addEventListener("unhandledrejection", (e)=>{
 try{
   if(typeof firebase !== "undefined"){
     firebase.initializeApp(FIREBASE_CONFIG);
+    if(APP_CHECK_CONFIG.enabled){
+      if(!firebase.appCheck || !firebase.appCheck.ReCaptchaEnterpriseProvider){
+        throw new Error("App Check foi habilitado, mas a biblioteca/provider não carregou.");
+      }
+      if(!APP_CHECK_CONFIG.enterpriseSiteKey || APP_CHECK_CONFIG.enterpriseSiteKey.startsWith("REPLACE_")){
+        throw new Error("App Check foi habilitado sem uma chave reCAPTCHA Enterprise válida.");
+      }
+      fbAppCheck = firebase.appCheck();
+      fbAppCheck.activate(
+        new firebase.appCheck.ReCaptchaEnterpriseProvider(APP_CHECK_CONFIG.enterpriseSiteKey),
+        true
+      );
+    }
     fbAuth = firebase.auth();
     fbDb = firebase.firestore();
     // Auto-detection of when long-polling is needed can fail to correctly identify
@@ -2437,70 +2500,192 @@ function withTimeout(promise, ms, label){
   ]);
 }
 
-// ---- Local cache (safety net): every cloud read/write also mirrors to localStorage,
-// scoped per-account, so the app keeps working (and data stays safe) even if the
-// cloud connection is temporarily unavailable. ----
-function cacheKey(key){ return "ramon_log_cache_" + (currentUser ? currentUser.uid : "anon") + "_" + key; }
-function readCache(key){ try{ const raw = localStorage.getItem(cacheKey(key)); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
-function writeCache(key, value){ try{ localStorage.setItem(cacheKey(key), JSON.stringify(value)); }catch(e){} }
-function clearCache(key){ try{ localStorage.removeItem(cacheKey(key)); }catch(e){} }
+// ---- UID-scoped cache + durable pending-sync queue ----
+// Cache is NEVER an authorization source. Authorization always comes from the freshly read
+// sharedUsers profile. Local data is only a resilience copy after a user is authenticated.
+const LOCAL_DATA_CONFIG = Object.freeze({
+  namespace: "kyro_secure_v2",
+  maxTotalBytesPerUser: 4 * 1024 * 1024,
+  maxEntryBytes: 900 * 1024,
+  maxQueueItems: 120,
+  maxAttempts: 10
+});
+const CACHEABLE_KEYS = new Set([
+  "workouts","state","history","completedSessions","bodyWeights","bodyMeasures",
+  "photoIndex","exerciseHistory","exerciseRecords","sessionLog","nutritionLog",
+  "profile","language","readinessLog","mySupplements","supplementLog","unitSystem",
+  "__migrated_from_local__"
+]);
+const LOCAL_SENSITIVE_KEYS = new Set(["fcmToken"]);
+let pendingSyncRunning = false;
 
-function pendingSyncKey(){ return "ramon_log_pending_sync_" + (currentUser ? currentUser.uid : "anon"); }
-function getPendingSync(){ try{ return JSON.parse(localStorage.getItem(pendingSyncKey())) || []; }catch(e){ return []; } }
-function addPendingSync(key){ const list = getPendingSync(); if(!list.includes(key)){ list.push(key); localStorage.setItem(pendingSyncKey(), JSON.stringify(list)); } }
-function removePendingSync(key){ const list = getPendingSync().filter(k=>k!==key); localStorage.setItem(pendingSyncKey(), JSON.stringify(list)); }
-
-async function retryPendingSync(){
-  if(!currentUser || !fbDb) return;
-  const pending = getPendingSync();
-  for(const key of pending){
-    const cached = readCache(key);
-    try{
-      await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value: cached }), 8000, "resync:"+key);
-      removePendingSync(key);
-    }catch(e){ /* still offline/unreachable, try again later */ }
+function validUid(uid){ return typeof uid === "string" && /^[A-Za-z0-9_-]{1,128}$/.test(uid); }
+function activeUid(){ return currentUser && validUid(currentUser.uid) ? currentUser.uid : null; }
+function isCacheableKey(key){ return CACHEABLE_KEYS.has(key) || /^photo_[A-Za-z0-9_-]{1,200}$/.test(key); }
+function cacheKey(key, uid=activeUid()){
+  if(!uid || !validUid(uid) || !isCacheableKey(key)) return null;
+  return `${LOCAL_DATA_CONFIG.namespace}:cache:${uid}:${key}`;
+}
+function cacheMetaKey(uid=activeUid()){
+  return uid && validUid(uid) ? `${LOCAL_DATA_CONFIG.namespace}:meta:${uid}` : null;
+}
+function pendingSyncKey(uid=activeUid()){
+  return uid && validUid(uid) ? `${LOCAL_DATA_CONFIG.namespace}:pending:${uid}` : null;
+}
+function byteLength(text){ return new Blob([String(text)]).size; }
+function safeJsonParse(raw, fallback=null){ try{ return JSON.parse(raw); }catch(e){ return fallback; } }
+function ownUserStorageKeys(uid=activeUid()){
+  if(!uid) return [];
+  const prefix = `${LOCAL_DATA_CONFIG.namespace}:cache:${uid}:`;
+  return Object.keys(localStorage).filter(k=>k.startsWith(prefix));
+}
+function loadCacheMeta(uid=activeUid()){
+  const key = cacheMetaKey(uid); if(!key) return {};
+  const parsed = safeJsonParse(localStorage.getItem(key), {});
+  return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+}
+function saveCacheMeta(meta, uid=activeUid()){
+  const key = cacheMetaKey(uid); if(!key) return;
+  try{ localStorage.setItem(key, JSON.stringify(meta)); }catch(e){}
+}
+function estimateUserCacheBytes(uid=activeUid()){
+  return ownUserStorageKeys(uid).reduce((sum,k)=> sum + byteLength(k) + byteLength(localStorage.getItem(k)||""), 0);
+}
+function evictOldestCacheEntries(bytesNeeded=0, uid=activeUid()){
+  if(!uid) return;
+  const meta = loadCacheMeta(uid);
+  const entries = ownUserStorageKeys(uid).map(k=>({k, at: finiteNumber(meta[k],0)})).sort((a,b)=>a.at-b.at);
+  let total = estimateUserCacheBytes(uid);
+  while(entries.length && total + bytesNeeded > LOCAL_DATA_CONFIG.maxTotalBytesPerUser){
+    const oldest = entries.shift();
+    const raw = localStorage.getItem(oldest.k)||"";
+    total -= byteLength(oldest.k)+byteLength(raw);
+    localStorage.removeItem(oldest.k);
+    delete meta[oldest.k];
+  }
+  saveCacheMeta(meta, uid);
+}
+function readCache(key){
+  const k = cacheKey(key); if(!k) return null;
+  try{
+    const raw = localStorage.getItem(k);
+    if(raw === null) return null;
+    const meta = loadCacheMeta(); meta[k] = Date.now(); saveCacheMeta(meta);
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function writeCache(key, value){
+  const k = cacheKey(key); if(!k || LOCAL_SENSITIVE_KEYS.has(key)) return {ok:false, reason:"not-cacheable"};
+  let raw;
+  try{ raw = JSON.stringify(value); }catch(e){ return {ok:false, reason:"serialize"}; }
+  const size = byteLength(raw);
+  if(size > LOCAL_DATA_CONFIG.maxEntryBytes) return {ok:false, reason:"entry-too-large"};
+  try{
+    evictOldestCacheEntries(size);
+    localStorage.setItem(k, raw);
+    const meta = loadCacheMeta(); meta[k] = Date.now(); saveCacheMeta(meta);
+    return {ok:true};
+  }catch(e){
+    // One last quota-recovery attempt, then fail without crashing or deleting other users' data.
+    try{ evictOldestCacheEntries(LOCAL_DATA_CONFIG.maxTotalBytesPerUser); localStorage.setItem(k, raw); return {ok:true}; }
+    catch(_){ return {ok:false, reason:"quota"}; }
   }
 }
-window.addEventListener("online", retryPendingSync);
+function clearCache(key){
+  const k = cacheKey(key); if(!k) return;
+  try{ localStorage.removeItem(k); const meta=loadCacheMeta(); delete meta[k]; saveCacheMeta(meta); }catch(e){}
+}
+function getPendingSync(){
+  const k = pendingSyncKey(); if(!k) return [];
+  const parsed = safeJsonParse(localStorage.getItem(k), []);
+  if(!Array.isArray(parsed)) return [];
+  return parsed.filter(item=> item && typeof item === "object" && isCacheableKey(item.key) && ["set","delete"].includes(item.op)).slice(-LOCAL_DATA_CONFIG.maxQueueItems);
+}
+function savePendingSync(list){
+  const k = pendingSyncKey(); if(!k) return false;
+  try{ localStorage.setItem(k, JSON.stringify(list.slice(-LOCAL_DATA_CONFIG.maxQueueItems))); return true; }
+  catch(e){ return false; }
+}
+function queuePendingSync(key, op, value){
+  if(!activeUid() || !isCacheableKey(key) || LOCAL_SENSITIVE_KEYS.has(key)) return false;
+  const list = getPendingSync().filter(item=>item.key!==key);
+  list.push({ key, op, value: op==="set" ? value : undefined, attempts:0, nextAttemptAt:0, updatedAt:Date.now() });
+  return savePendingSync(list);
+}
+function removePendingSync(key){ savePendingSync(getPendingSync().filter(item=>item.key!==key)); }
+function syncBackoffMs(attempts){ return Math.min(60*60*1000, 1500 * Math.pow(2, Math.max(0,attempts))); }
+function personalDocRef(key){
+  if(!currentUser || !fbDb || !(isCacheableKey(key) || LOCAL_SENSITIVE_KEYS.has(key))) return null;
+  return fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key);
+}
+async function retryPendingSync(){
+  if(pendingSyncRunning || !currentUser || !fbDb || navigator.onLine === false) return;
+  pendingSyncRunning = true;
+  try{
+    let list = getPendingSync();
+    for(const item of [...list]){
+      if(item.nextAttemptAt && item.nextAttemptAt > Date.now()) continue;
+      try{
+        const ref = personalDocRef(item.key); if(!ref) continue;
+        if(item.op === "delete") await withTimeout(ref.delete(), 10000, "resync-delete:"+item.key);
+        else await withTimeout(ref.set({ value:item.value }), 10000, "resync-set:"+item.key);
+        list = list.filter(x=>x.key!==item.key);
+        savePendingSync(list);
+      }catch(e){
+        item.attempts = Math.min(LOCAL_DATA_CONFIG.maxAttempts, finiteNumber(item.attempts,0)+1);
+        item.nextAttemptAt = Date.now() + syncBackoffMs(item.attempts);
+        list = list.map(x=>x.key===item.key ? item : x);
+        savePendingSync(list);
+      }
+    }
+  } finally { pendingSyncRunning = false; }
+}
+window.addEventListener("online", ()=> retryPendingSync());
 
 const store = {
   async get(key){
-    if(!currentUser){ return readCache(key); }
+    if(!currentUser || !isCacheableKey(key)) return null;
     if(fbDb){
       try{
-        const doc = await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).get(), 8000, "get:"+key);
+        const ref = personalDocRef(key);
+        const doc = await withTimeout(ref.get(), 10000, "get:"+key);
         const value = doc.exists ? doc.data().value : null;
         if(value !== null) writeCache(key, value);
         return value;
       }catch(e){
-        console.error("store.get error (using local cache as fallback)", key, e);
+        // Cache is a resilience fallback only after authentication/account authorization.
+        if(APP_ENV.name === "development") console.warn("store.get fallback", key, e && e.code);
       }
     }
     return readCache(key);
   },
   async set(key, value){
-    writeCache(key, value); // always keep the local safety copy, regardless of cloud outcome
-    if(!currentUser || !fbDb) return;
-    // Don't make the caller wait on the network round-trip — the local cache above already
-    // has the authoritative value for any immediate subsequent reads, so the UI can proceed
-    // instantly while the cloud sync happens in the background. This is what was making
-    // "Salvar" and exercise swaps feel frozen: every save used to block for up to 8s per write.
-    withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).set({ value }), 8000, "set:"+key)
-      .then(()=> removePendingSync(key))
-      .catch((e)=>{
-        console.error("store.set error (saved locally, will retry sync later)", key, e);
-        addPendingSync(key);
-      });
+    if(!currentUser || !fbDb) return {confirmed:false, queued:false};
+    // Tokens/credentials are never persisted in localStorage or the retry queue.
+    if(LOCAL_SENSITIVE_KEYS.has(key)){
+      try{ await withTimeout(personalDocRef(key).set({value}), 10000, "set-sensitive:"+key); return {confirmed:true,queued:false}; }
+      catch(e){ return {confirmed:false,queued:false}; }
+    }
+    if(!isCacheableKey(key)) throw new Error("store.set: key não permitida");
+    writeCache(key, value);
+    queuePendingSync(key, "set", value); // queue FIRST; remove only after server confirmation
+    retryPendingSync();
+    return {confirmed:false, queued:true};
+  },
+  async setConfirmed(key, value){
+    if(!currentUser || !fbDb || !isCacheableKey(key)) throw new Error("setConfirmed indisponível");
+    writeCache(key,value);
+    queuePendingSync(key,"set",value);
+    await withTimeout(personalDocRef(key).set({value}), 12000, "set-confirmed:"+key);
+    removePendingSync(key);
+    return true;
   },
   async delete(key){
+    if(!currentUser || !fbDb || !isCacheableKey(key)) return {confirmed:false,queued:false};
     clearCache(key);
-    removePendingSync(key);
-    if(!currentUser || !fbDb) return;
-    // Non-blocking, same reasoning as store.set: don't make the caller wait on the network
-    // round-trip for a delete — this was making photo deletion (and anything else that
-    // deletes) feel frozen for up to 8s.
-    withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc(key).delete(), 8000, "delete:"+key)
-      .catch((e)=> console.error("store.delete error", key, e));
+    queuePendingSync(key,"delete");
+    retryPendingSync();
+    return {confirmed:false,queued:true};
   }
 };
 
@@ -2645,37 +2830,71 @@ async function saveSharedExerciseDB(list){
   }catch(e){ console.error("saveSharedExerciseDB error", e); return false; }
 }
 
-// ---- Migrate any pre-existing localStorage data (from before accounts existed) into the user's cloud account ----
+// ---- Two-phase migration of pre-account localStorage data ----
+function legacyDataKeys(){
+  const blockedPrefixes = ["ramon_log_cache_","ramon_log_pending_sync_","ramon_log_pending_photos_",LOCAL_DATA_CONFIG.namespace+":"];
+  return Object.keys(localStorage).filter(k=> k.startsWith(LS_PREFIX) && !blockedPrefixes.some(p=>k.startsWith(p)))
+    .filter(k=>isCacheableKey(k.slice(LS_PREFIX.length)));
+}
+function migrationStateKey(){ const uid=activeUid(); return uid ? `${LOCAL_DATA_CONFIG.namespace}:migration:${uid}` : null; }
+function sanitizeStoredValueByKey(key, value){
+  switch(key){
+    case "bodyWeights": return sanitizeBodyWeights(value);
+    case "bodyMeasures": return sanitizeBodyMeasures(value);
+    case "photoIndex": return sanitizePhotoIndex(value);
+    case "exerciseHistory": return sanitizeExerciseHistory(value);
+    case "exerciseRecords": return sanitizeExerciseRecords(value);
+    case "sessionLog": return sanitizeSessionLog(value);
+    case "nutritionLog": return sanitizeNutritionLog(value);
+    case "profile": return sanitizeProfile(value);
+    case "readinessLog": return sanitizeReadinessLog(value);
+    case "mySupplements": return sanitizeSupplements(value);
+    case "supplementLog": return sanitizeSupplementLog(value);
+    case "workouts": return sanitizeWorkouts(value);
+    case "state": return value && typeof value==="object" && !Array.isArray(value) ? value : {};
+    case "history": return value && typeof value==="object" && !Array.isArray(value) ? value : {};
+    case "completedSessions": return Math.round(clampNumber(value,0,100000,0));
+    case "language": return value==="en" ? "en" : "pt";
+    case "unitSystem": return value==="imperial" ? "imperial" : "metric";
+    default: return value;
+  }
+}
 async function maybeMigrateLocalData(){
-  const localKeys = Object.keys(localStorage).filter(k=>k.startsWith(LS_PREFIX));
+  const localKeys = legacyDataKeys();
   if(!localKeys.length) return;
   const already = await store.get("__migrated_from_local__");
-  if(already) return;
-  const wantsImport = confirm(t("confirm_migrate"));
-  if(wantsImport){
-    const loadingEl = document.getElementById("appLoadingScreen");
-    const brandEl = loadingEl.querySelector(".app-loading-brand");
-    const originalBrandHtml = brandEl.innerHTML;
-    loadingEl.style.display = "flex";
-    brandEl.innerHTML = `${t("importing_data_msg")}<span>…</span>`;
-
-    await Promise.all(localKeys.map(async (lk)=>{
+  if(already && already.version>=2) return;
+  if(!confirm(t("confirm_migrate"))) return;
+  const stateKey = migrationStateKey();
+  const progress = safeJsonParse(stateKey ? localStorage.getItem(stateKey) : null, {completed:[]});
+  const completed = new Set(Array.isArray(progress.completed)?progress.completed:[]);
+  const loadingEl = document.getElementById("appLoadingScreen");
+  const brandEl = loadingEl.querySelector(".app-loading-brand");
+  const originalBrandHtml = brandEl.innerHTML;
+  loadingEl.style.display = "flex";
+  brandEl.textContent = t("importing_data_msg") + "…";
+  try{
+    for(const lk of localKeys){
+      if(completed.has(lk)) continue;
       const shortKey = lk.slice(LS_PREFIX.length);
-      try{
-        const raw = localStorage.getItem(lk);
-        const value = JSON.parse(raw);
-        await store.set(shortKey, value);
-      }catch(e){ console.error("migration error for", lk, e); }
-    }));
-
+      const raw = localStorage.getItem(lk);
+      let parsed;
+      try{ parsed=JSON.parse(raw); }catch(e){ continue; }
+      const clean = sanitizeStoredValueByKey(shortKey, parsed);
+      await store.setConfirmed(shortKey, clean);
+      const verify = await withTimeout(personalDocRef(shortKey).get({source:"server"}),12000,"migration-verify:"+shortKey);
+      if(!verify.exists || JSON.stringify(verify.data().value)!==JSON.stringify(clean)) throw new Error("Falha ao validar migração de "+shortKey);
+      completed.add(lk);
+      if(stateKey) localStorage.setItem(stateKey, JSON.stringify({completed:[...completed],updatedAt:Date.now()}));
+    }
+    const marker = {version:2, migratedAt:new Date().toISOString(), count:completed.size};
+    await store.setConfirmed("__migrated_from_local__", marker);
+    // Only after every copy was confirmed and read back do we remove legacy keys.
+    completed.forEach(k=>localStorage.removeItem(k));
+    if(stateKey) localStorage.removeItem(stateKey);
+  } finally {
     brandEl.innerHTML = originalBrandHtml;
-    // Note: we deliberately do NOT delete the original localStorage keys here.
-    // Keeping them as a redundant safety copy costs nothing and protects against
-    // a partial/failed cloud sync losing data that only existed in one place.
-    await store.set("__migrated_from_local__", true);
   }
-  // If declined, we intentionally do NOT set the migrated flag, so the person
-  // gets asked again on a future login instead of the offer silently vanishing forever.
 }
 
 // ---- Auth screen UI ----
@@ -2688,12 +2907,12 @@ let authMode = "login";
 const AUTH_CONFIG = {
   signupEnabled: true,
   requireEmailVerification: false,
-  minPasswordLength: 10
+  minPasswordLength: 12
 };
 
 function isPasswordStrongEnough(pw){
   if(typeof pw !== "string" || pw.length < AUTH_CONFIG.minPasswordLength) return false;
-  return /[A-Za-z]/.test(pw) && /[0-9]/.test(pw);
+  return /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /[0-9]/.test(pw);
 }
 
 // Maps Firebase Auth error codes to a small set of generic, user-facing messages.
@@ -4916,12 +5135,12 @@ function buildAbsCard(ex, i){
 }
 
 function computeProgressPct(){
-  const w = workouts[currentDay];
-  if(!w) return 0;
-  let total = 0, done = 0;
-  if(w.exercises) w.exercises.forEach((ex,i)=>{ total += (ex.sets||4); done += (state[currentDay].exSets[i]||[]).filter(Boolean).length; });
-  if(w.abs) w.abs.forEach((ex,i)=>{ total += (ex.sets||3); done += ((state[currentDay].absSets||{})[i]||[]).filter(Boolean).length; });
-  return total ? Math.round((done/total)*100) : 0;
+  const w=workouts[currentDay], dayState=state[currentDay];
+  if(!w || !dayState) return 0;
+  let total=0, done=0;
+  if(Array.isArray(w.exercises)) w.exercises.forEach((ex,i)=>{ const sets=Math.round(clampNumber(ex.sets,1,20,4)); total+=sets; done+=Math.min(sets,((dayState.exSets&&dayState.exSets[i])||[]).filter(Boolean).length); });
+  if(Array.isArray(w.abs)) w.abs.forEach((ex,i)=>{ const sets=Math.round(clampNumber(ex.sets,1,20,3)); total+=sets; done+=Math.min(sets,(((dayState.absSets||{})[i])||[]).filter(Boolean).length); });
+  return safePercent(done,total);
 }
 
 function updateProgress(){
@@ -4951,10 +5170,10 @@ function fmtClock(iso){
 }
 
 function fmtDuration(sec){
-  sec = Math.max(0, Math.floor(sec));
-  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-  const pad = n => String(n).padStart(2,'0');
-  return h>0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  sec=Math.floor(clampNumber(sec,0,7*86400,0));
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),seconds=sec%60;
+  const pad=n=>String(n).padStart(2,"0");
+  return h>0 ? `${h}:${pad(m)}:${pad(seconds)}` : `${pad(m)}:${pad(seconds)}`;
 }
 
 function renderSessionTimer(){
@@ -5031,7 +5250,11 @@ async function toggleWorkoutTimer(){
 }
 
 // ---- Estimated 1RM (Epley formula) ----
-function calcE1RM(kg, reps){ return kg * (1 + reps/30); }
+function calcE1RM(kg, reps){
+  const safeKg=clampNumber(kg,0,1000,0), safeReps=clampNumber(reps,0,1000,0);
+  const result=safeKg*(1+safeDivide(safeReps,30,0));
+  return clampNumber(result,0,2000,0);
+}
 // A set only counts toward history, records, and volume if both values are finite, positive,
 // and within a generous-but-sane real-world range. This guards derived stats (PRs, weekly
 // volume, share images) from garbage/mistyped input without interrupting live typing —
@@ -5405,29 +5628,21 @@ function buildRoutineExerciseItem(dayKey, listType, i, ex){
 
 // ---- Achievements / Streaks ----
 function computeStreaks(){
-  const dates = [...new Set(sessionLog.map(s=>s.date))].sort();
-  if(!dates.length) return { current:0, best:0 };
-  let best=1, run=1;
-  for(let i=1;i<dates.length;i++){
-    const diffDays = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
-    run = diffDays<=2 ? run+1 : 1; // allow 1 rest day gap to still count as a streak
-    best = Math.max(best, run);
+  const dayIndex=d=>{ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(d||""); return m ? Math.floor(Date.UTC(+m[1],+m[2]-1,+m[3])/86400000) : null; };
+  const dates=[...new Set(sessionLog.map(s=>s&&s.date).filter(d=>dayIndex(d)!==null))].sort();
+  if(!dates.length) return {current:0,best:0};
+  let best=1,run=1;
+  for(let i=1;i<dates.length;i++){ const diff=dayIndex(dates[i])-dayIndex(dates[i-1]); run=(diff>=1&&diff<=2)?run+1:1; best=Math.max(best,run); }
+  const todayIdx=dayIndex(todayKey()),lastIdx=dayIndex(dates[dates.length-1]);
+  let current=0;
+  if(todayIdx!==null&&lastIdx!==null&&todayIdx-lastIdx>=0&&todayIdx-lastIdx<=2){
+    current=1;
+    for(let i=dates.length-1;i>0;i--){ const diff=dayIndex(dates[i])-dayIndex(dates[i-1]); if(diff>=1&&diff<=2) current++; else break; }
   }
-  const today = new Date(todayKey());
-  const lastTrainDate = new Date(dates[dates.length-1]);
-  const daysSinceLast = Math.round((today-lastTrainDate)/86400000);
-  let current = 0;
-  if(daysSinceLast <= 2){
-    current = 1;
-    for(let i=dates.length-1;i>0;i--){
-      const diffDays = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
-      if(diffDays<=2) current++; else break;
-    }
-  }
-  return { current, best };
+  return {current:Math.max(0,current),best:Math.max(0,best)};
 }
 
-function totalVolumeAllTime(){ return sessionLog.reduce((sum,s)=> sum+(s.volume||0), 0); }
+function totalVolumeAllTime(){ return sessionLog.reduce((sum,s)=>sum+clampNumber(s&&s.volume,0,10000000,0),0); }
 
 function computeAchievementContext(){
   const { best } = computeStreaks();
@@ -6372,18 +6587,18 @@ async function addMeasures(){
 }
 
 function computeBodyFat(vals, prof){
-  if(!vals || !prof || !prof.height) return null;
-  const waist = vals.cintura, neck = vals.pescoco, hip = vals.quadril;
-  const height = prof.height;
-  if(!waist || !neck) return null;
-  let bf;
-  if(prof.sex === "F"){
-    if(!hip) return null;
-    bf = 495 / (1.29579 - 0.35004*Math.log10(waist+hip-neck) + 0.22100*Math.log10(height)) - 450;
-  } else {
-    bf = 495 / (1.0324 - 0.19077*Math.log10(waist-neck) + 0.15456*Math.log10(height)) - 450;
-  }
-  return (bf>0 && bf<70) ? +bf.toFixed(1) : null;
+  if(!vals || !prof) return null;
+  const waist=clampNumber(vals.cintura,0,300,0), neck=clampNumber(vals.pescoco,0,300,0);
+  const hip=clampNumber(vals.quadril,0,300,0), height=clampNumber(prof.height,0,300,0);
+  if(height<=0 || waist<=0 || neck<=0) return null;
+  const circumferenceTerm = prof.sex === "F" ? waist+hip-neck : waist-neck;
+  if(circumferenceTerm<=0 || (prof.sex==="F" && hip<=0)) return null;
+  const denominator = prof.sex === "F"
+    ? 1.29579 - 0.35004*Math.log10(circumferenceTerm) + 0.22100*Math.log10(height)
+    : 1.0324 - 0.19077*Math.log10(circumferenceTerm) + 0.15456*Math.log10(height);
+  if(!Number.isFinite(denominator) || denominator<=0) return null;
+  const bf=safeDivide(495,denominator,0)-450;
+  return Number.isFinite(bf) && bf>0 && bf<70 ? +bf.toFixed(1) : null;
 }
 
 function renderMeasTab(){
@@ -6651,69 +6866,83 @@ async function deletePhotoFromStorage(id){
 
 // ---- Barcode scanner (nutrition) ----
 let barcodeScanner = null;
+let barcodeLookupController = null;
+function normalizeBarcode(raw){
+  const code = String(raw||"").trim();
+  return /^\d{6,18}$/.test(code) ? code : null;
+}
+function stopBarcodeLookup(){
+  if(barcodeLookupController){ try{ barcodeLookupController.abort(); }catch(e){} barcodeLookupController=null; }
+}
+async function fetchJsonAbortable(url, timeoutMs){
+  stopBarcodeLookup();
+  const controller = new AbortController(); barcodeLookupController=controller;
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const res=await fetch(url,{signal:controller.signal,credentials:"omit",cache:"no-store",referrerPolicy:"no-referrer",headers:{Accept:"application/json"}});
+    if(!res.ok) throw new Error("HTTP_"+res.status);
+    const contentType=res.headers.get("content-type")||"";
+    if(!contentType.includes("application/json")) throw new Error("invalid_content_type");
+    return await res.json();
+  } finally { clearTimeout(timer); if(barcodeLookupController===controller) barcodeLookupController=null; }
+}
+function safeFoodNumber(value,max){ return clampNumber(value,0,max,0); }
 
 async function openBarcodeScanner(){
+  closeBarcodeScanner();
   const modal = document.getElementById("barcodeModal");
   const statusEl = document.getElementById("barcodeStatus");
   document.getElementById("barcodeModalTitle").textContent = t("scan_barcode");
   modal.classList.add("show");
-
   const isStandalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
   if(isStandalone){
-    statusEl.innerHTML = t("barcode_standalone_warning") + `<div class="mono" style="margin-top:10px;padding:10px;background:var(--panel-2);border-radius:10px;word-break:break-all;font-size:11px">${location.href}</div>`;
+    statusEl.textContent = t("barcode_standalone_warning") + " " + location.origin + location.pathname;
     return;
   }
-
   statusEl.textContent = t("barcode_starting_camera");
-
-  if(typeof ZXing === "undefined"){
-    statusEl.textContent = t("barcode_lib_unavailable");
-    return;
-  }
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    statusEl.textContent = t("barcode_camera_unsupported");
-    return;
-  }
-
+  if(typeof ZXing === "undefined"){ statusEl.textContent = t("barcode_lib_unavailable"); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ statusEl.textContent = t("barcode_camera_unsupported"); return; }
   try{
     barcodeScanner = new ZXing.BrowserMultiFormatReader();
     const devices = await barcodeScanner.listVideoInputDevices();
     const rearCamera = devices.find(d=>/back|rear|environment/i.test(d.label)) || devices[devices.length-1];
-    await barcodeScanner.decodeFromVideoDevice(rearCamera ? rearCamera.deviceId : undefined, "barcodeVideo", async (result, err)=>{
-      if(result){
-        const code = result.getText();
-        closeBarcodeScanner();
-        await lookupBarcodeProduct(code);
-      }
+    await barcodeScanner.decodeFromVideoDevice(rearCamera ? rearCamera.deviceId : undefined, "barcodeVideo", async (result)=>{
+      if(!result) return;
+      const code = normalizeBarcode(result.getText());
+      if(!code){ statusEl.textContent=t("barcode_lookup_error"); return; }
+      closeBarcodeScanner();
+      await lookupBarcodeProduct(code);
     });
     statusEl.textContent = t("barcode_point_at_code");
   }catch(e){
-    console.error("barcode scanner error", e);
+    closeBarcodeScanner();
     statusEl.textContent = t("barcode_camera_error");
   }
 }
-
 function closeBarcodeScanner(){
   const modal = document.getElementById("barcodeModal");
-  modal.classList.remove("show");
+  if(modal) modal.classList.remove("show");
   if(barcodeScanner){ try{ barcodeScanner.reset(); }catch(e){} barcodeScanner = null; }
+  const video=document.getElementById("barcodeVideo");
+  if(video && video.srcObject){ video.srcObject.getTracks().forEach(track=>track.stop()); video.srcObject=null; }
+  stopBarcodeLookup();
 }
-
-window.lookupBarcodeProduct = async function(code){
+window.lookupBarcodeProduct = async function(rawCode){
+  const code=normalizeBarcode(rawCode);
+  if(!code){ alert(t("barcode_lookup_error")); return; }
   try{
-    const res = await withTimeout(fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json`), 10000, "barcode-lookup");
-    const data = await res.json();
-    if(data.status !== 1 || !data.product){
-      alert(t("barcode_product_not_found"));
-      return;
+    const data = await fetchJsonAbortable(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json`, 9000);
+    if(!data || data.status !== 1 || !data.product || typeof data.product!=="object"){
+      alert(t("barcode_product_not_found")); return;
     }
-    const p = data.product;
-    const nutr = p.nutriments || {};
-    const name = p.product_name || p.product_name_pt || p.product_name_en || code;
-    const kcal = Math.round(nutr["energy-kcal_100g"] || (nutr["energy_100g"] ? nutr["energy_100g"]/4.184 : 0) || 0);
-    const prot = Math.round(nutr["proteins_100g"] || 0);
-    const carb = Math.round(nutr["carbohydrates_100g"] || 0);
-    const fat = Math.round(nutr["fat_100g"] || 0);
+    const p = data.product, nutr = p.nutriments && typeof p.nutriments==="object" ? p.nutriments : {};
+    const name = sanitizeString(p.product_name_pt || p.product_name || p.product_name_en || code, 120) || code;
+    const kj=safeFoodNumber(nutr["energy_100g"],50000);
+    const kcalRaw=safeFoodNumber(nutr["energy-kcal_100g"],10000) || safeDivide(kj,4.184,0);
+    const kcal=Math.round(clampNumber(kcalRaw,0,10000,0));
+    const prot=Math.round(safeFoodNumber(nutr["proteins_100g"],1000));
+    const carb=Math.round(safeFoodNumber(nutr["carbohydrates_100g"],1000));
+    const fat=Math.round(safeFoodNumber(nutr["fat_100g"],1000));
     const nameEl = document.getElementById("mealName");
     if(nameEl){
       nameEl.value = name + " (100g)";
@@ -6721,63 +6950,14 @@ window.lookupBarcodeProduct = async function(code){
       document.getElementById("mealProt").value = prot || "";
       document.getElementById("mealCarb").value = carb || "";
       document.getElementById("mealFat").value = fat || "";
-      haptic([40,30,60]);
+      nameEl.focus();
     }
   }catch(e){
-    console.error("barcode lookup error", e);
-    alert(t("barcode_lookup_error"));
+    if(e && e.name !== "AbortError") alert(t("barcode_lookup_error"));
   }
-}
-
-let photoUploadInProgress = false;
-async function addPhoto(file){
-  if(photoUploadInProgress){ alert(t("alert_photo_upload_in_progress")); return; }
-  const validation = await validatePhotoFile(file);
-  if(!validation.ok){ alert(validation.reason); return; }
-
-  photoUploadInProgress = true;
-  try{
-    const dataUrl = await compressImage(file);
-    const id = Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-    const storageUrl = await uploadPhotoToStorage(dataUrl, id);
-
-    if(storageUrl){
-      await store.set("photo_"+id, storageUrl);
-      const newIndex = photoIndex.concat([{id, d: todayKey()}]);
-      try{
-        // A direct, awaited write (not the app's usual non-blocking store.set) — this is
-        // the one write that MUST be confirmed before we can trust the index, since a
-        // silent failure here would leave an orphaned file in Storage with nothing
-        // pointing to it (and nothing to ever clean it up later).
-        await withTimeout(fbDb.collection("users").doc(currentUser.uid).collection("data").doc("photoIndex").set({ value: newIndex }), 8000, "photoIndex:confirm");
-        photoIndex = newIndex;
-        writeCache("photoIndex", newIndex);
-      }catch(indexErr){
-        // The upload succeeded but we couldn't confirm the index write — clean up the
-        // now-orphaned Storage file rather than leaving a file nothing will ever point to.
-        await deletePhotoFromStorage(id);
-        await store.delete("photo_"+id);
-        throw indexErr;
-      }
-      haptic();
-      renderPhotoTab();
-    } else {
-      // Storage upload failed — the photo stays on THIS DEVICE ONLY (never synced to
-      // Firestore as base64) and is clearly marked pending until a retry succeeds.
-      const pending = getPendingPhotos();
-      pending.push({ id, dataUrl, d: todayKey() });
-      savePendingPhotos(pending);
-      photoIndex.push({id, d: todayKey(), pending: true});
-      renderPhotoTab();
-      alert(t("alert_photo_upload_pending"));
-    }
-  }catch(e){
-    console.error("addPhoto error", e);
-    alert(t("alert_photo_save_error"));
-  }finally{
-    photoUploadInProgress = false;
-  }
-}
+};
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState!=="visible") closeBarcodeScanner(); });
+window.addEventListener("pagehide",closeBarcodeScanner);
 
 // ---- Nutrition tracker (premium: calories + macros + water) ----
 const NUTRI_DEFAULTS = { kcalGoal: 2400, proteinGoal: 150, carbGoal: 250, fatGoal: 70, waterGoal: 3.5 };
@@ -6809,7 +6989,8 @@ function getTodayNutrition(){
 const RING_R = 52, RING_C = 2*Math.PI*RING_R;
 
 function nutriRing(pct, color, label, value, sub){
-  const off = RING_C * (1 - Math.min(1,pct));
+  pct=clampNumber(pct,0,1,0);
+  const off = RING_C * (1 - pct);
   return `
     <div class="nutri-ring">
       <svg viewBox="0 0 120 120">
@@ -6826,8 +7007,9 @@ function nutriRing(pct, color, label, value, sub){
 }
 
 function macroBar(name, val, goal, color){
-  const pct = goal>0 ? Math.min(100, Math.round(val/goal*100)) : 0;
-  const left = Math.max(0, goal-val);
+  val=clampNumber(val,0,50000,0); goal=clampNumber(goal,0,50000,0);
+  const pct=safePercent(val,goal);
+  const left=Math.max(0,goal-val);
   return `
     <div class="macro-row">
       <div class="macro-head">
@@ -8405,8 +8587,112 @@ async function softRefreshCurrentView(){
   }, { passive: true });
 })();
 
+// ---- CSP-compatible event bindings (no inline onclick attributes) ----
+function bindStaticSecurityEvents(){
+  const bind=(id,fn)=>{ const el=document.getElementById(id); if(el) el.addEventListener("click",fn); };
+  bind("debugReloadBtn",()=>location.reload());
+  bind("exerciseBrowserCloseBtn",closeExerciseBrowser);
+  bind("exerciseConfigCloseBtn",closeExerciseConfig);
+  bind("cfgDelete",deleteExerciseConfig);
+  bind("cfgSave",saveExerciseConfig);
+  bind("exerciseHistoryCloseBtn",closeExerciseHistoryModal);
+  bind("plateCalcCloseBtn",closePlateCalc);
+  bind("templateCloseBtn",closeTemplateModal);
+  bind("autoGenCloseBtn",closeAutoGenModal);
+  bind("compareCloseBtn",closeCompareModal);
+}
+
+// ---- Accessible modal focus management ----
+let activeDialog=null,previousFocus=null;
+function dialogFocusable(root){ return [...root.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.offsetParent!==null); }
+function activateDialog(dialog){
+  if(activeDialog===dialog) return;
+  previousFocus=document.activeElement; activeDialog=dialog;
+  dialog.setAttribute("role","dialog"); dialog.setAttribute("aria-modal","true");
+  const focusables=dialogFocusable(dialog); (focusables[0]||dialog).focus({preventScroll:true});
+}
+function deactivateDialog(dialog){
+  if(activeDialog!==dialog) return; activeDialog=null;
+  if(previousFocus&&document.contains(previousFocus)) previousFocus.focus({preventScroll:true});
+  previousFocus=null;
+}
+const dialogObserver=new MutationObserver(records=>records.forEach(r=>{
+  const el=r.target;
+  if(!(el instanceof HTMLElement)) return;
+  const open=el.classList.contains("show") || (el.id==="bootstrapErrorScreen"&&el.style.display==="flex");
+  if(open) activateDialog(el); else deactivateDialog(el);
+}));
+document.querySelectorAll(".modal-overlay,.overlay,.celebrate-overlay,.photo-viewer,#bootstrapErrorScreen").forEach(el=>{
+  el.tabIndex=-1; dialogObserver.observe(el,{attributes:true,attributeFilter:["class","style"]});
+});
+document.addEventListener("keydown",e=>{
+  if(!activeDialog) return;
+  if(e.key==="Tab"){
+    const f=dialogFocusable(activeDialog); if(!f.length){e.preventDefault();activeDialog.focus();return;}
+    const first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+  if(e.key==="Escape"){
+    const close=activeDialog.querySelector("[data-modal-close],.close-btn,#pvClose,.cel-close");
+    if(close){e.preventDefault();close.click();}
+  }
+});
+
+// ---- Native constraint errors exposed to assistive technology ----
+function ensureFieldError(input){
+  if(!input||!input.id) return null;
+  const id=input.id+"Error"; let el=document.getElementById(id);
+  if(!el){el=document.createElement("div");el.id=id;el.className="field-error";el.setAttribute("role","alert");input.insertAdjacentElement("afterend",el);}
+  input.setAttribute("aria-describedby",id); return el;
+}
+function setFieldValidity(input,message=""){
+  const el=ensureFieldError(input); if(!el) return;
+  const bad=!!message; input.setAttribute("aria-invalid",bad?"true":"false"); el.textContent=message; el.classList.toggle("show",bad);
+  if(bad) input.focus({preventScroll:false});
+}
+document.addEventListener("invalid",e=>{ if(e.target instanceof HTMLInputElement){ e.preventDefault(); setFieldValidity(e.target,e.target.validationMessage||"Valor inválido"); } },true);
+document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&e.target.getAttribute("aria-invalid")==="true"&&e.target.checkValidity()) setFieldValidity(e.target,""); },true);
+
+// ---- Versioned Service Worker / controlled update flow ----
+async function registerKyroServiceWorker(){
+  if(!("serviceWorker" in navigator) || location.protocol!=="https:") return;
+  try{
+    const reg=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
+    const showUpdate=worker=>{
+      const toast=document.getElementById("pwaUpdateToast"),btn=document.getElementById("pwaUpdateBtn");
+      if(!toast||!btn||!worker) return; toast.classList.add("show");
+      btn.onclick=()=>worker.postMessage({type:"SKIP_WAITING"});
+    };
+    if(reg.waiting&&navigator.serviceWorker.controller) showUpdate(reg.waiting);
+    reg.addEventListener("updatefound",()=>{ const worker=reg.installing; if(worker) worker.addEventListener("statechange",()=>{ if(worker.state==="installed"&&navigator.serviceWorker.controller) showUpdate(worker); }); });
+    let refreshing=false; navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(!refreshing){refreshing=true;location.reload();} });
+    setInterval(()=>reg.update().catch(()=>{}),6*60*60*1000);
+  }catch(e){ if(APP_ENV.name==="development") console.warn("Service Worker não registrado",e); }
+}
+window.addEventListener("load",registerKyroServiceWorker,{once:true});
+
+// Lightweight deterministic self-tests. Run locally or with ?selftest=1; no personal data is read.
+function runSecuritySelfTests(){
+  if(APP_ENV.name!=="development"&&!new URLSearchParams(location.search).has("selftest")) return;
+  const tests=[
+    ["decimal rejects exponent",parseStrictDecimal("1e3")===null],
+    ["integer rejects sign",parseStrictInteger("-1")===null],
+    ["barcode accepts EAN",normalizeBarcode("7891234567890")==="7891234567890"],
+    ["barcode rejects script",normalizeBarcode("<script>")===null],
+    ["e1RM finite",Number.isFinite(calcE1RM(100,10))&&calcE1RM(Infinity,10)===0],
+    ["readiness clamped",computeReadinessScore(99,99,-10,-10)>=0&&computeReadinessScore(99,99,-10,-10)<=100],
+    ["safe percent zero",safePercent(5,0)===0],
+    ["CSV injection",csvSanitizeCell("=1+1").startsWith("'")]
+  ];
+  const failed=tests.filter(([,ok])=>!ok); console.group("KYRO security self-tests"); tests.forEach(([n,ok])=>console[ok?"log":"error"]((ok?"✓ ":"✗ ")+n)); console.groupEnd();
+  if(failed.length) throw new Error(`${failed.length} security self-test(s) failed`);
+}
+
+bindStaticSecurityEvents();
 initAuthScreenEvents();
 applyAuthScreenTranslations();
+runSecuritySelfTests();
 
 let appInitialized = false;
 
