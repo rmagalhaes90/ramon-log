@@ -1,5 +1,5 @@
 /* KYRO service worker — bilingual fast-start build */
-const SW_VERSION = "2026-08-01-email-verify-live-update-v11";
+const SW_VERSION = "2026-08-01-account-deletion-storage-v12";
 const CACHE_VERSION = "kyro-shell-" + SW_VERSION;
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));

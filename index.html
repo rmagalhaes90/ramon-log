@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>KYRO</title>
-<meta name="kyro-build" content="2026-08-01-email-verify-live-update-v11">
+<meta name="kyro-build" content="2026-08-01-account-deletion-storage-v12">
 <meta name="apple-mobile-web-app-title" content="KYRO">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
@@ -2141,7 +2141,7 @@ const UI_STRINGS = {
     delete_account_impact_workouts:"🏋️ Treinos e rotinas", delete_account_impact_progress:"📈 Peso e progresso", delete_account_impact_photos:"📸 Fotos", delete_account_impact_account:"👤 Conta de acesso",
     delete_account_progress_auth:"Confirmando sua identidade…", delete_account_progress_photos:"Excluindo suas fotos…", delete_account_progress_data:"Excluindo seus dados…", delete_account_progress_profile:"Removendo seu perfil…", delete_account_progress_account:"Excluindo sua conta…", delete_account_progress_done:"Conta excluída",
     delete_account_error_phrase:"Digite EXCLUIR exatamente como mostrado.", delete_account_error_password:"Digite sua senha atual.", delete_account_error_wrong_password:"A senha está incorreta. Confira e tente novamente.", delete_account_error_popup:"A confirmação do Google não foi concluída. Tente novamente.", delete_account_error_recent:"Confirme sua identidade novamente para excluir a conta.",
-    delete_account_error_permission:"A regra do Firestore ainda não permite excluir o próprio perfil. Publique a regra de exclusão de conta antes de tentar novamente.", delete_account_error_generic:"Não foi possível concluir a exclusão agora. Nenhuma conta foi removida. Tente novamente.", delete_account_error_partial:"Seus dados foram removidos, mas a conta não pôde ser finalizada. Entre novamente e tente a exclusão mais uma vez.", delete_account_success:"Sua conta e seus dados foram excluídos permanentemente.",
+    delete_account_error_permission:"A regra do Firestore ainda não permite excluir o próprio perfil. Publique a regra de exclusão de conta antes de tentar novamente.", delete_account_error_storage:"Não foi possível apagar suas fotos do Storage. Publique a regra atualizada do Storage e tente novamente.", delete_account_error_generic:"Não foi possível concluir a exclusão agora. Nenhuma conta foi removida. Tente novamente.", delete_account_error_partial:"Seus dados foram removidos, mas a conta não pôde ser finalizada. Entre novamente e tente a exclusão mais uma vez.", delete_account_success:"Sua conta e seus dados foram excluídos permanentemente.",
     export_backup:"⬇️ Exportar backup", import_data:"⬆️ Importar dados",
     delete_all:"🗑 Apagar todos os dados", clear_cache:"🧹 Limpar cache técnico (não apaga seus dados)",
     export_csv:"📊 Exportar CSV (planilha)", about_footer:"KYRO · v3.0 · treino profissional em um app",
@@ -2511,7 +2511,7 @@ const UI_STRINGS = {
     delete_account_impact_workouts:"🏋️ Workouts and routines", delete_account_impact_progress:"📈 Weight and progress", delete_account_impact_photos:"📸 Photos", delete_account_impact_account:"👤 Sign-in account",
     delete_account_progress_auth:"Confirming your identity…", delete_account_progress_photos:"Deleting your photos…", delete_account_progress_data:"Deleting your data…", delete_account_progress_profile:"Removing your profile…", delete_account_progress_account:"Deleting your account…", delete_account_progress_done:"Account deleted",
     delete_account_error_phrase:"Type DELETE exactly as shown.", delete_account_error_password:"Enter your current password.", delete_account_error_wrong_password:"That password is incorrect. Check it and try again.", delete_account_error_popup:"Google confirmation was not completed. Please try again.", delete_account_error_recent:"Confirm your identity again to delete the account.",
-    delete_account_error_permission:"The Firestore rule does not yet allow users to delete their own profile. Publish the account-deletion rule before trying again.", delete_account_error_generic:"The deletion could not be completed right now. No account was removed. Please try again.", delete_account_error_partial:"Your data was removed, but the account could not be finalized. Sign in again and retry account deletion.", delete_account_success:"Your account and data have been permanently deleted.",
+    delete_account_error_permission:"The Firestore rule does not yet allow users to delete their own profile. Publish the account-deletion rule before trying again.", delete_account_error_storage:"Your photos could not be removed from Storage. Publish the updated Storage rule and try again.", delete_account_error_generic:"The deletion could not be completed right now. No account was removed. Please try again.", delete_account_error_partial:"Your data was removed, but the account could not be finalized. Sign in again and retry account deletion.", delete_account_success:"Your account and data have been permanently deleted.",
     export_backup:"⬇️ Export backup", import_data:"⬆️ Import data",
     delete_all:"🗑 Delete all data", clear_cache:"🧹 Clear technical cache (does not delete your data)",
     export_csv:"📊 Export CSV (spreadsheet)", about_footer:"KYRO · v3.0 · professional training in one app",
@@ -3166,10 +3166,50 @@ async function deleteStorageTree(ref){
   for(const item of result.items){try{await item.delete();}catch(error){if(!(error&&error.code==="storage/object-not-found"))throw error;}}
   for(const prefix of result.prefixes)await deleteStorageTree(prefix);
 }
+async function deleteKnownPhotoFiles(uid){
+  // Fallback for older Storage rules that allow deleting a known object but do not
+  // allow listing the parent folder. The photo index is still available at this stage.
+  let entries=[];
+  try{
+    const snap=await withTimeout(
+      fbDb.collection("users").doc(uid).collection("data").doc("photoIndex").get(),
+      12000,
+      "account-delete:photo-index"
+    );
+    const value=snap.exists&&snap.data()?snap.data().value:null;
+    if(Array.isArray(value))entries=value;
+  }catch(error){
+    console.warn("Account deletion: photo index fallback unavailable",error&&error.code);
+  }
+
+  const ids=[...new Set(entries.map(item=>item&&item.id).filter(id=>typeof id==="string"&&/^[A-Za-z0-9_-]+$/.test(id)))];
+  for(const id of ids){
+    try{
+      await fbStorage.ref().child(`users/${uid}/photos/${id}.jpg`).delete();
+    }catch(error){
+      if(!(error&&error.code==="storage/object-not-found"))throw error;
+    }
+  }
+}
 async function deleteOwnStorageData(uid){
   if(!fbStorage)return;
-  const root=fbStorage.ref().child(`users/${uid}`);
-  try{await deleteStorageTree(root);}catch(error){if(error&&["storage/object-not-found","storage/unauthorized"].includes(error.code)){if(error.code==="storage/object-not-found")return;}throw error;}
+
+  // Photos are stored only under users/{uid}/photos. Listing users/{uid} requests
+  // permission for the parent prefix and is rejected by the intentionally narrow
+  // Storage rules. Listing the actual photos folder matches the owner-only rule.
+  const photosRoot=fbStorage.ref().child(`users/${uid}/photos`);
+  try{
+    await deleteStorageTree(photosRoot);
+  }catch(error){
+    if(error&&error.code==="storage/object-not-found")return;
+    if(error&&error.code==="storage/unauthorized"){
+      // Keep account deletion usable for an existing deployment whose list rule has
+      // not refreshed yet. Known photo paths can still be deleted individually.
+      await deleteKnownPhotoFiles(uid);
+      return;
+    }
+    throw error;
+  }
 }
 async function deleteOwnFirestoreData(uid){
   const collection=fbDb.collection("users").doc(uid).collection("data");
@@ -3194,6 +3234,7 @@ function accountDeleteErrorMessage(error,stage){
   if(code==="auth/popup-closed-by-user"||code==="auth/cancelled-popup-request"||code==="auth/popup-blocked")return t("delete_account_error_popup");
   if(code==="auth/requires-recent-login")return t("delete_account_error_recent");
   if(code==="permission-denied"||code==="firestore/permission-denied")return t("delete_account_error_permission");
+  if(stage==="storage"||String(code).startsWith("storage/"))return t("delete_account_error_storage");
   if(stage==="auth-delete")return t("delete_account_error_partial");
   return t("delete_account_error_generic");
 }
