@@ -1,0 +1,6 @@
+{
+  "build": "2026-08-01-bulletproof-update-share-v14",
+  "releasedAt": "2026-08-01T22:40:00+01:00",
+  "checkIntervalSeconds": 45,
+  "critical": false
+}

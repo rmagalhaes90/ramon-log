@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>KYRO</title>
-<meta name="kyro-build" content="2026-08-01-runtime-recovery-v13">
+<meta name="kyro-build" content="2026-08-01-bulletproof-update-share-v14">
 <meta name="apple-mobile-web-app-title" content="KYRO">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
@@ -2144,7 +2144,7 @@ const UI_STRINGS = {
     delete_account_error_permission:"A regra do Firestore ainda não permite excluir o próprio perfil. Publique a regra de exclusão de conta antes de tentar novamente.", delete_account_error_storage:"Não foi possível apagar suas fotos do Storage. Publique a regra atualizada do Storage e tente novamente.", delete_account_error_generic:"Não foi possível concluir a exclusão agora. Nenhuma conta foi removida. Tente novamente.", delete_account_error_partial:"Seus dados foram removidos, mas a conta não pôde ser finalizada. Entre novamente e tente a exclusão mais uma vez.", delete_account_success:"Sua conta e seus dados foram excluídos permanentemente.",
     export_backup:"⬇️ Exportar backup", import_data:"⬆️ Importar dados",
     delete_all:"🗑 Apagar todos os dados", clear_cache:"🧹 Limpar cache técnico (não apaga seus dados)",
-    export_csv:"📊 Exportar CSV (planilha)", about_footer:"KYRO · v3.0 · treino profissional em um app",
+    export_csv:"📊 Exportar CSV (planilha)", about_footer:"KYRO · v3.0 · build 14 · treino profissional em um app",
     try_again:"Tentar de novo",
     enable_notif:"🔔 Ativar avisos de descanso",
     week_label:"Semana", weight_label:"Peso", measures_label:"Medidas", photos_label:"Fotos",
@@ -2304,7 +2304,7 @@ const UI_STRINGS = {
     summary_nutrition_days:"{n} dias de nutrição", summary_photos:"{n} fotos",
     summary_routines:"rotinas de treino", summary_kyro_data:"dados do KYRO",
     this_week_suffix:"nesta semana", share_workout_done_text:"Treino de {title} concluído! 💪", share_image_footer:"treino registrado no KYRO",
-    share_more_exercises:"+ {n} exercício(s)", add_n_exercises:"+ Adicionar {n} exercícios",
+    share_more_exercises:"+ {n} exercício(s)", share_image_error:"Não foi possível preparar a imagem do treino.", share_fallback_ready:"O compartilhamento nativo não abriu. A imagem do treino foi preparada para você salvar.", add_n_exercises:"+ Adicionar {n} exercícios",
     repeat_last:"Repetir última", group_superset:"Agrupar em superconjunto",
     similar_alternative:"alternativa similar", superset_label:"Superconjunto {letter} — descanse só ao final das {count}",
     field_wrong_type:"Campo \"{key}\" deveria ser do tipo {expected}, mas veio como {actual}.",
@@ -2514,7 +2514,7 @@ const UI_STRINGS = {
     delete_account_error_permission:"The Firestore rule does not yet allow users to delete their own profile. Publish the account-deletion rule before trying again.", delete_account_error_storage:"Your photos could not be removed from Storage. Publish the updated Storage rule and try again.", delete_account_error_generic:"The deletion could not be completed right now. No account was removed. Please try again.", delete_account_error_partial:"Your data was removed, but the account could not be finalized. Sign in again and retry account deletion.", delete_account_success:"Your account and data have been permanently deleted.",
     export_backup:"⬇️ Export backup", import_data:"⬆️ Import data",
     delete_all:"🗑 Delete all data", clear_cache:"🧹 Clear technical cache (does not delete your data)",
-    export_csv:"📊 Export CSV (spreadsheet)", about_footer:"KYRO · v3.0 · professional training in one app",
+    export_csv:"📊 Export CSV (spreadsheet)", about_footer:"KYRO · v3.0 · build 14 · professional training in one app",
     try_again:"Try again",
     enable_notif:"🔔 Enable rest alerts",
     week_label:"Week", weight_label:"Weight", measures_label:"Measurements", photos_label:"Photos",
@@ -2674,7 +2674,7 @@ const UI_STRINGS = {
     summary_nutrition_days:"{n} days of nutrition", summary_photos:"{n} photos",
     summary_routines:"workout routines", summary_kyro_data:"KYRO data",
     this_week_suffix:"this week", share_workout_done_text:"{title} workout complete! 💪", share_image_footer:"workout logged on KYRO",
-    share_more_exercises:"+ {n} exercise(s)", add_n_exercises:"+ Add {n} exercises",
+    share_more_exercises:"+ {n} exercise(s)", share_image_error:"The workout image could not be prepared.", share_fallback_ready:"Native sharing could not be opened. The workout image was prepared for you to save.", add_n_exercises:"+ Add {n} exercises",
     repeat_last:"Repeat last", group_superset:"Group into superset",
     similar_alternative:"similar alternative", superset_label:"Superset {letter} — rest only after all {count}",
     field_wrong_type:"Field \"{key}\" should be of type {expected}, but came as {actual}.",
@@ -3882,7 +3882,7 @@ let kyroFatalScreenActive = false;
 
 function isRecoverableRuntimeIssue(message){
   const text=String(message||"").toLowerCase();
-  return /load failed|failed to fetch|network request failed|networkerror|aborterror|cancelled|canceled|app[ -]?check|recaptcha|internet connection appears to be offline|operation couldn.t be completed|temporarily unavailable/.test(text);
+  return /load failed|failed to fetch|network request failed|networkerror|aborterror|cancelled|canceled|app[ -]?check|recaptcha|internet connection appears to be offline|operation couldn.t be completed|temporarily unavailable|notallowederror|invalidstateerror|dataerror|web share|navigator\.share|share operation/.test(text);
 }
 function rememberRuntimeDiagnostic(id,message){
   try{
@@ -3955,6 +3955,8 @@ async function repairKyroTechnicalState(){
     try{
       sessionStorage.removeItem("kyro_sw_update_started_v7");
       sessionStorage.removeItem("kyro_sw_update_target_v7");
+      sessionStorage.removeItem("kyro_expected_build_v14");
+      sessionStorage.removeItem("kyro_recovery_build_v14");
     }catch(_){}
   }catch(error){
     console.warn("KYRO repair warning",error);
@@ -10199,7 +10201,7 @@ function showWorkoutSummary(isFullComplete){
 }
 
 
-async function shareWorkoutImage(){
+function shareWorkoutImage(){
   const w = workouts[currentDay];
   const s = state[currentDay];
   if(!w || !s) return;
@@ -10356,17 +10358,90 @@ async function shareWorkoutImage(){
   ctx.font = "26px 'JetBrains Mono', monospace";
   ctx.fillText(t("share_image_footer"), W/2, H-70);
 
-  canvas.toBlob(async (blob)=>{
-    const file = new File([blob], t("file_workout_image")+".png", {type:"image/png"});
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({ files:[file], title: tWorkoutTitle(w), text: tFmt("share_workout_done_text",{title:tWorkoutTitle(w)}) }); return; }catch(e){ /* user cancelled or unsupported, fall through to download */ }
+  // Web Share requires transient user activation. canvas.toBlob() is asynchronous and
+  // can lose that activation on Safari/iPadOS, so create the PNG synchronously and invoke
+  // navigator.share() in the same click task. Every path is guarded so sharing can never
+  // take down the rest of the app.
+  let blob=null;
+  try{
+    const dataUrl=canvas.toDataURL("image/png");
+    const parts=dataUrl.split(",");
+    if(parts.length!==2)throw new Error("share:image-data-invalid");
+    const binary=atob(parts[1]);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    blob=new Blob([bytes],{type:"image/png"});
+  }catch(error){
+    console.warn("KYRO share image generation failed",error);
+    void kyroAlert(t("share_image_error"),{type:"warning",icon:"📤"});
+    return;
+  }
+
+  const filename=t("file_workout_image")+"-"+todayKey()+".png";
+  const fallbackDownload=()=>{
+    try{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;
+      a.download=filename;
+      a.target="_blank";
+      a.rel="noopener";
+      a.style.display="none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Safari may still be reading the Blob after click; never revoke immediately.
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+      return true;
+    }catch(error){
+      console.warn("KYRO share fallback failed",error);
+      void kyroAlert(t("share_image_error"),{type:"warning",icon:"📤"});
+      return false;
     }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = t("file_workout_image")+"-"+todayKey()+".png";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  }, "image/png");
+  };
+  const cancelled=error=>!!error&&(
+    error.name==="AbortError"||
+    /cancel|abort/i.test(String(error.message||""))
+  );
+
+  let file=null;
+  try{
+    file=new File([blob],filename,{type:"image/png",lastModified:Date.now()});
+  }catch(error){
+    // Some older WebKit builds support Blob downloads but not constructing File objects.
+    console.warn("KYRO File constructor unavailable",error);
+  }
+
+  if(file&&typeof navigator.share==="function"){
+    let canShareFile=true;
+    try{
+      if(typeof navigator.canShare==="function")canShareFile=navigator.canShare({files:[file]});
+    }catch(error){
+      canShareFile=false;
+      console.warn("KYRO navigator.canShare failed",error);
+    }
+    if(canShareFile){
+      try{
+        const result=navigator.share({
+          files:[file],
+          title:tWorkoutTitle(w),
+          text:tFmt("share_workout_done_text",{title:tWorkoutTitle(w)})
+        });
+        Promise.resolve(result).catch(error=>{
+          // A user cancelling the native share sheet is a normal outcome, never an app error.
+          if(cancelled(error))return;
+          console.warn("KYRO native share failed; using safe fallback",error);
+          fallbackDownload();
+        });
+        return;
+      }catch(error){
+        if(cancelled(error))return;
+        console.warn("KYRO native share threw synchronously",error);
+      }
+    }
+  }
+
+  fallbackDownload();
 }
 
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight){
@@ -10596,127 +10671,284 @@ function setFieldValidity(input,message=""){
 document.addEventListener("invalid",e=>{ if(e.target instanceof HTMLInputElement){ e.preventDefault(); setFieldValidity(e.target,e.target.validationMessage||t("invalid_value")); } },true);
 document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&e.target.getAttribute("aria-invalid")==="true"&&e.target.checkValidity()) setFieldValidity(e.target,""); },true);
 
-// ---- Live app version checks + controlled Service Worker update flow ----
+// ---- Bulletproof live updates: remote version manifest + unique worker URL ----
 async function registerKyroServiceWorker(){
   if(!("serviceWorker" in navigator)||location.protocol!=="https:")return;
 
-  const CURRENT_APP_BUILD=document.querySelector('meta[name="kyro-build"]')?.content||"";
-  const UPDATE_STARTED_KEY="kyro_sw_update_started_v7";
-  const UPDATE_TARGET_KEY="kyro_sw_update_target_v7";
-  const DEFERRED_TARGET_KEY="kyro_update_deferred_target_v1";
-  const DEFERRED_UNTIL_KEY="kyro_update_deferred_until_v1";
-  const CHECK_INTERVAL_MS=60000;
+  const CURRENT_APP_BUILD=document.querySelector('meta[name="kyro-build"]')?.content||"unknown";
+  const EXPECTED_BUILD_KEY="kyro_expected_build_v14";
+  const RECOVERY_BUILD_KEY="kyro_recovery_build_v14";
+  const DEFERRED_TARGET_KEY="kyro_update_deferred_target_v14";
+  const DEFERRED_UNTIL_KEY="kyro_update_deferred_until_v14";
+  const CHECK_INTERVAL_MS=45000;
   const DEFER_MS=30*60*1000;
   const toast=document.getElementById("pwaUpdateToast");
   const btn=document.getElementById("pwaUpdateBtn");
   const laterBtn=document.getElementById("pwaUpdateLaterBtn");
-  let registration=null,waitingWorker=null,remoteBuild="",applying=false,reloadTriggered=false,fallbackTimer=null,checkTimer=null,deferTimer=null,checkInFlight=false;
+  let registration=null;
+  let remoteBuild="";
+  let applying=false;
+  let checkInFlight=false;
+  let reloadTriggered=false;
+  let intervalId=null;
+  let deferredTimer=null;
+  let updateChannel=null;
 
   const hideToast=()=>{
-    if(toast)toast.classList.remove("show");
+    toast?.classList.remove("show");
     if(btn){btn.disabled=false;btn.removeAttribute("aria-busy");btn.textContent=t("update_now");}
     if(laterBtn){laterBtn.disabled=false;laterBtn.textContent=t("update_later");}
   };
-  const targetId=()=>remoteBuild||"waiting-worker";
-  const isDeferred=target=>{
-    try{return localStorage.getItem(DEFERRED_TARGET_KEY)===target&&Date.now()<(Number(localStorage.getItem(DEFERRED_UNTIL_KEY))||0);}catch(_){return false;}
+  const showToast=target=>{
+    if(!target||target===CURRENT_APP_BUILD){hideToast();return;}
+    let deferred=false;
+    try{
+      deferred=localStorage.getItem(DEFERRED_TARGET_KEY)===target&&Date.now()<(Number(localStorage.getItem(DEFERRED_UNTIL_KEY))||0);
+    }catch(_){}
+    if(deferred){hideToast();scheduleDeferredCheck();return;}
+    toast?.classList.add("show");
   };
-  const clearDeferred=()=>{try{localStorage.removeItem(DEFERRED_TARGET_KEY);localStorage.removeItem(DEFERRED_UNTIL_KEY);}catch(_){}};
-  const scheduleDeferredRecheck=()=>{
-    if(deferTimer)clearTimeout(deferTimer);
-    let until=0;try{until=Number(localStorage.getItem(DEFERRED_UNTIL_KEY))||0;}catch(_){}
-    if(until>Date.now())deferTimer=setTimeout(()=>checkForUpdates({force:true}),Math.min(until-Date.now()+200,DEFER_MS));
+  const clearDeferred=()=>{
+    try{localStorage.removeItem(DEFERRED_TARGET_KEY);localStorage.removeItem(DEFERRED_UNTIL_KEY);}catch(_){}
   };
-  const updateIsInProgress=()=>{const started=Number(sessionStorage.getItem(UPDATE_STARTED_KEY))||0;return started>0&&Date.now()-started<30000;};
-  const markUpdateStarted=version=>{try{sessionStorage.setItem(UPDATE_STARTED_KEY,String(Date.now()));sessionStorage.setItem(UPDATE_TARGET_KEY,version||targetId());}catch(_){}};
-  const clearUpdateState=()=>{try{sessionStorage.removeItem(UPDATE_STARTED_KEY);sessionStorage.removeItem(UPDATE_TARGET_KEY);}catch(_){}};
-  const getVersion=worker=>new Promise(resolve=>{
-    if(!worker){resolve("");return;}const channel=new MessageChannel();let done=false;
-    const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(typeof value==="string"?value:"");};
-    const timer=setTimeout(()=>finish(""),1200);channel.port1.onmessage=e=>finish(e.data&&e.data.version);
+  const scheduleDeferredCheck=()=>{
+    if(deferredTimer)clearTimeout(deferredTimer);
+    let until=0;
+    try{until=Number(localStorage.getItem(DEFERRED_UNTIL_KEY))||0;}catch(_){}
+    if(until>Date.now())deferredTimer=setTimeout(()=>checkForUpdates({force:true}),Math.min(until-Date.now()+250,DEFER_MS));
+  };
+  const workerUrl=build=>{
+    const url=new URL("./sw.js",location.href);
+    url.searchParams.set("build",build||CURRENT_APP_BUILD);
+    return url.href;
+  };
+  const withTimeout=(promise,ms,fallback=null)=>Promise.race([
+    promise,
+    new Promise(resolve=>setTimeout(()=>resolve(fallback),ms))
+  ]);
+  const getWorkerVersion=worker=>new Promise(resolve=>{
+    if(!worker){resolve("");return;}
+    const channel=new MessageChannel();
+    let settled=false;
+    const finish=value=>{if(settled)return;settled=true;clearTimeout(timer);resolve(typeof value==="string"?value:"");};
+    const timer=setTimeout(()=>finish(""),1800);
+    channel.port1.onmessage=event=>finish(event.data&&event.data.version);
     try{worker.postMessage({type:"GET_VERSION"},[channel.port2]);}catch(_){finish("");}
   });
-  const showToast=target=>{
-    if(!target||isDeferred(target)){hideToast();scheduleDeferredRecheck();return;}
-    if(toast)toast.classList.add("show");
+  const fetchJsonNoCache=async url=>{
+    const controller=typeof AbortController==="function"?new AbortController():null;
+    const timer=controller?setTimeout(()=>controller.abort(),8000):null;
+    try{
+      const response=await fetch(url,{cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json","Cache-Control":"no-cache"},signal:controller?.signal});
+      if(!response.ok)return null;
+      return await response.json();
+    }finally{if(timer)clearTimeout(timer);}
   };
-  const reloadNow=()=>{if(reloadTriggered)return;reloadTriggered=true;hideToast();setTimeout(()=>location.reload(),80);};
-  const requestShellRefresh=(worker,build)=>new Promise(resolve=>{
-    if(!worker){resolve(false);return;}const channel=new MessageChannel();let done=false;
-    const finish=value=>{if(done)return;done=true;clearTimeout(timer);resolve(!!value);};
-    const timer=setTimeout(()=>finish(false),5000);channel.port1.onmessage=e=>finish(e.data&&e.data.ok);
-    try{worker.postMessage({type:"REFRESH_SHELL",build:build||""},[channel.port2]);}catch(_){finish(false);}
+  const readRemoteVersion=async()=>{
+    try{
+      const url=new URL("./version.json",location.href);
+      url.searchParams.set("t",String(Date.now()));
+      const data=await fetchJsonNoCache(url.href);
+      if(data&&typeof data.build==="string"&&data.build.trim())return data;
+    }catch(error){console.warn("KYRO version.json check failed",error);}
+
+    // Backward-compatible fallback in case version.json has not propagated through the CDN yet.
+    try{
+      const url=new URL("./index.html",location.href);
+      url.searchParams.set("kyro_version_probe",String(Date.now()));
+      const response=await fetch(url.href,{cache:"no-store",credentials:"same-origin",headers:{"Cache-Control":"no-cache"}});
+      if(!response.ok)return null;
+      const html=await response.text();
+      const build=(html.match(/<meta\s+name=["']kyro-build["']\s+content=["']([^"']+)["']/i)||[])[1]||"";
+      return build?{build}:null;
+    }catch(error){console.warn("KYRO HTML version fallback failed",error);return null;}
+  };
+  const waitForWaitingWorker=async(reg,timeoutMs=12000)=>{
+    if(reg.waiting)return reg.waiting;
+    const existing=reg.installing;
+    return await withTimeout(new Promise(resolve=>{
+      let candidate=existing;
+      let done=false;
+      const finish=worker=>{if(done)return;done=true;resolve(worker||null);};
+      const watch=worker=>{
+        if(!worker)return;
+        candidate=worker;
+        if(worker.state==="installed"){finish(worker);return;}
+        if(worker.state==="redundant"){finish(null);return;}
+        worker.addEventListener("statechange",()=>{
+          if(worker.state==="installed")finish(worker);
+          else if(worker.state==="redundant")finish(null);
+        });
+      };
+      watch(candidate);
+      reg.addEventListener("updatefound",()=>watch(reg.installing),{once:true});
+      setTimeout(()=>finish(reg.waiting||null),timeoutMs-100);
+    }),timeoutMs,null);
+  };
+  const ensureWorkerForBuild=async build=>{
+    // A build-specific query gives every release a unique URL, bypassing stale HTTP/CDN
+    // entries while keeping the same service-worker scope.
+    registration=await navigator.serviceWorker.register(workerUrl(build),{scope:"./",updateViaCache:"none"});
+    const activeVersion=await getWorkerVersion(registration.active||navigator.serviceWorker.controller);
+    if(activeVersion===build&&!registration.waiting)return null;
+    if(registration.waiting){
+      const waitingVersion=await getWorkerVersion(registration.waiting);
+      if(!waitingVersion||waitingVersion===build)return registration.waiting;
+    }
+    try{await registration.update();}catch(error){console.warn("KYRO registration.update failed",error);}
+    return await waitForWaitingWorker(registration);
+  };
+  const requestShellRefresh=(worker,target)=>new Promise(resolve=>{
+    if(!worker){resolve(false);return;}
+    const channel=new MessageChannel();
+    let settled=false;
+    const finish=value=>{if(settled)return;settled=true;clearTimeout(timer);resolve(!!value);};
+    const timer=setTimeout(()=>finish(false),7000);
+    channel.port1.onmessage=event=>finish(event.data&&event.data.ok);
+    try{worker.postMessage({type:"REFRESH_SHELL",build:target},[channel.port2]);}catch(_){finish(false);}
   });
-  const activateWaitingWorker=async worker=>{
-    if(!worker||worker.state!=="installed")return false;
-    const version=await getVersion(worker)||targetId();waitingWorker=worker;markUpdateStarted(version);hideToast();clearDeferred();
-    try{worker.postMessage({type:"SKIP_WAITING"});}catch(_){}
-    if(fallbackTimer)clearTimeout(fallbackTimer);
-    fallbackTimer=setTimeout(async()=>{try{const latest=await navigator.serviceWorker.getRegistration("./");if(latest&&latest.waiting)latest.waiting.postMessage({type:"SKIP_WAITING"});}catch(_){}reloadNow();},2500);
+  const reloadToBuild=target=>{
+    if(reloadTriggered)return;
+    reloadTriggered=true;
+    hideToast();
+    try{sessionStorage.setItem(EXPECTED_BUILD_KEY,target||"");}catch(_){}
+    const url=new URL("./index.html",location.href);
+    url.searchParams.set("kyro_build",target||CURRENT_APP_BUILD);
+    url.searchParams.set("kyro_reload",String(Date.now()));
+    location.replace(url.href);
+  };
+  const activateWorker=async(worker,target)=>{
+    if(!worker)return false;
+    const changed=new Promise(resolve=>{
+      let done=false;
+      const finish=()=>{if(done)return;done=true;resolve(true);};
+      navigator.serviceWorker.addEventListener("controllerchange",finish,{once:true});
+      setTimeout(()=>{if(!done)resolve(false);},7000);
+    });
+    try{worker.postMessage({type:"SKIP_WAITING"});}catch(error){console.warn("KYRO skipWaiting post failed",error);}
+    await changed;
+    const controller=navigator.serviceWorker.controller||registration?.active;
+    await requestShellRefresh(controller,target).catch(()=>false);
     return true;
   };
-  const readRemoteBuild=async()=>{
+  const emergencyRefresh=async target=>{
+    let attempted="";
+    try{attempted=sessionStorage.getItem(RECOVERY_BUILD_KEY)||"";}catch(_){}
+    if(!target||target===CURRENT_APP_BUILD||attempted===target)return false;
+    try{sessionStorage.setItem(RECOVERY_BUILD_KEY,target);}catch(_){}
     try{
-      const url=new URL("./index.html",location.href);url.searchParams.set("kyro_update_check",String(Date.now()));
-      const response=await fetch(url.href,{cache:"no-store",credentials:"same-origin",headers:{"Cache-Control":"no-cache"}});
-      if(!response.ok)return "";const text=await response.text();
-      return (text.match(/<meta\s+name=["']kyro-build["']\s+content=["']([^"']+)["']/i)||[])[1]||"";
-    }catch(_){return "";}
+      const registrations=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.filter(reg=>reg.scope.startsWith(new URL("./",location.href).href)).map(reg=>reg.unregister().catch(()=>false)));
+      if("caches" in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.filter(key=>key.startsWith("kyro-shell-")||key.startsWith("ramon-log-")).map(key=>caches.delete(key)));
+      }
+    }catch(error){console.warn("KYRO emergency refresh cleanup warning",error);}
+    reloadToBuild(target);
+    return true;
   };
-  const reconcileUpdateState=async()=>{
-    if(!registration){hideToast();return;}
-    const worker=registration.waiting;
-    if(worker&&worker.state==="installed"){
-      waitingWorker=worker;
-      const [candidate,active]=await Promise.all([getVersion(worker),getVersion(navigator.serviceWorker.controller)]);
-      if(candidate&&active&&candidate===active&&!remoteBuild){hideToast();clearUpdateState();return;}
-      if(updateIsInProgress()){hideToast();await activateWaitingWorker(worker);return;}
-      showToast(remoteBuild||candidate||"waiting-worker");return;
+
+  // Complete or recover an update that was interrupted by iOS suspending the app.
+  let expectedBuild="";
+  try{expectedBuild=sessionStorage.getItem(EXPECTED_BUILD_KEY)||"";}catch(_){}
+  if(expectedBuild&&expectedBuild===CURRENT_APP_BUILD){
+    try{sessionStorage.removeItem(EXPECTED_BUILD_KEY);sessionStorage.removeItem(RECOVERY_BUILD_KEY);}catch(_){}
+    const cleanUrl=new URL(location.href);
+    cleanUrl.searchParams.delete("kyro_build");cleanUrl.searchParams.delete("kyro_reload");
+    history.replaceState(null,"",cleanUrl.href);
+  }else if(expectedBuild&&expectedBuild!==CURRENT_APP_BUILD){
+    if(await emergencyRefresh(expectedBuild))return;
+  }
+
+  const applyUpdate=async()=>{
+    if(applying||!remoteBuild)return;
+    applying=true;
+    const target=remoteBuild;
+    hideToast();clearDeferred();
+    if(btn){btn.disabled=true;btn.setAttribute("aria-busy","true");btn.textContent=t("update_installing");}
+    if(laterBtn)laterBtn.disabled=true;
+    try{
+      try{sessionStorage.setItem(EXPECTED_BUILD_KEY,target);}catch(_){}
+      const worker=await ensureWorkerForBuild(target);
+      if(worker)await activateWorker(worker,target);
+      else await requestShellRefresh(navigator.serviceWorker.controller||registration?.active,target);
+      reloadToBuild(target);
+    }catch(error){
+      console.warn("KYRO update application failed",error);
+      applying=false;
+      hideToast();
+      showToast(target);
+      void kyroAlert(currentLang==="en"?"The update could not be installed yet. KYRO is still safe to use; try Update again when the connection is stable.":"A atualização ainda não pôde ser instalada. O KYRO continua seguro para uso; tente Atualizar novamente quando a conexão estiver estável.",{type:"warning",icon:"↻"});
     }
-    waitingWorker=null;
-    if(remoteBuild&&remoteBuild!==CURRENT_APP_BUILD){showToast(remoteBuild);return;}
-    hideToast();clearUpdateState();
+  };
+  const deferUpdate=()=>{
+    if(!remoteBuild)return;
+    try{
+      localStorage.setItem(DEFERRED_TARGET_KEY,remoteBuild);
+      localStorage.setItem(DEFERRED_UNTIL_KEY,String(Date.now()+DEFER_MS));
+    }catch(_){}
+    hideToast();scheduleDeferredCheck();
   };
   async function checkForUpdates({force=false}={}){
     if(checkInFlight||reloadTriggered||(!force&&document.visibilityState==="hidden"))return;
     checkInFlight=true;
     try{
-      if(registration)await registration.update().catch(()=>{});
-      const latestBuild=await readRemoteBuild();
-      remoteBuild=latestBuild&&latestBuild!==CURRENT_APP_BUILD?latestBuild:"";
-      await reconcileUpdateState();
+      const version=await readRemoteVersion();
+      const latest=version&&typeof version.build==="string"?version.build.trim():"";
+      if(latest&&latest!==CURRENT_APP_BUILD){
+        const previous=remoteBuild;
+        remoteBuild=latest;
+        if(previous&&previous!==latest)clearDeferred();
+        // Begin downloading/installing in the background, but never activate without consent.
+        ensureWorkerForBuild(latest).catch(error=>console.warn("KYRO background update preparation failed",error));
+        showToast(latest);
+        try{updateChannel?.postMessage({type:"UPDATE_AVAILABLE",build:latest});}catch(_){}
+      }else if(latest===CURRENT_APP_BUILD){
+        remoteBuild="";
+        hideToast();clearDeferred();
+      }
+    }catch(error){
+      // Update checks are never fatal and never interrupt a workout.
+      console.warn("KYRO update check failed",error);
     }finally{checkInFlight=false;}
   }
-  const applyUpdate=async()=>{
-    if(applying)return;applying=true;hideToast();clearDeferred();markUpdateStarted(targetId());
-    if(btn){btn.disabled=true;btn.setAttribute("aria-busy","true");btn.textContent=t("update_installing");}
-    if(laterBtn)laterBtn.disabled=true;
-    try{
-      if(registration)await registration.update().catch(()=>{});
-      const worker=registration&&registration.waiting||waitingWorker;
-      if(worker&&await activateWaitingWorker(worker))return;
-      // HTML-only releases are still applied: refresh the cached shell before reloading.
-      await requestShellRefresh(navigator.serviceWorker.controller,remoteBuild||CURRENT_APP_BUILD);
-      reloadNow();
-    }catch(error){applying=false;clearUpdateState();hideToast();if(APP_ENV.name==="development")console.warn("Falha ao aplicar atualização",error);}
-  };
-  const deferUpdate=()=>{
-    const target=targetId();try{localStorage.setItem(DEFERRED_TARGET_KEY,target);localStorage.setItem(DEFERRED_UNTIL_KEY,String(Date.now()+DEFER_MS));}catch(_){}
-    hideToast();scheduleDeferredRecheck();
-  };
 
-  hideToast();if(btn)btn.onclick=applyUpdate;if(laterBtn)laterBtn.onclick=deferUpdate;
+  hideToast();
+  if(btn)btn.onclick=applyUpdate;
+  if(laterBtn)laterBtn.onclick=deferUpdate;
   try{
-    registration=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
-    if(updateIsInProgress()&&registration.waiting)await activateWaitingWorker(registration.waiting);else await checkForUpdates({force:true});
-    registration.addEventListener("updatefound",()=>{const worker=registration.installing;if(!worker)return;worker.addEventListener("statechange",()=>{if(worker.state==="installed")reconcileUpdateState().catch(hideToast);else if(worker.state==="redundant")hideToast();});});
-    navigator.serviceWorker.addEventListener("controllerchange",()=>{if(fallbackTimer)clearTimeout(fallbackTimer);hideToast();clearUpdateState();clearDeferred();reloadNow();});
-    const checkNow=()=>{if(!reloadTriggered)checkForUpdates({force:true});};
-    window.addEventListener("pageshow",checkNow);window.addEventListener("focus",checkNow);window.addEventListener("online",checkNow);
+    if("BroadcastChannel" in window){
+      updateChannel=new BroadcastChannel("kyro-updates-v14");
+      updateChannel.onmessage=event=>{
+        const build=event.data&&event.data.build;
+        if(event.data&&event.data.type==="UPDATE_AVAILABLE"&&build&&build!==CURRENT_APP_BUILD){remoteBuild=build;showToast(build);}
+      };
+    }
+    registration=await navigator.serviceWorker.register(workerUrl(CURRENT_APP_BUILD),{scope:"./",updateViaCache:"none"});
+    registration.addEventListener("updatefound",()=>{
+      const worker=registration.installing;
+      if(!worker)return;
+      worker.addEventListener("statechange",async()=>{
+        if(worker.state!=="installed"||!navigator.serviceWorker.controller)return;
+        const version=await getWorkerVersion(worker);
+        if(version&&version!==CURRENT_APP_BUILD){remoteBuild=version;showToast(version);}
+      });
+    });
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(applying&&remoteBuild)reloadToBuild(remoteBuild);
+    });
+    const checkNow=()=>checkForUpdates({force:true});
+    window.addEventListener("pageshow",checkNow);
+    window.addEventListener("focus",checkNow);
+    window.addEventListener("online",checkNow);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkNow();});
-    checkTimer=setInterval(()=>checkForUpdates(),CHECK_INTERVAL_MS);
-    setTimeout(checkNow,4000);
-  }catch(error){hideToast();clearUpdateState();if(APP_ENV.name==="development")console.warn("Service Worker não registrado",error);}
+    intervalId=setInterval(()=>checkForUpdates(),CHECK_INTERVAL_MS);
+    setTimeout(checkNow,1500);
+  }catch(error){
+    console.warn("KYRO Service Worker registration failed",error);
+    // The app remains usable online even if a browser temporarily rejects Service Workers.
+    setTimeout(()=>checkForUpdates({force:true}),5000);
+  }
 }
 window.addEventListener("load",registerKyroServiceWorker,{once:true});
 
