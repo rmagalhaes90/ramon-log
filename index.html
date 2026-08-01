@@ -2351,9 +2351,13 @@ document.getElementById("bootstrapErrorRetryBtn").addEventListener("click", ()=>
 // including granted admins — only ever sees a short, generic message with an error ID, so
 // internal details (paths, Firestore structure, stack traces) are never exposed to them.
 function canSeeDebugDetails(){
-  const host = (typeof location !== "undefined") ? location.hostname : "";
-  if(host === "localhost" || host === "127.0.0.1") return true;
-  return isSuperAdmin();
+  // TEMPORARY: always showing full debug detail while actively diagnosing a real connectivity
+  // issue in production. This intentionally bypasses the normal isSuperAdmin()-only gate —
+  // REVERT this back to the commented-out version below once the issue is confirmed fixed.
+  return true;
+  // const host = (typeof location !== "undefined") ? location.hostname : "";
+  // if(host === "localhost" || host === "127.0.0.1") return true;
+  // return isSuperAdmin();
 }
 function shortErrorId(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 function showDebugError(msg){
