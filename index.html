@@ -2394,7 +2394,7 @@ try{
     // been observed (consistent timeouts across multiple real networks, on a network where
     // Firebase Auth itself works fine). Forcing long-polling trades a little connection
     // overhead for much higher reliability in exactly this situation.
-    fbDb.settings({ experimentalForceLongPolling: true, merge: true });
+    fbDb.settings({ experimentalForceLongPolling: true });
     // Deliberately NOT calling fbDb.enablePersistence() here. Firestore's built-in IndexedDB
     // persistence is a known source of "Failed to get document because the client is offline"
     // errors on iOS Safari — the persistence layer can get stuck reporting offline even with
