@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background:#0b0c0e;color-scheme:dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
@@ -7,6 +7,11 @@
 <meta name="apple-mobile-web-app-title" content="KYRO">
 <meta name="theme-color" content="#0b0c0e">
 <meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style id="criticalStartupStyle">
+  html,body{margin:0;min-height:100%;background:#0b0c0e!important;color:#eef0f2;color-scheme:dark}
+  body{min-height:100dvh}
+</style>
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://www.google.com https://www.recaptcha.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; worker-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://*.firebasestorage.app https://world.openfoodfacts.org https://www.google.com https://www.recaptcha.net; frame-src https://www.youtube-nocookie.com https://accounts.google.com https://www.google.com https://www.recaptcha.net; upgrade-insecure-requests">
 <link rel="manifest" id="appManifest" href="./manifest.json">
@@ -439,8 +444,15 @@
   .meas-vals{display:flex;flex-wrap:wrap;gap:6px 14px}.meas-vals span{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--dim)}.meas-vals b{color:var(--text)}.m-diff.down{color:var(--blue)}.m-diff.up{color:var(--red)}
 
   .photo-add{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--panel);border:1px dashed var(--line);border-radius:14px;padding:18px;color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px}
-  .photo-add.uploading{opacity:.6;pointer-events:none}
+  .photo-add.uploading{opacity:.72;pointer-events:none}
   .photo-add .spinner{width:14px;height:14px;border:2px solid var(--dim);border-top-color:var(--volt);border-radius:50%;animation:pullSpin .7s linear infinite;display:inline-block}
+  .photo-upload-progress[hidden]{display:none!important}
+  .photo-upload-progress{margin:-4px 0 14px;background:linear-gradient(155deg,rgba(31,34,38,.98),rgba(20,22,25,.98));border:1px solid var(--volt-dim);border-radius:14px;padding:12px 13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+  .photo-upload-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+  .photo-upload-progress-label{font-size:12px;font-weight:700;color:var(--text)}
+  .photo-upload-progress-pct{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--volt);min-width:44px;text-align:right}
+  .photo-upload-track{height:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+  .photo-upload-bar{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--volt-dim),var(--volt));border-radius:inherit;transition:width .18s linear}
   .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photo-cell{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);aspect-ratio:3/4;cursor:pointer}
   .photo-cell img{width:100%;height:100%;object-fit:cover;display:block}.p-date{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:rgba(6,7,8,.72);font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text)}
 
@@ -484,8 +496,9 @@
   .segmented button.active{background:var(--volt);color:#0b0c0e;border-color:var(--volt)}
 
   /* ---- Auth screen ---- */
-  #authScreen{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:28px;overflow-y:auto}
-  #authScreen.hide{display:none}
+  #authScreen{position:fixed;inset:0;z-index:20000;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:28px;overflow-y:auto;pointer-events:auto;touch-action:manipulation;isolation:isolate;-webkit-overflow-scrolling:touch}
+  #authScreen.hide{display:none;pointer-events:none}
+  #authScreen input,#authScreen button,#authScreen form{pointer-events:auto;touch-action:manipulation}
   .auth-brand{text-align:center;margin-bottom:36px}
   .auth-brand h1{font-size:44px;color:var(--text)}
   .auth-brand h1 span{color:var(--volt)}
@@ -505,10 +518,10 @@
   .auth-forgot{display:block;text-align:center;margin-top:16px;color:var(--blue);font-size:12.5px;text-decoration:none;background:none;border:none;cursor:pointer}
   .auth-error{background:rgba(255,77,94,.1);border:1px solid rgba(255,77,94,.4);color:var(--red);border-radius:10px;padding:11px 14px;font-size:12.5px;margin-bottom:14px;display:none}
   .auth-error.show{display:block}
-  .auth-loading{position:fixed;inset:0;z-index:600;background:rgba(6,7,8,.7);display:none;align-items:center;justify-content:center}
+  .auth-loading{position:fixed;inset:0;z-index:20010;background:rgba(6,7,8,.7);display:none;align-items:center;justify-content:center}
   .auth-loading.show{display:flex}
   #appLoadingScreen{position:fixed;inset:0;z-index:450;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;animation:fadein .2s}
-  #appLoadingScreen.fade-out{animation:loadFadeOut .4s forwards}
+  #appLoadingScreen.fade-out{animation:loadFadeOut .4s forwards;pointer-events:none}
   @keyframes loadFadeOut{to{opacity:0}}
   .app-loading-brand{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.03em;color:var(--text)}
   .app-loading-brand span{color:var(--volt)}
@@ -597,7 +610,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js" referrerpolicy="no-referrer"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js" referrerpolicy="no-referrer"></script>
 </head>
-<body>
+<body style="background:#0b0c0e">
 
 <div id="authScreen">
   <div class="auth-brand">
@@ -920,6 +933,15 @@
       <div id="sub-fotos" style="display:none">
         <label class="photo-add" for="photoInput" id="photoAddLabel">📷 Adicionar foto</label>
         <input type="file" id="photoInput" accept="image/*" style="display:none">
+        <div class="photo-upload-progress" id="photoUploadProgress" hidden role="status" aria-live="polite" aria-atomic="true">
+          <div class="photo-upload-progress-head">
+            <span class="photo-upload-progress-label" id="photoUploadProgressLabel">Preparando foto...</span>
+            <strong class="photo-upload-progress-pct" id="photoUploadProgressPct">0%</strong>
+          </div>
+          <div class="photo-upload-track" role="progressbar" id="photoUploadProgressTrack" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="photo-upload-bar" id="photoUploadProgressBar"></span>
+          </div>
+        </div>
         <div id="photoToolbar" style="margin-bottom:12px"></div>
         <div class="photo-grid" id="photoGrid"></div>
       </div>
@@ -2043,7 +2065,7 @@ const UI_STRINGS = {
     weekly_priority_muscle:"{muscle} não foi treinado esta semana. Prioridade: incluir esse grupo muscular na próxima semana.",
     weekly_priority_volume_drop:"Seu volume caiu {pct}% em relação à semana anterior. Prioridade: recuperar o volume, ou confirmar que essa redução foi intencional (deload).",
     weekly_priority_maintain:"Você manteve a consistência e o volume. Prioridade: continuar assim e buscar pequenos aumentos de carga.",
-    photo_uploading:"Enviando foto...",
+    photo_uploading:"Enviando foto...", photo_preparing:"Preparando foto...", photo_saving:"Salvando foto...", photo_uploaded:"Foto enviada!",
     video_no_embed_fallback:"Ainda não temos um vídeo específico em inglês para este exercício. Toque abaixo para buscar no YouTube.",
     lbl_cfg_sets:"Séries", lbl_cfg_reps:"Repetições", lbl_cfg_rest:"Descanso (segundos)",
     lbl_cfg_video:"Link do vídeo (YouTube)", lbl_cfg_notes:"Notas (opcional)",
@@ -2162,6 +2184,7 @@ const UI_STRINGS = {
     reload_btn:"🔄 Tentar de novo",
     update_available:"Uma atualização segura do KYRO está disponível.",
     update_now:"Atualizar",
+    update_installing:"Atualizando…",
     page_home_title:"INÍCIO<span>.</span>",
     page_routines_title:"ROTINAS<span>.</span>",
     page_progress_title:"PROGRESSO<span>.</span>",
@@ -2399,7 +2422,7 @@ const UI_STRINGS = {
     weekly_priority_muscle:"{muscle} wasn't trained this week. Priority: include that muscle group next week.",
     weekly_priority_volume_drop:"Your volume dropped {pct}% compared to last week. Priority: recover the volume, or confirm this drop was intentional (deload).",
     weekly_priority_maintain:"You kept up consistency and volume. Priority: keep it up and aim for small load increases.",
-    photo_uploading:"Uploading photo...",
+    photo_uploading:"Uploading photo...", photo_preparing:"Preparing photo...", photo_saving:"Saving photo...", photo_uploaded:"Photo uploaded!",
     video_no_embed_fallback:"We don't have a specific English tutorial video for this exercise yet. Tap below to search YouTube.",
     lbl_cfg_sets:"Sets", lbl_cfg_reps:"Reps", lbl_cfg_rest:"Rest (seconds)",
     lbl_cfg_video:"Video link (YouTube)", lbl_cfg_notes:"Notes (optional)",
@@ -2518,6 +2541,7 @@ const UI_STRINGS = {
     reload_btn:"🔄 Try again",
     update_available:"A secure KYRO update is available.",
     update_now:"Update",
+    update_installing:"Updating…",
     page_home_title:"HOME<span>.</span>",
     page_routines_title:"ROUTINES<span>.</span>",
     page_progress_title:"PROGRESS<span>.</span>",
@@ -3887,8 +3911,27 @@ function initAuthScreenEvents(){
   });
 }
 
+function resetBlockingUiBeforeAuth(){
+  document.querySelectorAll(".modal-overlay.show,.overlay.show,.celebrate-overlay.show,.photo-viewer.show").forEach(el=>el.classList.remove("show"));
+  const tour=document.getElementById("firstRunOnboarding"); if(tour) tour.hidden=true;
+  const coach=document.getElementById("onboardingCoach"); if(coach) coach.hidden=true;
+  const loading=document.getElementById("appLoadingScreen");
+  if(loading){ loading.style.display="none"; loading.classList.remove("fade-out"); }
+  const authLoading=document.getElementById("authLoading"); if(authLoading) authLoading.classList.remove("show");
+  const bootstrap=document.getElementById("bootstrapErrorScreen"); if(bootstrap) bootstrap.style.display="none";
+  document.body.classList.remove("no-select-while-dragging");
+  document.body.style.pointerEvents="";
+  clearOnboardingFocus();
+}
+
 function showAuthScreen(){
-  document.getElementById("authScreen").classList.remove("hide");
+  resetBlockingUiBeforeAuth();
+  const authScreen=document.getElementById("authScreen");
+  authScreen.classList.remove("hide");
+  authScreen.removeAttribute("aria-hidden");
+  authScreen.style.pointerEvents="auto";
+  try{ authScreen.inert=false; }catch(_){}
+  ["authSubmit","authGoogle","authForgot"].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=false; });
   if(FIREBASE_CONFIG.apiKey.startsWith("COLE_")){
     const el = document.getElementById("authError");
     el.textContent = t("firebase_setup_missing");
@@ -3899,7 +3942,12 @@ function showAuthScreen(){
     document.querySelector(".auth-divider").style.display = "none";
   }
 }
-function hideAuthScreen(){ document.getElementById("authScreen").classList.add("hide"); }
+function hideAuthScreen(){
+  const authScreen=document.getElementById("authScreen");
+  authScreen.classList.add("hide");
+  authScreen.setAttribute("aria-hidden","true");
+  try{ authScreen.inert=true; }catch(_){}
+}
 
 let currentDay = "quarta", currentMuscleFilter = null, currentEquipmentFilter = null, addingToDay = null, currentProgSub = "semana", currentPhotoId = null;
 let selectedExercisesForAdd = new Set(); // exercise names currently checked in the multi-select browser
@@ -7771,13 +7819,61 @@ async function retryPendingPhotoUploads(){
   if(anySucceeded){ await store.set("photoIndex", photoIndex); renderPhotoTab(); }
 }
 
-async function uploadPhotoToStorage(dataUrl, id){
+function setPhotoUploadProgress(percent, labelKey="photo_uploading"){
+  const panel=document.getElementById("photoUploadProgress");
+  if(!panel) return;
+  const safe=Math.max(0,Math.min(100,Math.round(Number(percent)||0)));
+  panel.hidden=false;
+  document.getElementById("photoUploadProgressLabel").textContent=t(labelKey);
+  document.getElementById("photoUploadProgressPct").textContent=`${safe}%`;
+  document.getElementById("photoUploadProgressBar").style.width=`${safe}%`;
+  const track=document.getElementById("photoUploadProgressTrack");
+  track.setAttribute("aria-valuenow",String(safe));
+  track.setAttribute("aria-label",`${t(labelKey)} ${safe}%`);
+}
+
+function hidePhotoUploadProgress(delay=0){
+  const panel=document.getElementById("photoUploadProgress");
+  if(!panel) return;
+  const hide=()=>{
+    panel.hidden=true;
+    document.getElementById("photoUploadProgressBar").style.width="0%";
+    document.getElementById("photoUploadProgressPct").textContent="0%";
+    document.getElementById("photoUploadProgressTrack").setAttribute("aria-valuenow","0");
+  };
+  if(delay>0) setTimeout(hide,delay); else hide();
+}
+
+async function uploadPhotoToStorage(dataUrl, id, onProgress=null){
   if(!fbStorage || !currentUser) return null;
   try{
     const blob = dataUrlToBlob(dataUrl);
     const ref = fbStorage.ref().child(`users/${currentUser.uid}/photos/${id}.jpg`);
-    await ref.put(blob, { contentType: "image/jpeg" });
-    return await ref.getDownloadURL();
+    const task = ref.put(blob, { contentType: "image/jpeg" });
+    return await new Promise(resolve=>{
+      let settled=false;
+      const finish=value=>{ if(settled) return; settled=true; resolve(value); };
+      task.on("state_changed",
+        snapshot=>{
+          const total=snapshot.totalBytes||blob.size||1;
+          const pct=Math.max(0,Math.min(100,Math.round((snapshot.bytesTransferred/total)*100)));
+          try{ if(typeof onProgress==="function") onProgress(pct,snapshot); }catch(_){}
+        },
+        error=>{
+          console.error("uploadPhotoToStorage error", error);
+          finish(null);
+        },
+        async()=>{
+          try{
+            if(typeof onProgress==="function") onProgress(100,task.snapshot);
+            finish(await task.snapshot.ref.getDownloadURL());
+          }catch(error){
+            console.error("uploadPhotoToStorage download URL error", error);
+            finish(null);
+          }
+        }
+      );
+    });
   }catch(e){
     console.error("uploadPhotoToStorage error", e);
     return null; // caller keeps the compressed JPEG locally as a pending upload
@@ -7802,6 +7898,7 @@ function createPhotoId(){
 async function addPhoto(file){
   if(photoUploadInProgress){ alert(t("alert_photo_upload_in_progress")); return; }
   photoUploadInProgress = true;
+  setPhotoUploadProgress(0,"photo_preparing");
   let photoId = null;
   let uploadedToStorage = false;
 
@@ -7828,9 +7925,11 @@ async function addPhoto(file){
 
     photoId = createPhotoId();
     const date = todayKey();
-    const downloadUrl = await uploadPhotoToStorage(dataUrl, photoId);
+    setPhotoUploadProgress(0,"photo_uploading");
+    const downloadUrl = await uploadPhotoToStorage(dataUrl, photoId, pct=>setPhotoUploadProgress(pct,"photo_uploading"));
 
     if(downloadUrl){
+      setPhotoUploadProgress(100,"photo_saving");
       uploadedToStorage = true;
       const newIndex = photoIndex.concat({ id: photoId, d: date });
       try{
@@ -7849,6 +7948,7 @@ async function addPhoto(file){
         removePendingSync("photoIndex");
         haptic();
         await renderPhotoTab();
+        setPhotoUploadProgress(100,"photo_uploaded");
         return;
       }catch(e){
         console.error("addPhoto: failed to persist uploaded photo", e);
@@ -7886,6 +7986,7 @@ async function addPhoto(file){
     alert(t("alert_photo_save_error"));
   }finally{
     photoUploadInProgress = false;
+    hidePhotoUploadProgress(500);
   }
 }
 
@@ -9577,7 +9678,8 @@ async function softRefreshCurrentView(){
   }
 
   document.addEventListener("touchstart", (e)=>{
-    if(refreshing || anyModalOpen() || window.scrollY > 0) { startY = null; return; }
+    const authVisible = !document.getElementById("authScreen")?.classList.contains("hide");
+    if(authVisible || e.target.closest("#authScreen") || refreshing || anyModalOpen() || window.scrollY > 0) { startY = null; return; }
     startY = e.touches[0].clientY;
   }, { passive: true });
 
@@ -9689,15 +9791,73 @@ document.addEventListener("input",e=>{ if(e.target instanceof HTMLInputElement&&
 async function registerKyroServiceWorker(){
   if(!("serviceWorker" in navigator) || location.protocol!=="https:") return;
   try{
-    const reg=await navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"});
-    const showUpdate=worker=>{
-      const toast=document.getElementById("pwaUpdateToast"),btn=document.getElementById("pwaUpdateBtn");
-      if(!toast||!btn||!worker) return; toast.classList.add("show");
-      btn.onclick=()=>worker.postMessage({type:"SKIP_WAITING"});
+    const reg=await navigator.serviceWorker.register("./sw.js?v=login-photo-progress-v5",{scope:"./",updateViaCache:"none"});
+    const toast=document.getElementById("pwaUpdateToast");
+    const btn=document.getElementById("pwaUpdateBtn");
+    let pendingWorker=null;
+    let applyingUpdate=false;
+    let reloadFallback=null;
+
+    const setButtonBusy=busy=>{
+      if(!btn) return;
+      btn.disabled=busy;
+      btn.setAttribute("aria-busy",busy?"true":"false");
+      btn.textContent=busy?t("update_installing"):t("update_now");
     };
+    const reloadFresh=()=>{
+      const url=new URL(location.href);
+      url.searchParams.set("_kyro_update",Date.now().toString());
+      location.replace(url.toString());
+    };
+    const showUpdate=worker=>{
+      if(!toast||!btn||!worker) return;
+      pendingWorker=worker;
+      setButtonBusy(false);
+      toast.classList.add("show");
+    };
+    const applyUpdate=async()=>{
+      if(applyingUpdate) return;
+      applyingUpdate=true;
+      setButtonBusy(true);
+      try{
+        await reg.update().catch(()=>{});
+        const worker=reg.waiting||pendingWorker;
+        if(worker&&worker.state==="installed"){
+          worker.postMessage({type:"SKIP_WAITING"});
+          reloadFallback=setTimeout(reloadFresh,4000);
+          return;
+        }
+        // Safari/iOS can report the update after the worker has already activated.
+        // In that case a cache-busted navigation is the reliable completion path.
+        reloadFresh();
+      }catch(e){
+        applyingUpdate=false;
+        setButtonBusy(false);
+        if(APP_ENV.name==="development") console.warn("Falha ao aplicar atualização",e);
+      }
+    };
+
+    if(btn) btn.addEventListener("click",applyUpdate);
     if(reg.waiting&&navigator.serviceWorker.controller) showUpdate(reg.waiting);
-    reg.addEventListener("updatefound",()=>{ const worker=reg.installing; if(worker) worker.addEventListener("statechange",()=>{ if(worker.state==="installed"&&navigator.serviceWorker.controller) showUpdate(worker); }); });
-    let refreshing=false; navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(!refreshing){refreshing=true;location.reload();} });
+    reg.addEventListener("updatefound",()=>{
+      const worker=reg.installing;
+      if(!worker) return;
+      worker.addEventListener("statechange",()=>{
+        if(worker.state==="installed"&&navigator.serviceWorker.controller){
+          showUpdate(reg.waiting||worker);
+        }
+      });
+    });
+
+    let refreshing=false;
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(refreshing) return;
+      refreshing=true;
+      if(reloadFallback) clearTimeout(reloadFallback);
+      if(toast) toast.classList.remove("show");
+      reloadFresh();
+    });
+
     setInterval(()=>reg.update().catch(()=>{}),6*60*60*1000);
   }catch(e){ if(APP_ENV.name==="development") console.warn("Service Worker não registrado",e); }
 }

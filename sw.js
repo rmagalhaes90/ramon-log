@@ -1,5 +1,5 @@
 /* KYRO service worker — bilingual fast-start build */
-const CACHE_VERSION = "kyro-shell-2026-08-01-onboarding-dynamic-v3";
+const CACHE_VERSION = "kyro-shell-2026-08-01-login-photo-progress-v5";
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));
 const SHELL_ASSETS = [
@@ -23,8 +23,12 @@ async function readLanguage(){
 self.addEventListener("install",event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE_VERSION);
-    await Promise.allSettled(SHELL_ASSETS.map(asset=>cache.add(new Request(asset,{cache:"reload"}))));
-    await self.skipWaiting();
+    // Cache the document first so standalone launch always has a dark, renderable shell.
+    try{ await cache.add(new Request("./index.html",{cache:"reload"})); }catch(_){}
+    await Promise.allSettled(SHELL_ASSETS.filter(asset=>asset!=="./index.html").map(asset=>cache.add(new Request(asset,{cache:"reload"}))));
+    // First installation activates immediately. Later releases wait for the user to
+    // press Update, so the update toast and button represent a real waiting worker.
+    if(!self.registration.active) await self.skipWaiting();
   })());
 });
 
@@ -34,13 +38,13 @@ self.addEventListener("activate",event=>{
     await Promise.all(keys.filter(key=>(key.startsWith("kyro-shell-")||key.startsWith("ramon-log-"))&&key!==CACHE_VERSION).map(key=>caches.delete(key)));
     if("navigationPreload" in self.registration){ try{await self.registration.navigationPreload.enable();}catch(_){} }
     await self.clients.claim();
-    const windows=await self.clients.matchAll({type:"window",includeUncontrolled:true});
-    await Promise.all(windows.map(client=>"navigate" in client?client.navigate(client.url).catch(()=>undefined):undefined));
+    // The page reloads itself on controllerchange. Avoid navigating clients from the
+    // worker as well, which can be ignored or race on iOS standalone mode.
   })());
 });
 
 self.addEventListener("message",event=>{
-  if(event.data&&event.data.type==="SKIP_WAITING") self.skipWaiting();
+  if(event.data&&event.data.type==="SKIP_WAITING") event.waitUntil(self.skipWaiting());
   if(event.data&&event.data.type==="SET_LANGUAGE") event.waitUntil(saveLanguage(event.data.language));
 });
 
