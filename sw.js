@@ -1,5 +1,5 @@
 /* KYRO service worker — bilingual fast-start build */
-const CACHE_VERSION = "kyro-shell-2026-08-01-login-photo-progress-v5";
+const CACHE_VERSION = "kyro-shell-2026-08-01-premium-dialogs-v6";
 const PREF_CACHE = "kyro-preferences-v1";
 const LANGUAGE_REQUEST = new Request(new URL("./__kyro_language__", self.location.href));
 const SHELL_ASSETS = [

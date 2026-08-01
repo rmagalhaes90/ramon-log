@@ -601,6 +601,45 @@
       scroll-behavior: auto !important;
     }
   }
+
+
+  /* ==================== KYRO PREMIUM DIALOG SYSTEM ==================== */
+  body.kyro-dialog-open{overflow:hidden;touch-action:none}
+  .kyro-dialog-layer{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 18px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .24s ease,visibility .24s ease}
+  .kyro-dialog-layer.show{opacity:1;visibility:visible;pointer-events:auto}
+  .kyro-dialog-backdrop{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(215,255,61,.08),transparent 36%),rgba(0,0,0,.76);backdrop-filter:blur(12px) saturate(1.12);-webkit-backdrop-filter:blur(12px) saturate(1.12)}
+  .kyro-dialog-panel{--dialog-accent:#d7ff3d;--dialog-glow:rgba(215,255,61,.24);position:relative;width:min(100%,430px);max-height:min(82dvh,680px);overflow:auto;border:1px solid color-mix(in srgb,var(--dialog-accent) 72%,transparent);border-radius:28px;background:linear-gradient(155deg,rgba(29,32,35,.985),rgba(13,15,17,.995));box-shadow:0 30px 90px rgba(0,0,0,.72),0 0 0 1px rgba(255,255,255,.035) inset,0 0 44px var(--dialog-glow);padding:29px 24px 22px;transform:translateY(28px) scale(.94);opacity:0;transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .24s ease;isolation:isolate}
+  .kyro-dialog-layer.show .kyro-dialog-panel{transform:none;opacity:1}
+  .kyro-dialog-panel::before{content:"";position:absolute;inset:0;z-index:-2;border-radius:inherit;background:radial-gradient(circle at 50% -12%,var(--dialog-glow),transparent 42%),linear-gradient(140deg,rgba(255,255,255,.045),transparent 42%)}
+  .kyro-dialog-panel::after{content:"";position:absolute;inset:auto 0 0;z-index:-1;height:42%;border-radius:0 0 28px 28px;opacity:.34;background-image:radial-gradient(circle,var(--dialog-accent) 0 1px,transparent 1.5px);background-size:16px 16px;mask-image:linear-gradient(to top,#000,transparent);-webkit-mask-image:linear-gradient(to top,#000,transparent);pointer-events:none}
+  .kyro-dialog-panel[data-type="danger"]{--dialog-accent:#ff4d5e;--dialog-glow:rgba(255,77,94,.25)}
+  .kyro-dialog-panel[data-type="warning"]{--dialog-accent:#ffbd4a;--dialog-glow:rgba(255,189,74,.23)}
+  .kyro-dialog-panel[data-type="info"]{--dialog-accent:#4dc3ff;--dialog-glow:rgba(77,195,255,.22)}
+  .kyro-dialog-panel[data-type="success"]{--dialog-accent:#d7ff3d;--dialog-glow:rgba(215,255,61,.25)}
+  .kyro-dialog-icon{width:58px;height:58px;margin:0 auto 17px;border-radius:50%;display:grid;place-items:center;font-size:27px;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(0,0,0,.18));border:1px solid var(--dialog-accent);box-shadow:0 0 0 7px color-mix(in srgb,var(--dialog-accent) 8%,transparent),0 0 26px var(--dialog-glow);animation:kyroDialogIconFloat 2.4s ease-in-out infinite}
+  .kyro-dialog-title{margin:0;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:clamp(21px,5.4vw,27px);line-height:1.14;letter-spacing:-.025em;color:var(--text);font-weight:800;text-wrap:balance}
+  .kyro-dialog-title .accent{color:var(--dialog-accent);text-shadow:0 0 18px var(--dialog-glow)}
+  .kyro-dialog-rule{width:92px;height:4px;margin:15px auto 17px;border-radius:99px;background:linear-gradient(90deg,transparent,var(--dialog-accent),transparent);box-shadow:0 0 14px var(--dialog-glow)}
+  .kyro-dialog-message{margin:0 auto;max-width:350px;text-align:center;color:#c4c7ca;font-size:14.5px;line-height:1.58;white-space:pre-line;text-wrap:pretty}
+  .kyro-dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:24px}
+  .kyro-dialog-actions.single{grid-template-columns:1fr}
+  .kyro-dialog-btn{min-height:52px;border-radius:16px;padding:12px 16px;font:750 14px 'Space Grotesk',sans-serif;cursor:pointer;border:1px solid var(--line);transition:transform .14s ease,box-shadow .2s ease,border-color .2s ease,filter .2s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+  .kyro-dialog-btn:active{transform:scale(.965)}
+  .kyro-dialog-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--dialog-accent) 45%,transparent);outline-offset:3px}
+  .kyro-dialog-btn.secondary{background:rgba(31,34,38,.92);color:var(--text);border-color:#41454c}
+  .kyro-dialog-btn.secondary:hover{border-color:#676d75}
+  .kyro-dialog-btn.primary{background:linear-gradient(135deg,color-mix(in srgb,var(--dialog-accent) 88%,white),var(--dialog-accent));color:#0b0c0e;border-color:var(--dialog-accent);box-shadow:0 9px 28px var(--dialog-glow),0 1px 0 rgba(255,255,255,.42) inset}
+  .kyro-dialog-btn.primary:hover{filter:brightness(1.035);box-shadow:0 12px 34px var(--dialog-glow),0 1px 0 rgba(255,255,255,.5) inset}
+  .kyro-dialog-btn .arrow{font-size:20px;line-height:1;margin-left:2px}
+  .kyro-dialog-spark{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--dialog-accent);box-shadow:0 0 12px var(--dialog-accent);opacity:.8;pointer-events:none}
+  .kyro-dialog-spark.s1{left:8%;top:42%;animation:kyroSpark 2.7s ease-in-out infinite}
+  .kyro-dialog-spark.s2{right:9%;top:32%;animation:kyroSpark 3.1s .5s ease-in-out infinite}
+  .kyro-dialog-spark.s3{right:15%;bottom:31%;animation:kyroSpark 2.5s .9s ease-in-out infinite}
+  @keyframes kyroDialogIconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes kyroSpark{0%,100%{opacity:.18;transform:scale(.65)}50%{opacity:1;transform:scale(1.35)}}
+  @media(max-width:390px){.kyro-dialog-panel{padding:25px 18px 18px;border-radius:24px}.kyro-dialog-actions{gap:8px}.kyro-dialog-btn{min-height:49px;padding:10px 11px}}
+  @media(prefers-reduced-motion:reduce){.kyro-dialog-panel,.kyro-dialog-layer{transition:none}.kyro-dialog-icon,.kyro-dialog-spark{animation:none}}
+
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" referrerpolicy="no-referrer"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" referrerpolicy="no-referrer"></script>
@@ -809,6 +848,22 @@
   <button id="bootstrapErrorRetryBtn" style="background:#d7ff3d;color:#0b0c0e;border:none;border-radius:10px;padding:12px 24px;font-weight:700;font-family:inherit;cursor:pointer">🔄 Tentar de novo</button>
 </div>
 
+
+
+<div id="kyroDialogLayer" class="kyro-dialog-layer" hidden>
+  <div class="kyro-dialog-backdrop" id="kyroDialogBackdrop"></div>
+  <section class="kyro-dialog-panel" id="kyroDialogPanel" data-type="success" role="dialog" aria-modal="true" aria-labelledby="kyroDialogTitle" aria-describedby="kyroDialogMessage" tabindex="-1">
+    <span class="kyro-dialog-spark s1"></span><span class="kyro-dialog-spark s2"></span><span class="kyro-dialog-spark s3"></span>
+    <div class="kyro-dialog-icon" id="kyroDialogIcon" aria-hidden="true">✨</div>
+    <h2 class="kyro-dialog-title" id="kyroDialogTitle"></h2>
+    <div class="kyro-dialog-rule" aria-hidden="true"></div>
+    <p class="kyro-dialog-message" id="kyroDialogMessage"></p>
+    <div class="kyro-dialog-actions" id="kyroDialogActions">
+      <button type="button" class="kyro-dialog-btn secondary" id="kyroDialogCancel"></button>
+      <button type="button" class="kyro-dialog-btn primary" id="kyroDialogConfirm"><span id="kyroDialogConfirmText"></span><span class="arrow" aria-hidden="true">›</span></button>
+    </div>
+  </section>
+</div>
 
 <div class="first-run-tour" id="firstRunOnboarding" hidden role="dialog" aria-modal="true" aria-labelledby="firstRunTitle">
   <div class="first-run-card">
@@ -2691,6 +2746,192 @@ function tFmt(key, vars){
 }
 
 
+// ==================== KYRO PREMIUM DIALOGS ====================
+// Replaces native browser alerts and confirmations with branded, accessible,
+// bilingual dialogs that match KYRO's visual language.
+const KYRO_DIALOG_COPY = Object.freeze({
+  pt:Object.freeze({
+    cancel:"Cancelar", confirm:"Confirmar", apply:"Aplicar", remove:"Excluir", signOut:"Sair",
+    gotIt:"Entendi", great:"Ótimo", continue:"Continuar",
+    confirmTitle:"Confirmar ação", applyTitle:"Aplicar alterações?", deleteTitle:"Confirmar exclusão",
+    warningTitle:"Atenção", errorTitle:"Algo deu errado", successTitle:"Tudo certo!", infoTitle:"Só para avisar",
+    signOutTitle:"Sair da conta?", cacheTitle:"Limpar cache técnico?", permissionsTitle:"Alterar permissões?",
+    applyWorkoutPrefix:"Aplicar treino em ", applyWorkoutBody:"Isso substituirá a rotina atual desse dia."
+  }),
+  en:Object.freeze({
+    cancel:"Cancel", confirm:"Confirm", apply:"Apply", remove:"Delete", signOut:"Sign out",
+    gotIt:"Got it", great:"Great", continue:"Continue",
+    confirmTitle:"Confirm action", applyTitle:"Apply changes?", deleteTitle:"Confirm deletion",
+    warningTitle:"Heads up", errorTitle:"Something went wrong", successTitle:"All set!", infoTitle:"Just so you know",
+    signOutTitle:"Sign out?", cacheTitle:"Clear technical cache?", permissionsTitle:"Change permissions?",
+    applyWorkoutPrefix:"Apply workout to ", applyWorkoutBody:"This will replace the current routine for that day."
+  })
+});
+
+const kyroNativeAlert = typeof window.alert === "function" ? window.alert.bind(window) : null;
+const kyroDialogQueue = [];
+let kyroDialogBusy = false;
+let kyroDialogLastFocus = null;
+
+function kyroDialogCopy(){ return KYRO_DIALOG_COPY[currentLang === "en" ? "en" : "pt"]; }
+function kyroMessageHas(text, patterns){ return patterns.some(pattern=>pattern.test(text)); }
+function kyroInferDialog(message, kind, options={}){
+  const copy = kyroDialogCopy();
+  const text = String(message == null ? "" : message).trim();
+  const lower = text.toLocaleLowerCase(currentLang === "en" ? "en" : "pt-BR");
+  let type = options.type || "info";
+  let icon = options.icon || "✨";
+  let title = options.title || "";
+  let highlight = options.highlight || "";
+  let body = options.body != null ? String(options.body) : text;
+  let primaryLabel = options.primaryLabel || "";
+
+  const generatedEn = text.match(/^Apply this generated workout to (.+?)\?\s*(.*)$/is);
+  const generatedPt = text.match(/^Aplicar esse treino gerado para (.+?)\?\s*(.*)$/is);
+  if(kind === "confirm" && (generatedEn || generatedPt)){
+    const match = generatedEn || generatedPt;
+    type = "success"; icon = "🏋️";
+    title = copy.applyWorkoutPrefix;
+    highlight = `${match[1]}?`;
+    body = (match[2] || copy.applyWorkoutBody).trim();
+    primaryLabel = copy.apply;
+    return {type,icon,title,highlight,body,primaryLabel};
+  }
+
+  const isDelete = kyroMessageHas(lower,[/delete/,/remove/,/excluir/,/remover/,/apagar/,/wipe/,/substituir tudo/,/replace all/]);
+  const isApply = kyroMessageHas(lower,[/apply/,/aplicar/,/template/,/replace the current routine/,/substitui a rotina atual/]);
+  const isLogout = kyroMessageHas(lower,[/sign out/,/logout/,/sair da (sua )?conta/]);
+  const isCache = kyroMessageHas(lower,[/cache/]);
+  const isPermission = kyroMessageHas(lower,[/admin/,/permission/,/permiss/,/grant/,/revoke/,/conceder/,/revogar/]);
+  const isError = kyroMessageHas(lower,[/error/,/erro/,/failed/,/falha/,/couldn['’]t/,/não foi possível/,/inválid/,/invalid/]);
+  const isSuccess = kyroMessageHas(lower,[/success/,/sucesso/,/saved/,/salv[oa]/,/imported/,/importado/,/enabled/,/ativad[oa]/,/sent/,/enviad[oa]/]);
+  const isWarning = kyroMessageHas(lower,[/warning/,/atenção/,/continue anyway/,/continuar mesmo assim/,/too large/,/grande demais/,/pending/,/pendente/]);
+
+  if(kind === "confirm"){
+    if(isLogout){ type="warning"; icon="🚪"; title=copy.signOutTitle; primaryLabel=copy.signOut; }
+    else if(isCache){ type="info"; icon="🧹"; title=copy.cacheTitle; primaryLabel=copy.continue; }
+    else if(isPermission){ type="warning"; icon="🛡️"; title=copy.permissionsTitle; primaryLabel=copy.confirm; }
+    else if(isDelete){ type="danger"; icon="🗑️"; title=copy.deleteTitle; primaryLabel=copy.remove; }
+    else if(isApply){ type="success"; icon="🏋️"; title=copy.applyTitle; primaryLabel=copy.apply; }
+    else { type="warning"; icon="?"; title=copy.confirmTitle; primaryLabel=copy.confirm; }
+  }else{
+    if(isError){ type="danger"; icon="⚠️"; title=copy.errorTitle; primaryLabel=copy.gotIt; }
+    else if(isSuccess){ type="success"; icon="✓"; title=copy.successTitle; primaryLabel=copy.great; }
+    else if(isWarning){ type="warning"; icon="!"; title=copy.warningTitle; primaryLabel=copy.gotIt; }
+    else { type=options.type || "info"; icon=options.icon || "i"; title=options.title || copy.infoTitle; primaryLabel=options.primaryLabel || copy.gotIt; }
+  }
+  return {type,icon,title,highlight,body,primaryLabel};
+}
+
+function kyroSetDialogTitle(element, title, highlight){
+  element.replaceChildren();
+  element.append(document.createTextNode(String(title || "")));
+  if(highlight){
+    const span = document.createElement("span");
+    span.className = "accent";
+    span.textContent = String(highlight);
+    element.append(span);
+  }
+}
+
+function kyroEnqueueDialog(config){
+  return new Promise((resolve,reject)=>{
+    kyroDialogQueue.push({config,resolve,reject});
+    kyroPumpDialogs();
+  });
+}
+
+function kyroPumpDialogs(){
+  if(kyroDialogBusy || !kyroDialogQueue.length) return;
+  kyroDialogBusy = true;
+  const item = kyroDialogQueue.shift();
+  kyroShowDialog(item.config).then(item.resolve,item.reject).finally(()=>{
+    kyroDialogBusy = false;
+    kyroPumpDialogs();
+  });
+}
+
+function kyroShowDialog(config){
+  return new Promise(resolve=>{
+    const layer=document.getElementById("kyroDialogLayer");
+    const panel=document.getElementById("kyroDialogPanel");
+    const icon=document.getElementById("kyroDialogIcon");
+    const title=document.getElementById("kyroDialogTitle");
+    const message=document.getElementById("kyroDialogMessage");
+    const actions=document.getElementById("kyroDialogActions");
+    const cancelBtn=document.getElementById("kyroDialogCancel");
+    const confirmBtn=document.getElementById("kyroDialogConfirm");
+    const confirmText=document.getElementById("kyroDialogConfirmText");
+    const backdrop=document.getElementById("kyroDialogBackdrop");
+    if(!layer||!panel||!icon||!title||!message||!actions||!cancelBtn||!confirmBtn||!confirmText){
+      if(config.kind==="confirm") return resolve(false);
+      if(kyroNativeAlert) kyroNativeAlert(config.message);
+      return resolve(true);
+    }
+
+    const meta=kyroInferDialog(config.message,config.kind,config.options||{});
+    const copy=kyroDialogCopy();
+    panel.dataset.type=meta.type;
+    icon.textContent=meta.icon;
+    kyroSetDialogTitle(title,meta.title,meta.highlight);
+    message.textContent=meta.body;
+    confirmText.textContent=meta.primaryLabel;
+    cancelBtn.textContent=(config.options&&config.options.cancelLabel)||copy.cancel;
+    cancelBtn.hidden=config.kind!=="confirm";
+    actions.classList.toggle("single",config.kind!=="confirm");
+
+    kyroDialogLastFocus=document.activeElement;
+    layer.hidden=false;
+    document.body.classList.add("kyro-dialog-open");
+    requestAnimationFrame(()=>{
+      layer.classList.add("show");
+      setTimeout(()=>confirmBtn.focus({preventScroll:true}),90);
+    });
+    try{ haptic(); }catch(_){}
+
+    let settled=false;
+    const finish=value=>{
+      if(settled) return;
+      settled=true;
+      layer.classList.remove("show");
+      document.body.classList.remove("kyro-dialog-open");
+      document.removeEventListener("keydown",onKeydown,true);
+      confirmBtn.onclick=null; cancelBtn.onclick=null; backdrop.onclick=null;
+      setTimeout(()=>{
+        layer.hidden=true;
+        if(kyroDialogLastFocus && typeof kyroDialogLastFocus.focus==="function"){
+          try{kyroDialogLastFocus.focus({preventScroll:true});}catch(_){}
+        }
+        resolve(value);
+      },240);
+    };
+    const onKeydown=event=>{
+      if(event.key==="Escape"){ event.preventDefault(); finish(config.kind==="confirm"?false:true); return; }
+      if(event.key!=="Tab") return;
+      const focusables=[cancelBtn,confirmBtn].filter(btn=>!btn.hidden);
+      if(!focusables.length) return;
+      const index=focusables.indexOf(document.activeElement);
+      if(event.shiftKey && index<=0){event.preventDefault();focusables.at(-1).focus();}
+      else if(!event.shiftKey && index===focusables.length-1){event.preventDefault();focusables[0].focus();}
+    };
+    confirmBtn.onclick=()=>finish(true);
+    cancelBtn.onclick=()=>finish(false);
+    backdrop.onclick=()=>{
+      if(config.kind==="confirm") finish(false);
+      else finish(true);
+    };
+    document.addEventListener("keydown",onKeydown,true);
+  });
+}
+
+function kyroAlert(message,options={}){ return kyroEnqueueDialog({kind:"alert",message,options}); }
+function kyroConfirm(message,options={}){ return kyroEnqueueDialog({kind:"confirm",message,options}); }
+window.kyroAlert=kyroAlert;
+window.kyroConfirm=kyroConfirm;
+// Existing alert() calls throughout KYRO automatically use the premium dialog.
+window.alert=function(message){ void kyroAlert(message); };
+
+
 // ==================== FIRST-RUN ONBOARDING ====================
 const FIRST_RUN_ONBOARDING_VERSION = 1;
 const FIRST_RUN_COPY = Object.freeze({
@@ -3721,7 +3962,7 @@ async function maybeMigrateLocalData(){
   if(!localKeys.length) return;
   const already = await store.get("__migrated_from_local__");
   if(already && already.version>=2) return;
-  if(!confirm(t("confirm_migrate"))) return;
+  if(!(await kyroConfirm(t("confirm_migrate")))) return;
   const stateKey = migrationStateKey();
   const progress = safeJsonParse(stateKey ? localStorage.getItem(stateKey) : null, {completed:[]});
   const completed = new Set(Array.isArray(progress.completed)?progress.completed:[]);
@@ -4734,7 +4975,7 @@ function switchPage(name){
 }
 
 function bindTrainoEvents(){
-  document.getElementById("resetBtn").addEventListener("click", async ()=>{ if(!confirm(t("confirm_reset_workout"))) return; clearInterval(sessionTimerInterval); state[currentDay]=emptyDayState(currentDay); await store.set("state", state); renderDay(); });
+  document.getElementById("resetBtn").addEventListener("click", async ()=>{ if(!(await kyroConfirm(t("confirm_reset_workout")))) return; clearInterval(sessionTimerInterval); state[currentDay]=emptyDayState(currentDay); await store.set("state", state); renderDay(); });
   document.getElementById("skipBtn").addEventListener("click", stopRestTimer);
   document.getElementById("addTimeBtn").addEventListener("click", ()=>{ restEndTime += 15000; restTotal+=15; updateRingDisplay(); });
   document.getElementById("celebrateClose").addEventListener("click", ()=>document.getElementById("celebrateOverlay").classList.remove("show"));
@@ -4991,7 +5232,7 @@ function bindAjustesEvents(){
     });
   });
   document.getElementById("clearCacheBtn").addEventListener("click", async ()=>{
-    if(!confirm(t("confirm_clear_cache"))) return;
+    if(!(await kyroConfirm(t("confirm_clear_cache")))) return;
     try{
       if("serviceWorker" in navigator){
         const regs = await navigator.serviceWorker.getRegistrations();
@@ -5001,12 +5242,12 @@ function bindAjustesEvents(){
         const keys = await caches.keys();
         for(const k of keys) await caches.delete(k);
       }
-      alert(t("alert_cache_cleared"));
+      await kyroAlert(t("alert_cache_cleared"),{type:"success"});
       location.reload();
     }catch(e){ alert(tFmt("alert_cache_clear_error",{msg:e.message})); }
   });
   document.getElementById("logoutBtn").addEventListener("click", async ()=>{
-    if(!confirm(t("confirm_logout"))) return;
+    if(!(await kyroConfirm(t("confirm_logout")))) return;
     await teardownSession();
     await fbAuth.signOut();
   });
@@ -5618,7 +5859,7 @@ function buildExCard(ex, i){
 
   card.querySelector('[data-role="shuffle"]').addEventListener("click", ()=> shuffleExercise(currentDay, "exercises", i));
   card.querySelector('[data-role="deleteex"]').addEventListener("click", async ()=>{
-    if(!confirm(tFmt("confirm_remove_exercise_named",{name:tExerciseName(ex.name)}))) return;
+    if(!(await kyroConfirm(tFmt("confirm_remove_exercise_named",{name:tExerciseName(ex.name)})))) return;
     await deleteExerciseAtIndex(currentDay, "exercises", i);
     buildDaySwitch();
     renderDay();
@@ -5749,7 +5990,7 @@ window.openTemplateModal = function(){
       <button class="settings-btn primary" style="margin:10px 0 0" data-tpl="${key}">${t("use_this_template")}</button>
     `;
     card.querySelector("[data-tpl]").addEventListener("click", async ()=>{
-      if(!confirm(tFmt("template_apply_name",{name:currentLang==="en"?(tpl.labelEn||tpl.label):tpl.label}))) return;
+      if(!(await kyroConfirm(tFmt("template_apply_name",{name:currentLang==="en"?(tpl.labelEn||tpl.label):tpl.label})))) return;
       workouts = tpl.build();
       await store.set("workouts", workouts);
       DAY_KEYS.forEach(dk=> reconcileStateForDay(dk));
@@ -5887,7 +6128,7 @@ function renderAutoGenBody(){
   });
   const applyBtn = document.getElementById("autoGenApply");
   if(applyBtn) applyBtn.addEventListener("click", async ()=>{
-    if(!confirm(tFmt("confirm_apply_generated",{day:tDayFull(autoGenState.day)}))) return;
+    if(!(await kyroConfirm(tFmt("confirm_apply_generated",{day:tDayFull(autoGenState.day)})))) return;
     workouts[autoGenState.day] = autoGenState.preview;
     await store.set("workouts", workouts);
     reconcileStateForDay(autoGenState.day);
@@ -6083,7 +6324,7 @@ function buildAbsCard(ex, i){
   card.querySelector('[data-role="replaceabs"]').addEventListener("click", ()=> openExerciseBrowserForReplace(currentDay, "abs", i));
 
   card.querySelector('[data-role="deleteabsex"]').addEventListener("click", async ()=>{
-    if(!confirm(tFmt("confirm_remove_exercise_named",{name:tExerciseName(ex.name)}))) return;
+    if(!(await kyroConfirm(tFmt("confirm_remove_exercise_named",{name:tExerciseName(ex.name)})))) return;
     await deleteExerciseAtIndex(currentDay, "abs", i);
     buildDaySwitch();
     renderDay();
@@ -6460,7 +6701,7 @@ function renderRotinas(){
     const delX = btn.querySelector(".day-del-x");
     if(delX) delX.addEventListener("click", async (e)=>{
       e.stopPropagation();
-      if(!confirm(tFmt("confirm_remove_day_routine",{day:tDayFull(dayKey)}))) return;
+      if(!(await kyroConfirm(tFmt("confirm_remove_day_routine",{day:tDayFull(dayKey)})))) return;
       workouts[dayKey] = null;
       await store.set("workouts", workouts);
       state[dayKey] = emptyDayState(dayKey);
@@ -6540,7 +6781,7 @@ function renderRotinas(){
   panel.querySelector("#addExBtn").addEventListener("click", ()=> openExerciseBrowser(rotinaSelectedDay, "exercises"));
   panel.querySelector("#addAbsBtn").addEventListener("click", ()=> openExerciseBrowser(rotinaSelectedDay, "abs"));
   panel.querySelector("#deleteRoutineBtn").addEventListener("click", async ()=>{
-    if(!confirm(tFmt("confirm_remove_day_routine",{day:tDayFull(rotinaSelectedDay)}))) return;
+    if(!(await kyroConfirm(tFmt("confirm_remove_day_routine",{day:tDayFull(rotinaSelectedDay)})))) return;
     workouts[rotinaSelectedDay] = null;
     await store.set("workouts", workouts);
     state[rotinaSelectedDay] = emptyDayState(rotinaSelectedDay);
@@ -6582,7 +6823,7 @@ function buildRoutineExerciseItem(dayKey, listType, i, ex){
     renderRotinas();
   });
   div.querySelector(".del").addEventListener("click", async ()=>{
-    if(!confirm(t("confirm_remove_exercise"))) return;
+    if(!(await kyroConfirm(t("confirm_remove_exercise")))) return;
     await deleteExerciseAtIndex(dayKey, listType, i);
     if(dayKey===currentDay) renderDay();
     buildDaySwitch();
@@ -6758,7 +6999,7 @@ function renderSupplementsTab(){
   });
   el.querySelectorAll('[data-role="deleteSupp"]').forEach(btn=>{
     btn.addEventListener("click", async ()=>{
-      if(!confirm(t("confirm_delete_generic"))) return;
+      if(!(await kyroConfirm(t("confirm_delete_generic")))) return;
       mySupplements = mySupplements.filter(s=>s.id!==btn.dataset.id);
       await store.set("mySupplements", mySupplements);
       renderSupplementsTab();
@@ -8377,7 +8618,7 @@ function updateCompareSlider(){
 window.closeCompareModal = function(){ document.getElementById("comparePhotoModal").classList.remove("show"); };
 
 async function deleteCurrentPhoto(){
-  if(!currentPhotoId || !confirm(t("confirm_delete_generic"))) return;
+  if(!currentPhotoId || !(await kyroConfirm(t("confirm_delete_generic")))) return;
   const idToDelete = currentPhotoId;
   const entry = photoIndex.find(p=>p.id===idToDelete);
   const wasPending = !!(entry && entry.pending);
@@ -8536,7 +8777,7 @@ async function saveExerciseEditModal(){
   // since this whole list lives in a single document (shared/exerciseDatabase).
   const estimatedBytes = new Blob([JSON.stringify(candidateList)]).size;
   if(estimatedBytes > 800*1024){
-    if(!confirm(tFmt("confirm_exercise_db_size_warning",{kb:Math.round(estimatedBytes/1024)}))) return;
+    if(!(await kyroConfirm(tFmt("confirm_exercise_db_size_warning",{kb:Math.round(estimatedBytes/1024)})))) return;
   }
 
   EXERCISE_DB.length = 0;
@@ -8550,7 +8791,7 @@ async function saveExerciseEditModal(){
 
 async function deleteExerciseFromManager(){
   if(exMgrEditingIndex === null) return;
-  if(!confirm(t("confirm_delete_shared_exercise"))) return;
+  if(!(await kyroConfirm(t("confirm_delete_shared_exercise")))) return;
   EXERCISE_DB.splice(exMgrEditingIndex, 1);
   const ok = await saveSharedExerciseDB(EXERCISE_DB);
   if(!ok){ alert(t("alert_delete_failed")); return; }
@@ -8627,7 +8868,7 @@ async function openUserManager(){
       adminBtn.addEventListener("click", async ()=>{
         const currentlyAdmin = u.isAdmin === true;
         const confirmMsg = currentlyAdmin ? t("confirm_revoke_admin") : t("confirm_grant_admin");
-        if(!confirm(confirmMsg)) return;
+        if(!(await kyroConfirm(confirmMsg))) return;
         adminBtn.disabled = true;
         const ok = await setUserAdmin(uidStr, !currentlyAdmin);
         if(ok) openUserManager(); // refresh
@@ -8909,7 +9150,7 @@ window.saveExerciseConfig = async function(){
 window.deleteExerciseConfig = async function(){
   if(!configContext || configContext.index==null) return;
   const { day, listType, index } = configContext;
-  if(!confirm(t("confirm_remove_exercise"))) return;
+  if(!(await kyroConfirm(t("confirm_remove_exercise")))) return;
   await deleteExerciseAtIndex(day, listType, index);
   closeExerciseConfig();
   if(day===currentDay){ buildDaySwitch(); renderDay(); }
@@ -9236,7 +9477,7 @@ async function applyImport(mode){
       if(data.nutritionLog) await store.set("nutritionLog", data.nutritionLog);
       if(data.profile) await store.set("profile", data.profile);
     }
-    alert(t("alert_import_success"));
+    await kyroAlert(t("alert_import_success"),{type:"success"});
     location.reload();
   }catch(e){
     alert(t("alert_import_error") + " " + t("import_rollback_safe"));
@@ -9246,9 +9487,9 @@ async function applyImport(mode){
 }
 
 async function resetAllData(){
-  if(!confirm(t("confirm_delete_all_1")) || !confirm(t("confirm_delete_all_2"))) return;
+  if(!(await kyroConfirm(t("confirm_delete_all_1"),{type:"danger"})) || !(await kyroConfirm(t("confirm_delete_all_2"),{type:"danger"}))) return;
   await exportData(); // safety copy, downloaded automatically before anything is wiped
-  alert(t("alert_backup_before_delete"));
+  await kyroAlert(t("alert_backup_before_delete"),{type:"success"});
   workouts = {};
   DAY_KEYS.forEach(k=>{ state[k]=emptyDayState(k); history[k]={lastKg:{}}; });
   for(const p of photoIndex){ await store.delete("photo_"+p.id); await deletePhotoFromStorage(p.id); } // delete the actual photo files BEFORE clearing the index that points to them
@@ -9609,8 +9850,8 @@ document.getElementById("userMgrCloseBtn").addEventListener("click", closeUserMa
 document.getElementById("weeklyReportCloseBtn").addEventListener("click", ()=> document.getElementById("weeklyReportModal").classList.remove("show"));
 document.getElementById("importChoiceCloseBtn").addEventListener("click", ()=>{ document.getElementById("importChoiceModal").classList.remove("show"); pendingImportData = null; });
 document.getElementById("importMergeBtn").addEventListener("click", ()=> applyImport("merge"));
-document.getElementById("importReplaceBtn").addEventListener("click", ()=>{
-  if(confirm(t("confirm_replace_all_data"))) applyImport("replace");
+document.getElementById("importReplaceBtn").addEventListener("click", async ()=>{
+  if(await kyroConfirm(t("confirm_replace_all_data"),{type:"danger"})) await applyImport("replace");
 });
 
 // Delegated click handler for any "watch how-to video" trigger, wherever it's rendered
