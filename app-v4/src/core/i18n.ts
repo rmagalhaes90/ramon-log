@@ -23,6 +23,9 @@ const messages = {
     verifyPending: 'A verificação ainda não foi confirmada.', welcome: 'Bem-vindo ao KYRO.',
     onboardingBody: 'Defina suas preferências iniciais. Você poderá alterá-las depois.',
     metric: 'Métrico (kg/cm)', imperial: 'Imperial (lb/in)', continue: 'Continuar',
+    train: 'Treinar', noWorkout: 'Nenhum treino configurado para este dia.', finishWorkout: 'Concluir treino',
+    load: 'Carga', reps: 'Repetições', rest: 'Descanso', syncPending: 'Salvo localmente; sincronização pendente.',
+    workoutSaved: 'Treino registrado.', back: 'Voltar',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -46,6 +49,9 @@ const messages = {
     verifyPending: 'Verification has not been confirmed yet.', welcome: 'Welcome to KYRO.',
     onboardingBody: 'Set your initial preferences. You can change them later.',
     metric: 'Metric (kg/cm)', imperial: 'Imperial (lb/in)', continue: 'Continue',
+    train: 'Train', noWorkout: 'No workout configured for this day.', finishWorkout: 'Finish workout',
+    load: 'Load', reps: 'Reps', rest: 'Rest', syncPending: 'Saved locally; sync pending.',
+    workoutSaved: 'Workout logged.', back: 'Back',
   },
 } as const;
 

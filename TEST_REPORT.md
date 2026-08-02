@@ -14,8 +14,8 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 4 arquivos e 9 testes, código 0. Inclui contratos de domínio e política de senha. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 112 módulos; JS 634,58 kB (188,61 kB gzip), CSS 4,92 kB, código 0. Há aviso de chunk acima de 500 kB após incluir Auth/Firestore modular. |
+| Unitários (`vitest run`) | **PASS**, 5 arquivos e 12 testes, código 0. Inclui contratos, autenticação e cálculos de treino. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 116 módulos; JS 645,50 kB (192,16 kB gzip), CSS 6,34 kB, código 0. Permanece aviso de chunk acima de 500 kB. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 Vitest e Vite precisaram ser executados fora do sandbox porque o processo esbuild recebia `Access is denied` ao carregar `vite.config.ts`; fora do sandbox ambos concluíram normalmente.

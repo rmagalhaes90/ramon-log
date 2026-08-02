@@ -34,7 +34,7 @@ export const workoutSchema = z.object({
   exercises: z.array(exerciseSchema).max(60).default([]),
   abs: z.array(exerciseSchema).max(30).default([]),
 });
-export const workoutsSchema = z.record(
+export const workoutsSchema = z.partialRecord(
   z.enum(['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']),
   workoutSchema,
 );

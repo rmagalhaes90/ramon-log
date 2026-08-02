@@ -14,6 +14,8 @@
 - Fluxo modular de autenticação por email/senha e Google, recuperação, verificação de email, bloqueio administrativo e logout.
 - Onboarding inicial com preferência de unidades persistida em IndexedDB.
 - Contratos Zod para exercícios, treinos, séries, sessões, readiness, nutrição, perfil, peso e fotos.
+- Repositório de dados por usuário com cache IndexedDB, validação remota e escrita com fallback para fila offline.
+- Primeira experiência de treino v4: seleção do dia, séries, carga, repetições, conclusão, volume e histórico de sessões.
 
 ### Preserved
 
