@@ -1,4 +1,4 @@
-const VERSION = '4.0.0-alpha.2';
+const VERSION = '4.0.0-alpha.3';
 const SHELL = `kyro-v4-shell-${VERSION}`;
 const PRECACHE = ['./', './index.html', './manifest.webmanifest', './version.json'];
 
@@ -15,6 +15,15 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
   if (event.data?.type === 'GET_VERSION') event.ports?.[0]?.postMessage({ version: VERSION });
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windows) => {
+    const existing = windows[0];
+    if (existing) { await existing.focus(); return; }
+    await clients.openWindow('./');
+  }));
 });
 
 self.addEventListener('fetch', (event) => {

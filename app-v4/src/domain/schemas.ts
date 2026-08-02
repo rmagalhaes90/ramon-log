@@ -112,6 +112,7 @@ export const profileSchema = z.object({
 
 export const photoSchema = z.object({ id: safeIdSchema, d: dateKeySchema });
 export const photoIndexSchema = z.array(photoSchema).max(5000);
+export const notificationSettingsSchema = z.object({ restEnabled: z.boolean().default(false) });
 
 export const userDataSchemas = {
   workouts: workoutsSchema,
@@ -126,6 +127,7 @@ export const userDataSchemas = {
   supplementLog: supplementLogSchema,
   exerciseHistory: exerciseHistorySchema,
   exerciseRecords: exerciseRecordsSchema,
+  notificationSettings: notificationSettingsSchema,
 } as const;
 
 export type UserDataKey = keyof typeof userDataSchemas;

@@ -9,6 +9,7 @@ const backupDataSchema = z.object({
   sessionLog: userDataSchemas.sessionLog.optional(), readinessLog: userDataSchemas.readinessLog.optional(), nutritionLog: userDataSchemas.nutritionLog.optional(),
   profile: userDataSchemas.profile.optional(), photoIndex: userDataSchemas.photoIndex.optional(), mySupplements: userDataSchemas.mySupplements.optional(),
   supplementLog: userDataSchemas.supplementLog.optional(), exerciseHistory: userDataSchemas.exerciseHistory.optional(), exerciseRecords: userDataSchemas.exerciseRecords.optional(),
+  notificationSettings: userDataSchemas.notificationSettings.optional(),
 }).strict();
 export const backupSchema = z.object({ format: z.literal('kyro-v4-backup'), version: z.literal(1), exportedAt: z.iso.datetime(), data: backupDataSchema }).strict();
 export type Backup = z.infer<typeof backupSchema>;

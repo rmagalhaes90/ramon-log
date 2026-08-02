@@ -18,6 +18,7 @@ import { emptyNutritionDay, percentage } from './features/nutrition/model';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
 import { chartPoints } from './features/progress/chart';
 import { createBackup, parseBackup, restoreBackup } from './features/backup';
+import { notificationsSupported, requestNotificationAccess, showLocalNotification } from './features/notifications';
 import { cacheGet, cacheSet, clearLocalData, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
@@ -39,6 +40,8 @@ let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt = new Date().toISOString();
 let sessionClock:number|undefined;
 let restClock:number|undefined;
+let notificationUid='';
+let restNotificationsEnabled=false;
 
 function clearWorkoutTimers():void {
   if(sessionClock) window.clearInterval(sessionClock);
@@ -160,12 +163,13 @@ function renderOnboarding(user: User): void {
 
 async function renderReady(user: User): Promise<void> {
   if (await needsOnboarding(user)) { renderOnboarding(user); return; }
+  if(notificationUid!==user.uid){const settings=await loadUserData(user,'notificationSettings');restNotificationsEnabled=settings?.restEnabled??false;notificationUid=user.uid;}
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'progress') await renderProgress(user);
   else if (currentView === 'photos') await renderPhotos(user);
   else if (currentView === 'nutrition') await renderNutrition(user);
   else if (currentView === 'supplements') await renderSupplements(user);
-  else if (currentView === 'settings') renderSettings(user);
+  else if (currentView === 'settings') await renderSettings(user);
   else if (currentView === 'admin') await renderAdmin(user);
   else renderDashboard(user);
 }
@@ -181,7 +185,7 @@ function renderDashboard(user: User): void {
   document.querySelector('#start-workout')?.addEventListener('click', () => { currentView = 'workout'; workoutStartedAt=new Date().toISOString(); void renderWorkout(user); });
   document.querySelector('#open-progress')?.addEventListener('click', () => { currentView = 'progress'; void renderProgress(user); });
   document.querySelector('#open-nutrition')?.addEventListener('click', () => { currentView = 'nutrition'; void renderNutrition(user); });
-  document.querySelector('#open-settings')?.addEventListener('click', () => { currentView = 'settings'; renderSettings(user); });
+  document.querySelector('#open-settings')?.addEventListener('click', () => { currentView = 'settings'; void renderSettings(user); });
   document.querySelector('#open-admin')?.addEventListener('click', () => { currentView = 'admin'; void renderAdmin(user); });
   void flushUserDataQueue(user).catch((error: unknown) => reportError(error, 'sync/flush'));
   void queueList().then((items) => { const count = document.querySelector('#queue-count'); if (count) count.textContent = String(items.length); })
@@ -194,11 +198,15 @@ async function renderAdmin(user:User):Promise<void>{
   const list=document.querySelector('#admin-users');users.forEach((entry)=>{const row=document.createElement('article');const identity=document.createElement('div');const email=document.createElement('strong');email.textContent=entry.email||entry.uid;const role=document.createElement('span');role.textContent=entry.isAdmin?'admin':'';identity.append(email,role);const actions=document.createElement('div');const block=document.createElement('button');block.textContent=copy(entry.blocked?'unblock':'block');block.addEventListener('click',()=>void setUserBlocked(entry.uid,!entry.blocked).then(()=>renderAdmin(user)).catch((error:unknown)=>reportError(error,'admin/block')));actions.append(block);if(superAdmin&&entry.uid!==user.uid){const admin=document.createElement('button');admin.textContent=copy(entry.isAdmin?'revokeAdmin':'grantAdmin');admin.addEventListener('click',()=>void setUserAdmin(entry.uid,!entry.isAdmin).then(()=>renderAdmin(user)).catch((error:unknown)=>reportError(error,'admin/role')));actions.append(admin);}row.append(identity,actions);list?.append(row);});
 }
 
-function renderSettings(user: User): void {
+async function renderSettings(user: User): Promise<void> {
   const passwordProvider=user.providerData.some(({providerId})=>providerId==='password');
+  const notificationSettings=await loadUserData(user,'notificationSettings').then((value)=>value??{restEnabled:false});restNotificationsEnabled=notificationSettings.restEnabled;
   shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">04 · ACCOUNT</p><h1>${copy('settings')}</h1><article class="backup-card"><h2>${copy('yourData')}</h2><p>${copy('backupBody')}</p><div><button id="export-data">${copy('exportData')}</button><label class="import-button">${copy('importData')}<input id="import-data" type="file" accept="application/json,.json"></label></div><p id="backup-status" role="status"></p></article>
     <article class="danger-zone"><h2>${copy('deleteAccount')}</h2><p>${copy('deleteWarning')}</p><form id="delete-form"><label>${copy('confirmation')}<input name="phrase" autocomplete="off" required></label>${passwordProvider?`<label>${copy('password')}<input name="password" type="password" autocomplete="current-password" required></label>`:''}<button class="danger-button">${copy('deleteAccount')}</button></form><p id="delete-status" role="status"></p></article></section>`);
   bindBack(user);
+  const notificationCard=document.createElement('article');notificationCard.className='notification-card';const notificationTitle=document.createElement('h2');notificationTitle.textContent=copy('notifications');const notificationBody=document.createElement('p');notificationBody.textContent=copy(notificationsSupported()?'notificationBody':'notificationUnsupported');const notificationActions=document.createElement('div');const notificationToggle=document.createElement('button');notificationToggle.id='notification-toggle';notificationToggle.disabled=!notificationsSupported();notificationToggle.textContent=copy(notificationSettings.restEnabled?'disableNotifications':'enableNotifications');const notificationTest=document.createElement('button');notificationTest.id='notification-test';notificationTest.disabled=!notificationSettings.restEnabled;notificationTest.textContent=copy('testNotification');const notificationStatus=document.createElement('p');notificationStatus.id='notification-status';notificationStatus.setAttribute('role','status');notificationActions.append(notificationToggle,notificationTest);notificationCard.append(notificationTitle,notificationBody,notificationActions,notificationStatus);document.querySelector('.backup-card')?.before(notificationCard);
+  notificationToggle.addEventListener('click',()=>void (async()=>{const enabled=!notificationSettings.restEnabled;if(enabled&&await requestNotificationAccess()!=='granted'){notificationStatus.textContent=copy('notificationDenied');return;}await saveUserData(user,'notificationSettings',{restEnabled:enabled});restNotificationsEnabled=enabled;await renderSettings(user);})().catch((error:unknown)=>reportError(error,'notifications/settings')));
+  notificationTest.addEventListener('click',()=>void showLocalNotification('KYRO',copy('restComplete')).then((shown)=>{notificationStatus.textContent=copy(shown?'notificationSent':'notificationDenied');}).catch((error:unknown)=>reportError(error,'notifications/test')));
   document.querySelector('#export-data')?.addEventListener('click',()=>void createBackup(user).then((backup)=>{const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`kyro-backup-${dateKey()}.json`;link.click();URL.revokeObjectURL(url);const status=document.querySelector('#backup-status');if(status)status.textContent=copy('exportReady');}).catch((error:unknown)=>reportError(error,'backup/export')));
   document.querySelector<HTMLInputElement>('#import-data')?.addEventListener('change',(event)=>{const file=(event.currentTarget as HTMLInputElement).files?.[0];if(!file)return;const status=document.querySelector('#backup-status');if(status)status.textContent=copy('validatingBackup');void file.text().then(parseBackup).then(async(backup)=>{const safety=await createBackup(user);const safetyBlob=new Blob([JSON.stringify(safety,null,2)],{type:'application/json'});const url=URL.createObjectURL(safetyBlob);const link=document.createElement('a');link.href=url;link.download=`kyro-before-import-${dateKey()}.json`;link.click();URL.revokeObjectURL(url);if(!confirm(copy('importConfirm')))throw new DOMException('Cancelled','AbortError');await restoreBackup(user,backup);if(status)status.textContent=copy('importComplete');}).catch((error:unknown)=>{if((error as Error).name==='AbortError')return;reportError(error,'backup/import');if(status)status.textContent=copy((error as Error).message==='backupTooLarge'?'backupTooLarge':'backupInvalid');});});
   document.querySelector('#delete-form')?.addEventListener('submit',(event)=>{event.preventDefault();const form=event.currentTarget as HTMLFormElement;const data=new FormData(form);const expected=i18n.locale==='pt'?'EXCLUIR':'DELETE';if(formText(data,'phrase').trim().toUpperCase()!==expected)return;form.querySelectorAll('button,input').forEach((element)=>{(element as HTMLButtonElement|HTMLInputElement).disabled=true;});const status=document.querySelector('#delete-status');if(status)status.textContent=copy('deleting');void deleteOwnAccount(user,{password:formText(data,'password'),onStage:(stage)=>{if(status)status.textContent=`${copy('deleting')} ${stage}`;}}).then(clearLocalData).catch((error:unknown)=>{reportError(error,'account/delete');if(status)status.textContent=copy('deleteFailed');form.querySelectorAll('button,input').forEach((element)=>{(element as HTMLButtonElement|HTMLInputElement).disabled=false;});});});
@@ -319,7 +327,7 @@ function renderExerciseEntries(user:User,workouts:Workouts): void {
   });
 }
 
-function startRestTimer(seconds:number):void{if(restClock)window.clearInterval(restClock);const target=document.querySelector<HTMLElement>('#rest-timer');if(!target)return;const end=Date.now()+Math.max(0,seconds)*1000;target.hidden=false;const tick=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));target.textContent=`${copy('rest')} ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;if(left<=0){if(restClock)window.clearInterval(restClock);target.hidden=true;}};tick();restClock=window.setInterval(tick,250);}
+function startRestTimer(seconds:number):void{if(restClock)window.clearInterval(restClock);const target=document.querySelector<HTMLElement>('#rest-timer');if(!target)return;const end=Date.now()+Math.max(0,seconds)*1000;target.hidden=false;let notified=false;const tick=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));target.textContent=`${copy('rest')} ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;if(left<=0){if(restClock)window.clearInterval(restClock);target.hidden=true;if(!notified&&restNotificationsEnabled){notified=true;void showLocalNotification('KYRO',copy('restComplete')).catch((error:unknown)=>reportError(error,'notifications/rest'));}}};tick();restClock=window.setInterval(tick,250);}
 
 async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   const count = completedExerciseCount(workoutEntries); if (!count) return;
