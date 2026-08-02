@@ -14,8 +14,8 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 11 arquivos e 28 testes, código 0. Inclui validação de fotos e caminhos Web Share/fallback. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 127 módulos; app JS 153,04 kB (41,45 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 12,19 kB (2,94 kB gzip), código 0 e sem aviso. |
+| Unitários (`vitest run`) | **PASS**, 12 arquivos e 30 testes, código 0. Inclui validação estrita de backups e geometria defensiva dos gráficos. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 129 módulos; app JS 159,68 kB (43,49 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 13,41 kB (3,11 kB gzip), código 0 e sem aviso. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 ## Verificação visual local
@@ -33,3 +33,7 @@ Typecheck, lint, 24 testes unitários e build foram repetidos após as alteraç�
 ## Rodada 2026-08-02 — fotos e compartilhamento
 
 Typecheck, lint, 28 testes unitários e build passaram. O shell público foi novamente inspecionado no navegador local e renderizou sem regressão. Upload, leitura e exclusão autenticados não foram executados contra dados reais; continuam pendentes de Firebase Emulator ou conta isolada de teste. A validação limita o cliente e as regras de Storage limitam o servidor a JPEG privado de até 3 MB.
+
+## Rodada 2026-08-02 — medidas, gráficos e portabilidade
+
+Typecheck, lint, 30 testes unitários e build passaram. O backup JSON tem envelope/versionamento explícito, limite de 5 MB e contratos por feature; a restauração baixa uma cópia de segurança antes da confirmação e tenta restaurar o estado anterior se uma escrita local falhar. O índice de fotos é exportado, mas os JPEGs privados permanecem no Storage e não fazem parte do JSON.

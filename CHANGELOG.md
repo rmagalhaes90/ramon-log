@@ -31,6 +31,8 @@
 - Matriz de progresso ponderada por fase para acompanhamento contínuo da migração.
 - Galeria privada de fotos de progresso com upload resumível, limite JPEG de 3 MB, comparação lado a lado e exclusão confirmada.
 - Compartilhamento de fotos pelo Web Share API quando suportado, com fallback de texto para clipboard.
+- Medidas corporais datadas para cintura, peito, braço, quadril e coxa, além de gráfico SVG acessível de evolução do peso.
+- Exportação/importação JSON v4 com validação Zod estrita, limite de 5 MB, backup automático pré-importação e rollback lógico.
 
 ### Preserved
 

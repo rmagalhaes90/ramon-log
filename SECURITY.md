@@ -14,6 +14,7 @@ Protegemos dados de saúde/treino, fotos, identidade, permissões administrativa
 - Dependências registradas no lockfile e auditáveis.
 - Firestore Rules e Storage Rules owner-only versionadas, com admin limitado e uploads JPEG até 3 MiB.
 - Exclusão com reautenticação, Storage recursivo, Firestore paginado, perfil, Auth e limpeza local nessa ordem.
+- Importação aceita somente o envelope `kyro-v4-backup` versão 1, limita o arquivo a 5 MiB, rejeita campos desconhecidos e valida cada feature antes da escrita.
 
 ## Requisitos antes de produção
 
