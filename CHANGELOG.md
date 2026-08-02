@@ -48,6 +48,7 @@
 - Painel de quota/persistência do armazenamento e reset seletivo de treino, progresso ou nutrição sem afetar fotos e conta.
 - Agenda editável de suplementos, links HTTPS de vídeos de exercícios e compartilhamento do relatório semanal.
 - Smoke E2E real aprovado em Chromium desktop e WebKit mobile; release paralela atualizada para `4.0.0-alpha.5`.
+- Firebase Auth Emulator opt-in, teste isolado de criação/login/exclusão e E2E de cadastro com bloqueio de email não verificado em Chromium/WebKit; release `4.0.0-alpha.6`.
 
 ### Preserved
 

@@ -57,3 +57,7 @@ Typecheck, lint, 41 testes unitários e build passaram após formatar `main.ts` 
 ## Rodada 2026-08-02 — sincronização, quota e E2E alpha.5
 
 Typecheck strict, lint, **20 arquivos/45 testes unitários**, build e **2 smoke tests Playwright** passaram. O build transformou 142 módulos; app JS 183,05 kB (50,93 kB gzip), Storage 33,05 kB (10,90 kB gzip), Firestore 441,11 kB (130,90 kB gzip) e CSS 16,96 kB (3,54 kB gzip). O E2E encontrou um seletor obsoleto do grid provisório; o cenário foi corrigido para validar o shell de autenticação atual e passou em Chromium e WebKit mobile. Fluxos autenticados e regras continuam pendentes de Firebase Emulator, sem uso de dados reais.
+
+## Rodada 2026-08-02 — Auth Emulator e E2E autenticado alpha.6
+
+`firebase-tools` e `@firebase/rules-unit-testing` foram instalados como dependências de desenvolvimento. O Auth Emulator com projeto isolado `demo-kyro-v4` aprovou criação, login e exclusão; o Playwright aprovou cadastro e bloqueio por email não verificado em Chromium e WebKit mobile (**2/2**). A conexão local exige flag explícita e tem teste garantindo o padrão desativado. O Firestore Emulator não pôde iniciar porque Java não está instalado nesta máquina; nenhuma regra foi marcada como testada sem execução real.
