@@ -15,7 +15,7 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
 | Unitários (`vitest run`) | **PASS**, 6 arquivos e 16 testes, código 0. Inclui contratos, autenticação, treino, readiness, peso e nutrição. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 118 módulos; JS 652,76 kB (194,23 kB gzip), CSS 8,35 kB, código 0. Permanece aviso de chunk acima de 500 kB. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 120 módulos; app JS 110,96 kB (32,54 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 8,88 kB, código 0 e sem aviso de tamanho/ciclo. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 ## Verificação visual local

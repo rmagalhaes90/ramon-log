@@ -32,6 +32,7 @@ const messages = {
     water: 'Água', meal: 'Refeição', mealName: 'Nome da refeição',
     settings: 'Ajustes', deleteAccount: 'Excluir conta e todos os dados', deleteWarning: 'Esta ação é permanente. Digite EXCLUIR para confirmar.',
     confirmation: 'Confirmação', deleting: 'Excluindo com segurança…', deleteFailed: 'Não foi possível concluir a exclusão. Nenhum passo restante será ocultado.',
+    admin: 'Administração', users: 'Usuários', block: 'Bloquear', unblock: 'Desbloquear', grantAdmin: 'Tornar admin', revokeAdmin: 'Remover admin',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -64,6 +65,7 @@ const messages = {
     water: 'Water', meal: 'Meal', mealName: 'Meal name',
     settings: 'Settings', deleteAccount: 'Delete account and all data', deleteWarning: 'This is permanent. Type DELETE to confirm.',
     confirmation: 'Confirmation', deleting: 'Deleting securely…', deleteFailed: 'Deletion could not be completed. No remaining step will be hidden.',
+    admin: 'Administration', users: 'Users', block: 'Block', unblock: 'Unblock', grantAdmin: 'Grant admin', revokeAdmin: 'Revoke admin',
   },
 } as const;
 

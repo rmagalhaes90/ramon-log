@@ -18,7 +18,7 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | Offline/fila | ✅ | 🟡 | Cache e fila de documentos integrados; faltam conflitos, quota e testes de reload |
 | PWA/atualização | ✅ | 🟡 | install/update/rollback e suspensão iOS |
 | Notificações | ✅ | ⬜ | permissão por gesto, push e timer local |
-| Admin | ✅ | 🟡 | regras owner/admin versionadas; faltam UI v4, claims e testes Emulator |
+| Admin | ✅ | 🟡 | listagem, bloqueio e concessão/revogação v4; faltam claims e testes Emulator |
 | Exclusão de conta | ✅ | 🟡 | fluxo modular completo no cliente; backend idempotente ainda recomendado |
 | Import/export/reset | ✅ | ⬜ | round-trip, limites, backup e rollback |
 

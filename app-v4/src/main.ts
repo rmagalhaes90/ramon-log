@@ -8,6 +8,7 @@ import {
   refreshVerification, requestPasswordReset, resendVerification, type AuthState,
 } from './features/auth';
 import { deleteOwnAccount } from './features/account/delete-account';
+import { listSharedUsers,setUserAdmin,setUserBlocked } from './features/admin';
 import { completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
 import { emptyNutritionDay, percentage } from './features/nutrition/model';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
@@ -22,10 +23,10 @@ const root = document.querySelector<HTMLDivElement>('#app');
 if (!root) throw new Error('Missing #app root');
 const appRoot = root;
 
-let authState: AuthState = { status: 'loading', user: null };
+let authState: AuthState = { status: 'loading', user: null, isAdmin:false };
 let authMode: 'login' | 'signup' = 'login';
 let updateRegistration: ServiceWorkerRegistration | null = null;
-let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' | 'settings' = 'dashboard';
+let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' | 'settings' | 'admin' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt = new Date().toISOString();
@@ -147,13 +148,14 @@ async function renderReady(user: User): Promise<void> {
   else if (currentView === 'progress') await renderProgress(user);
   else if (currentView === 'nutrition') await renderNutrition(user);
   else if (currentView === 'settings') renderSettings(user);
+  else if (currentView === 'admin') await renderAdmin(user);
   else renderDashboard(user);
 }
 
 function renderDashboard(user: User): void {
   shell(`<section class="hero"><p class="eyebrow">${copy('foundation')}</p><h1>${copy('tagline')}</h1>
     <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><span>${copy('queue')}: <b id="queue-count">0</b></span></div>
-    <button id="start-workout" class="primary">${copy('train')}</button><button id="logout" class="link-button">${copy('logout')}</button></section>
+    <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin?`<button id="open-admin" class="secondary">${copy('admin')}</button>`:''}<button id="logout" class="link-button">${copy('logout')}</button></section>
     <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>Workouts, routines, exercises and sets.</p></article>
     <article><span>02</span><h2>RECOVER</h2><p>Readiness, history and progress.</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>Nutrition and supplements.</p><button id="open-nutrition">${copy('nutrition')}</button></article>
     <article><span>04</span><h2>SYNC</h2><p>Offline-first, private and resilient.</p><button id="open-settings">${copy('settings')}</button></article></section>`);
@@ -162,9 +164,16 @@ function renderDashboard(user: User): void {
   document.querySelector('#open-progress')?.addEventListener('click', () => { currentView = 'progress'; void renderProgress(user); });
   document.querySelector('#open-nutrition')?.addEventListener('click', () => { currentView = 'nutrition'; void renderNutrition(user); });
   document.querySelector('#open-settings')?.addEventListener('click', () => { currentView = 'settings'; renderSettings(user); });
+  document.querySelector('#open-admin')?.addEventListener('click', () => { currentView = 'admin'; void renderAdmin(user); });
   void flushUserDataQueue(user).catch((error: unknown) => reportError(error, 'sync/flush'));
   void queueList().then((items) => { const count = document.querySelector('#queue-count'); if (count) count.textContent = String(items.length); })
     .catch((error: unknown) => reportError(error, 'queue/render'));
+}
+
+async function renderAdmin(user:User):Promise<void>{
+  const users=await listSharedUsers();const superAdmin=user.email?.toLowerCase()==='rmagalhaes90@gmail.com';
+  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">ADMIN</p><h1>${copy('users')}</h1><div id="admin-users" class="history-list"></div></section>`);bindBack(user);
+  const list=document.querySelector('#admin-users');users.forEach((entry)=>{const row=document.createElement('article');const identity=document.createElement('div');const email=document.createElement('strong');email.textContent=entry.email||entry.uid;const role=document.createElement('span');role.textContent=entry.isAdmin?'admin':'';identity.append(email,role);const actions=document.createElement('div');const block=document.createElement('button');block.textContent=copy(entry.blocked?'unblock':'block');block.addEventListener('click',()=>void setUserBlocked(entry.uid,!entry.blocked).then(()=>renderAdmin(user)).catch((error:unknown)=>reportError(error,'admin/block')));actions.append(block);if(superAdmin&&entry.uid!==user.uid){const admin=document.createElement('button');admin.textContent=copy(entry.isAdmin?'revokeAdmin':'grantAdmin');admin.addEventListener('click',()=>void setUserAdmin(entry.uid,!entry.isAdmin).then(()=>renderAdmin(user)).catch((error:unknown)=>reportError(error,'admin/role')));actions.append(admin);}row.append(identity,actions);list?.append(row);});
 }
 
 function renderSettings(user: User): void {

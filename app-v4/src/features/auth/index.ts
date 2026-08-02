@@ -15,7 +15,7 @@ import { KyroError } from '../../core/errors';
 import { getFirebaseServices } from '../../services/firebase';
 
 export type AuthStatus = 'loading' | 'signed-out' | 'unverified' | 'blocked' | 'ready';
-export interface AuthState { status: AuthStatus; user: User | null }
+export interface AuthState { status: AuthStatus; user: User | null; isAdmin: boolean }
 export type AuthListener = (state: AuthState) => void;
 
 const configuredServices = getFirebaseServices();
@@ -26,7 +26,7 @@ function requiresVerification(user: User): boolean {
   return user.providerData.some(({ providerId }) => providerId === 'password') && !user.emailVerified;
 }
 
-async function ensureSharedProfile(user: User): Promise<boolean> {
+async function ensureSharedProfile(user: User): Promise<{blocked:boolean;isAdmin:boolean}> {
   const reference = doc(services.firestore, 'sharedUsers', user.uid);
   const snapshot = await getDoc(reference);
   if (!snapshot.exists()) {
@@ -35,24 +35,24 @@ async function ensureSharedProfile(user: User): Promise<boolean> {
       createdAt: serverTimestamp(),
       blocked: false,
     });
-    return false;
+    return {blocked:false,isAdmin:user.email?.toLowerCase()==='rmagalhaes90@gmail.com'};
   }
-  return snapshot.data().blocked === true;
+  const data=snapshot.data();return {blocked:data.blocked===true,isAdmin:data.isAdmin===true||user.email?.toLowerCase()==='rmagalhaes90@gmail.com'};
 }
 
 export function observeAuth(listener: AuthListener): () => void {
-  listener({ status: 'loading', user: null });
+  listener({ status: 'loading', user: null, isAdmin:false });
   let generation = 0;
   return onAuthStateChanged(services.auth, (user) => {
     const current = ++generation;
-    if (!user) { listener({ status: 'signed-out', user: null }); return; }
-    if (requiresVerification(user)) { listener({ status: 'unverified', user }); return; }
+    if (!user) { listener({ status: 'signed-out', user: null, isAdmin:false }); return; }
+    if (requiresVerification(user)) { listener({ status: 'unverified', user, isAdmin:false }); return; }
     void ensureSharedProfile(user)
-      .then((blocked) => {
-        if (current === generation) listener({ status: blocked ? 'blocked' : 'ready', user });
+      .then(({blocked,isAdmin}) => {
+        if (current === generation) listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin });
       })
       .catch(() => {
-        if (current === generation) listener({ status: 'signed-out', user: null });
+        if (current === generation) listener({ status: 'signed-out', user: null, isAdmin:false });
       });
   });
 }

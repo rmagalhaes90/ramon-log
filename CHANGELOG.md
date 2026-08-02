@@ -20,6 +20,8 @@
 - Nutrição v4 com metas herdadas, refeições, calorias, macros e água.
 - Regras Firestore/Storage versionadas e configuração local de emuladores.
 - Exclusão modular de conta e dados com reautenticação e progresso por estágio.
+- Administração modular com listagem, bloqueio e concessão/revogação de admin protegida pelas regras.
+- Separação de chunks Firebase; nenhum chunk de produção excede 500 kB.
 
 ### Preserved
 
