@@ -44,6 +44,10 @@
 - IndexedDB v2 com fila limitada de fotos offline e retomada automática antes de atualizar o índice remoto.
 - Release paralela atualizada para `4.0.0-alpha.4`.
 - `main.ts` formatado e reduzido com extração das views de ajustes, portabilidade e fotos para módulos de feature.
+- Sincronização offline segregada por usuário, envelopes de revisão compatíveis com filas antigas e proteção contra sobrescrita remota enquanto há mudança local pendente.
+- Painel de quota/persistência do armazenamento e reset seletivo de treino, progresso ou nutrição sem afetar fotos e conta.
+- Agenda editável de suplementos, links HTTPS de vídeos de exercícios e compartilhamento do relatório semanal.
+- Smoke E2E real aprovado em Chromium desktop e WebKit mobile; release paralela atualizada para `4.0.0-alpha.5`.
 
 ### Preserved
 

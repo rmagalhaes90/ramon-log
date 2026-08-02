@@ -8,15 +8,15 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 
 ## Fundação v4
 
-| Comando | Resultado |
-|---|---|
-| `npm install` | Não executável: `npm` não existe no `PATH` nem no runtime fornecido. |
-| `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
-| Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
-| Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 18 arquivos e 41 testes, código 0. Inclui capacidade de câmera sem prompt antecipado e limite da fila offline de fotos. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 140 módulos; app JS 177,55 kB (49,33 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 15,69 kB (3,39 kB gzip), código 0 e sem aviso. |
-| `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
+| Comando                                                                     | Resultado                                                                                                                                                                                       |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm install`                                                               | Não executável: `npm` não existe no `PATH` nem no runtime fornecido.                                                                                                                            |
+| `pnpm install` (fallback do workspace)                                      | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`.                          |
+| Typecheck (`tsc -b --pretty false`)                                         | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final.                                                                                             |
+| Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida.                                                                                                             |
+| Unitários (`vitest run`)                                                    | **PASS**, 18 arquivos e 41 testes, código 0. Inclui capacidade de câmera sem prompt antecipado e limite da fila offline de fotos.                                                               |
+| Build (`vite build --config vite.config.ts`)                                | **PASS**, 140 módulos; app JS 177,55 kB (49,33 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 15,69 kB (3,39 kB gzip), código 0 e sem aviso. |
+| Playwright (`playwright test`)                                              | **PASS**, 2 testes: Chromium desktop e WebKit mobile. Os binários oficiais foram instalados pelo CLI usando o Node empacotado.                                                                  |
 
 ## Verificação visual local
 
@@ -53,3 +53,7 @@ Typecheck, lint, 41 testes unitários e build passaram. IndexedDB migrou de v1 p
 ## Rodada 2026-08-02 — primeira extração do composition root
 
 Typecheck, lint, 41 testes unitários e build passaram após formatar `main.ts` e extrair ajustes/conta, import/export/CSV e fotos/Storage/Share para três módulos. O composition root caiu para cerca de 53,3 mil caracteres; o número de módulos transformados subiu para 140 sem mudança material no bundle.
+
+## Rodada 2026-08-02 — sincronização, quota e E2E alpha.5
+
+Typecheck strict, lint, **20 arquivos/45 testes unitários**, build e **2 smoke tests Playwright** passaram. O build transformou 142 módulos; app JS 183,05 kB (50,93 kB gzip), Storage 33,05 kB (10,90 kB gzip), Firestore 441,11 kB (130,90 kB gzip) e CSS 16,96 kB (3,54 kB gzip). O E2E encontrou um seletor obsoleto do grid provisório; o cenário foi corrigido para validar o shell de autenticação atual e passou em Chromium e WebKit mobile. Fluxos autenticados e regras continuam pendentes de Firebase Emulator, sem uso de dados reais.
