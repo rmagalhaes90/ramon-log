@@ -1,5 +1,9 @@
 # Guia de migração KYRO v4
 
+## Testes Firebase locais
+
+Com Java 21+ no `PATH`, execute `pnpm test:emulator:auth`, `pnpm test:e2e:auth` e `pnpm test:emulator:rules`. Todos usam o projeto reservado `demo-kyro-v4`; tentativas de acessar serviços reais são bloqueadas pelo Firebase CLI.
+
 ## Execução local
 
 1. Copie `.env.example` para `.env.local` e preencha um projeto Firebase de desenvolvimento.

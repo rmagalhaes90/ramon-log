@@ -4,6 +4,8 @@
 
 Os SDKs somente conectam aos emuladores quando `VITE_USE_FIREBASE_EMULATORS=true`. O valor padrão é `false`. Os testes automatizados usam o projeto `demo-kyro-v4`, para o qual o Firebase CLI bloqueia tentativas de acesso a serviços não emulados. O runner também encerra imediatamente se `FIREBASE_AUTH_EMULATOR_HOST` não estiver presente, evitando criação acidental de contas reais.
 
+As regras Firestore e Storage foram executadas no Emulator com Java 21. Os testes confirmam propriedade de documentos, negação anônima e entre contas, criação de perfil sem autoelevação, limites das operações administrativas e uploads privados restritos a JPEG de até 3 MB.
+
 ## Modelo de ameaça
 
 Protegemos dados de saúde/treino, fotos, identidade, permissões administrativas e disponibilidade offline contra acesso entre usuários, XSS, adulteração de import, perda durante sincronização e exclusão incompleta.

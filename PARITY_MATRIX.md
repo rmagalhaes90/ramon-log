@@ -26,22 +26,21 @@ Paridade global: **não atingida**. O baseline continua sendo a versão operacio
 
 ## Progresso acompanhado por fase
 
-Percentual estimado da migração funcional: **95%**. A estimativa pondera implementação e validação de comportamento, não apenas quantidade de arquivos. A versão legada continua sendo o baseline operacional até os 5% finais e a homologação completa.
+Percentual estimado da migração funcional: **97%**. A estimativa pondera implementação e validação de comportamento, não apenas quantidade de arquivos. A versão legada continua sendo o baseline operacional até a homologação completa.
 
-| Fase                                           | Progresso | Estado                                                                                                                                                     |
-| ---------------------------------------------- | --------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Fundação, contratos, qualidade e design system |       85% | TypeScript strict, ferramentas, i18n, erros e tokens ativos; falta ampliar componentes reutilizáveis                                                       |
-| Auth, verificação, onboarding e conta          |       92% | Auth Emulator, E2E de cadastro/verificação em Chromium/WebKit e exclusão modular; faltam Google real e tour completo                                       |
-| Treinos, rotinas, catálogo e histórico         |       94% | Núcleo, templates, gerador, reorder, rascunhos, PR/e1RM, vídeos, relatório compartilhável e conquistas implementados                                       |
-| Progresso, readiness e nutrição                |       92% | Peso, gráfico, medidas, readiness, suplementos com agenda editável e barcode manual/câmera implementados                                                   |
-| Fotos, compartilhamento e notificações         |       60% | Fotos privadas, comparação, Web Share e alertas locais migrados; faltam EXIF e push remoto                                                                 |
-| Admin e segurança Firebase                     |       70% | UI, regras, bloqueio e ambiente Emulator seguro; faltam claims/backend e execução das regras Firestore/Storage, bloqueada localmente pela ausência de Java |
-| Offline, sincronização e PWA                   |       90% | IndexedDB v2, filas segregadas, prioridade local, quota/persistência, cache e recuperação ativos; faltam conflitos interativos e validação iOS prolongada  |
-| Import/export, acessibilidade e E2E            |       95% | JSON/CSV, reset seletivo, smoke e cadastro/verificação autenticados aprovados em Chromium/WebKit mobile                                                    |
+| Fase                                           | Progresso | Estado                                                                                                                                                    |
+| ---------------------------------------------- | --------: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fundação, contratos, qualidade e design system |       85% | TypeScript strict, ferramentas, i18n, erros e tokens ativos; falta ampliar componentes reutilizáveis                                                      |
+| Auth, verificação, onboarding e conta          |       92% | Auth Emulator, E2E de cadastro/verificação em Chromium/WebKit e exclusão modular; faltam Google real e tour completo                                      |
+| Treinos, rotinas, catálogo e histórico         |       94% | Núcleo, templates, gerador, reorder, rascunhos, PR/e1RM, vídeos, relatório compartilhável e conquistas implementados                                      |
+| Progresso, readiness e nutrição                |       92% | Peso, gráfico, medidas, readiness, suplementos com agenda editável e barcode manual/câmera implementados                                                  |
+| Fotos, compartilhamento e notificações         |       60% | Fotos privadas, comparação, Web Share e alertas locais migrados; faltam EXIF e push remoto                                                                |
+| Admin e segurança Firebase                     |       85% | UI, bloqueio e regras Firestore/Storage aprovadas no Emulator com cenários positivos/negativos; faltam custom claims/backend                              |
+| Offline, sincronização e PWA                   |       90% | IndexedDB v2, filas segregadas, prioridade local, quota/persistência, cache e recuperação ativos; faltam conflitos interativos e validação iOS prolongada |
+| Import/export, acessibilidade e E2E            |       95% | JSON/CSV, reset seletivo, smoke e cadastro/verificação autenticados aprovados em Chromium/WebKit mobile                                                   |
 
-## 5% finais
+## 3% finais
 
-- Executar as regras Firestore/Storage no Emulator quando Java 21+ estiver disponível.
 - Substituir a concessão administrativa baseada em documento/email por custom claims emitidas por backend confiável.
 - Homologar Google Sign-In, Web Share de arquivos e instalação/atualização em dispositivos Safari/iOS reais.
 - Completar retry offline de blobs/EXIF, resolução interativa de conflitos e push remoto/FCM.
