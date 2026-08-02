@@ -1,4 +1,4 @@
-const VERSION = '4.0.0-alpha.1';
+const VERSION = '4.0.0-alpha.2';
 const SHELL = `kyro-v4-shell-${VERSION}`;
 const PRECACHE = ['./', './index.html', './manifest.webmanifest', './version.json'];
 
@@ -27,5 +27,17 @@ self.addEventListener('fetch', (event) => {
       event.waitUntil(caches.open(SHELL).then((cache) => cache.put('./index.html', copy)));
       return response;
     }).catch(() => caches.match('./index.html')));
+    return;
+  }
+  if (['script', 'style', 'image', 'font', 'manifest'].includes(event.request.destination)) {
+    event.respondWith(caches.open(SHELL).then(async (cache) => {
+      const cached = await cache.match(event.request);
+      const network = fetch(event.request).then((response) => {
+        if (response.ok && response.type !== 'opaque') event.waitUntil(cache.put(event.request, response.clone()));
+        return response;
+      });
+      if (cached) { event.waitUntil(network.catch(() => undefined)); return cached; }
+      return network;
+    }));
   }
 });

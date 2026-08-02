@@ -1,13 +1,13 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "build": "tsc -b && vite build --config vite.config.ts",
     "typecheck": "tsc -b --pretty false",
-    "lint": "eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts",
+    "lint": "eslint app-v4/src app-v4/tests scripts vite.config.ts playwright.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
