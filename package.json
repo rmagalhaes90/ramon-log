@@ -1,20 +1,21 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.7",
+  "version": "4.0.0-alpha.8",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
     "build": "tsc -b && vite build --config vite.config.ts",
     "typecheck": "tsc -b --pretty false",
-    "lint": "eslint app-v4/src app-v4/tests scripts vite.config.ts playwright.config.ts",
+    "lint": "eslint app-v4/src app-v4/tests scripts functions vite.config.ts playwright.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:emulator:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-emulator-test.mjs\"",
     "test:e2e:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-e2e-runner.mjs\"",
-    "test:emulator:rules": "firebase emulators:exec --only firestore,storage --project demo-kyro-v4 \"node scripts/firebase-rules-test.mjs\""
+    "test:emulator:rules": "firebase emulators:exec --only firestore,storage --project demo-kyro-v4 \"node scripts/firebase-rules-test.mjs\"",
+    "test:emulator:functions": "firebase emulators:exec --only auth,firestore,storage,functions --project demo-kyro-v4 \"pnpm --dir functions test:emulator\""
   },
   "dependencies": {
     "firebase": "^12.2.1",

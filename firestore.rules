@@ -4,10 +4,7 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function owns(uid) { return signedIn() && request.auth.uid == uid; }
     function isSuperAdmin() { return signedIn() && request.auth.token.email == 'rmagalhaes90@gmail.com'; }
-    function isGrantedAdmin() {
-      return signedIn() && exists(/databases/$(database)/documents/sharedUsers/$(request.auth.uid))
-        && get(/databases/$(database)/documents/sharedUsers/$(request.auth.uid)).data.isAdmin == true;
-    }
+    function isGrantedAdmin() { return signedIn() && request.auth.token.admin == true; }
     function isAdmin() { return isSuperAdmin() || isGrantedAdmin(); }
 
     match /users/{uid}/data/{document=**} {

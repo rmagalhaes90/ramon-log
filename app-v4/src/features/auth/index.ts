@@ -1,5 +1,6 @@
 import {
   GoogleAuthProvider,
+  getIdTokenResult,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   reload,
@@ -41,12 +42,18 @@ async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAd
       createdAt: serverTimestamp(),
       blocked: false,
     });
-    return { blocked: false, isAdmin: user.email?.toLowerCase() === 'rmagalhaes90@gmail.com' };
+    const token = await getIdTokenResult(user);
+    return {
+      blocked: false,
+      isAdmin:
+        token.claims.admin === true || user.email?.toLowerCase() === 'rmagalhaes90@gmail.com',
+    };
   }
   const data = snapshot.data();
+  const token = await getIdTokenResult(user);
   return {
     blocked: data.blocked === true,
-    isAdmin: data.isAdmin === true || user.email?.toLowerCase() === 'rmagalhaes90@gmail.com',
+    isAdmin: token.claims.admin === true || user.email?.toLowerCase() === 'rmagalhaes90@gmail.com',
   };
 }
 

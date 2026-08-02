@@ -1,4 +1,5 @@
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { z } from 'zod';
 import { getFirebaseServices } from '../../services/firebase';
 
@@ -25,10 +26,10 @@ export async function listSharedUsers(): Promise<SharedUser[]> {
 export async function setUserBlocked(uid: string, blocked: boolean): Promise<void> {
   const services = getFirebaseServices();
   if (!services) throw new Error('firebase/unavailable');
-  await updateDoc(doc(services.firestore, 'sharedUsers', uid), { blocked });
+  await httpsCallable(services.functions, 'setUserBlocked')({ uid, blocked });
 }
 export async function setUserAdmin(uid: string, isAdmin: boolean): Promise<void> {
   const services = getFirebaseServices();
   if (!services) throw new Error('firebase/unavailable');
-  await updateDoc(doc(services.firestore, 'sharedUsers', uid), { isAdmin });
+  await httpsCallable(services.functions, 'setAdminRole')({ uid, isAdmin });
 }

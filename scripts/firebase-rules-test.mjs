@@ -50,9 +50,17 @@ try {
     }),
   );
   await assertSucceeds(updateDoc(doc(owner.firestore(), 'sharedUsers/alice'), { isAdmin: true }));
-  await assertSucceeds(getDocs(collection(alice.firestore(), 'sharedUsers')));
-  await assertFails(updateDoc(doc(alice.firestore(), 'sharedUsers/alice'), { isAdmin: false }));
-  await assertSucceeds(updateDoc(doc(alice.firestore(), 'sharedUsers/alice'), { blocked: true }));
+  const aliceAdmin = testEnvironment.authenticatedContext('alice', {
+    email: 'alice@example.test',
+    admin: true,
+  });
+  await assertSucceeds(getDocs(collection(aliceAdmin.firestore(), 'sharedUsers')));
+  await assertFails(
+    updateDoc(doc(aliceAdmin.firestore(), 'sharedUsers/alice'), { isAdmin: false }),
+  );
+  await assertSucceeds(
+    updateDoc(doc(aliceAdmin.firestore(), 'sharedUsers/alice'), { blocked: true }),
+  );
 
   const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
   await assertSucceeds(

@@ -10,7 +10,7 @@ export default tseslint.config(
   prettier,
   {
     ...tseslint.configs.disableTypeChecked,
-    files: ['scripts/**/*.mjs'],
+    files: ['scripts/**/*.mjs', 'functions/**/*.{js,mjs}'],
     languageOptions: { globals: globals.node },
   },
   {
@@ -22,7 +22,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'error'
-    }
-  }
+      '@typescript-eslint/no-misused-promises': 'error',
+    },
+  },
 );
