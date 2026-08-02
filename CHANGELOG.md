@@ -43,6 +43,7 @@
 - Leitura de barcode pela câmera via `BarcodeDetector`, com permissão por gesto, encerramento de tracks e fallback manual.
 - IndexedDB v2 com fila limitada de fotos offline e retomada automática antes de atualizar o índice remoto.
 - Release paralela atualizada para `4.0.0-alpha.4`.
+- `main.ts` formatado e reduzido com extração das views de ajustes, portabilidade e fotos para módulos de feature.
 
 ### Preserved
 

@@ -33,3 +33,9 @@ O cliente não decide autorização. Firestore Rules, Storage Rules e testes de 
 ## Build e qualidade
 
 TypeScript strict, ESLint type-aware, Prettier, Vitest e Playwright compõem o gate. Vite gera assets com hash. A PWA v4 usa SW independente e nunca deve controlar o escopo do baseline durante desenvolvimento/migração.
+
+## Composição da interface
+
+`main.ts` permanece como composition root: autenticação, roteamento de views e estado transitório de treino. Fluxos completos não devem voltar a ser implementados nele. Ajustes/conta ficam em `features/settings/view.ts`, portabilidade em `features/backup/ui.ts` e galeria/Storage/compartilhamento em `features/photos/view.ts`. Cada view recebe apenas callbacks de shell, tradução e navegação necessários, enquanto serviços e regras de domínio permanecem importados pela própria feature.
+
+Na primeira extração, `main.ts` foi formatado integralmente e caiu de aproximadamente 59,6 mil para 53,3 mil caracteres após mover ajustes e fotos. As próximas extrações-alvo são nutrição, progresso e workout view.
