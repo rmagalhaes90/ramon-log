@@ -27,6 +27,10 @@ export async function cacheGet<T>(key: string): Promise<T | undefined> {
   return (await database()).get('cache', key) as Promise<T | undefined>;
 }
 
+export async function cacheDelete(key:string):Promise<void>{
+  await (await database()).delete('cache',key);
+}
+
 export async function queuePut(value: QueueItem): Promise<void> {
   await (await database()).put('queue', queueItemSchema.parse(value));
 }
