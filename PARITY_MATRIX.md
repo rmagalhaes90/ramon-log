@@ -11,8 +11,8 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | Onboarding | ✅ | 🟡 | Preferência inicial persistida; falta portar tour completo do produto |
 | Treinos/rotinas/exercícios/séries | ✅ | 🟡 | Leitura validada, séries, carga/reps, volume e conclusão; faltam CRUD/reorder/timers/PR |
 | Histórico/relatórios/conquistas | ✅ | 🟡 | Sessões são gravadas com cache/fila; faltam relatórios e conquistas |
-| Readiness/progresso/medidas | ✅ | ⬜ | Fórmulas e gráficos com tolerância definida |
-| Nutrição/barcode/suplementos | ✅ | ⬜ | CRUD offline e integração abortável |
+| Readiness/progresso/medidas | ✅ | 🟡 | Peso, delta, sessões e readiness equivalentes; faltam medidas/gráficos |
+| Nutrição/barcode/suplementos | ✅ | 🟡 | Refeições, macros e água offline; faltam barcode e suplementos |
 | Fotos/comparação/Storage | ✅ | ⬜ | EXIF, limites, upload retry e exclusão confirmada |
 | Compartilhamento | ✅ | ⬜ | Web Share files + fallback em Chromium/WebKit |
 | Offline/fila | ✅ | 🟡 | Cache e fila de documentos integrados; faltam conflitos, quota e testes de reload |

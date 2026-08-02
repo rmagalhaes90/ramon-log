@@ -16,6 +16,8 @@
 - Contratos Zod para exercícios, treinos, séries, sessões, readiness, nutrição, perfil, peso e fotos.
 - Repositório de dados por usuário com cache IndexedDB, validação remota e escrita com fallback para fila offline.
 - Primeira experiência de treino v4: seleção do dia, séries, carga, repetições, conclusão, volume e histórico de sessões.
+- Progresso v4 com peso, delta, histórico de sessões e readiness usando a fórmula do baseline.
+- Nutrição v4 com metas herdadas, refeições, calorias, macros e água.
 
 ### Preserved
 

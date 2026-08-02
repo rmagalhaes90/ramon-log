@@ -81,6 +81,7 @@ export const nutritionDaySchema = z.object({
   water: finite(0, 50), meals: z.array(mealSchema).max(200), kcalGoal: finite(1, 10_000),
   proteinGoal: finite(1, 1000), carbGoal: finite(1, 1000), fatGoal: finite(1, 1000), waterGoal: finite(0.5, 20),
 });
+export type NutritionDay = z.infer<typeof nutritionDaySchema>;
 export const nutritionLogSchema = z.record(dateKeySchema, nutritionDaySchema);
 
 export const profileSchema = z.object({

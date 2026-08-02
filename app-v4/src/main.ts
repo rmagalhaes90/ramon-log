@@ -2,12 +2,14 @@ import './styles.css';
 import type { User } from 'firebase/auth';
 import { installGlobalErrorHandlers, onError, reportError } from './core/errors';
 import { createI18n, type Locale, type MessageKey } from './core/i18n';
-import type { Workouts } from './domain/schemas';
+import type { NutritionDay, Workouts } from './domain/schemas';
 import {
   authErrorKey, createAccount, loginWithGoogle, loginWithPassword, logout, observeAuth,
   refreshVerification, requestPasswordReset, resendVerification, type AuthState,
 } from './features/auth';
 import { completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
+import { emptyNutritionDay, percentage } from './features/nutrition/model';
+import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
 import { cacheGet, cacheSet, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
@@ -22,12 +24,13 @@ const appRoot = root;
 let authState: AuthState = { status: 'loading', user: null };
 let authMode: 'login' | 'signup' = 'login';
 let updateRegistration: ServiceWorkerRegistration | null = null;
-let currentView: 'dashboard' | 'workout' = 'dashboard';
+let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt = new Date().toISOString();
 
 function copy(key: MessageKey): string { return i18n.t(key); }
+function formText(data: FormData, key: string): string { const value = data.get(key); return typeof value === 'string' ? value : ''; }
 
 function shell(content: string): void {
   appRoot.innerHTML = `<header class="topbar"><a class="brand" href="./" aria-label="KYRO">KYRO<span>.</span></a>
@@ -139,7 +142,10 @@ function renderOnboarding(user: User): void {
 
 async function renderReady(user: User): Promise<void> {
   if (await needsOnboarding(user)) { renderOnboarding(user); return; }
-  if (currentView === 'workout') await renderWorkout(user); else renderDashboard(user);
+  if (currentView === 'workout') await renderWorkout(user);
+  else if (currentView === 'progress') await renderProgress(user);
+  else if (currentView === 'nutrition') await renderNutrition(user);
+  else renderDashboard(user);
 }
 
 function renderDashboard(user: User): void {
@@ -147,13 +153,49 @@ function renderDashboard(user: User): void {
     <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><span>${copy('queue')}: <b id="queue-count">0</b></span></div>
     <button id="start-workout" class="primary">${copy('train')}</button><button id="logout" class="link-button">${copy('logout')}</button></section>
     <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>Workouts, routines, exercises and sets.</p></article>
-    <article><span>02</span><h2>RECOVER</h2><p>Readiness, history and progress.</p></article><article><span>03</span><h2>FUEL</h2><p>Nutrition and supplements.</p></article>
+    <article><span>02</span><h2>RECOVER</h2><p>Readiness, history and progress.</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>Nutrition and supplements.</p><button id="open-nutrition">${copy('nutrition')}</button></article>
     <article><span>04</span><h2>SYNC</h2><p>Offline-first, private and resilient.</p></article></section>`);
   document.querySelector('#logout')?.addEventListener('click', () => void logout().catch((error: unknown) => reportError(error, 'auth/logout')));
   document.querySelector('#start-workout')?.addEventListener('click', () => { currentView = 'workout'; void renderWorkout(user); });
+  document.querySelector('#open-progress')?.addEventListener('click', () => { currentView = 'progress'; void renderProgress(user); });
+  document.querySelector('#open-nutrition')?.addEventListener('click', () => { currentView = 'nutrition'; void renderNutrition(user); });
   void flushUserDataQueue(user).catch((error: unknown) => reportError(error, 'sync/flush'));
   void queueList().then((items) => { const count = document.querySelector('#queue-count'); if (count) count.textContent = String(items.length); })
     .catch((error: unknown) => reportError(error, 'queue/render'));
+}
+
+function bindBack(user: User): void { document.querySelector('#feature-back')?.addEventListener('click', () => { currentView = 'dashboard'; renderDashboard(user); }); }
+
+async function renderProgress(user: User): Promise<void> {
+  const [weights, readiness, sessions] = await Promise.all([
+    loadUserData(user, 'bodyWeights').then((value) => value ?? []), loadUserData(user, 'readinessLog').then((value) => value ?? {}), loadUserData(user, 'sessionLog').then((value) => value ?? []),
+  ]);
+  const latest = [...weights].sort((a,b) => b.d.localeCompare(a.d))[0]; const delta = weightDelta(weights); const todayReadiness = readiness[dateKey()];
+  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">02 · RECOVER</p><h1>${copy('progress')}</h1>
+    <div class="metric-grid"><article><span>${copy('weight')}</span><strong id="latest-weight">—</strong><small id="weight-delta"></small></article><article><span>${copy('readiness')}</span><strong id="readiness-score">—</strong><small id="readiness-class"></small></article><article><span>${copy('history')}</span><strong>${sessions.length}</strong></article></div>
+    <form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form>
+    <form id="readiness-form" class="readiness-form">${(['sleep','energy','soreness','stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<button class="primary">${copy('save')}</button></form>
+    <div id="session-history" class="history-list"></div></section>`);
+  const weightTarget=document.querySelector('#latest-weight'); if(weightTarget)weightTarget.textContent=latest?`${latest.kg.toFixed(1)} kg`:'—';
+  const deltaTarget=document.querySelector('#weight-delta'); if(deltaTarget)deltaTarget.textContent=delta===null?'':`${delta>=0?'+':''}${delta.toFixed(1)} kg`;
+  const scoreTarget=document.querySelector('#readiness-score'); if(scoreTarget)scoreTarget.textContent=todayReadiness?String(todayReadiness.score):'—';
+  const classTarget=document.querySelector('#readiness-class'); if(classTarget)classTarget.textContent=todayReadiness?todayReadiness.classification:'';
+  const history=document.querySelector('#session-history'); sessions.slice(-20).reverse().forEach((session)=>{const row=document.createElement('article');const title=document.createElement('strong');title.textContent=session.title;const meta=document.createElement('span');meta.textContent=`${session.date} · ${Math.round(session.volume)} kg·vol`;row.append(title,meta);history?.append(row);});
+  bindBack(user);
+  document.querySelector('#weight-form')?.addEventListener('submit',(event)=>{event.preventDefault();const input=document.querySelector<HTMLInputElement>('#weight-input');const kg=Number(input?.value);if(!Number.isFinite(kg)||kg<=0||kg>1000)return;const next=[...weights.filter((item)=>item.d!==dateKey()),{d:dateKey(),kg}].sort((a,b)=>a.d.localeCompare(b.d));void saveUserData(user,'bodyWeights',next).then(()=>renderProgress(user)).catch((error:unknown)=>reportError(error,'progress/weight'));});
+  document.querySelector('#readiness-form')?.addEventListener('submit',(event)=>{event.preventDefault();const data=new FormData(event.currentTarget as HTMLFormElement);const values=['sleep','energy','soreness','stress'].map((key)=>Number(data.get(key)));const [sleep=3,energy=3,soreness=3,stress=3]=values;const score=readinessScore(sleep,energy,soreness,stress);const next={...readiness,[dateKey()]:{sleep,energy,soreness,stress,score,classification:readinessClass(score),recordedAt:new Date().toISOString()}};void saveUserData(user,'readinessLog',next).then(()=>renderProgress(user)).catch((error:unknown)=>reportError(error,'progress/readiness'));});
+}
+
+async function renderNutrition(user: User): Promise<void> {
+  const log = await loadUserData(user, 'nutritionLog') ?? {}; const today=dateKey(); const previous=Object.keys(log).sort().map((key)=>log[key]).filter((value):value is NutritionDay=>Boolean(value)).at(-1); const day=log[today] ?? emptyNutritionDay(previous);
+  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">03 · FUEL</p><h1>${copy('nutrition')}</h1>
+    <div class="metric-grid nutrition-metrics"><article><span>${copy('calories')}</span><strong>${Math.round(day.kcal)}</strong><small>${Math.round(percentage(day.kcal,day.kcalGoal))}%</small></article><article><span>${copy('protein')}</span><strong>${Math.round(day.protein)}g</strong><small>${Math.round(percentage(day.protein,day.proteinGoal))}%</small></article><article><span>${copy('water')}</span><strong>${day.water.toFixed(2)}L</strong><button id="add-water">+ 250ml</button></article></div>
+    <form id="meal-form" class="meal-form"><label>${copy('mealName')}<input name="name" maxlength="120" required></label><label>${copy('calories')}<input name="kcal" type="number" min="0" max="10000" required></label><label>${copy('protein')}<input name="protein" type="number" min="0" max="1000" step="0.1"></label><label>${copy('carbs')}<input name="carb" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fat')}<input name="fat" type="number" min="0" max="1000" step="0.1"></label><button class="primary">${copy('add')} ${copy('meal')}</button></form>
+    <div id="meal-list" class="history-list"></div></section>`);
+  bindBack(user); const list=document.querySelector('#meal-list');day.meals.slice().reverse().forEach((meal)=>{const row=document.createElement('article');const name=document.createElement('strong');name.textContent=meal.name;const meta=document.createElement('span');meta.textContent=`${Math.round(meal.kcal)} kcal · P ${Math.round(meal.prot)}g · C ${Math.round(meal.carb)}g · F ${Math.round(meal.fat)}g`;row.append(name,meta);list?.append(row);});
+  const persist=(next: NutritionDay)=>saveUserData(user,'nutritionLog',{...log,[today]:next}).then(()=>renderNutrition(user));
+  document.querySelector('#add-water')?.addEventListener('click',()=>void persist({...day,water:Math.min(50,day.water+0.25)}).catch((error:unknown)=>reportError(error,'nutrition/water')));
+  document.querySelector('#meal-form')?.addEventListener('submit',(event)=>{event.preventDefault();const data=new FormData(event.currentTarget as HTMLFormElement);const meal={id:crypto.randomUUID().slice(0,60),name:formText(data,'name').slice(0,120),kcal:Number(data.get('kcal'))||0,prot:Number(data.get('protein'))||0,carb:Number(data.get('carb'))||0,fat:Number(data.get('fat'))||0,t:new Date().toISOString()};const next={...day,kcal:day.kcal+meal.kcal,protein:day.protein+meal.prot,carb:day.carb+meal.carb,fat:day.fat+meal.fat,meals:[...day.meals,meal]};void persist(next).catch((error:unknown)=>reportError(error,'nutrition/meal'));});
 }
 
 async function renderWorkout(user: User): Promise<void> {

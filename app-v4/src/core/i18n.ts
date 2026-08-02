@@ -26,6 +26,10 @@ const messages = {
     train: 'Treinar', noWorkout: 'Nenhum treino configurado para este dia.', finishWorkout: 'Concluir treino',
     load: 'Carga', reps: 'Repetições', rest: 'Descanso', syncPending: 'Salvo localmente; sincronização pendente.',
     workoutSaved: 'Treino registrado.', back: 'Voltar',
+    progress: 'Progresso', nutrition: 'Nutrição', weight: 'Peso', add: 'Adicionar', readiness: 'Readiness',
+    sleep: 'Sono', energy: 'Energia', soreness: 'Dor muscular', stress: 'Stress', save: 'Salvar',
+    history: 'Histórico', calories: 'Calorias', protein: 'Proteína', carbs: 'Carboidratos', fat: 'Gordura',
+    water: 'Água', meal: 'Refeição', mealName: 'Nome da refeição',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -52,6 +56,10 @@ const messages = {
     train: 'Train', noWorkout: 'No workout configured for this day.', finishWorkout: 'Finish workout',
     load: 'Load', reps: 'Reps', rest: 'Rest', syncPending: 'Saved locally; sync pending.',
     workoutSaved: 'Workout logged.', back: 'Back',
+    progress: 'Progress', nutrition: 'Nutrition', weight: 'Weight', add: 'Add', readiness: 'Readiness',
+    sleep: 'Sleep', energy: 'Energy', soreness: 'Soreness', stress: 'Stress', save: 'Save',
+    history: 'History', calories: 'Calories', protein: 'Protein', carbs: 'Carbs', fat: 'Fat',
+    water: 'Water', meal: 'Meal', mealName: 'Meal name',
   },
 } as const;
 
