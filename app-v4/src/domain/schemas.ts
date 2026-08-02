@@ -58,6 +58,11 @@ export type Workouts = z.infer<typeof workoutsSchema>;
 
 export const bodyWeightSchema = z.object({ d: dateKeySchema, kg: finite(0.01, 1000) });
 export const bodyWeightsSchema = z.array(bodyWeightSchema).max(5000);
+export const bodyMeasurementSchema = z.object({
+  waist: finite(20, 300).optional(), chest: finite(20, 300).optional(), arm: finite(10, 150).optional(),
+  hip: finite(20, 300).optional(), thigh: finite(10, 200).optional(),
+}).refine((value) => Object.values(value).some((item) => item !== undefined), 'At least one measurement is required');
+export const bodyMeasurementsSchema = z.record(dateKeySchema, bodyMeasurementSchema);
 
 export const sessionSchema = z.object({
   id: z.string().max(60),
@@ -111,6 +116,7 @@ export const photoIndexSchema = z.array(photoSchema).max(5000);
 export const userDataSchemas = {
   workouts: workoutsSchema,
   bodyWeights: bodyWeightsSchema,
+  bodyMeasurements: bodyMeasurementsSchema,
   sessionLog: sessionLogSchema,
   readinessLog: readinessLogSchema,
   nutritionLog: nutritionLogSchema,
