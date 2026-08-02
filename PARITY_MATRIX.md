@@ -13,8 +13,8 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | Histórico/relatórios/conquistas | ✅ | 🟡 | Sessões, histórico por exercício e recordes são gravados com cache/fila; faltam relatórios visuais e conquistas |
 | Readiness/progresso/medidas | ✅ | 🟡 | Peso, delta, sessões e readiness equivalentes; faltam medidas/gráficos |
 | Nutrição/barcode/suplementos | ✅ | 🟡 | Refeições, macros, água e catálogo de suplementos com agenda/check diário offline; falta barcode e edição avançada de horários |
-| Fotos/comparação/Storage | ✅ | ⬜ | EXIF, limites, upload retry e exclusão confirmada |
-| Compartilhamento | ✅ | ⬜ | Web Share files + fallback em Chromium/WebKit |
+| Fotos/comparação/Storage | ✅ | 🟡 | Galeria privada, JPEG até 3 MB, upload resumível, comparação e exclusão confirmada; faltam EXIF/orientação e retry offline de blobs |
+| Compartilhamento | ✅ | 🟡 | Web Share de arquivos com fallback para clipboard e cancelamento tratado; falta E2E Chromium/WebKit autenticado |
 | Offline/fila | ✅ | 🟡 | Cache e fila de documentos integrados; faltam conflitos, quota e testes de reload |
 | PWA/atualização | ✅ | 🟡 | Worker versionado e cache runtime de chunks; faltam rollback e suspensão iOS |
 | Notificações | ✅ | ⬜ | permissão por gesto, push e timer local |
@@ -26,7 +26,7 @@ Paridade global: **não atingida**. O baseline continua sendo a versão operacio
 
 ## Progresso acompanhado por fase
 
-Percentual estimado da migração funcional: **48%**. A estimativa pondera paridade de comportamento e validação, não apenas quantidade de arquivos.
+Percentual estimado da migração funcional: **54%**. A estimativa pondera paridade de comportamento e validação, não apenas quantidade de arquivos.
 
 | Fase | Progresso | Estado |
 |---|---:|---|
@@ -34,7 +34,7 @@ Percentual estimado da migração funcional: **48%**. A estimativa pondera parid
 | Auth, verificação, onboarding e conta | 70% | Fluxos principais implementados; faltam tour completo e E2E com Emulator |
 | Treinos, rotinas, catálogo e histórico | 60% | Núcleo operacional, timers, notas, PR/e1RM e histórico implementados |
 | Progresso, readiness e nutrição | 50% | Dados essenciais e suplementos implementados; faltam gráficos, medidas e barcode |
-| Fotos, compartilhamento e notificações | 5% | Contratos iniciais existem; interfaces e fluxos continuam no baseline |
+| Fotos, compartilhamento e notificações | 45% | Fotos privadas, comparação e Web Share migrados; notificações e tratamento EXIF continuam no baseline |
 | Admin e segurança Firebase | 55% | UI, regras e bloqueio implementados; faltam claims/backend e testes Emulator |
 | Offline, sincronização e PWA | 55% | IndexedDB, fila e cache de chunks ativos; faltam conflitos, quota, rollback e validação iOS prolongada |
 | Import/export, acessibilidade e E2E | 15% | Smoke tests configurados; fluxos completos ainda não migrados |

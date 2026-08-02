@@ -29,6 +29,8 @@
 - Histórico por exercício e recordes de carga/e1RM calculados exclusivamente a partir de séries concluídas.
 - Suplementação v4 com catálogo legado completo, agenda de doses e registro diário persistido pela camada offline.
 - Matriz de progresso ponderada por fase para acompanhamento contínuo da migração.
+- Galeria privada de fotos de progresso com upload resumível, limite JPEG de 3 MB, comparação lado a lado e exclusão confirmada.
+- Compartilhamento de fotos pelo Web Share API quando suportado, com fallback de texto para clipboard.
 
 ### Preserved
 

@@ -14,8 +14,8 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 9 arquivos e 24 testes, código 0. Inclui catálogos, PWA, suplementos, e1RM, anilhas e recordes de treino. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 124 módulos; app JS 147,38 kB (39,78 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 10,91 kB (2,76 kB gzip), código 0 e sem aviso. |
+| Unitários (`vitest run`) | **PASS**, 11 arquivos e 28 testes, código 0. Inclui validação de fotos e caminhos Web Share/fallback. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 127 módulos; app JS 153,04 kB (41,45 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 12,19 kB (2,94 kB gzip), código 0 e sem aviso. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 ## Verificação visual local
@@ -29,3 +29,7 @@ Observação: tentativas iniciais de instalação falharam por ausência de `npm
 ## Rodada 2026-08-02 — treino avançado e suplementos
 
 Typecheck, lint, 24 testes unitários e build foram repetidos após as alterações e passaram. Um teste inicialmente exigia uma decomposição não mínima de anilhas para 100 kg; a expectativa foi corrigida para `25 + 15` por lado, coerente com o algoritmo e com a menor quantidade de anilhas. Os timers também passaram a ser encerrados ao sair ou concluir o treino.
+
+## Rodada 2026-08-02 — fotos e compartilhamento
+
+Typecheck, lint, 28 testes unitários e build passaram. O shell público foi novamente inspecionado no navegador local e renderizou sem regressão. Upload, leitura e exclusão autenticados não foram executados contra dados reais; continuam pendentes de Firebase Emulator ou conta isolada de teste. A validação limita o cliente e as regras de Storage limitam o servidor a JPEG privado de até 3 MB.
