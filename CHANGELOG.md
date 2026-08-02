@@ -40,6 +40,9 @@
 - Relatório semanal, sequência de treinos e seis conquistas progressivas.
 - Exportação de sessões em CSV com neutralização de fórmulas de planilha.
 - Consulta nutricional por GTIN usando a API v3 do Open Food Facts, com timeout, validação e tratamento offline.
+- Leitura de barcode pela câmera via `BarcodeDetector`, com permissão por gesto, encerramento de tracks e fallback manual.
+- IndexedDB v2 com fila limitada de fotos offline e retomada automática antes de atualizar o índice remoto.
+- Release paralela atualizada para `4.0.0-alpha.4`.
 
 ### Preserved
 

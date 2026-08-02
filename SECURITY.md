@@ -17,6 +17,8 @@ Protegemos dados de saúde/treino, fotos, identidade, permissões administrativa
 - Importação aceita somente o envelope `kyro-v4-backup` versão 1, limita o arquivo a 5 MiB, rejeita campos desconhecidos e valida cada feature antes da escrita.
 - CSV neutraliza células iniciadas por `=`, `+`, `-` ou `@` para reduzir formula injection em planilhas.
 - Consulta nutricional envia somente o GTIN digitado ao Open Food Facts, limita campos da resposta e valida os nutrientes antes de preencher o formulário.
+- Câmera é iniciada somente por gesto, nunca grava vídeo e encerra todas as tracks ao detectar um código ou sair da tela.
+- Fotos offline permanecem em uma store IndexedDB owner-scoped, limitada a dez JPEGs, e o índice só é publicado após upload confirmado.
 
 ## Requisitos antes de produção
 

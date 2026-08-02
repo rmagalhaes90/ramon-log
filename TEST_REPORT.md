@@ -14,8 +14,8 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 16 arquivos e 38 testes, código 0. Inclui templates, reorder, relatórios, conquistas, CSV, barcode e contratos de rascunho. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 135 módulos; app JS 174,25 kB (48,11 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 15,50 kB (3,36 kB gzip), código 0 e sem aviso. |
+| Unitários (`vitest run`) | **PASS**, 18 arquivos e 41 testes, código 0. Inclui capacidade de câmera sem prompt antecipado e limite da fila offline de fotos. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 137 módulos; app JS 177,39 kB (49,10 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 15,69 kB (3,39 kB gzip), código 0 e sem aviso. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 ## Verificação visual local
@@ -45,3 +45,7 @@ Typecheck, lint, 32 testes unitários e build passaram. A permissão é solicita
 ## Rodada 2026-08-02 — batch de paridade funcional 80%
 
 Typecheck, lint, 38 testes unitários e build passaram. Foram validados três templates semanais gerados do catálogo, reordenação sem mutação, relatório semanal, streak, conquistas, CSV protegido contra formula injection, consulta de barcode validada e rascunhos de treino que aceitam séries vazias sem relaxar os contratos do histórico. Uma primeira versão do schema de rascunho rejeitou corretamente séries ainda vazias durante os testes; o contrato foi separado e a rodada integral passou depois da correção.
+
+## Rodada 2026-08-02 — câmera e fila offline de fotos
+
+Typecheck, lint, 41 testes unitários e build passaram. IndexedDB migrou de v1 para v2 adicionando uma store de blobs sem recriar as stores existentes. A fila aceita no máximo dez JPEGs já validados por usuário, envia em ordem e só cria o índice remoto após o Storage confirmar. A câmera de barcode exige clique, detecta capacidade antes de exibir a ação e encerra todas as tracks ao detectar ou navegar. Release alinhada em `4.0.0-alpha.4`.
