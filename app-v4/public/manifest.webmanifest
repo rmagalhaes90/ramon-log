@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "KYRO — Treino e Progresso",
+  "short_name": "KYRO",
+  "description": "Treinos, progresso corporal, nutrição e performance.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0c0e",
+  "theme_color": "#0b0c0e"
+}

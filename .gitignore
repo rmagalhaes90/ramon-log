@@ -1,0 +1,10 @@
+node_modules/
+.pnpm-store/
+*.tsbuildinfo
+dist-v4/
+playwright-report/
+test-results/
+coverage/
+.env
+.env.*
+!.env.example
