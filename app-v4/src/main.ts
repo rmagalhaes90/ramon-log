@@ -11,12 +11,15 @@ import { deleteOwnAccount } from './features/account/delete-account';
 import { listSharedUsers,setUserAdmin,setUserBlocked } from './features/admin';
 import { searchExercises,supplementCatalog } from './features/catalog';
 import { dosesTakenToday } from './features/supplements/model';
+import { comparisonReady, validatePhoto } from './features/photos/model';
+import { shareOrFallback } from './features/share';
 import { bestCompletedSet, calculatePlates, completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
 import { emptyNutritionDay, percentage } from './features/nutrition/model';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
 import { cacheGet, cacheSet, clearLocalData, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
+import { deletePhoto, photoUrl, uploadPhoto } from './services/photo-storage';
 
 installGlobalErrorHandlers();
 const i18n = createI18n();
@@ -28,7 +31,7 @@ const appRoot = root;
 let authState: AuthState = { status: 'loading', user: null, isAdmin:false };
 let authMode: 'login' | 'signup' = 'login';
 let updateRegistration: ServiceWorkerRegistration | null = null;
-let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' | 'supplements' | 'settings' | 'admin' = 'dashboard';
+let currentView: 'dashboard' | 'workout' | 'progress' | 'photos' | 'nutrition' | 'supplements' | 'settings' | 'admin' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt = new Date().toISOString();
@@ -157,6 +160,7 @@ async function renderReady(user: User): Promise<void> {
   if (await needsOnboarding(user)) { renderOnboarding(user); return; }
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'progress') await renderProgress(user);
+  else if (currentView === 'photos') await renderPhotos(user);
   else if (currentView === 'nutrition') await renderNutrition(user);
   else if (currentView === 'supplements') await renderSupplements(user);
   else if (currentView === 'settings') renderSettings(user);
@@ -207,15 +211,30 @@ async function renderProgress(user: User): Promise<void> {
     <div class="metric-grid"><article><span>${copy('weight')}</span><strong id="latest-weight">—</strong><small id="weight-delta"></small></article><article><span>${copy('readiness')}</span><strong id="readiness-score">—</strong><small id="readiness-class"></small></article><article><span>${copy('history')}</span><strong>${sessions.length}</strong></article></div>
     <form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form>
     <form id="readiness-form" class="readiness-form">${(['sleep','energy','soreness','stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<button class="primary">${copy('save')}</button></form>
-    <div id="session-history" class="history-list"></div></section>`);
+    <button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
   const weightTarget=document.querySelector('#latest-weight'); if(weightTarget)weightTarget.textContent=latest?`${latest.kg.toFixed(1)} kg`:'—';
   const deltaTarget=document.querySelector('#weight-delta'); if(deltaTarget)deltaTarget.textContent=delta===null?'':`${delta>=0?'+':''}${delta.toFixed(1)} kg`;
   const scoreTarget=document.querySelector('#readiness-score'); if(scoreTarget)scoreTarget.textContent=todayReadiness?String(todayReadiness.score):'—';
   const classTarget=document.querySelector('#readiness-class'); if(classTarget)classTarget.textContent=todayReadiness?todayReadiness.classification:'';
   const history=document.querySelector('#session-history'); sessions.slice(-20).reverse().forEach((session)=>{const row=document.createElement('article');const title=document.createElement('strong');title.textContent=session.title;const meta=document.createElement('span');meta.textContent=`${session.date} · ${Math.round(session.volume)} kg·vol`;row.append(title,meta);history?.append(row);});
   bindBack(user);
+  document.querySelector('#open-photos')?.addEventListener('click',()=>{currentView='photos';void renderPhotos(user);});
   document.querySelector('#weight-form')?.addEventListener('submit',(event)=>{event.preventDefault();const input=document.querySelector<HTMLInputElement>('#weight-input');const kg=Number(input?.value);if(!Number.isFinite(kg)||kg<=0||kg>1000)return;const next=[...weights.filter((item)=>item.d!==dateKey()),{d:dateKey(),kg}].sort((a,b)=>a.d.localeCompare(b.d));void saveUserData(user,'bodyWeights',next).then(()=>renderProgress(user)).catch((error:unknown)=>reportError(error,'progress/weight'));});
   document.querySelector('#readiness-form')?.addEventListener('submit',(event)=>{event.preventDefault();const data=new FormData(event.currentTarget as HTMLFormElement);const values=['sleep','energy','soreness','stress'].map((key)=>Number(data.get(key)));const [sleep=3,energy=3,soreness=3,stress=3]=values;const score=readinessScore(sleep,energy,soreness,stress);const next={...readiness,[dateKey()]:{sleep,energy,soreness,stress,score,classification:readinessClass(score),recordedAt:new Date().toISOString()}};void saveUserData(user,'readinessLog',next).then(()=>renderProgress(user)).catch((error:unknown)=>reportError(error,'progress/readiness'));});
+}
+
+async function renderPhotos(user:User):Promise<void>{
+  const photos=await loadUserData(user,'photoIndex').then((value)=>value??[]);const selected=new Set<string>();
+  shell(`<section class="feature-view"><button id="photos-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">02 · RECOVER</p><h1>${copy('progressPhotos')}</h1><form id="photo-form" class="photo-upload"><label>${copy('choosePhoto')}<input id="photo-input" type="file" accept="image/jpeg" capture="environment" required></label><button class="primary">${copy('upload')}</button><progress id="photo-progress" max="100" value="0" hidden></progress><p id="photo-status" role="status"></p></form><div class="photo-actions"><button id="compare-photos" disabled>${copy('compare')}</button><button id="share-photos" disabled>${copy('share')}</button></div><div id="photo-comparison" class="photo-comparison" hidden></div><div id="photo-grid" class="photo-grid"></div></section>`);
+  document.querySelector('#photos-back')?.addEventListener('click',()=>{currentView='progress';void renderProgress(user);});
+  const grid=document.querySelector('#photo-grid');const comparison=document.querySelector<HTMLElement>('#photo-comparison');const compare=document.querySelector<HTMLButtonElement>('#compare-photos');const share=document.querySelector<HTMLButtonElement>('#share-photos');const urls=new Map<string,string>();
+  const updateActions=()=>{const ready=comparisonReady(selected);if(compare)compare.disabled=!ready;if(share)share.disabled=selected.size===0;};
+  const results=await Promise.allSettled(photos.slice().reverse().map(async(photo)=>({photo,url:await photoUrl(user,photo.id)})));
+  results.forEach((result)=>{if(result.status!=='fulfilled')return;const {photo,url}=result.value;urls.set(photo.id,url);const card=document.createElement('article');const image=document.createElement('img');image.src=url;image.alt=`${copy('progressPhoto')} ${photo.d}`;image.loading='lazy';const meta=document.createElement('div');const choice=document.createElement('label');const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.addEventListener('change',()=>{if(checkbox.checked){if(selected.size>=2){checkbox.checked=false;return;}selected.add(photo.id);}else selected.delete(photo.id);updateActions();});choice.append(checkbox,document.createTextNode(` ${photo.d}`));const remove=document.createElement('button');remove.textContent=copy('remove');remove.addEventListener('click',()=>{if(!confirm(copy('deletePhotoConfirm')))return;remove.disabled=true;void deletePhoto(user,photo.id).then(()=>saveUserData(user,'photoIndex',photos.filter((item)=>item.id!==photo.id))).then(()=>renderPhotos(user)).catch((error:unknown)=>{remove.disabled=false;reportError(error,'photos/delete');});});meta.append(choice,remove);card.append(image,meta);grid?.append(card);});
+  if(!photos.length){const empty=document.createElement('p');empty.className='empty-state';empty.textContent=copy('noPhotos');grid?.append(empty);}
+  compare?.addEventListener('click',()=>{if(!comparison||!comparisonReady(selected))return;comparison.replaceChildren();selected.forEach((id)=>{const url=urls.get(id);if(!url)return;const image=document.createElement('img');image.src=url;image.alt=copy('progressPhoto');comparison.append(image);});comparison.hidden=false;});
+  share?.addEventListener('click',()=>void (async()=>{const files:File[]=[];for(const id of selected){const url=urls.get(id);if(!url)continue;const blob=await fetch(url).then((response)=>response.blob());files.push(new File([blob],`${id}.jpg`,{type:'image/jpeg'}));}const result=await shareOrFallback({title:'KYRO Progress',text:copy('shareText'),files});const status=document.querySelector('#photo-status');if(status)status.textContent=copy(result==='shared'?'shared':'copied');})().catch((error:unknown)=>{if((error as Error).name!=='AbortError')reportError(error,'photos/share');}));
+  document.querySelector('#photo-form')?.addEventListener('submit',(event)=>{event.preventDefault();const input=document.querySelector<HTMLInputElement>('#photo-input');const file=input?.files?.[0];if(!file)return;const error=validatePhoto(file);const status=document.querySelector('#photo-status');if(error){if(status)status.textContent=copy(error);return;}const progress=document.querySelector<HTMLProgressElement>('#photo-progress');if(progress)progress.hidden=false;const id=crypto.randomUUID().slice(0,60);void uploadPhoto(user,id,file,(value)=>{if(progress)progress.value=value;}).then(()=>saveUserData(user,'photoIndex',[...photos,{id,d:dateKey()}])).then(()=>renderPhotos(user)).catch(async(error:unknown)=>{try{await deletePhoto(user,id);}catch{ /* Upload may not have created an object. */ }reportError(error,'photos/upload');if(status)status.textContent=copy((error as Error).message==='photoOffline'?'photoOffline':'uploadFailed');});});
 }
 
 async function renderNutrition(user: User): Promise<void> {

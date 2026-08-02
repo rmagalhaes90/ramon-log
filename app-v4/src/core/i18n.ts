@@ -36,6 +36,7 @@ const messages = {
     addExercise: 'Adicionar exercício', remove: 'Remover', search: 'Buscar exercício', editRoutine: 'Editar rotina', routineName: 'Nome da rotina',
     sessionTime: 'Tempo de treino', startRest: 'Iniciar descanso', notes: 'Notas', plates: 'Placas por lado', warmup: 'Aquecimento', newRecord: 'Novo recorde',
     supplements: 'Suplementos', schedule: 'Horário', taken: 'Tomado', addSupplement: 'Adicionar suplemento', noSupplements: 'Nenhum suplemento configurado.',
+    progressPhotos: 'Fotos de progresso', progressPhoto: 'Foto de progresso', choosePhoto: 'Escolher JPEG', upload: 'Enviar foto', compare: 'Comparar', share: 'Compartilhar', shared: 'Compartilhado.', copied: 'Texto copiado.', shareText: 'Meu progresso no KYRO.', noPhotos: 'Nenhuma foto de progresso.', photoType: 'Use uma imagem JPEG.', photoSize: 'A foto deve ter no máximo 3 MB.', photoOffline: 'Conecte-se para enviar a foto com segurança.', uploadFailed: 'Não foi possível enviar a foto.', deletePhotoConfirm: 'Excluir esta foto permanentemente?',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -72,6 +73,7 @@ const messages = {
     addExercise: 'Add exercise', remove: 'Remove', search: 'Search exercise', editRoutine: 'Edit routine', routineName: 'Routine name',
     sessionTime: 'Workout time', startRest: 'Start rest', notes: 'Notes', plates: 'Plates per side', warmup: 'Warm-up', newRecord: 'New record',
     supplements: 'Supplements', schedule: 'Schedule', taken: 'Taken', addSupplement: 'Add supplement', noSupplements: 'No supplements configured.',
+    progressPhotos: 'Progress photos', progressPhoto: 'Progress photo', choosePhoto: 'Choose JPEG', upload: 'Upload photo', compare: 'Compare', share: 'Share', shared: 'Shared.', copied: 'Text copied.', shareText: 'My progress with KYRO.', noPhotos: 'No progress photos.', photoType: 'Use a JPEG image.', photoSize: 'The photo must be 3 MB or smaller.', photoOffline: 'Connect to upload the photo securely.', uploadFailed: 'The photo could not be uploaded.', deletePhotoConfirm: 'Permanently delete this photo?',
   },
 } as const;
 
