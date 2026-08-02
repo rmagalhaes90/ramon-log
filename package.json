@@ -1,7 +1,7 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.6",
+  "version": "4.0.0-alpha.7",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:emulator:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-emulator-test.mjs\"",
-    "test:e2e:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-e2e-runner.mjs\""
+    "test:e2e:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-e2e-runner.mjs\"",
+    "test:emulator:rules": "firebase emulators:exec --only firestore,storage --project demo-kyro-v4 \"node scripts/firebase-rules-test.mjs\""
   },
   "dependencies": {
     "firebase": "^12.2.1",
