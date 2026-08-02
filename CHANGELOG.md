@@ -35,6 +35,11 @@
 - Exportação/importação JSON v4 com validação Zod estrita, limite de 5 MB, backup automático pré-importação e rollback lógico.
 - Notificações locais de fim de descanso com permissão por gesto, preferência sincronizada, teste manual e retorno à PWA ao tocar no aviso.
 - Service Worker e release paralela atualizados para `4.0.0-alpha.3`.
+- Builder de rotinas com templates Full Body, Upper/Lower e Push/Pull/Legs gerados do catálogo legado, além de reordenação persistente.
+- Rascunho de treino validado no IndexedDB para recuperar cargas, repetições e séries após reload/crash.
+- Relatório semanal, sequência de treinos e seis conquistas progressivas.
+- Exportação de sessões em CSV com neutralização de fórmulas de planilha.
+- Consulta nutricional por GTIN usando a API v3 do Open Food Facts, com timeout, validação e tratamento offline.
 
 ### Preserved
 

@@ -14,8 +14,8 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 13 arquivos e 32 testes, código 0. Inclui permissão negada, solicitação por gesto e entrega via Service Worker. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 130 módulos; app JS 162,71 kB (44,38 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 13,78 kB (3,14 kB gzip), código 0 e sem aviso. |
+| Unitários (`vitest run`) | **PASS**, 16 arquivos e 38 testes, código 0. Inclui templates, reorder, relatórios, conquistas, CSV, barcode e contratos de rascunho. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 135 módulos; app JS 174,25 kB (48,11 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 15,50 kB (3,36 kB gzip), código 0 e sem aviso. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 ## Verificação visual local
@@ -41,3 +41,7 @@ Typecheck, lint, 30 testes unitários e build passaram. O backup JSON tem envelo
 ## Rodada 2026-08-02 — notificações locais e PWA alpha.3
 
 Typecheck, lint, 32 testes unitários e build passaram. A permissão é solicitada exclusivamente após clique, a preferência é validada/sincronizada e o fim do descanso usa `ServiceWorkerRegistration.showNotification`. A release avançou para `4.0.0-alpha.3`, com package, manifesto de versão e worker conferidos por teste. Push remoto e entrega com o app totalmente encerrado não foram implementados.
+
+## Rodada 2026-08-02 — batch de paridade funcional 80%
+
+Typecheck, lint, 38 testes unitários e build passaram. Foram validados três templates semanais gerados do catálogo, reordenação sem mutação, relatório semanal, streak, conquistas, CSV protegido contra formula injection, consulta de barcode validada e rascunhos de treino que aceitam séries vazias sem relaxar os contratos do histórico. Uma primeira versão do schema de rascunho rejeitou corretamente séries ainda vazias durante os testes; o contrato foi separado e a rodada integral passou depois da correção.

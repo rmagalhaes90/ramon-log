@@ -15,6 +15,8 @@ Protegemos dados de saúde/treino, fotos, identidade, permissões administrativa
 - Firestore Rules e Storage Rules owner-only versionadas, com admin limitado e uploads JPEG até 3 MiB.
 - Exclusão com reautenticação, Storage recursivo, Firestore paginado, perfil, Auth e limpeza local nessa ordem.
 - Importação aceita somente o envelope `kyro-v4-backup` versão 1, limita o arquivo a 5 MiB, rejeita campos desconhecidos e valida cada feature antes da escrita.
+- CSV neutraliza células iniciadas por `=`, `+`, `-` ou `@` para reduzir formula injection em planilhas.
+- Consulta nutricional envia somente o GTIN digitado ao Open Food Facts, limita campos da resposta e valida os nutrientes antes de preencher o formulário.
 
 ## Requisitos antes de produção
 
