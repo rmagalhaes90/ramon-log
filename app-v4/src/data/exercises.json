@@ -1,0 +1,1849 @@
+[
+  {
+    "name": "Agachamento Livre",
+    "muscles": {
+      "quads": 1,
+      "glutes": 1,
+      "hamstrings": 0.5,
+      "lowerback": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Leg Press",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.6
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Cadeira Extensora",
+    "muscles": {
+      "quads": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Stiff",
+    "muscles": {
+      "hamstrings": 1,
+      "glutes": 0.6,
+      "lowerback": 0.5
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Mesa Flexora",
+    "muscles": {
+      "hamstrings": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Afundo com Halteres",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.8
+    },
+    "sets": "3",
+    "reps": "10",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Panturrilha em Pé",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "4",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Panturrilha Sentada",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Cable Crunch",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Elevação de Pernas",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Prancha",
+    "muscles": {
+      "abs": 1,
+      "obliques": 0.5
+    },
+    "sets": "3",
+    "reps": "45-60s",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Desenvolvimento com Halteres",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Elevação Lateral",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "4",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Elevação Lateral no Cabo",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Peck Deck Invertido",
+    "muscles": {
+      "shoulders": 1,
+      "upperback": 0.5,
+      "traps": 0.3
+    },
+    "sets": "4",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Desenvolvimento Arnold",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.3
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Encolhimento com Halteres",
+    "muscles": {
+      "traps": 1
+    },
+    "sets": "4",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Russian Twist",
+    "muscles": {
+      "obliques": 1,
+      "abs": 0.5
+    },
+    "sets": "3",
+    "reps": "20",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Rosca Direta",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Rosca Inclinada",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca Martelo",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.6
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Tríceps Corda",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Tríceps Francês",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Mergulho",
+    "muscles": {
+      "triceps": 1,
+      "chest": 0.4,
+      "shoulders": 0.3
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Supino com Barra",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4,
+      "shoulders": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Supino Inclinado",
+    "muscles": {
+      "chest": 1,
+      "shoulders": 0.5
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Crucifixo Cabos",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Rosca Scotch",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "8-10",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Barra Fixa",
+    "muscles": {
+      "upperback": 1,
+      "biceps": 0.6,
+      "lats": 1
+    },
+    "sets": "4",
+    "reps": "8-12",
+    "rest": 90,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Remada com Halteres",
+    "muscles": {
+      "upperback": 1,
+      "biceps": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Remada em Máquina",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.8
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Desenvolvimento com Barra",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.5
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Elevação Frontal",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Face Pulls",
+    "muscles": {
+      "shoulders": 1,
+      "traps": 0.5,
+      "upperback": 0.3
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Pulley Frontal",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.5
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 90,
+    "equipment": "cable"
+  },
+  {
+    "name": "Supino Reto",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4,
+      "shoulders": 0.3
+    },
+    "sets": "4",
+    "reps": "6-8",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Crucifixo Polia",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Peck Deck",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Tríceps Testa",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Puxada Frente",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "cable"
+  },
+  {
+    "name": "Puxada Aberta",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.4
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Remada Baixa",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.5
+    },
+    "sets": "4",
+    "reps": "10",
+    "rest": 90,
+    "equipment": "cable"
+  },
+  {
+    "name": "Remada Unilateral",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.4
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Pulldown",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.4
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Rosca Scott",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "12",
+    "rest": 60,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Agachamento",
+    "muscles": {
+      "quads": 1,
+      "glutes": 1,
+      "hamstrings": 0.5,
+      "lowerback": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Extensora",
+    "muscles": {
+      "quads": 1
+    },
+    "sets": "3",
+    "reps": "15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Desenvolvimento",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Desenvolvimento Halteres",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.4
+    },
+    "sets": "3",
+    "reps": "10",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Crucifixo Invertido Polia",
+    "muscles": {
+      "shoulders": 1,
+      "upperback": 0.5,
+      "traps": 0.3
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Face Pull",
+    "muscles": {
+      "shoulders": 1,
+      "traps": 0.5,
+      "upperback": 0.3
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Encolhimento",
+    "muscles": {
+      "traps": 1
+    },
+    "sets": "4",
+    "reps": "12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Remada",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.5
+    },
+    "sets": "3",
+    "reps": "8-10",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Supino Declinado",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Supino com Halteres",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4,
+      "shoulders": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Supino Inclinado com Halteres",
+    "muscles": {
+      "chest": 1,
+      "shoulders": 0.5
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Supino Declinado com Halteres",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Crucifixo Reto com Halteres",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Crucifixo Inclinado com Halteres",
+    "muscles": {
+      "chest": 1,
+      "shoulders": 0.3
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Crucifixo Declinado com Halteres",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Peck Deck Máquina",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Crossover na Polia",
+    "muscles": {
+      "chest": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Crossover Baixo",
+    "muscles": {
+      "chest": 1,
+      "shoulders": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Flexão de Braço",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.5,
+      "shoulders": 0.3,
+      "abs": 0.2
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Flexão Diamante",
+    "muscles": {
+      "triceps": 1,
+      "chest": 0.6
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Flexão Inclinada",
+    "muscles": {
+      "chest": 0.8,
+      "shoulders": 0.4,
+      "triceps": 0.4
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Flexão Declinada",
+    "muscles": {
+      "chest": 1,
+      "shoulders": 0.3,
+      "triceps": 0.4
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Supino Máquina",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "machine"
+  },
+  {
+    "name": "Chest Press Máquina",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.4,
+      "shoulders": 0.2
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "machine"
+  },
+  {
+    "name": "Pullover com Halter",
+    "muscles": {
+      "chest": 0.7,
+      "lats": 0.5,
+      "triceps": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Mergulho nas Paralelas (Peito)",
+    "muscles": {
+      "chest": 1,
+      "triceps": 0.6,
+      "shoulders": 0.3
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Supino Guilhotina",
+    "muscles": {
+      "chest": 1,
+      "shoulders": 0.3
+    },
+    "sets": "3",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Puxada Triângulo",
+    "muscles": {
+      "lats": 1,
+      "upperback": 0.4,
+      "biceps": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "cable"
+  },
+  {
+    "name": "Puxada Supinada",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.6
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "cable"
+  },
+  {
+    "name": "Remada Curvada com Barra",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.6,
+      "lowerback": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Remada Cavalinho (T-bar)",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.5
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Barra Fixa Supinada (Chin-up)",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.7
+    },
+    "sets": "3",
+    "reps": "6-10",
+    "rest": 90,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Pull-over na Polia Alta",
+    "muscles": {
+      "lats": 1,
+      "chest": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Remada Sentada no Cabo",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.5,
+      "biceps": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "cable"
+  },
+  {
+    "name": "Levantamento Terra",
+    "muscles": {
+      "lowerback": 1,
+      "glutes": 0.8,
+      "hamstrings": 0.7,
+      "upperback": 0.4
+    },
+    "sets": "4",
+    "reps": "5-8",
+    "rest": 120,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Levantamento Terra Sumô",
+    "muscles": {
+      "glutes": 1,
+      "hamstrings": 0.6,
+      "lowerback": 0.7,
+      "quads": 0.5
+    },
+    "sets": "4",
+    "reps": "5-8",
+    "rest": 120,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Remada com Elástico",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.4
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Australian Pull-up (Remada Invertida)",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.5,
+      "biceps": 0.4
+    },
+    "sets": "3",
+    "reps": "10-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Remada Serrote",
+    "muscles": {
+      "upperback": 1,
+      "lats": 0.6,
+      "biceps": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Puxada Neutra",
+    "muscles": {
+      "lats": 1,
+      "biceps": 0.4,
+      "upperback": 0.3
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "cable"
+  },
+  {
+    "name": "Superman (Lombar)",
+    "muscles": {
+      "lowerback": 1,
+      "glutes": 0.3
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Hiperextensão Lombar",
+    "muscles": {
+      "lowerback": 1,
+      "glutes": 0.5,
+      "hamstrings": 0.3
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Desenvolvimento Militar",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.4
+    },
+    "sets": "4",
+    "reps": "6-8",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Desenvolvimento Máquina",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "machine"
+  },
+  {
+    "name": "Elevação Frontal com Barra",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Elevação Frontal com Halteres",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Crucifixo Invertido com Halteres",
+    "muscles": {
+      "shoulders": 1,
+      "upperback": 0.4,
+      "traps": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Remada Alta",
+    "muscles": {
+      "shoulders": 1,
+      "traps": 0.7
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Remada Alta com Halteres",
+    "muscles": {
+      "shoulders": 1,
+      "traps": 0.6
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Encolhimento com Barra",
+    "muscles": {
+      "traps": 1
+    },
+    "sets": "4",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Encolhimento na Polia",
+    "muscles": {
+      "traps": 1
+    },
+    "sets": "4",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Manguito Rotador (Rotação Externa)",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "cable"
+  },
+  {
+    "name": "Elevação Lateral Máquina",
+    "muscles": {
+      "shoulders": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Desenvolvimento na Máquina Articulado",
+    "muscles": {
+      "shoulders": 1,
+      "triceps": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "machine"
+  },
+  {
+    "name": "Elevação em Y",
+    "muscles": {
+      "shoulders": 1,
+      "traps": 0.4
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 45,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca Direta com Halteres",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.3
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca Alternada",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca Scott com Halteres",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca Concentrada",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca 21",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.3
+    },
+    "sets": "3",
+    "reps": "21",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Rosca no Cabo",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Rosca Spider",
+    "muscles": {
+      "biceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Rosca Barra W",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.2
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Rosca Cross Body (Martelo Cruzado)",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.5
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca Punho Supinado",
+    "muscles": {
+      "biceps": 1,
+      "forearms": 0.4
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Tríceps Coice (Kickback)",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 45,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Tríceps Barra Reta na Polia",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Mergulho no Banco",
+    "muscles": {
+      "triceps": 1,
+      "chest": 0.3,
+      "shoulders": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Supino Pegada Fechada",
+    "muscles": {
+      "triceps": 1,
+      "chest": 0.5
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Tríceps Overhead com Halter",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Tríceps Francês Unilateral",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Extensão de Tríceps na Polia (V)",
+    "muscles": {
+      "triceps": 1
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Rosca de Punho",
+    "muscles": {
+      "forearms": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Rosca de Punho Invertida",
+    "muscles": {
+      "forearms": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Farmer's Walk",
+    "muscles": {
+      "forearms": 1,
+      "traps": 0.5,
+      "abs": 0.3
+    },
+    "sets": "3",
+    "reps": "30-40m",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rosca de Punho com Halteres",
+    "muscles": {
+      "forearms": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Abdominal Infra",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Abdominal Supra",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Abdominal Bicicleta",
+    "muscles": {
+      "abs": 1,
+      "obliques": 0.6
+    },
+    "sets": "3",
+    "reps": "20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Prancha Lateral",
+    "muscles": {
+      "obliques": 1,
+      "abs": 0.5
+    },
+    "sets": "3",
+    "reps": "30-45s",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Ab Wheel (Roda Abdominal)",
+    "muscles": {
+      "abs": 1,
+      "lowerback": 0.2
+    },
+    "sets": "3",
+    "reps": "10-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Sit-up",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Elevação de Joelhos na Barra",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Oblíquo no Cabo (Wood Chop)",
+    "muscles": {
+      "obliques": 1,
+      "abs": 0.4
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Abdominal na Polia",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "4",
+    "reps": "15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Prancha com Elevação de Perna",
+    "muscles": {
+      "abs": 1,
+      "glutes": 0.3
+    },
+    "sets": "3",
+    "reps": "30-45s",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Dead Bug",
+    "muscles": {
+      "abs": 1,
+      "lowerback": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Abdominal Canivete (V-up)",
+    "muscles": {
+      "abs": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Agachamento Búlgaro",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.7
+    },
+    "sets": "3",
+    "reps": "10-12 cada",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Agachamento Frontal",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.5,
+      "abs": 0.3
+    },
+    "sets": "4",
+    "reps": "6-8",
+    "rest": 105,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Hack Squat",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.4
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Passada (Lunge)",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.6
+    },
+    "sets": "3",
+    "reps": "10-12 cada",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Passada com Barra",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.6
+    },
+    "sets": "3",
+    "reps": "10-12 cada",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Agachamento Sumô",
+    "muscles": {
+      "quads": 0.7,
+      "glutes": 1,
+      "hamstrings": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Leg Press Unilateral",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.5
+    },
+    "sets": "3",
+    "reps": "10-12 cada",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Agachamento na Máquina Smith",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.6
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Agachamento Sissy",
+    "muscles": {
+      "quads": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Step Up (Subida no Banco)",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.6
+    },
+    "sets": "3",
+    "reps": "10-12 cada",
+    "rest": 60,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Agachamento Livre com Halteres (Goblet)",
+    "muscles": {
+      "quads": 1,
+      "glutes": 0.6,
+      "abs": 0.2
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Flexora em Pé",
+    "muscles": {
+      "hamstrings": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Levantamento Terra Romeno",
+    "muscles": {
+      "hamstrings": 1,
+      "glutes": 0.7,
+      "lowerback": 0.4
+    },
+    "sets": "4",
+    "reps": "8-10",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Levantamento Terra Romeno com Halteres",
+    "muscles": {
+      "hamstrings": 1,
+      "glutes": 0.6,
+      "lowerback": 0.3
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Good Morning",
+    "muscles": {
+      "hamstrings": 1,
+      "lowerback": 0.6,
+      "glutes": 0.4
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Cadeira Flexora",
+    "muscles": {
+      "hamstrings": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Stiff com Halteres",
+    "muscles": {
+      "hamstrings": 1,
+      "glutes": 0.6,
+      "lowerback": 0.4
+    },
+    "sets": "3",
+    "reps": "10-12",
+    "rest": 75,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Flexora Deitado",
+    "muscles": {
+      "hamstrings": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Elevação Pélvica (Hip Thrust)",
+    "muscles": {
+      "glutes": 1,
+      "hamstrings": 0.4
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 90,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Hip Thrust na Máquina",
+    "muscles": {
+      "glutes": 1,
+      "hamstrings": 0.3
+    },
+    "sets": "4",
+    "reps": "10-12",
+    "rest": 90,
+    "equipment": "machine"
+  },
+  {
+    "name": "Glúteo no Cabo (Kickback)",
+    "muscles": {
+      "glutes": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "cable"
+  },
+  {
+    "name": "Abdução de Quadril na Máquina",
+    "muscles": {
+      "glutes": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Abdução de Quadril no Cabo",
+    "muscles": {
+      "glutes": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "cable"
+  },
+  {
+    "name": "Ponte de Glúteo",
+    "muscles": {
+      "glutes": 1,
+      "hamstrings": 0.3,
+      "abs": 0.2
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Coice na Máquina (Glúteo)",
+    "muscles": {
+      "glutes": 1
+    },
+    "sets": "3",
+    "reps": "12-15",
+    "rest": 60,
+    "equipment": "machine"
+  },
+  {
+    "name": "Cadeira Abdutora",
+    "muscles": {
+      "glutes": 1
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Panturrilha no Leg Press",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "4",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Panturrilha Unilateral",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "3",
+    "reps": "15-20 cada",
+    "rest": 45,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Panturrilha no Smith",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "4",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Panturrilha com Halteres",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "4",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "dumbbell"
+  },
+  {
+    "name": "Rotação de Tronco com Barra",
+    "muscles": {
+      "obliques": 1,
+      "abs": 0.3
+    },
+    "sets": "3",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "barbell"
+  },
+  {
+    "name": "Prancha Lateral com Rotação",
+    "muscles": {
+      "obliques": 1,
+      "abs": 0.4
+    },
+    "sets": "3",
+    "reps": "12-15 cada",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Elevação de Perna Lateral Deitado",
+    "muscles": {
+      "obliques": 1
+    },
+    "sets": "3",
+    "reps": "15-20 cada",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Abdominal Oblíquo no Solo",
+    "muscles": {
+      "obliques": 1,
+      "abs": 0.4
+    },
+    "sets": "3",
+    "reps": "15-20 cada",
+    "rest": 45,
+    "equipment": "bodyweight"
+  },
+  {
+    "name": "Panturrilha na Barra Guiada",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "4",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Panturrilha Burrinho",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "4",
+    "reps": "15-20",
+    "rest": 45,
+    "equipment": "machine"
+  },
+  {
+    "name": "Pulo de Corda (Panturrilha)",
+    "muscles": {
+      "calves": 1
+    },
+    "sets": "3",
+    "reps": "30-45s",
+    "rest": 45,
+    "equipment": "bodyweight"
+  }
+]

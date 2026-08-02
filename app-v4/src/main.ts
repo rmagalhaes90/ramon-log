@@ -9,6 +9,7 @@ import {
 } from './features/auth';
 import { deleteOwnAccount } from './features/account/delete-account';
 import { listSharedUsers,setUserAdmin,setUserBlocked } from './features/admin';
+import { searchExercises } from './features/catalog';
 import { completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
 import { emptyNutritionDay, percentage } from './features/nutrition/model';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
@@ -223,12 +224,20 @@ async function renderWorkout(user: User): Promise<void> {
   workoutEntries = createEntries(workouts, selectedDay);
   workoutStartedAt = new Date().toISOString();
   shell(`<section class="workout-view"><button id="workout-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
-    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1></header><div id="exercise-list"></div>
+    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="routine-actions"><button id="rename-routine">${copy('editRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button></div></header><div id="exercise-list"></div>
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title'); if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
-  renderDayButtons(user, workouts); renderExerciseEntries();
+  renderDayButtons(user, workouts); renderExerciseEntries(user,workouts);
   document.querySelector('#workout-back')?.addEventListener('click', () => { currentView = 'dashboard'; renderDashboard(user); });
   document.querySelector('#finish-workout')?.addEventListener('click', () => void finishWorkout(user, workouts));
+  document.querySelector('#add-exercise')?.addEventListener('click',()=>renderExerciseCatalog(user,workouts));
+  document.querySelector('#rename-routine')?.addEventListener('click',()=>{const title=prompt(copy('routineName'),workouts[selectedDay]?.title??'');if(title?.trim()){const current=workouts[selectedDay]??{title:selectedDay,titleEn:'',cardioNote:'',exercises:[],abs:[]};void saveUserData(user,'workouts',{...workouts,[selectedDay]:{...current,title:title.trim().slice(0,80)}}).then(()=>renderWorkout(user)).catch((error:unknown)=>reportError(error,'workout/rename'));}});
+}
+
+function renderExerciseCatalog(user:User,workouts:Workouts):void{
+  shell(`<section class="feature-view"><button id="catalog-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">CATALOG · 170</p><h1>${copy('addExercise')}</h1><input id="catalog-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><div id="catalog-list" class="catalog-list"></div></section>`);
+  const draw=(query='')=>{const list=document.querySelector('#catalog-list');if(!list)return;list.replaceChildren();searchExercises(query,i18n.locale).slice(0,100).forEach((exercise)=>{const row=document.createElement('article');const body=document.createElement('div');const name=document.createElement('strong');name.textContent=exercise.name;const meta=document.createElement('span');meta.textContent=`${exercise.sets} × ${exercise.reps} · ${exercise.equipment}`;body.append(name,meta);const add=document.createElement('button');add.textContent=copy('add');add.addEventListener('click',()=>{const current=workouts[selectedDay]??{title:selectedDay,titleEn:'',cardioNote:'',exercises:[],abs:[]};const next={...workouts,[selectedDay]:{...current,exercises:[...current.exercises,exercise].slice(0,60)}};void saveUserData(user,'workouts',next).then(()=>renderWorkout(user)).catch((error:unknown)=>reportError(error,'workout/add'));});row.append(body,add);list.append(row);});};
+  draw();document.querySelector('#catalog-back')?.addEventListener('click',()=>void renderWorkout(user));document.querySelector<HTMLInputElement>('#catalog-search')?.addEventListener('input',(event)=>draw((event.currentTarget as HTMLInputElement).value));
 }
 
 function renderDayButtons(user: User, workouts: Workouts): void {
@@ -240,12 +249,12 @@ function renderDayButtons(user: User, workouts: Workouts): void {
   });
 }
 
-function renderExerciseEntries(): void {
+function renderExerciseEntries(user:User,workouts:Workouts): void {
   const list = document.querySelector('#exercise-list'); if (!list) return;
   if (!workoutEntries.length) { const empty = document.createElement('p'); empty.className = 'empty-state'; empty.textContent = copy('noWorkout'); list.append(empty); return; }
   workoutEntries.forEach((entry, exerciseIndex) => {
     const card = document.createElement('article'); card.className = 'exercise-card';
-    const heading = document.createElement('h2'); heading.textContent = entry.exercise.name; card.append(heading);
+    const top=document.createElement('div');top.className='exercise-top';const heading = document.createElement('h2'); heading.textContent = entry.exercise.name;const remove=document.createElement('button');remove.textContent=copy('remove');remove.addEventListener('click',()=>{const current=workouts[selectedDay];if(!current)return;const nextExercises=current.exercises.filter((_,index)=>index!==exerciseIndex);void saveUserData(user,'workouts',{...workouts,[selectedDay]:{...current,exercises:nextExercises}}).then(()=>renderWorkout(user)).catch((error:unknown)=>reportError(error,'workout/remove'));});top.append(heading,remove);card.append(top);
     const meta = document.createElement('p'); meta.className = 'exercise-meta'; meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`; card.append(meta);
     entry.sets.forEach((set, setIndex) => {
       const row = document.createElement('div'); row.className = 'set-row';
@@ -256,7 +265,7 @@ function renderExerciseEntries(): void {
       kg.addEventListener('input', () => { set.kg = Number(kg.value) || 0; }); reps.addEventListener('input', () => { set.reps = Number(reps.value) || 0; }); done.addEventListener('change', () => { set.done = done.checked; row.classList.toggle('done', done.checked); });
       row.append(number, kg, reps, done); card.append(row);
     });
-    list.append(card); void exerciseIndex;
+    list.append(card);
   });
 }
 

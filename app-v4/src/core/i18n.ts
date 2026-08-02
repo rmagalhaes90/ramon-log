@@ -33,6 +33,7 @@ const messages = {
     settings: 'Ajustes', deleteAccount: 'Excluir conta e todos os dados', deleteWarning: 'Esta ação é permanente. Digite EXCLUIR para confirmar.',
     confirmation: 'Confirmação', deleting: 'Excluindo com segurança…', deleteFailed: 'Não foi possível concluir a exclusão. Nenhum passo restante será ocultado.',
     admin: 'Administração', users: 'Usuários', block: 'Bloquear', unblock: 'Desbloquear', grantAdmin: 'Tornar admin', revokeAdmin: 'Remover admin',
+    addExercise: 'Adicionar exercício', remove: 'Remover', search: 'Buscar exercício', editRoutine: 'Editar rotina', routineName: 'Nome da rotina',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -66,6 +67,7 @@ const messages = {
     settings: 'Settings', deleteAccount: 'Delete account and all data', deleteWarning: 'This is permanent. Type DELETE to confirm.',
     confirmation: 'Confirmation', deleting: 'Deleting securely…', deleteFailed: 'Deletion could not be completed. No remaining step will be hidden.',
     admin: 'Administration', users: 'Users', block: 'Block', unblock: 'Unblock', grantAdmin: 'Grant admin', revokeAdmin: 'Revoke admin',
+    addExercise: 'Add exercise', remove: 'Remove', search: 'Search exercise', editRoutine: 'Edit routine', routineName: 'Routine name',
   },
 } as const;
 

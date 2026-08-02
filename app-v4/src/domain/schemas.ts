@@ -17,15 +17,20 @@ export type LoggedSet = z.infer<typeof loggedSetSchema>;
 
 export const exerciseSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  sets: z.number().int().min(1).max(20).default(4),
+  sets: z.coerce.number().int().min(1).max(20).default(4),
   reps: boundedText(20).pipe(z.string().min(1)).default('10'),
-  rest: z.number().int().min(0).max(1800).default(90),
+  rest: z.coerce.number().int().min(0).max(1800).default(90),
   equipment: z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', '']).default(''),
   muscles: z.record(z.string().max(32), finite(0, 1)).default({}),
   videoUrl: videoUrlSchema,
   notes: boundedText(1000),
 });
 export type Exercise = z.infer<typeof exerciseSchema>;
+
+export const supplementSchema = z.object({
+  id: z.string().max(60).optional(), name: z.string().trim().min(1).max(100), nameEn: z.string().max(100).optional(),
+  category: z.string().max(60).default(''), timing: z.string().max(200).optional(), timingEn: z.string().max(200).optional(),
+});
 
 export const workoutSchema = z.object({
   title: z.string().trim().min(1).max(80),

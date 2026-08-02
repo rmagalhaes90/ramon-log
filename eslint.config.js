@@ -9,6 +9,11 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   prettier,
   {
+    ...tseslint.configs.disableTypeChecked,
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
+  {
     files: ['app-v4/src/**/*.ts', 'app-v4/tests/**/*.ts', '*.config.ts'],
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
