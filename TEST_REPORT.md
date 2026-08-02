@@ -14,8 +14,8 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | `pnpm install` (fallback do workspace) | **PASS**, código 0; 244 pacotes, lockfile e postinstalls permitidos de `@firebase/util`, `esbuild` e `protobufjs`. Foi necessário incluir o Node empacotado no `PATH`. |
 | Typecheck (`tsc -b --pretty false`) | **PASS**, código 0. Duas falhas iniciais de configuração foram corrigidas antes do resultado final. |
 | Lint (`eslint app-v4/src app-v4/tests vite.config.ts playwright.config.ts`) | **PASS**, código 0. Uma promise IndexedDB não aguardada foi encontrada e corrigida. |
-| Unitários (`vitest run`) | **PASS**, 12 arquivos e 30 testes, código 0. Inclui validação estrita de backups e geometria defensiva dos gráficos. |
-| Build (`vite build --config vite.config.ts`) | **PASS**, 129 módulos; app JS 159,68 kB (43,49 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 13,41 kB (3,11 kB gzip), código 0 e sem aviso. |
+| Unitários (`vitest run`) | **PASS**, 13 arquivos e 32 testes, código 0. Inclui permissão negada, solicitação por gesto e entrega via Service Worker. |
+| Build (`vite build --config vite.config.ts`) | **PASS**, 130 módulos; app JS 162,71 kB (44,38 kB gzip), Storage 33,05 kB (10,90 kB gzip), maior chunk Firestore 441,11 kB (130,90 kB gzip), CSS 13,78 kB (3,14 kB gzip), código 0 e sem aviso. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
 ## Verificação visual local
@@ -37,3 +37,7 @@ Typecheck, lint, 28 testes unitários e build passaram. O shell público foi nov
 ## Rodada 2026-08-02 — medidas, gráficos e portabilidade
 
 Typecheck, lint, 30 testes unitários e build passaram. O backup JSON tem envelope/versionamento explícito, limite de 5 MB e contratos por feature; a restauração baixa uma cópia de segurança antes da confirmação e tenta restaurar o estado anterior se uma escrita local falhar. O índice de fotos é exportado, mas os JPEGs privados permanecem no Storage e não fazem parte do JSON.
+
+## Rodada 2026-08-02 — notificações locais e PWA alpha.3
+
+Typecheck, lint, 32 testes unitários e build passaram. A permissão é solicitada exclusivamente após clique, a preferência é validada/sincronizada e o fim do descanso usa `ServiceWorkerRegistration.showNotification`. A release avançou para `4.0.0-alpha.3`, com package, manifesto de versão e worker conferidos por teste. Push remoto e entrega com o app totalmente encerrado não foram implementados.

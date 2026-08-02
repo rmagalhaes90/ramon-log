@@ -33,6 +33,8 @@
 - Compartilhamento de fotos pelo Web Share API quando suportado, com fallback de texto para clipboard.
 - Medidas corporais datadas para cintura, peito, braço, quadril e coxa, além de gráfico SVG acessível de evolução do peso.
 - Exportação/importação JSON v4 com validação Zod estrita, limite de 5 MB, backup automático pré-importação e rollback lógico.
+- Notificações locais de fim de descanso com permissão por gesto, preferência sincronizada, teste manual e retorno à PWA ao tocar no aviso.
+- Service Worker e release paralela atualizados para `4.0.0-alpha.3`.
 
 ### Preserved
 
