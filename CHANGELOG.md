@@ -25,6 +25,10 @@
 - Extração reproduzível de 170 exercícios e 50 suplementos do HTML legado para JSON validado.
 - Editor de rotinas com renomear, pesquisar catálogo, adicionar e remover exercícios.
 - Service Worker v4.0.0-alpha.2 com cache runtime dos chunks hash para uso offline real após o primeiro carregamento.
+- Treinos com relógio de sessão, timer de descanso, notas por exercício, orientação de aquecimento e cálculo de anilhas.
+- Histórico por exercício e recordes de carga/e1RM calculados exclusivamente a partir de séries concluídas.
+- Suplementação v4 com catálogo legado completo, agenda de doses e registro diário persistido pela camada offline.
+- Matriz de progresso ponderada por fase para acompanhamento contínuo da migração.
 
 ### Preserved
 
