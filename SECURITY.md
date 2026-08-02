@@ -12,10 +12,12 @@ Protegemos dados de saúde/treino, fotos, identidade, permissões administrativa
 - Reporter global para exceções e promises rejeitadas.
 - UI nova evita interpolar dados pessoais em HTML; novos componentes devem usar `textContent`/DOM seguro.
 - Dependências registradas no lockfile e auditáveis.
+- Firestore Rules e Storage Rules owner-only versionadas, com admin limitado e uploads JPEG até 3 MiB.
+- Exclusão com reautenticação, Storage recursivo, Firestore paginado, perfil, Auth e limpeza local nessa ordem.
 
 ## Requisitos antes de produção
 
-- Versionar e testar Firestore Rules e Storage Rules no emulator, incluindo negação entre UIDs.
+- Executar os testes das regras já versionadas no Emulator, incluindo negação entre UIDs.
 - Substituir autorização por email no cliente por claims/controle servidor.
 - Implementar exclusão idempotente no backend e inventário de todas as subcoleções/objetos.
 - Ativar App Check em produção e aplicar limites/monitoramento.

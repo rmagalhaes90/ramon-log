@@ -39,3 +39,9 @@ export async function queueList(): Promise<QueueItem[]> {
 export async function queueDelete(id: string): Promise<void> {
   await (await database()).delete('queue', id);
 }
+
+export async function clearLocalData(): Promise<void> {
+  const db = await database();
+  const transaction = db.transaction(['cache', 'queue'], 'readwrite');
+  await Promise.all([transaction.objectStore('cache').clear(), transaction.objectStore('queue').clear(), transaction.done]);
+}

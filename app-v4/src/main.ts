@@ -7,10 +7,11 @@ import {
   authErrorKey, createAccount, loginWithGoogle, loginWithPassword, logout, observeAuth,
   refreshVerification, requestPasswordReset, resendVerification, type AuthState,
 } from './features/auth';
+import { deleteOwnAccount } from './features/account/delete-account';
 import { completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
 import { emptyNutritionDay, percentage } from './features/nutrition/model';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
-import { cacheGet, cacheSet, queueList } from './services/database';
+import { cacheGet, cacheSet, clearLocalData, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
 
@@ -24,7 +25,7 @@ const appRoot = root;
 let authState: AuthState = { status: 'loading', user: null };
 let authMode: 'login' | 'signup' = 'login';
 let updateRegistration: ServiceWorkerRegistration | null = null;
-let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' = 'dashboard';
+let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' | 'settings' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt = new Date().toISOString();
@@ -145,6 +146,7 @@ async function renderReady(user: User): Promise<void> {
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'progress') await renderProgress(user);
   else if (currentView === 'nutrition') await renderNutrition(user);
+  else if (currentView === 'settings') renderSettings(user);
   else renderDashboard(user);
 }
 
@@ -154,14 +156,23 @@ function renderDashboard(user: User): void {
     <button id="start-workout" class="primary">${copy('train')}</button><button id="logout" class="link-button">${copy('logout')}</button></section>
     <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>Workouts, routines, exercises and sets.</p></article>
     <article><span>02</span><h2>RECOVER</h2><p>Readiness, history and progress.</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>Nutrition and supplements.</p><button id="open-nutrition">${copy('nutrition')}</button></article>
-    <article><span>04</span><h2>SYNC</h2><p>Offline-first, private and resilient.</p></article></section>`);
+    <article><span>04</span><h2>SYNC</h2><p>Offline-first, private and resilient.</p><button id="open-settings">${copy('settings')}</button></article></section>`);
   document.querySelector('#logout')?.addEventListener('click', () => void logout().catch((error: unknown) => reportError(error, 'auth/logout')));
   document.querySelector('#start-workout')?.addEventListener('click', () => { currentView = 'workout'; void renderWorkout(user); });
   document.querySelector('#open-progress')?.addEventListener('click', () => { currentView = 'progress'; void renderProgress(user); });
   document.querySelector('#open-nutrition')?.addEventListener('click', () => { currentView = 'nutrition'; void renderNutrition(user); });
+  document.querySelector('#open-settings')?.addEventListener('click', () => { currentView = 'settings'; renderSettings(user); });
   void flushUserDataQueue(user).catch((error: unknown) => reportError(error, 'sync/flush'));
   void queueList().then((items) => { const count = document.querySelector('#queue-count'); if (count) count.textContent = String(items.length); })
     .catch((error: unknown) => reportError(error, 'queue/render'));
+}
+
+function renderSettings(user: User): void {
+  const passwordProvider=user.providerData.some(({providerId})=>providerId==='password');
+  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">04 · ACCOUNT</p><h1>${copy('settings')}</h1>
+    <article class="danger-zone"><h2>${copy('deleteAccount')}</h2><p>${copy('deleteWarning')}</p><form id="delete-form"><label>${copy('confirmation')}<input name="phrase" autocomplete="off" required></label>${passwordProvider?`<label>${copy('password')}<input name="password" type="password" autocomplete="current-password" required></label>`:''}<button class="danger-button">${copy('deleteAccount')}</button></form><p id="delete-status" role="status"></p></article></section>`);
+  bindBack(user);
+  document.querySelector('#delete-form')?.addEventListener('submit',(event)=>{event.preventDefault();const form=event.currentTarget as HTMLFormElement;const data=new FormData(form);const expected=i18n.locale==='pt'?'EXCLUIR':'DELETE';if(formText(data,'phrase').trim().toUpperCase()!==expected)return;form.querySelectorAll('button,input').forEach((element)=>{(element as HTMLButtonElement|HTMLInputElement).disabled=true;});const status=document.querySelector('#delete-status');if(status)status.textContent=copy('deleting');void deleteOwnAccount(user,{password:formText(data,'password'),onStage:(stage)=>{if(status)status.textContent=`${copy('deleting')} ${stage}`;}}).then(clearLocalData).catch((error:unknown)=>{reportError(error,'account/delete');if(status)status.textContent=copy('deleteFailed');form.querySelectorAll('button,input').forEach((element)=>{(element as HTMLButtonElement|HTMLInputElement).disabled=false;});});});
 }
 
 function bindBack(user: User): void { document.querySelector('#feature-back')?.addEventListener('click', () => { currentView = 'dashboard'; renderDashboard(user); }); }

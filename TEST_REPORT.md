@@ -18,6 +18,10 @@ O repositório não continha `package.json`, suíte automatizada ou configuraç�
 | Build (`vite build --config vite.config.ts`) | **PASS**, 118 módulos; JS 652,76 kB (194,23 kB gzip), CSS 8,35 kB, código 0. Permanece aviso de chunk acima de 500 kB. |
 | `npm run test:e2e` | Não executado: `npm` indisponível e browsers Playwright não foram instalados. Configuração e smoke test foram criados. |
 
+## Verificação visual local
+
+O shell foi servido com Vite e inspecionado no navegador interno em desktop: login renderizou corretamente, PT/EN alternou sem reload e não houve erro no console. Fluxos autenticados não foram exercitados para evitar criar ou alterar dados reais. As regras Firebase ainda não foram compiladas/testadas no Emulator porque `firebase-tools` não está instalado.
+
 Vitest e Vite precisaram ser executados fora do sandbox porque o processo esbuild recebia `Access is denied` ao carregar `vite.config.ts`; fora do sandbox ambos concluíram normalmente.
 
 Observação: tentativas iniciais de instalação falharam por ausência de `npm`, restrição de rede, timeout e depois ausência do Node no `PATH` dos postinstalls. Nenhuma foi considerada resultado final; a execução final acima concluiu com código 0.

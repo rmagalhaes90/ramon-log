@@ -30,6 +30,8 @@ const messages = {
     sleep: 'Sono', energy: 'Energia', soreness: 'Dor muscular', stress: 'Stress', save: 'Salvar',
     history: 'Histórico', calories: 'Calorias', protein: 'Proteína', carbs: 'Carboidratos', fat: 'Gordura',
     water: 'Água', meal: 'Refeição', mealName: 'Nome da refeição',
+    settings: 'Ajustes', deleteAccount: 'Excluir conta e todos os dados', deleteWarning: 'Esta ação é permanente. Digite EXCLUIR para confirmar.',
+    confirmation: 'Confirmação', deleting: 'Excluindo com segurança…', deleteFailed: 'Não foi possível concluir a exclusão. Nenhum passo restante será ocultado.',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -60,6 +62,8 @@ const messages = {
     sleep: 'Sleep', energy: 'Energy', soreness: 'Soreness', stress: 'Stress', save: 'Save',
     history: 'History', calories: 'Calories', protein: 'Protein', carbs: 'Carbs', fat: 'Fat',
     water: 'Water', meal: 'Meal', mealName: 'Meal name',
+    settings: 'Settings', deleteAccount: 'Delete account and all data', deleteWarning: 'This is permanent. Type DELETE to confirm.',
+    confirmation: 'Confirmation', deleting: 'Deleting securely…', deleteFailed: 'Deletion could not be completed. No remaining step will be hidden.',
   },
 } as const;
 

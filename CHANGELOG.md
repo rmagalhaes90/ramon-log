@@ -18,6 +18,8 @@
 - Primeira experiência de treino v4: seleção do dia, séries, carga, repetições, conclusão, volume e histórico de sessões.
 - Progresso v4 com peso, delta, histórico de sessões e readiness usando a fórmula do baseline.
 - Nutrição v4 com metas herdadas, refeições, calorias, macros e água.
+- Regras Firestore/Storage versionadas e configuração local de emuladores.
+- Exclusão modular de conta e dados com reautenticação e progresso por estágio.
 
 ### Preserved
 

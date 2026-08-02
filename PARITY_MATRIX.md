@@ -18,8 +18,8 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | Offline/fila | ✅ | 🟡 | Cache e fila de documentos integrados; faltam conflitos, quota e testes de reload |
 | PWA/atualização | ✅ | 🟡 | install/update/rollback e suspensão iOS |
 | Notificações | ✅ | ⬜ | permissão por gesto, push e timer local |
-| Admin | ✅ | 🔴 | regras/claims e emulador versionados |
-| Exclusão de conta | ✅ | 🔴 | backend idempotente apaga Auth/Firestore/Storage |
+| Admin | ✅ | 🟡 | regras owner/admin versionadas; faltam UI v4, claims e testes Emulator |
+| Exclusão de conta | ✅ | 🟡 | fluxo modular completo no cliente; backend idempotente ainda recomendado |
 | Import/export/reset | ✅ | ⬜ | round-trip, limites, backup e rollback |
 
 Paridade global: **não atingida**. O baseline continua sendo a versão operacional.

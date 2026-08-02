@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(uid) { return signedIn() && request.auth.uid == uid; }
+    function isSuperAdmin() { return signedIn() && request.auth.token.email == 'rmagalhaes90@gmail.com'; }
+    function isGrantedAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/sharedUsers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/sharedUsers/$(request.auth.uid)).data.isAdmin == true;
+    }
+    function isAdmin() { return isSuperAdmin() || isGrantedAdmin(); }
+
+    match /users/{uid}/data/{document=**} {
+      allow read, create, update, delete: if owns(uid);
+    }
+
+    match /sharedUsers/{uid} {
+      allow get: if owns(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if owns(uid)
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.blocked == false
+        && request.resource.data.keys().hasOnly(['email', 'createdAt', 'blocked']);
+      allow update: if isSuperAdmin()
+        || (isGrantedAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['blocked']))
+        || (owns(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email']));
+      allow delete: if owns(uid) || isSuperAdmin();
+    }
+
+    match /shared/exerciseDatabase {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
