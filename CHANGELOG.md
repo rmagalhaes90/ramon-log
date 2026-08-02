@@ -11,6 +11,9 @@
 - IndexedDB, contrato Zod e fila offline com backoff.
 - Tratamento global de erros e novo fluxo de atualização PWA baseado em worker `waiting`.
 - Auditoria, arquitetura, matriz de paridade, guia de migração, segurança e relatório de testes.
+- Fluxo modular de autenticação por email/senha e Google, recuperação, verificação de email, bloqueio administrativo e logout.
+- Onboarding inicial com preferência de unidades persistida em IndexedDB.
+- Contratos Zod para exercícios, treinos, séries, sessões, readiness, nutrição, perfil, peso e fotos.
 
 ### Preserved
 

@@ -13,6 +13,3 @@ const schema = z.object({
 });
 
 export const env = schema.parse(import.meta.env);
-export const isFirebaseConfigured = Boolean(
-  env.VITE_FIREBASE_API_KEY && env.VITE_FIREBASE_PROJECT_ID && env.VITE_FIREBASE_APP_ID,
-);

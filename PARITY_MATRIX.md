@@ -5,10 +5,10 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | Capacidade | Baseline | v4 | Critério de aceite |
 |---|---:|---:|---|
 | Identidade visual/design tokens | ✅ | 🟡 | Comparação visual mobile/desktop, safe areas e reduced motion |
-| PT/EN e unidades | ✅ | 🟡 | 100% das strings, persistência e troca sem reload |
-| Auth email/Google/reset | ✅ | 🟡 | Emulator + fluxos E2E e cancelamento de sessão |
-| Verificação de email | ✅ | 🟡 | Bloqueio, reenvio/cooldown e retorno por deep link |
-| Onboarding | ✅ | ⬜ | Novo usuário e usuário com dados, acessível e retomável |
+| PT/EN e unidades | ✅ | 🟡 | Fundação traduzida e unidade persistida; faltam strings das features |
+| Auth email/Google/reset | ✅ | 🟡 | Implementado com SDK modular; falta Emulator/E2E conectado |
+| Verificação de email | ✅ | 🟡 | Bloqueio, reenvio/cooldown e reload implementados; falta E2E |
+| Onboarding | ✅ | 🟡 | Preferência inicial persistida; falta portar tour completo do produto |
 | Treinos/rotinas/exercícios/séries | ✅ | ⬜ | CRUD, reorder, notas, timer, PR e dados equivalentes |
 | Histórico/relatórios/conquistas | ✅ | ⬜ | Cálculos validados com fixtures do legado |
 | Readiness/progresso/medidas | ✅ | ⬜ | Fórmulas e gráficos com tolerância definida |

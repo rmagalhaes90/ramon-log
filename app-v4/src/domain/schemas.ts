@@ -1,0 +1,104 @@
+import { z } from 'zod';
+
+export const dateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+export const safeIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,200}$/);
+const boundedText = (max: number) => z.string().max(max).default('');
+const finite = (min: number, max: number) => z.number().finite().min(min).max(max);
+const videoUrlSchema = z.string().max(2048).refine((value) => {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname.toLowerCase());
+  } catch { return false; }
+}, 'Only HTTPS YouTube URLs are supported').default('');
+
+export const loggedSetSchema = z.object({ kg: finite(0.01, 1000), reps: finite(1, 1000) });
+export type LoggedSet = z.infer<typeof loggedSetSchema>;
+
+export const exerciseSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  sets: z.number().int().min(1).max(20).default(4),
+  reps: boundedText(20).pipe(z.string().min(1)).default('10'),
+  rest: z.number().int().min(0).max(1800).default(90),
+  equipment: z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', '']).default(''),
+  muscles: z.record(z.string().max(32), finite(0, 1)).default({}),
+  videoUrl: videoUrlSchema,
+  notes: boundedText(1000),
+});
+export type Exercise = z.infer<typeof exerciseSchema>;
+
+export const workoutSchema = z.object({
+  title: z.string().trim().min(1).max(80),
+  titleEn: boundedText(80),
+  cardioNote: boundedText(300),
+  exercises: z.array(exerciseSchema).max(60).default([]),
+  abs: z.array(exerciseSchema).max(30).default([]),
+});
+export const workoutsSchema = z.record(
+  z.enum(['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']),
+  workoutSchema,
+);
+export type Workouts = z.infer<typeof workoutsSchema>;
+
+export const bodyWeightSchema = z.object({ d: dateKeySchema, kg: finite(0.01, 1000) });
+export const bodyWeightsSchema = z.array(bodyWeightSchema).max(5000);
+
+export const sessionSchema = z.object({
+  id: z.string().max(60),
+  date: dateKeySchema,
+  day: boundedText(20),
+  title: boundedText(200),
+  startedAt: z.iso.datetime().nullable(),
+  endedAt: z.iso.datetime().nullable(),
+  durationSec: finite(0, 86400).nullable(),
+  volume: finite(0, 10_000_000),
+  exerciseCount: z.number().int().min(0).max(200),
+});
+export const sessionLogSchema = z.array(sessionSchema).max(450);
+
+export const readinessSchema = z.object({
+  sleep: z.number().int().min(1).max(5),
+  energy: z.number().int().min(1).max(5),
+  soreness: z.number().int().min(1).max(5),
+  stress: z.number().int().min(1).max(5),
+  score: finite(0, 100),
+  classification: boundedText(60),
+  recordedAt: z.iso.datetime(),
+});
+export const readinessLogSchema = z.record(dateKeySchema, readinessSchema);
+
+export const mealSchema = z.object({
+  id: z.string().max(60),
+  name: boundedText(120),
+  kcal: finite(0, 10_000),
+  prot: finite(0, 1000),
+  carb: finite(0, 1000),
+  fat: finite(0, 1000),
+  t: z.iso.datetime(),
+});
+export const nutritionDaySchema = z.object({
+  kcal: finite(0, 50_000), protein: finite(0, 5000), carb: finite(0, 5000), fat: finite(0, 5000),
+  water: finite(0, 50), meals: z.array(mealSchema).max(200), kcalGoal: finite(1, 10_000),
+  proteinGoal: finite(1, 1000), carbGoal: finite(1, 1000), fatGoal: finite(1, 1000), waterGoal: finite(0.5, 20),
+});
+export const nutritionLogSchema = z.record(dateKeySchema, nutritionDaySchema);
+
+export const profileSchema = z.object({
+  height: finite(50, 250).nullable().default(null),
+  sex: z.enum(['M', 'F']).default('M'),
+});
+
+export const photoSchema = z.object({ id: safeIdSchema, d: dateKeySchema });
+export const photoIndexSchema = z.array(photoSchema).max(5000);
+
+export const userDataSchemas = {
+  workouts: workoutsSchema,
+  bodyWeights: bodyWeightsSchema,
+  sessionLog: sessionLogSchema,
+  readinessLog: readinessLogSchema,
+  nutritionLog: nutritionLogSchema,
+  profile: profileSchema,
+  photoIndex: photoIndexSchema,
+} as const;
+
+export type UserDataKey = keyof typeof userDataSchemas;
