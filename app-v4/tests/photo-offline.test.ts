@@ -1,2 +1,11 @@
-import{describe,expect,it}from'vitest';import{MAX_PENDING_PHOTOS}from'../src/features/photos/offline';import{MAX_PHOTO_BYTES,validatePhoto}from'../src/features/photos/model';
-describe('offline photo queue contracts',()=>{it('keeps a bounded queue of already validated JPEG blobs',()=>{expect(MAX_PENDING_PHOTOS).toBe(10);expect(validatePhoto({name:'queued.jpg',type:'image/jpeg',size:MAX_PHOTO_BYTES})).toBeNull();});});
+import { describe, expect, it } from 'vitest';
+import { MAX_PENDING_PHOTOS } from '../src/features/photos/offline';
+import { MAX_PHOTO_BYTES, validatePhoto } from '../src/features/photos/model';
+describe('offline photo queue contracts', () => {
+  it('keeps a bounded queue of already validated JPEG blobs', () => {
+    expect(MAX_PENDING_PHOTOS).toBe(10);
+    expect(
+      validatePhoto({ name: 'queued.jpg', type: 'image/jpeg', size: MAX_PHOTO_BYTES }),
+    ).toBeNull();
+  });
+});

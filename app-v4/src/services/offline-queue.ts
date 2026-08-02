@@ -8,14 +8,20 @@ export function retryDelay(attempts: number): number {
   return Math.min(3_600_000, 1_500 * 2 ** Math.max(0, attempts));
 }
 
-export async function enqueue(item: Omit<QueueItem, 'attempts' | 'createdAt' | 'nextAttemptAt'>): Promise<void> {
+export async function enqueue(
+  item: Omit<QueueItem, 'attempts' | 'createdAt' | 'nextAttemptAt'>,
+): Promise<void> {
   const now = Date.now();
   await queuePut({ ...item, attempts: 0, createdAt: now, nextAttemptAt: now });
 }
 
-export async function flushQueue(handler: SyncHandler, now = Date.now()): Promise<number> {
+export async function flushQueue(
+  handler: SyncHandler,
+  now = Date.now(),
+  accepts: (item: QueueItem) => boolean = () => true,
+): Promise<number> {
   if (!navigator.onLine) return 0;
-  const pending = (await queueList()).filter((item) => item.nextAttemptAt <= now);
+  const pending = (await queueList()).filter((item) => item.nextAttemptAt <= now && accepts(item));
   let completed = 0;
   for (const item of pending) {
     try {

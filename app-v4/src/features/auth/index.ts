@@ -15,7 +15,11 @@ import { KyroError } from '../../core/errors';
 import { getFirebaseServices } from '../../services/firebase';
 
 export type AuthStatus = 'loading' | 'signed-out' | 'unverified' | 'blocked' | 'ready';
-export interface AuthState { status: AuthStatus; user: User | null; isAdmin: boolean }
+export interface AuthState {
+  status: AuthStatus;
+  user: User | null;
+  isAdmin: boolean;
+}
 export type AuthListener = (state: AuthState) => void;
 
 const configuredServices = getFirebaseServices();
@@ -23,10 +27,12 @@ if (!configuredServices) throw new KyroError('Firebase unavailable', 'firebase/u
 const services = configuredServices;
 
 function requiresVerification(user: User): boolean {
-  return user.providerData.some(({ providerId }) => providerId === 'password') && !user.emailVerified;
+  return (
+    user.providerData.some(({ providerId }) => providerId === 'password') && !user.emailVerified
+  );
 }
 
-async function ensureSharedProfile(user: User): Promise<{blocked:boolean;isAdmin:boolean}> {
+async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAdmin: boolean }> {
   const reference = doc(services.firestore, 'sharedUsers', user.uid);
   const snapshot = await getDoc(reference);
   if (!snapshot.exists()) {
@@ -35,39 +41,60 @@ async function ensureSharedProfile(user: User): Promise<{blocked:boolean;isAdmin
       createdAt: serverTimestamp(),
       blocked: false,
     });
-    return {blocked:false,isAdmin:user.email?.toLowerCase()==='rmagalhaes90@gmail.com'};
+    return { blocked: false, isAdmin: user.email?.toLowerCase() === 'rmagalhaes90@gmail.com' };
   }
-  const data=snapshot.data();return {blocked:data.blocked===true,isAdmin:data.isAdmin===true||user.email?.toLowerCase()==='rmagalhaes90@gmail.com'};
+  const data = snapshot.data();
+  return {
+    blocked: data.blocked === true,
+    isAdmin: data.isAdmin === true || user.email?.toLowerCase() === 'rmagalhaes90@gmail.com',
+  };
 }
 
 export function observeAuth(listener: AuthListener): () => void {
-  listener({ status: 'loading', user: null, isAdmin:false });
+  listener({ status: 'loading', user: null, isAdmin: false });
   let generation = 0;
   return onAuthStateChanged(services.auth, (user) => {
     const current = ++generation;
-    if (!user) { listener({ status: 'signed-out', user: null, isAdmin:false }); return; }
-    if (requiresVerification(user)) { listener({ status: 'unverified', user, isAdmin:false }); return; }
+    if (!user) {
+      listener({ status: 'signed-out', user: null, isAdmin: false });
+      return;
+    }
+    if (requiresVerification(user)) {
+      listener({ status: 'unverified', user, isAdmin: false });
+      return;
+    }
     void ensureSharedProfile(user)
-      .then(({blocked,isAdmin}) => {
-        if (current === generation) listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin });
+      .then(({ blocked, isAdmin }) => {
+        if (current === generation)
+          listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin });
       })
       .catch(() => {
-        if (current === generation) listener({ status: 'signed-out', user: null, isAdmin:false });
+        if (current === generation) listener({ status: 'signed-out', user: null, isAdmin: false });
       });
   });
 }
 
 export function passwordIsStrong(password: string): boolean {
-  return password.length >= 12 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password);
+  return (
+    password.length >= 12 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password)
+  );
 }
 
 export async function loginWithPassword(email: string, password: string): Promise<void> {
-  await signInWithEmailAndPassword(services.auth, email.trim().toLowerCase().slice(0, 254), password.slice(0, 128));
+  await signInWithEmailAndPassword(
+    services.auth,
+    email.trim().toLowerCase().slice(0, 254),
+    password.slice(0, 128),
+  );
 }
 
 export async function createAccount(email: string, password: string): Promise<void> {
   if (!passwordIsStrong(password)) throw new KyroError('Weak password', 'auth/weak-password');
-  const credential = await createUserWithEmailAndPassword(services.auth, email.trim().toLowerCase().slice(0, 254), password.slice(0, 128));
+  const credential = await createUserWithEmailAndPassword(
+    services.auth,
+    email.trim().toLowerCase().slice(0, 254),
+    password.slice(0, 128),
+  );
   services.auth.languageCode = document.documentElement.lang;
   await sendEmailVerification(credential.user);
   sessionStorage.setItem('kyro-v4-new-account', credential.user.uid);
@@ -78,8 +105,9 @@ export async function loginWithGoogle(): Promise<void> {
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
-  try { await sendPasswordResetEmail(services.auth, email.trim().toLowerCase().slice(0, 254)); }
-  catch (error: unknown) {
+  try {
+    await sendPasswordResetEmail(services.auth, email.trim().toLowerCase().slice(0, 254));
+  } catch (error: unknown) {
     const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
     if (code === 'auth/too-many-requests') throw error;
   }
@@ -88,7 +116,8 @@ export async function requestPasswordReset(email: string): Promise<void> {
 export async function resendVerification(user: User): Promise<void> {
   const key = `kyro-v4-verify-${user.uid}`;
   const last = Number(localStorage.getItem(key)) || 0;
-  if (Date.now() - last < 60_000) throw new KyroError('Verification cooldown', 'auth/too-many-requests');
+  if (Date.now() - last < 60_000)
+    throw new KyroError('Verification cooldown', 'auth/too-many-requests');
   await sendEmailVerification(user);
   localStorage.setItem(key, String(Date.now()));
 }
@@ -98,9 +127,13 @@ export async function refreshVerification(user: User): Promise<boolean> {
   return user.emailVerified;
 }
 
-export async function logout(): Promise<void> { await signOut(services.auth); }
+export async function logout(): Promise<void> {
+  await signOut(services.auth);
+}
 
-export function authErrorKey(error: unknown): 'authInvalid' | 'authRate' | 'passwordHint' | 'authGeneric' {
+export function authErrorKey(
+  error: unknown,
+): 'authInvalid' | 'authRate' | 'passwordHint' | 'authGeneric' {
   const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
   if (/invalid-credential|wrong-password|user-not-found/.test(code)) return 'authInvalid';
   if (code === 'auth/too-many-requests') return 'authRate';

@@ -1,2 +1,16 @@
-import{afterEach,describe,expect,it,vi}from'vitest';import{barcodeCameraSupported}from'../src/features/nutrition/camera';
-afterEach(()=>vi.unstubAllGlobals());describe('barcode camera',()=>{it('detects capability without requesting camera permission',()=>{const getUserMedia=vi.fn();vi.stubGlobal('navigator',{mediaDevices:{getUserMedia}});vi.stubGlobal('BarcodeDetector',class{});expect(barcodeCameraSupported()).toBe(true);expect(getUserMedia).not.toHaveBeenCalled();});it('fails closed without BarcodeDetector',()=>{vi.stubGlobal('navigator',{mediaDevices:{getUserMedia:vi.fn()}});expect(barcodeCameraSupported()).toBe(false);});});
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { barcodeCameraSupported } from '../src/features/nutrition/camera';
+afterEach(() => vi.unstubAllGlobals());
+describe('barcode camera', () => {
+  it('detects capability without requesting camera permission', () => {
+    const getUserMedia = vi.fn();
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
+    vi.stubGlobal('BarcodeDetector', class {});
+    expect(barcodeCameraSupported()).toBe(true);
+    expect(getUserMedia).not.toHaveBeenCalled();
+  });
+  it('fails closed without BarcodeDetector', () => {
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia: vi.fn() } });
+    expect(barcodeCameraSupported()).toBe(false);
+  });
+});

@@ -2,7 +2,9 @@ export type UpdateListener = (registration: ServiceWorkerRegistration) => void;
 
 export async function registerPwaUpdates(onUpdate: UpdateListener): Promise<(() => void) | null> {
   if (!('serviceWorker' in navigator) || !window.isSecureContext) return null;
-  const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+  const registration = await navigator.serviceWorker.register('./sw.js', {
+    updateViaCache: 'none',
+  });
   const inspect = (): void => {
     if (registration.waiting && navigator.serviceWorker.controller) onUpdate(registration);
   };

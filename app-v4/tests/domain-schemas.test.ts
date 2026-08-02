@@ -10,7 +10,15 @@ describe('domain schemas', () => {
 
   it('rejects dangerous or unrealistic exercise data', () => {
     expect(() => exerciseSchema.parse({ name: '', sets: 100, reps: '10', rest: 90 })).toThrow();
-    expect(() => exerciseSchema.parse({ name: 'X', sets: 4, reps: '10', rest: 90, videoUrl: 'javascript:alert(1)' })).toThrow();
+    expect(() =>
+      exerciseSchema.parse({
+        name: 'X',
+        sets: 4,
+        reps: '10',
+        rest: 90,
+        videoUrl: 'javascript:alert(1)',
+      }),
+    ).toThrow();
   });
 
   it('rejects malformed dates and non-finite measurements', () => {
@@ -19,6 +27,18 @@ describe('domain schemas', () => {
   });
 
   it('validates readiness ranges', () => {
-    expect(() => readinessLogSchema.parse({ '2026-08-02': { sleep: 9, energy: 3, soreness: 2, stress: 2, score: 50, classification: 'ok', recordedAt: '2026-08-02T12:00:00.000Z' } })).toThrow();
+    expect(() =>
+      readinessLogSchema.parse({
+        '2026-08-02': {
+          sleep: 9,
+          energy: 3,
+          soreness: 2,
+          stress: 2,
+          score: 50,
+          classification: 'ok',
+          recordedAt: '2026-08-02T12:00:00.000Z',
+        },
+      }),
+    ).toThrow();
   });
 });

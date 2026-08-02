@@ -6,9 +6,14 @@ export const exerciseCatalog: Exercise[] = exerciseSchema.array().parse(exercise
 export const supplementCatalog = supplementSchema.array().parse(supplementsJson);
 
 export function searchExercises(query: string, locale: 'pt' | 'en'): Exercise[] {
-  const normalized=query.trim().toLocaleLowerCase(locale==='pt'?'pt-BR':'en-US');
-  if(!normalized)return exerciseCatalog;
-  return exerciseCatalog.filter((exercise)=>exercise.name.toLocaleLowerCase().includes(normalized)
-    ||Object.keys(exercise.muscles).some((muscle)=>muscle.toLocaleLowerCase().includes(normalized))
-    ||exercise.equipment.toLocaleLowerCase().includes(normalized));
+  const normalized = query.trim().toLocaleLowerCase(locale === 'pt' ? 'pt-BR' : 'en-US');
+  if (!normalized) return exerciseCatalog;
+  return exerciseCatalog.filter(
+    (exercise) =>
+      exercise.name.toLocaleLowerCase().includes(normalized) ||
+      Object.keys(exercise.muscles).some((muscle) =>
+        muscle.toLocaleLowerCase().includes(normalized),
+      ) ||
+      exercise.equipment.toLocaleLowerCase().includes(normalized),
+  );
 }

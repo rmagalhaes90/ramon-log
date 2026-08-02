@@ -9,13 +9,27 @@ function photoReference(user: User, id: string) {
   return ref(services.storage, `users/${user.uid}/photos/${photoFileName(id)}`);
 }
 
-export async function uploadPhoto(user: User, id: string, file: File, onProgress?: (percent: number) => void): Promise<void> {
+export async function uploadPhoto(
+  user: User,
+  id: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<void> {
   const validationError = validatePhoto(file);
   if (validationError) throw new Error(validationError);
   if (!navigator.onLine) throw new Error('photoOffline');
   await new Promise<void>((resolve, reject) => {
-    const task = uploadBytesResumable(photoReference(user, id), file, { contentType: 'image/jpeg', cacheControl: 'private,max-age=3600' });
-    task.on('state_changed', (snapshot) => onProgress?.(Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 100)), reject, () => resolve());
+    const task = uploadBytesResumable(photoReference(user, id), file, {
+      contentType: 'image/jpeg',
+      cacheControl: 'private,max-age=3600',
+    });
+    task.on(
+      'state_changed',
+      (snapshot) =>
+        onProgress?.(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)),
+      reject,
+      () => resolve(),
+    );
   });
 }
 

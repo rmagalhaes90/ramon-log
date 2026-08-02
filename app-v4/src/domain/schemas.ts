@@ -4,13 +4,24 @@ export const dateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 export const safeIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,200}$/);
 const boundedText = (max: number) => z.string().max(max).default('');
 const finite = (min: number, max: number) => z.number().finite().min(min).max(max);
-const videoUrlSchema = z.string().max(2048).refine((value) => {
-  if (!value) return true;
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' && ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname.toLowerCase());
-  } catch { return false; }
-}, 'Only HTTPS YouTube URLs are supported').default('');
+const videoUrlSchema = z
+  .string()
+  .max(2048)
+  .refine((value) => {
+    if (!value) return true;
+    try {
+      const url = new URL(value);
+      return (
+        url.protocol === 'https:' &&
+        ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'].includes(
+          url.hostname.toLowerCase(),
+        )
+      );
+    } catch {
+      return false;
+    }
+  }, 'Only HTTPS YouTube URLs are supported')
+  .default('');
 
 export const loggedSetSchema = z.object({ kg: finite(0.01, 1000), reps: finite(1, 1000) });
 export type LoggedSet = z.infer<typeof loggedSetSchema>;
@@ -28,20 +39,45 @@ export const exerciseSchema = z.object({
 export type Exercise = z.infer<typeof exerciseSchema>;
 
 export const supplementSchema = z.object({
-  id: z.string().max(60).optional(), name: z.string().trim().min(1).max(100), nameEn: z.string().max(100).optional(),
-  category: z.string().max(60).default(''), timing: z.string().max(200).optional(), timingEn: z.string().max(200).optional(),
+  id: z.string().max(60).optional(),
+  name: z.string().trim().min(1).max(100),
+  nameEn: z.string().max(100).optional(),
+  category: z.string().max(60).default(''),
+  timing: z.string().max(200).optional(),
+  timingEn: z.string().max(200).optional(),
 });
 export const userSupplementSchema = supplementSchema.extend({
-  id: safeIdSchema, times: z.array(z.string().regex(/^\d{2}:\d{2}$/)).max(10).default([]), custom: z.boolean().default(false),
+  id: safeIdSchema,
+  times: z
+    .array(z.string().regex(/^\d{2}:\d{2}$/))
+    .max(10)
+    .default([]),
+  custom: z.boolean().default(false),
 });
 export type UserSupplement = z.infer<typeof userSupplementSchema>;
 export const supplementsSchema = z.array(userSupplementSchema).max(100);
-export const supplementLogSchema = z.record(dateKeySchema,z.record(z.string().max(60),z.array(z.boolean()).max(10)));
+export const supplementLogSchema = z.record(
+  dateKeySchema,
+  z.record(z.string().max(60), z.array(z.boolean()).max(10)),
+);
 
-export const exerciseHistoryEntrySchema=z.object({date:dateKeySchema,sets:z.array(loggedSetSchema).max(20),e1rm:finite(0,2000)});
-export const exerciseHistorySchema=z.record(z.string().max(120),z.array(exerciseHistoryEntrySchema).max(60));
-export const exerciseRecordSchema=z.object({maxWeight:finite(0,1000),maxWeightReps:finite(0,1000),maxE1rm:finite(0,2000),maxWeightDate:dateKeySchema.nullable(),maxE1rmDate:dateKeySchema.nullable()});
-export const exerciseRecordsSchema=z.record(z.string().max(120),exerciseRecordSchema);
+export const exerciseHistoryEntrySchema = z.object({
+  date: dateKeySchema,
+  sets: z.array(loggedSetSchema).max(20),
+  e1rm: finite(0, 2000),
+});
+export const exerciseHistorySchema = z.record(
+  z.string().max(120),
+  z.array(exerciseHistoryEntrySchema).max(60),
+);
+export const exerciseRecordSchema = z.object({
+  maxWeight: finite(0, 1000),
+  maxWeightReps: finite(0, 1000),
+  maxE1rm: finite(0, 2000),
+  maxWeightDate: dateKeySchema.nullable(),
+  maxE1rmDate: dateKeySchema.nullable(),
+});
+export const exerciseRecordsSchema = z.record(z.string().max(120), exerciseRecordSchema);
 
 export const workoutSchema = z.object({
   title: z.string().trim().min(1).max(80),
@@ -58,10 +94,18 @@ export type Workouts = z.infer<typeof workoutsSchema>;
 
 export const bodyWeightSchema = z.object({ d: dateKeySchema, kg: finite(0.01, 1000) });
 export const bodyWeightsSchema = z.array(bodyWeightSchema).max(5000);
-export const bodyMeasurementSchema = z.object({
-  waist: finite(20, 300).optional(), chest: finite(20, 300).optional(), arm: finite(10, 150).optional(),
-  hip: finite(20, 300).optional(), thigh: finite(10, 200).optional(),
-}).refine((value) => Object.values(value).some((item) => item !== undefined), 'At least one measurement is required');
+export const bodyMeasurementSchema = z
+  .object({
+    waist: finite(20, 300).optional(),
+    chest: finite(20, 300).optional(),
+    arm: finite(10, 150).optional(),
+    hip: finite(20, 300).optional(),
+    thigh: finite(10, 200).optional(),
+  })
+  .refine(
+    (value) => Object.values(value).some((item) => item !== undefined),
+    'At least one measurement is required',
+  );
 export const bodyMeasurementsSchema = z.record(dateKeySchema, bodyMeasurementSchema);
 
 export const sessionSchema = z.object({
@@ -98,9 +142,17 @@ export const mealSchema = z.object({
   t: z.iso.datetime(),
 });
 export const nutritionDaySchema = z.object({
-  kcal: finite(0, 50_000), protein: finite(0, 5000), carb: finite(0, 5000), fat: finite(0, 5000),
-  water: finite(0, 50), meals: z.array(mealSchema).max(200), kcalGoal: finite(1, 10_000),
-  proteinGoal: finite(1, 1000), carbGoal: finite(1, 1000), fatGoal: finite(1, 1000), waterGoal: finite(0.5, 20),
+  kcal: finite(0, 50_000),
+  protein: finite(0, 5000),
+  carb: finite(0, 5000),
+  fat: finite(0, 5000),
+  water: finite(0, 50),
+  meals: z.array(mealSchema).max(200),
+  kcalGoal: finite(1, 10_000),
+  proteinGoal: finite(1, 1000),
+  carbGoal: finite(1, 1000),
+  fatGoal: finite(1, 1000),
+  waterGoal: finite(0.5, 20),
 });
 export type NutritionDay = z.infer<typeof nutritionDaySchema>;
 export const nutritionLogSchema = z.record(dateKeySchema, nutritionDaySchema);

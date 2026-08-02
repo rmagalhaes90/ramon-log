@@ -10,7 +10,13 @@ export async function requestNotificationAccess(): Promise<NotificationPermissio
 
 export async function showLocalNotification(title: string, body: string): Promise<boolean> {
   if (!notificationsSupported() || Notification.permission !== 'granted') return false;
-  const options: NotificationOptions = { body, icon: './icon-192.png', badge: './icon-192.png', tag: 'kyro-rest', silent: false };
+  const options: NotificationOptions = {
+    body,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    tag: 'kyro-rest',
+    silent: false,
+  };
   if ('serviceWorker' in navigator) {
     const registration = await navigator.serviceWorker.ready;
     await registration.showNotification(title, options);

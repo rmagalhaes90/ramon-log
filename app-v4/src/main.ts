@@ -17,9 +17,10 @@ import {
 } from './features/auth';
 import { listSharedUsers, setUserAdmin, setUserBlocked } from './features/admin';
 import { searchExercises, supplementCatalog } from './features/catalog';
-import { dosesTakenToday } from './features/supplements/model';
+import { dosesTakenToday, normalizeTimes } from './features/supplements/model';
 import { flushPhotoUploads, photoQueueCount } from './features/photos/offline';
 import { renderPhotosView } from './features/photos/view';
+import { shareOrFallback } from './features/share';
 import {
   bestCompletedSet,
   calculatePlates,
@@ -400,7 +401,7 @@ async function renderProgress(user: User): Promise<void> {
     <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form>
     <form id="measurements-form" class="measurements-form"><label>${copy('waist')}<input name="waist" type="number" min="20" max="300" step="0.1"></label><label>${copy('chest')}<input name="chest" type="number" min="20" max="300" step="0.1"></label><label>${copy('arm')}<input name="arm" type="number" min="10" max="150" step="0.1"></label><label>${copy('hip')}<input name="hip" type="number" min="20" max="300" step="0.1"></label><label>${copy('thigh')}<input name="thigh" type="number" min="10" max="200" step="0.1"></label><button class="primary">${copy('saveMeasurements')}</button></form>
     <form id="readiness-form" class="readiness-form">${(['sleep', 'energy', 'soreness', 'stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<button class="primary">${copy('save')}</button></form>
-    <section class="weekly-report"><h2>${copy('weeklyReport')}</h2><div><article><strong>${report.sessions}</strong><span>${copy('sessions')}</span></article><article><strong>${Math.round(report.volume)}</strong><span>${copy('volume')}</span></article><article><strong>${Math.round(report.minutes)}</strong><span>${copy('minutes')}</span></article><article><strong>${streak}</strong><span>${copy('streak')}</span></article></div></section><section><h2>${copy('achievements')}</h2><div id="achievement-list" class="achievement-list"></div></section><button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
+    <section class="weekly-report"><h2>${copy('weeklyReport')}</h2><div><article><strong>${report.sessions}</strong><span>${copy('sessions')}</span></article><article><strong>${Math.round(report.volume)}</strong><span>${copy('volume')}</span></article><article><strong>${Math.round(report.minutes)}</strong><span>${copy('minutes')}</span></article><article><strong>${streak}</strong><span>${copy('streak')}</span></article></div><button id="share-report">${copy('shareReport')}</button></section><section><h2>${copy('achievements')}</h2><div id="achievement-list" class="achievement-list"></div></section><button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
   const weightTarget = document.querySelector('#latest-weight');
   if (weightTarget) weightTarget.textContent = latest ? `${latest.kg.toFixed(1)} kg` : '—';
   const deltaTarget = document.querySelector('#weight-delta');
@@ -425,6 +426,16 @@ async function renderProgress(user: User): Promise<void> {
       history?.append(row);
     });
   const achievementList = document.querySelector('#achievement-list');
+  document.querySelector('#share-report')?.addEventListener(
+    'click',
+    () =>
+      void shareOrFallback({
+        title: 'KYRO Weekly',
+        text: `${copy('weeklyReport')}: ${report.sessions} ${copy('sessions')} · ${Math.round(report.volume)} kg · ${Math.round(report.minutes)} ${copy('minutes')} · ${streak} ${copy('streak')}`,
+      }).catch((error: unknown) => {
+        if ((error as Error).name !== 'AbortError') reportError(error, 'reports/share');
+      }),
+  );
   if (!achievements.length) {
     const empty = document.createElement('span');
     empty.textContent = copy('noAchievements');
@@ -728,8 +739,43 @@ async function renderSupplements(user: User): Promise<void> {
           .catch((error: unknown) => reportError(error, 'supplements/log'));
       });
       label.append(checkbox, document.createTextNode(` ${time}`));
+      const removeTime = document.createElement('button');
+      removeTime.type = 'button';
+      removeTime.textContent = '×';
+      removeTime.ariaLabel = `${copy('remove')} ${time}`;
+      removeTime.addEventListener('click', () => {
+        const updated = supplements.map((item) =>
+          item.id === supplement.id
+            ? { ...item, times: item.times.filter((_, timeIndex) => timeIndex !== index) }
+            : item,
+        );
+        void saveUserData(user, 'mySupplements', updated)
+          .then(() => renderSupplements(user))
+          .catch((error: unknown) => reportError(error, 'supplements/time-remove'));
+      });
+      label.append(removeTime);
       card.append(label);
     });
+    const schedule = document.createElement('div');
+    schedule.className = 'supplement-schedule';
+    const timeInput = document.createElement('input');
+    timeInput.type = 'time';
+    timeInput.value = '08:00';
+    const addTime = document.createElement('button');
+    addTime.type = 'button';
+    addTime.textContent = `+ ${copy('schedule')}`;
+    addTime.addEventListener('click', () => {
+      const updated = supplements.map((item) =>
+        item.id === supplement.id
+          ? { ...item, times: normalizeTimes([...item.times, timeInput.value]) }
+          : item,
+      );
+      void saveUserData(user, 'mySupplements', updated)
+        .then(() => renderSupplements(user))
+        .catch((error: unknown) => reportError(error, 'supplements/time-add'));
+    });
+    schedule.append(timeInput, addTime);
+    card.append(schedule);
     own?.append(card);
   });
   const draw = (query = '') => {
@@ -1020,6 +1066,15 @@ function renderExerciseEntries(user: User, workouts: Workouts): void {
     meta.className = 'exercise-meta';
     meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`;
     card.append(meta);
+    if (entry.exercise.videoUrl) {
+      const video = document.createElement('a');
+      video.className = 'exercise-video';
+      video.href = entry.exercise.videoUrl;
+      video.target = '_blank';
+      video.rel = 'noopener noreferrer';
+      video.textContent = copy('watchVideo');
+      card.append(video);
+    }
     const tools = document.createElement('div');
     tools.className = 'exercise-tools';
     const rest = document.createElement('button');
