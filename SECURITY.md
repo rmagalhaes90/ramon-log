@@ -6,6 +6,8 @@ Os SDKs somente conectam aos emuladores quando `VITE_USE_FIREBASE_EMULATORS=true
 
 As regras Firestore e Storage foram executadas no Emulator com Java 21. Os testes confirmam propriedade de documentos, negação anônima e entre contas, criação de perfil sem autoelevação, limites das operações administrativas e uploads privados restritos a JPEG de até 3 MB.
 
+Administração privilegiada não confia mais no documento editável do usuário. `setAdminRole` emite custom claim pelo Admin SDK, `setUserBlocked` sincroniza Firestore e Firebase Auth, e `deleteOwnAccount` remove Storage, Firestore, perfil e identidade de forma idempotente. As três Functions exigem autenticação e as operações administrativas exigem claim assinada ou o bootstrap explicitamente protegido.
+
 ## Modelo de ameaça
 
 Protegemos dados de saúde/treino, fotos, identidade, permissões administrativas e disponibilidade offline contra acesso entre usuários, XSS, adulteração de import, perda durante sincronização e exclusão incompleta.

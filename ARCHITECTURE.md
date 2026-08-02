@@ -1,5 +1,9 @@
 # Arquitetura KYRO v4
 
+## Backend confiável
+
+`functions/` contém Cloud Functions v2 em Node 22. O cliente usa callables para papéis administrativos, bloqueio e exclusão definitiva. As regras Firestore autorizam administradores concedidos exclusivamente pela custom claim `admin`; o campo `isAdmin` em `sharedUsers` serve apenas para apresentação e auditoria.
+
 ## Estratégia paralela
 
 O produto estável permanece nos arquivos da raiz. A aplicação v4 vive em `app-v4/` e gera `dist-v4/`; não substitui nem publica o baseline. O corte só ocorrerá quando a matriz de paridade estiver aprovada e houver plano de rollback.

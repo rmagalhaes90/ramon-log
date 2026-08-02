@@ -50,6 +50,7 @@
 - Smoke E2E real aprovado em Chromium desktop e WebKit mobile; release paralela atualizada para `4.0.0-alpha.5`.
 - Firebase Auth Emulator opt-in, teste isolado de criação/login/exclusão e E2E de cadastro com bloqueio de email não verificado em Chromium/WebKit; release `4.0.0-alpha.6`.
 - Regras Firestore/Storage aprovadas no Emulator com isolamento entre contas, controles administrativos, MIME e limite de upload; release `4.0.0-alpha.7`.
+- Cloud Functions v2 para custom claims, bloqueio sincronizado e exclusão idempotente, integradas ao SDK modular e aprovadas no Emulator; marco final de implementação `4.0.0-alpha.8`.
 
 ### Preserved
 

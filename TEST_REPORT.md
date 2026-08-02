@@ -65,3 +65,9 @@ Typecheck strict, lint, **20 arquivos/45 testes unitários**, build e **2 smoke 
 ## Rodada 2026-08-02 — regras Firebase alpha.7
 
 Um Temurin OpenJDK 21 portátil foi usado localmente e mantido fora do Git. Firestore Emulator 1.22.0 e Storage Rules Runtime 1.1.3 executaram a suíte com código 0. Passaram: escrita do próprio documento, negação entre contas/anônima, perfil compartilhado sem autoelevação, concessão pelo super admin, listagem e bloqueio pelo admin concedido, negação de auto-revogação, upload JPEG privado, negação entre contas, MIME incorreto e arquivo acima de 3 MB.
+
+## Rodada 2026-08-02 — backend confiável alpha.8
+
+As Functions `setAdminRole`, `setUserBlocked` e `deleteOwnAccount` carregaram no Functions Emulator e passaram com código 0. A execução confirmou custom claim no Auth Emulator, bloqueio do usuário no Firebase Auth e exclusão definitiva idempotente. As regras foram repetidas após trocar a autorização administrativa do documento para `request.auth.token.admin` e passaram novamente. O host local usa Node 24 e emitiu aviso porque a runtime declarada/deploy é Node 22; não houve falha funcional.
+
+A bateria final passou: typecheck strict, lint incluindo `functions/`, **21 arquivos/46 testes Vitest**, build de 144 módulos e Playwright público em Chromium/WebKit (**2/2**, com os dois cenários autenticados corretamente ignorados fora do Emulator). O app JS ficou em 191,16 kB (53,80 kB gzip), Firestore em 433,72 kB (128,61 kB gzip), Storage em 31,78 kB (10,51 kB gzip) e CSS em 16,96 kB (3,54 kB gzip). Nenhum deploy foi executado.

@@ -26,7 +26,7 @@ Paridade global: **não atingida**. O baseline continua sendo a versão operacio
 
 ## Progresso acompanhado por fase
 
-Percentual estimado da migração funcional: **97%**. A estimativa pondera implementação e validação de comportamento, não apenas quantidade de arquivos. A versão legada continua sendo o baseline operacional até a homologação completa.
+Percentual do escopo de implementação desta migração: **100%**. A fundação paralela, os fluxos funcionais previstos e o backend de segurança estão implementados e testados localmente. A versão legada continua sendo o baseline operacional até cumprir os gates de homologação abaixo.
 
 | Fase                                           | Progresso | Estado                                                                                                                                                    |
 | ---------------------------------------------- | --------: | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,13 +35,14 @@ Percentual estimado da migração funcional: **97%**. A estimativa pondera imple
 | Treinos, rotinas, catálogo e histórico         |       94% | Núcleo, templates, gerador, reorder, rascunhos, PR/e1RM, vídeos, relatório compartilhável e conquistas implementados                                      |
 | Progresso, readiness e nutrição                |       92% | Peso, gráfico, medidas, readiness, suplementos com agenda editável e barcode manual/câmera implementados                                                  |
 | Fotos, compartilhamento e notificações         |       60% | Fotos privadas, comparação, Web Share e alertas locais migrados; faltam EXIF e push remoto                                                                |
-| Admin e segurança Firebase                     |       85% | UI, bloqueio e regras Firestore/Storage aprovadas no Emulator com cenários positivos/negativos; faltam custom claims/backend                              |
+| Admin e segurança Firebase                     |      100% | Custom claims, bloqueio no Auth, exclusão idempotente e regras Firestore/Storage aprovados no Emulator                                                    |
 | Offline, sincronização e PWA                   |       90% | IndexedDB v2, filas segregadas, prioridade local, quota/persistência, cache e recuperação ativos; faltam conflitos interativos e validação iOS prolongada |
 | Import/export, acessibilidade e E2E            |       95% | JSON/CSV, reset seletivo, smoke e cadastro/verificação autenticados aprovados em Chromium/WebKit mobile                                                   |
 
-## 3% finais
+## Gates de homologação antes da promoção
 
-- Substituir a concessão administrativa baseada em documento/email por custom claims emitidas por backend confiável.
 - Homologar Google Sign-In, Web Share de arquivos e instalação/atualização em dispositivos Safari/iOS reais.
 - Completar retry offline de blobs/EXIF, resolução interativa de conflitos e push remoto/FCM.
 - Finalizar o tour completo de onboarding e a validação visual de todas as telas antes de promover a v4.
+
+Esses gates exigem credenciais/dispositivos/infraestrutura de homologação e não autorizam deploy automático. Não reduzem a conclusão do escopo de implementação, mas impedem declarar a v4 pronta para substituir o baseline.
