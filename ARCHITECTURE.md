@@ -4,6 +4,8 @@
 
 O produto estável permanece nos arquivos da raiz. A aplicação v4 vive em `app-v4/` e gera `dist-v4/`; não substitui nem publica o baseline. O corte só ocorrerá quando a matriz de paridade estiver aprovada e houver plano de rollback.
 
+Os catálogos legados são extraídos por `scripts/extract-legacy-data.mjs` para JSON validado por Zod. Assim, a v4 não precisa carregar nem analisar o `index.html` de 661 KB para obter exercícios ou suplementos.
+
 ## Camadas
 
 ```text

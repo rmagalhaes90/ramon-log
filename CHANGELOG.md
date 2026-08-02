@@ -22,6 +22,9 @@
 - Exclusão modular de conta e dados com reautenticação e progresso por estágio.
 - Administração modular com listagem, bloqueio e concessão/revogação de admin protegida pelas regras.
 - Separação de chunks Firebase; nenhum chunk de produção excede 500 kB.
+- Extração reproduzível de 170 exercícios e 50 suplementos do HTML legado para JSON validado.
+- Editor de rotinas com renomear, pesquisar catálogo, adicionar e remover exercícios.
+- Service Worker v4.0.0-alpha.2 com cache runtime dos chunks hash para uso offline real após o primeiro carregamento.
 
 ### Preserved
 
