@@ -9,8 +9,9 @@ import {
 } from './features/auth';
 import { deleteOwnAccount } from './features/account/delete-account';
 import { listSharedUsers,setUserAdmin,setUserBlocked } from './features/admin';
-import { searchExercises } from './features/catalog';
-import { completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
+import { searchExercises,supplementCatalog } from './features/catalog';
+import { dosesTakenToday } from './features/supplements/model';
+import { bestCompletedSet, calculatePlates, completedExerciseCount, createEntries, dateKey, dayKeys, todayDayKey, workoutVolume, type DayKey, type ExerciseEntry } from './features/workouts/model';
 import { emptyNutritionDay, percentage } from './features/nutrition/model';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
 import { cacheGet, cacheSet, clearLocalData, queueList } from './services/database';
@@ -27,10 +28,19 @@ const appRoot = root;
 let authState: AuthState = { status: 'loading', user: null, isAdmin:false };
 let authMode: 'login' | 'signup' = 'login';
 let updateRegistration: ServiceWorkerRegistration | null = null;
-let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' | 'settings' | 'admin' = 'dashboard';
+let currentView: 'dashboard' | 'workout' | 'progress' | 'nutrition' | 'supplements' | 'settings' | 'admin' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt = new Date().toISOString();
+let sessionClock:number|undefined;
+let restClock:number|undefined;
+
+function clearWorkoutTimers():void {
+  if(sessionClock) window.clearInterval(sessionClock);
+  if(restClock) window.clearInterval(restClock);
+  sessionClock=undefined;
+  restClock=undefined;
+}
 
 function copy(key: MessageKey): string { return i18n.t(key); }
 function formText(data: FormData, key: string): string { const value = data.get(key); return typeof value === 'string' ? value : ''; }
@@ -148,6 +158,7 @@ async function renderReady(user: User): Promise<void> {
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'progress') await renderProgress(user);
   else if (currentView === 'nutrition') await renderNutrition(user);
+  else if (currentView === 'supplements') await renderSupplements(user);
   else if (currentView === 'settings') renderSettings(user);
   else if (currentView === 'admin') await renderAdmin(user);
   else renderDashboard(user);
@@ -161,7 +172,7 @@ function renderDashboard(user: User): void {
     <article><span>02</span><h2>RECOVER</h2><p>Readiness, history and progress.</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>Nutrition and supplements.</p><button id="open-nutrition">${copy('nutrition')}</button></article>
     <article><span>04</span><h2>SYNC</h2><p>Offline-first, private and resilient.</p><button id="open-settings">${copy('settings')}</button></article></section>`);
   document.querySelector('#logout')?.addEventListener('click', () => void logout().catch((error: unknown) => reportError(error, 'auth/logout')));
-  document.querySelector('#start-workout')?.addEventListener('click', () => { currentView = 'workout'; void renderWorkout(user); });
+  document.querySelector('#start-workout')?.addEventListener('click', () => { currentView = 'workout'; workoutStartedAt=new Date().toISOString(); void renderWorkout(user); });
   document.querySelector('#open-progress')?.addEventListener('click', () => { currentView = 'progress'; void renderProgress(user); });
   document.querySelector('#open-nutrition')?.addEventListener('click', () => { currentView = 'nutrition'; void renderNutrition(user); });
   document.querySelector('#open-settings')?.addEventListener('click', () => { currentView = 'settings'; renderSettings(user); });
@@ -210,25 +221,34 @@ async function renderProgress(user: User): Promise<void> {
 async function renderNutrition(user: User): Promise<void> {
   const log = await loadUserData(user, 'nutritionLog') ?? {}; const today=dateKey(); const previous=Object.keys(log).sort().map((key)=>log[key]).filter((value):value is NutritionDay=>Boolean(value)).at(-1); const day=log[today] ?? emptyNutritionDay(previous);
   shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">03 · FUEL</p><h1>${copy('nutrition')}</h1>
-    <div class="metric-grid nutrition-metrics"><article><span>${copy('calories')}</span><strong>${Math.round(day.kcal)}</strong><small>${Math.round(percentage(day.kcal,day.kcalGoal))}%</small></article><article><span>${copy('protein')}</span><strong>${Math.round(day.protein)}g</strong><small>${Math.round(percentage(day.protein,day.proteinGoal))}%</small></article><article><span>${copy('water')}</span><strong>${day.water.toFixed(2)}L</strong><button id="add-water">+ 250ml</button></article></div>
+    <div class="metric-grid nutrition-metrics"><article><span>${copy('calories')}</span><strong>${Math.round(day.kcal)}</strong><small>${Math.round(percentage(day.kcal,day.kcalGoal))}%</small></article><article><span>${copy('protein')}</span><strong>${Math.round(day.protein)}g</strong><small>${Math.round(percentage(day.protein,day.proteinGoal))}%</small></article><article><span>${copy('water')}</span><strong>${day.water.toFixed(2)}L</strong><button id="add-water">+ 250ml</button></article></div><button id="open-supplements" class="secondary">${copy('supplements')}</button>
     <form id="meal-form" class="meal-form"><label>${copy('mealName')}<input name="name" maxlength="120" required></label><label>${copy('calories')}<input name="kcal" type="number" min="0" max="10000" required></label><label>${copy('protein')}<input name="protein" type="number" min="0" max="1000" step="0.1"></label><label>${copy('carbs')}<input name="carb" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fat')}<input name="fat" type="number" min="0" max="1000" step="0.1"></label><button class="primary">${copy('add')} ${copy('meal')}</button></form>
     <div id="meal-list" class="history-list"></div></section>`);
   bindBack(user); const list=document.querySelector('#meal-list');day.meals.slice().reverse().forEach((meal)=>{const row=document.createElement('article');const name=document.createElement('strong');name.textContent=meal.name;const meta=document.createElement('span');meta.textContent=`${Math.round(meal.kcal)} kcal · P ${Math.round(meal.prot)}g · C ${Math.round(meal.carb)}g · F ${Math.round(meal.fat)}g`;row.append(name,meta);list?.append(row);});
   const persist=(next: NutritionDay)=>saveUserData(user,'nutritionLog',{...log,[today]:next}).then(()=>renderNutrition(user));
   document.querySelector('#add-water')?.addEventListener('click',()=>void persist({...day,water:Math.min(50,day.water+0.25)}).catch((error:unknown)=>reportError(error,'nutrition/water')));
+  document.querySelector('#open-supplements')?.addEventListener('click',()=>{currentView='supplements';void renderSupplements(user);});
   document.querySelector('#meal-form')?.addEventListener('submit',(event)=>{event.preventDefault();const data=new FormData(event.currentTarget as HTMLFormElement);const meal={id:crypto.randomUUID().slice(0,60),name:formText(data,'name').slice(0,120),kcal:Number(data.get('kcal'))||0,prot:Number(data.get('protein'))||0,carb:Number(data.get('carb'))||0,fat:Number(data.get('fat'))||0,t:new Date().toISOString()};const next={...day,kcal:day.kcal+meal.kcal,protein:day.protein+meal.prot,carb:day.carb+meal.carb,fat:day.fat+meal.fat,meals:[...day.meals,meal]};void persist(next).catch((error:unknown)=>reportError(error,'nutrition/meal'));});
 }
 
+async function renderSupplements(user:User):Promise<void>{
+  const [supplements,fullLog]=await Promise.all([loadUserData(user,'mySupplements').then((value)=>value??[]),loadUserData(user,'supplementLog').then((value)=>value??{})]);const today=dateKey();const dayLog=fullLog[today]??{};const progress=dosesTakenToday(supplements,dayLog);
+  shell(`<section class="feature-view"><button id="supp-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">${progress.taken}/${progress.total} ${copy('taken')}</p><h1>${copy('supplements')}</h1><div id="my-supplements" class="supplement-list"></div><h2>${copy('addSupplement')}</h2><input id="supp-search" class="catalog-search" placeholder="${copy('search')}"><div id="supp-catalog" class="catalog-list"></div></section>`);
+  document.querySelector('#supp-back')?.addEventListener('click',()=>{currentView='nutrition';void renderNutrition(user);});const own=document.querySelector('#my-supplements');if(!supplements.length){const empty=document.createElement('p');empty.className='empty-state';empty.textContent=copy('noSupplements');own?.append(empty);}supplements.forEach((supplement)=>{const card=document.createElement('article');const top=document.createElement('div');const name=document.createElement('strong');name.textContent=i18n.locale==='en'?(supplement.nameEn||supplement.name):supplement.name;const remove=document.createElement('button');remove.textContent=copy('remove');remove.addEventListener('click',()=>void saveUserData(user,'mySupplements',supplements.filter((item)=>item.id!==supplement.id)).then(()=>renderSupplements(user)).catch((error:unknown)=>reportError(error,'supplements/remove')));top.append(name,remove);card.append(top);supplement.times.forEach((time,index)=>{const label=document.createElement('label');const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=dayLog[supplement.id]?.[index]===true;checkbox.addEventListener('change',()=>{const doses=[...(dayLog[supplement.id]??[])];doses[index]=checkbox.checked;void saveUserData(user,'supplementLog',{...fullLog,[today]:{...dayLog,[supplement.id]:doses}}).then(()=>renderSupplements(user)).catch((error:unknown)=>reportError(error,'supplements/log'));});label.append(checkbox,document.createTextNode(` ${time}`));card.append(label);});own?.append(card);});
+  const draw=(query='')=>{const list=document.querySelector('#supp-catalog');if(!list)return;list.replaceChildren();const normalized=query.trim().toLowerCase();supplementCatalog.filter((item)=>!normalized||item.name.toLowerCase().includes(normalized)||(item.nameEn??'').toLowerCase().includes(normalized)).slice(0,50).forEach((item)=>{const row=document.createElement('article');const body=document.createElement('div');const name=document.createElement('strong');name.textContent=i18n.locale==='en'?(item.nameEn||item.name):item.name;const category=document.createElement('span');category.textContent=item.category;body.append(name,category);const add=document.createElement('button');add.textContent=copy('add');add.addEventListener('click',()=>{const base=(item.id||item.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')).slice(0,45);const created={...item,id:`${base}-${Date.now().toString(36)}`,times:['08:00'],custom:false};void saveUserData(user,'mySupplements',[...supplements,created].slice(0,100)).then(()=>renderSupplements(user)).catch((error:unknown)=>reportError(error,'supplements/add'));});row.append(body,add);list.append(row);});};draw();document.querySelector<HTMLInputElement>('#supp-search')?.addEventListener('input',(event)=>draw((event.currentTarget as HTMLInputElement).value));
+}
+
 async function renderWorkout(user: User): Promise<void> {
+  clearWorkoutTimers();
   const workouts = await loadUserData(user, 'workouts') ?? {};
   workoutEntries = createEntries(workouts, selectedDay);
-  workoutStartedAt = new Date().toISOString();
   shell(`<section class="workout-view"><button id="workout-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
-    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="routine-actions"><button id="rename-routine">${copy('editRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button></div></header><div id="exercise-list"></div>
+    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong></div><div class="routine-actions"><button id="rename-routine">${copy('editRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button></div></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title'); if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
   renderDayButtons(user, workouts); renderExerciseEntries(user,workouts);
-  document.querySelector('#workout-back')?.addEventListener('click', () => { currentView = 'dashboard'; renderDashboard(user); });
+  const updateClock=()=>{const elapsed=Math.max(0,Math.floor((Date.now()-new Date(workoutStartedAt).getTime())/1000));const target=document.querySelector('#session-clock');if(target)target.textContent=[Math.floor(elapsed/3600),Math.floor(elapsed%3600/60),elapsed%60].map((value)=>String(value).padStart(2,'0')).join(':');};updateClock();sessionClock=window.setInterval(updateClock,1000);
+  document.querySelector('#workout-back')?.addEventListener('click', () => { clearWorkoutTimers(); currentView = 'dashboard'; renderDashboard(user); });
   document.querySelector('#finish-workout')?.addEventListener('click', () => void finishWorkout(user, workouts));
   document.querySelector('#add-exercise')?.addEventListener('click',()=>renderExerciseCatalog(user,workouts));
   document.querySelector('#rename-routine')?.addEventListener('click',()=>{const title=prompt(copy('routineName'),workouts[selectedDay]?.title??'');if(title?.trim()){const current=workouts[selectedDay]??{title:selectedDay,titleEn:'',cardioNote:'',exercises:[],abs:[]};void saveUserData(user,'workouts',{...workouts,[selectedDay]:{...current,title:title.trim().slice(0,80)}}).then(()=>renderWorkout(user)).catch((error:unknown)=>reportError(error,'workout/rename'));}});
@@ -256,27 +276,33 @@ function renderExerciseEntries(user:User,workouts:Workouts): void {
     const card = document.createElement('article'); card.className = 'exercise-card';
     const top=document.createElement('div');top.className='exercise-top';const heading = document.createElement('h2'); heading.textContent = entry.exercise.name;const remove=document.createElement('button');remove.textContent=copy('remove');remove.addEventListener('click',()=>{const current=workouts[selectedDay];if(!current)return;const nextExercises=current.exercises.filter((_,index)=>index!==exerciseIndex);void saveUserData(user,'workouts',{...workouts,[selectedDay]:{...current,exercises:nextExercises}}).then(()=>renderWorkout(user)).catch((error:unknown)=>reportError(error,'workout/remove'));});top.append(heading,remove);card.append(top);
     const meta = document.createElement('p'); meta.className = 'exercise-meta'; meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`; card.append(meta);
+    const tools=document.createElement('div');tools.className='exercise-tools';const rest=document.createElement('button');rest.textContent=copy('startRest');rest.addEventListener('click',()=>startRestTimer(entry.exercise.rest));const notes=document.createElement('textarea');notes.maxLength=1000;notes.placeholder=copy('notes');notes.value=entry.exercise.notes;notes.addEventListener('change',()=>{const current=workouts[selectedDay];if(!current)return;const exercises=current.exercises.map((exercise,index)=>index===exerciseIndex?{...exercise,notes:notes.value.slice(0,1000)}:exercise);void saveUserData(user,'workouts',{...workouts,[selectedDay]:{...current,exercises}}).catch((error:unknown)=>reportError(error,'workout/notes'));});tools.append(rest,notes);card.append(tools);
     entry.sets.forEach((set, setIndex) => {
       const row = document.createElement('div'); row.className = 'set-row';
       const number = document.createElement('span'); number.textContent = String(setIndex + 1);
       const kg = document.createElement('input'); kg.type = 'number'; kg.min = '0'; kg.max = '1000'; kg.step = '0.5'; kg.inputMode = 'decimal'; kg.placeholder = copy('load'); kg.ariaLabel = `${copy('load')} ${setIndex + 1}`;
       const reps = document.createElement('input'); reps.type = 'number'; reps.min = '0'; reps.max = '1000'; reps.step = '1'; reps.inputMode = 'numeric'; reps.placeholder = copy('reps'); reps.ariaLabel = `${copy('reps')} ${setIndex + 1}`;
       const done = document.createElement('input'); done.type = 'checkbox'; done.ariaLabel = `${copy('continue')} ${setIndex + 1}`;
-      kg.addEventListener('input', () => { set.kg = Number(kg.value) || 0; }); reps.addEventListener('input', () => { set.reps = Number(reps.value) || 0; }); done.addEventListener('change', () => { set.done = done.checked; row.classList.toggle('done', done.checked); });
+      const guidance=document.createElement('small');guidance.className='set-guidance';kg.addEventListener('input', () => { set.kg = Number(kg.value) || 0;const plates=calculatePlates(set.kg);guidance.textContent=set.kg>20?`${copy('warmup')} ${Math.round(set.kg*.5)}kg · ${copy('plates')}: ${plates.join(' + ')||'—'}`:''; }); reps.addEventListener('input', () => { set.reps = Number(reps.value) || 0; }); done.addEventListener('change', () => { set.done = done.checked; row.classList.toggle('done', done.checked); });
       row.append(number, kg, reps, done); card.append(row);
+      card.append(guidance);
     });
     list.append(card);
   });
 }
 
+function startRestTimer(seconds:number):void{if(restClock)window.clearInterval(restClock);const target=document.querySelector<HTMLElement>('#rest-timer');if(!target)return;const end=Date.now()+Math.max(0,seconds)*1000;target.hidden=false;const tick=()=>{const left=Math.max(0,Math.ceil((end-Date.now())/1000));target.textContent=`${copy('rest')} ${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;if(left<=0){if(restClock)window.clearInterval(restClock);target.hidden=true;}};tick();restClock=window.setInterval(tick,250);}
+
 async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   const count = completedExerciseCount(workoutEntries); if (!count) return;
-  const endedAt = new Date(); const existing = await loadUserData(user, 'sessionLog') ?? [];
+  const endedAt = new Date(); const [existing,history,records]=await Promise.all([loadUserData(user,'sessionLog').then((value)=>value??[]),loadUserData(user,'exerciseHistory').then((value)=>value??{}),loadUserData(user,'exerciseRecords').then((value)=>value??{})]);
   const session = { id: crypto.randomUUID().slice(0, 60), date: dateKey(endedAt), day: selectedDay, title: workouts[selectedDay]?.title ?? selectedDay,
     startedAt: workoutStartedAt, endedAt: endedAt.toISOString(), durationSec: Math.max(0, Math.round((endedAt.getTime() - new Date(workoutStartedAt).getTime()) / 1000)),
     volume: workoutVolume(workoutEntries), exerciseCount: count };
-  await saveUserData(user, 'sessionLog', [...existing, session].slice(-450));
+  const nextHistory={...history};const nextRecords={...records};for(const entry of workoutEntries){const completed=entry.sets.filter((set)=>set.done&&set.kg>0&&set.reps>0).map(({kg,reps})=>({kg,reps}));const best=bestCompletedSet(entry);if(!completed.length||!best)continue;nextHistory[entry.exercise.name]=[...(nextHistory[entry.exercise.name]??[]),{date:dateKey(endedAt),sets:completed,e1rm:best.maxE1rm}].slice(-60);const previous=nextRecords[entry.exercise.name];nextRecords[entry.exercise.name]={maxWeight:Math.max(previous?.maxWeight??0,best.maxWeight),maxWeightReps:best.maxWeight>=(previous?.maxWeight??0)?best.maxWeightReps:previous?.maxWeightReps??0,maxE1rm:Math.max(previous?.maxE1rm??0,best.maxE1rm),maxWeightDate:best.maxWeight>=(previous?.maxWeight??0)?dateKey(endedAt):previous?.maxWeightDate??null,maxE1rmDate:best.maxE1rm>=(previous?.maxE1rm??0)?dateKey(endedAt):previous?.maxE1rmDate??null};}
+  await Promise.all([saveUserData(user,'sessionLog',[...existing,session].slice(-450)),saveUserData(user,'exerciseHistory',nextHistory),saveUserData(user,'exerciseRecords',nextRecords)]);
   const status = document.querySelector('#workout-status'); if (status) status.textContent = navigator.onLine ? copy('workoutSaved') : copy('syncPending');
+  clearWorkoutTimers();
   workoutStartedAt = endedAt.toISOString();
 }
 

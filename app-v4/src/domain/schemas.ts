@@ -31,6 +31,17 @@ export const supplementSchema = z.object({
   id: z.string().max(60).optional(), name: z.string().trim().min(1).max(100), nameEn: z.string().max(100).optional(),
   category: z.string().max(60).default(''), timing: z.string().max(200).optional(), timingEn: z.string().max(200).optional(),
 });
+export const userSupplementSchema = supplementSchema.extend({
+  id: safeIdSchema, times: z.array(z.string().regex(/^\d{2}:\d{2}$/)).max(10).default([]), custom: z.boolean().default(false),
+});
+export type UserSupplement = z.infer<typeof userSupplementSchema>;
+export const supplementsSchema = z.array(userSupplementSchema).max(100);
+export const supplementLogSchema = z.record(dateKeySchema,z.record(z.string().max(60),z.array(z.boolean()).max(10)));
+
+export const exerciseHistoryEntrySchema=z.object({date:dateKeySchema,sets:z.array(loggedSetSchema).max(20),e1rm:finite(0,2000)});
+export const exerciseHistorySchema=z.record(z.string().max(120),z.array(exerciseHistoryEntrySchema).max(60));
+export const exerciseRecordSchema=z.object({maxWeight:finite(0,1000),maxWeightReps:finite(0,1000),maxE1rm:finite(0,2000),maxWeightDate:dateKeySchema.nullable(),maxE1rmDate:dateKeySchema.nullable()});
+export const exerciseRecordsSchema=z.record(z.string().max(120),exerciseRecordSchema);
 
 export const workoutSchema = z.object({
   title: z.string().trim().min(1).max(80),
@@ -105,6 +116,10 @@ export const userDataSchemas = {
   nutritionLog: nutritionLogSchema,
   profile: profileSchema,
   photoIndex: photoIndexSchema,
+  mySupplements: supplementsSchema,
+  supplementLog: supplementLogSchema,
+  exerciseHistory: exerciseHistorySchema,
+  exerciseRecords: exerciseRecordsSchema,
 } as const;
 
 export type UserDataKey = keyof typeof userDataSchemas;

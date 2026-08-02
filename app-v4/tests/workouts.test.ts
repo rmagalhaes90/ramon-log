@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { completedExerciseCount, createEntries, dateKey, workoutVolume } from '../src/features/workouts/model';
+import { bestCompletedSet, calculatePlates, completedExerciseCount, createEntries, dateKey, estimatedOneRepMax, workoutVolume } from '../src/features/workouts/model';
 
 describe('workouts', () => {
   const workouts = { segunda: { title: 'Push', titleEn: '', cardioNote: '', abs: [], exercises: [{ name:'Supino', sets:2, reps:'10', rest:90, equipment:'barbell' as const, muscles:{ chest:1 }, videoUrl:'', notes:'' }] } };
@@ -10,4 +10,6 @@ describe('workouts', () => {
     expect(workoutVolume(entries)).toBe(500); expect(completedExerciseCount(entries)).toBe(1);
   });
   it('formats local dates without UTC drift', () => { expect(dateKey(new Date(2026, 7, 2, 23, 0))).toBe('2026-08-02'); });
+  it('calculates e1RM and plate loading defensively',()=>{expect(estimatedOneRepMax(100,10)).toBeCloseTo(133.33,1);expect(estimatedOneRepMax(Infinity,10)).toBe(0);expect(calculatePlates(100)).toEqual([25,15]);});
+  it('finds records only in completed sets',()=>{const entries=createEntries(workouts,'segunda');const first=entries[0];if(!first)throw new Error('fixture');first.sets[0]={kg:100,reps:5,done:true};first.sets[1]={kg:120,reps:3,done:false};expect(bestCompletedSet(first)?.maxWeight).toBe(100);});
 });

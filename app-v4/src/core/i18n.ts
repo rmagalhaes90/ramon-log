@@ -34,6 +34,8 @@ const messages = {
     confirmation: 'Confirmação', deleting: 'Excluindo com segurança…', deleteFailed: 'Não foi possível concluir a exclusão. Nenhum passo restante será ocultado.',
     admin: 'Administração', users: 'Usuários', block: 'Bloquear', unblock: 'Desbloquear', grantAdmin: 'Tornar admin', revokeAdmin: 'Remover admin',
     addExercise: 'Adicionar exercício', remove: 'Remover', search: 'Buscar exercício', editRoutine: 'Editar rotina', routineName: 'Nome da rotina',
+    sessionTime: 'Tempo de treino', startRest: 'Iniciar descanso', notes: 'Notas', plates: 'Placas por lado', warmup: 'Aquecimento', newRecord: 'Novo recorde',
+    supplements: 'Suplementos', schedule: 'Horário', taken: 'Tomado', addSupplement: 'Adicionar suplemento', noSupplements: 'Nenhum suplemento configurado.',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -68,6 +70,8 @@ const messages = {
     confirmation: 'Confirmation', deleting: 'Deleting securely…', deleteFailed: 'Deletion could not be completed. No remaining step will be hidden.',
     admin: 'Administration', users: 'Users', block: 'Block', unblock: 'Unblock', grantAdmin: 'Grant admin', revokeAdmin: 'Revoke admin',
     addExercise: 'Add exercise', remove: 'Remove', search: 'Search exercise', editRoutine: 'Edit routine', routineName: 'Routine name',
+    sessionTime: 'Workout time', startRest: 'Start rest', notes: 'Notes', plates: 'Plates per side', warmup: 'Warm-up', newRecord: 'New record',
+    supplements: 'Supplements', schedule: 'Schedule', taken: 'Taken', addSupplement: 'Add supplement', noSupplements: 'No supplements configured.',
   },
 } as const;
 
