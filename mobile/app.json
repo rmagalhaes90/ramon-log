@@ -16,7 +16,17 @@
         "backgroundColor": "#080d0b"
       }
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O KYRO acessa suas fotos somente para registrar seu progresso.",
+          "cameraPermission": "O KYRO usa a câmera somente para registrar fotos de progresso.",
+          "microphonePermission": false
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }

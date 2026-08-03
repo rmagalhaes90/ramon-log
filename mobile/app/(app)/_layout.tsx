@@ -39,6 +39,7 @@ export default function ProtectedLayout() {
       <Tabs.Screen name="progress" options={{ title: 'Progresso' }} />
       <Tabs.Screen name="nutrition" options={{ title: 'Nutrição' }} />
       <Tabs.Screen name="supplements" options={{ title: 'Suplementos' }} />
+      <Tabs.Screen name="photos" options={{ title: 'Fotos' }} />
     </Tabs>
   );
 }

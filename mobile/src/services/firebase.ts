@@ -2,11 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, getReactNativePersistence, initializeAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
 import { readEnvironment } from '@/config/env';
 
 let auth: Auth | undefined;
 let firestore: Firestore | undefined;
+let storage: FirebaseStorage | undefined;
 
 function getMobileApp() {
   if (getApps().length > 0) return getApp();
@@ -40,4 +42,9 @@ export function getMobileAuth(): Auth {
 export function getMobileFirestore(): Firestore {
   firestore ??= getFirestore(getMobileApp());
   return firestore;
+}
+
+export function getMobileStorage(): FirebaseStorage {
+  storage ??= getStorage(getMobileApp());
+  return storage;
 }
