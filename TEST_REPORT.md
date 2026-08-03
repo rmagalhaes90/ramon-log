@@ -175,3 +175,9 @@ Na matriz final das três fases, Prettier, typecheck strict, ESLint e **65 teste
 O admin mobile lista no máximo 100 usuários, fica oculto sem claim e redireciona acesso direto não autorizado. Bloqueio e roles continuam validados pela callable e agora geram auditoria imutável com timestamp do servidor; a tela mostra os 50 eventos mais recentes. Um Error Boundary registra até 50 diagnósticos locais sem enviar PII a terceiros e oferece recuperação sem apagar dados. O CI passa a exigir exports Android e iOS além da matriz web.
 
 Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build Vite passou com 155 módulos. O Android exportou 1.463 módulos/5,2 MB e o iOS exportou 1.332 módulos/4,9 MB. Playwright passou 2 smoke tests em Chromium/WebKit móvel e ignorou os 2 cenários que requerem Emulators. Os testes locais de Rules/Functions não iniciaram porque não há Java instalado no PATH; o workflow instala Java 21 e permanece responsável por validar esses mesmos testes antes de aceitar a fase.
+
+## Rodada 2026-08-03 — i18n mobile expandido alpha.26
+
+O catálogo PT/EN persistente passou a cobrir títulos, navegação, estados vazios, carregamento e ações principais de dashboard, treinos, progresso, nutrição, suplementos, fotos, conta e admin. Todas as chamadas usam chaves inferidas pelo TypeScript; renomes ou ausências interrompem o typecheck. Valores do usuário e nomes de exercícios/suplementos permanecem inalterados.
+
+Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build Vite passou com 155 módulos. Android exportou 1.463 módulos/5,2 MB e iOS exportou 1.332 módulos/4,9 MB. Playwright passou 2 smoke tests em Chromium e WebKit móvel; 2 cenários dependentes dos Emulators ficaram ignorados localmente e permanecem cobertos pelo CI.

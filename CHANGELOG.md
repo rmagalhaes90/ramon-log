@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.26: catálogo PT/EN tipado aplicado às telas mobile de dashboard, treinos, progresso, nutrição, suplementos, fotos, conta e admin.
 - Fase alpha.25: admin mobile com auditoria server-side, error boundary/diagnóstico local e bundles Android+iOS obrigatórios no CI.
 - Fase alpha.24: configurações mobile e exclusão integral de conta com reautenticação e confirmação em duas etapas.
 - Fase alpha.23: provider i18n mobile PT/EN persistente, navegação e dashboard principal traduzíveis sem reload.
