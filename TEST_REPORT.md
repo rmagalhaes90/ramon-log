@@ -169,3 +169,9 @@ Um provider de locale persistido em AsyncStorage agora alterna português/inglê
 A nova área de conta oferece logout e exclusão integral. A ação exige a frase `EXCLUIR`, confirmação nativa destrutiva e, para contas password, reautenticação com a senha atual. A callable autenticada remove fotos do Storage, documentos Firestore, índice compartilhado e usuário Auth; o cache local só é apagado depois da confirmação server-side. Falhas mantêm os dados locais e mostram estado assertivo.
 
 Na matriz final das três fases, Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build Vite passou com 155 módulos; o bundle Android com Notifications e Functions passou com **1.459 módulos** e Hermes de **5,2 MB**. Playwright passou 2 smoke tests em Chromium/WebKit móvel e ignorou 2 cenários dependentes dos Firebase Emulators, não iniciados nesta rodada.
+
+## Rodada 2026-08-03 — hardening até 90% alpha.25
+
+O admin mobile lista no máximo 100 usuários, fica oculto sem claim e redireciona acesso direto não autorizado. Bloqueio e roles continuam validados pela callable e agora geram auditoria imutável com timestamp do servidor; a tela mostra os 50 eventos mais recentes. Um Error Boundary registra até 50 diagnósticos locais sem enviar PII a terceiros e oferece recuperação sem apagar dados. O CI passa a exigir exports Android e iOS além da matriz web.
+
+Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build Vite passou com 155 módulos. O Android exportou 1.463 módulos/5,2 MB e o iOS exportou 1.332 módulos/4,9 MB. Playwright passou 2 smoke tests em Chromium/WebKit móvel e ignorou os 2 cenários que requerem Emulators. Os testes locais de Rules/Functions não iniciaram porque não há Java instalado no PATH; o workflow instala Java 21 e permanece responsável por validar esses mesmos testes antes de aceitar a fase.

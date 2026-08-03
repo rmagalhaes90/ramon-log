@@ -1,5 +1,7 @@
 # Segurança
 
+As alterações administrativas de bloqueio e role são autorizadas novamente por callable Functions e registradas em `adminAudit` com ator, alvo, ação, valor e timestamp server-side. Clientes não podem criar, alterar ou excluir essa trilha; somente administradores autenticados podem consultá-la.
+
 ## Emuladores locais
 
 Os SDKs somente conectam aos emuladores quando `VITE_USE_FIREBASE_EMULATORS=true`. O valor padrão é `false`. Os testes automatizados usam o projeto `demo-kyro-v4`, para o qual o Firebase CLI bloqueia tentativas de acesso a serviços não emulados. O runner também encerra imediatamente se `FIREBASE_AUTH_EMULATOR_HOST` não estiver presente, evitando criação acidental de contas reais.
