@@ -11,7 +11,7 @@ Legenda: **Pronto** = implementado/testado; **Parcial** = base funcional, expans
 | Progressão, plateau e deload determinísticos   | Pronto  | Motor, RIR/RPE e aceite/recusa persistidos com aplicação da carga            |
 | Readiness                                      | Pronto  | Score, plano automático e override com motivo persistido                     |
 | Gym Occupied/substituições                     | Pronto  | Ranking muscular/equipamento e troca segura na rotina                        |
-| Nutrição e barcode                             | Parcial | Macros/água/refeições/câmera prontos; fibra/favoritos/cópia pendentes        |
+| Nutrição e barcode                             | Pronto  | Macros, fibra, água, favoritos, cópia/duplicação, barcode e câmera           |
 | Fotos privadas e comparação                    | Pronto  | Storage privado, fila, EXIF removido e resize local                          |
 | Offline e sync                                 | Pronto  | IndexedDB v3, fila visível e resolução explícita local/nuvem sem overwrite   |
 | PWA e atualização                              | Pronto  | Worker, manifesto, ícones e update consentido; gate iOS real                 |

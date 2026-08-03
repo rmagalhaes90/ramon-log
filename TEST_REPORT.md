@@ -95,3 +95,9 @@ Os dois primeiros jobs do GitHub Actions falharam antes dos testes porque pnpm 1
 Formatação, typecheck strict, ESLint, **26 arquivos/56 testes Vitest**, build e Playwright público em Chromium/WebKit passaram. O build transformou 148 módulos; app JS 205,29 kB (58,24 kB gzip), CSS 18,02 kB (3,80 kB gzip) e o chunk Firestore permaneceu em 433,72 kB (128,61 kB gzip).
 
 Os testes cobrem detecção de revisão remota divergente, ausência de falso conflito sem revisão-base, contratos das decisões de progressão e retrocompatibilidade dos schemas. Firestore/Storage Emulator repetiu ownership, isolamento entre contas, administração e limites de upload com código 0. Nenhum deploy foi executado.
+
+## Rodada 2026-08-03 — nutrição reutilizável alpha.12
+
+Formatação, typecheck strict, ESLint, **26 arquivos/57 testes Vitest**, build e Playwright público em Chromium/WebKit passaram. A suíte valida fibra do Open Food Facts, meta retrocompatível, cópia com IDs novos e duplicação que preserva refeições existentes. O build transformou 148 módulos; app JS 209,70 kB (59,34 kB gzip) e CSS 18,23 kB (3,84 kB gzip).
+
+Favoritos são limitados a 100 e refeições a 200 por dia pelos schemas. A duplicação é uma mesclagem aditiva; nenhum dado do dia de destino é removido. Nenhum deploy foi executado.
