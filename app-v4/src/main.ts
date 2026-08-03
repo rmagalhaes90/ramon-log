@@ -53,6 +53,13 @@ import { lookupBarcode } from './features/nutrition/barcode';
 import { barcodeCameraSupported, startBarcodeCamera } from './features/nutrition/camera';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
 import { chartPoints } from './features/progress/chart';
+import {
+  measurementSeries,
+  muscleVolume,
+  readinessPerformanceCorrelation,
+  seriesDelta,
+  type MeasurementKey,
+} from './features/progress/analytics';
 import { showLocalNotification } from './features/notifications';
 import { cacheGet, cacheSet, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
@@ -391,11 +398,12 @@ function bindBack(user: User): void {
 }
 
 async function renderProgress(user: User): Promise<void> {
-  const [weights, measurements, readiness, sessions] = await Promise.all([
+  const [weights, measurements, readiness, sessions, exerciseHistory] = await Promise.all([
     loadUserData(user, 'bodyWeights').then((value) => value ?? []),
     loadUserData(user, 'bodyMeasurements').then((value) => value ?? {}),
     loadUserData(user, 'readinessLog').then((value) => value ?? {}),
     loadUserData(user, 'sessionLog').then((value) => value ?? []),
+    loadUserData(user, 'exerciseHistory').then((value) => value ?? {}),
   ]);
   const latest = [...weights].sort((a, b) => b.d.localeCompare(a.d))[0];
   const delta = weightDelta(weights);
@@ -409,10 +417,10 @@ async function renderProgress(user: User): Promise<void> {
   );
   shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">02 · RECOVER</p><h1>${copy('progress')}</h1>
     <div class="metric-grid"><article><span>${copy('weight')}</span><strong id="latest-weight">—</strong><small id="weight-delta"></small></article><article><span>${copy('readiness')}</span><strong id="readiness-score">—</strong><small id="readiness-class"></small></article><article><span>${copy('history')}</span><strong>${sessions.length}</strong></article></div>
-    <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form>
+    <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form><section><h2>${copy('measurementTrends')}</h2><div id="measurement-charts" class="measurement-charts"></div></section>
     <form id="measurements-form" class="measurements-form"><label>${copy('waist')}<input name="waist" type="number" min="20" max="300" step="0.1"></label><label>${copy('chest')}<input name="chest" type="number" min="20" max="300" step="0.1"></label><label>${copy('arm')}<input name="arm" type="number" min="10" max="150" step="0.1"></label><label>${copy('hip')}<input name="hip" type="number" min="20" max="300" step="0.1"></label><label>${copy('thigh')}<input name="thigh" type="number" min="10" max="200" step="0.1"></label><button class="primary">${copy('saveMeasurements')}</button></form>
     <form id="readiness-form" class="readiness-form">${(['sleep', 'energy', 'soreness', 'stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<label>${copy('readinessOverride')}<select name="override"><option value="">${copy('automatic')}</option>${(['high', 'normal', 'reduce', 'light', 'rest'] as const).map((value) => `<option value="${value}">${copy(`readiness_${value}` as MessageKey)}</option>`).join('')}</select></label><label>${copy('overrideReason')}<input name="overrideReason" maxlength="300"></label><button class="primary">${copy('save')}</button></form>
-    <section class="weekly-report"><h2>${copy('weeklyReport')}</h2><div><article><strong>${report.sessions}</strong><span>${copy('sessions')}</span></article><article><strong>${Math.round(report.volume)}</strong><span>${copy('volume')}</span></article><article><strong>${Math.round(report.minutes)}</strong><span>${copy('minutes')}</span></article><article><strong>${streak}</strong><span>${copy('streak')}</span></article></div><button id="share-report">${copy('shareReport')}</button></section><section><h2>${copy('achievements')}</h2><div id="achievement-list" class="achievement-list"></div></section><button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
+    <section class="training-analytics"><h2>${copy('trainingAnalytics')}</h2><article><strong id="readiness-correlation">—</strong><span>${copy('readinessCorrelation')}</span><small id="correlation-samples"></small></article><div id="muscle-volume" class="muscle-volume"></div></section><section class="weekly-report"><h2>${copy('weeklyReport')}</h2><div><article><strong>${report.sessions}</strong><span>${copy('sessions')}</span></article><article><strong>${Math.round(report.volume)}</strong><span>${copy('volume')}</span></article><article><strong>${Math.round(report.minutes)}</strong><span>${copy('minutes')}</span></article><article><strong>${streak}</strong><span>${copy('streak')}</span></article></div><button id="share-report">${copy('shareReport')}</button></section><section><h2>${copy('achievements')}</h2><div id="achievement-list" class="achievement-list"></div></section><button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
   const weightTarget = document.querySelector('#latest-weight');
   if (weightTarget) weightTarget.textContent = latest ? `${latest.kg.toFixed(1)} kg` : '—';
   const deltaTarget = document.querySelector('#weight-delta');
@@ -461,6 +469,52 @@ async function renderProgress(user: User): Promise<void> {
     document.querySelector('#weight-chart'),
     weights.map((item) => ({ d: item.d, value: item.kg })),
   );
+  const measurementCharts = document.querySelector('#measurement-charts');
+  (['waist', 'chest', 'arm', 'hip', 'thigh'] as MeasurementKey[]).forEach((key) => {
+    const series = measurementSeries(measurements, key);
+    const card = document.createElement('article');
+    const heading = document.createElement('h3');
+    heading.textContent = copy(key);
+    const delta = document.createElement('small');
+    const change = seriesDelta(series);
+    delta.textContent =
+      change === null
+        ? copy('insufficientTrend')
+        : `${change >= 0 ? '+' : ''}${change.toFixed(1)} cm`;
+    const chart = document.createElement('div');
+    chart.className = 'progress-chart compact';
+    chart.ariaLabel = `${copy(key)} · ${copy('measurementTrends')}`;
+    card.append(heading, delta, chart);
+    measurementCharts?.append(card);
+    drawProgressChart(chart, series);
+  });
+  const correlation = readinessPerformanceCorrelation(readiness, sessions);
+  const correlationTarget = document.querySelector('#readiness-correlation');
+  if (correlationTarget)
+    correlationTarget.textContent =
+      correlation.correlation === null ? '—' : correlation.correlation.toFixed(2);
+  const sampleTarget = document.querySelector('#correlation-samples');
+  if (sampleTarget)
+    sampleTarget.textContent = `${correlation.samples} ${copy('correlationSamples')}`;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 27);
+  const muscles = muscleVolume(exerciseHistory, exerciseCatalog, dateKey(cutoff)).slice(0, 8);
+  const muscleTarget = document.querySelector('#muscle-volume');
+  const maximumMuscleVolume = muscles[0]?.volume ?? 0;
+  muscles.forEach(({ muscle, volume }) => {
+    const row = document.createElement('article');
+    const label = document.createElement('span');
+    label.textContent = muscle;
+    const amount = document.createElement('strong');
+    amount.textContent = Math.round(volume).toLocaleString(i18n.locale);
+    const meter = document.createElement('progress');
+    meter.max = maximumMuscleVolume || 1;
+    meter.value = volume;
+    meter.ariaLabel = `${muscle}: ${Math.round(volume)}`;
+    row.append(label, amount, meter);
+    muscleTarget?.append(row);
+  });
+  if (!muscles.length && muscleTarget) muscleTarget.textContent = copy('noMuscleData');
   bindBack(user);
   document.querySelector('#open-photos')?.addEventListener('click', () => {
     currentView = 'photos';

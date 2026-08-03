@@ -1206,3 +1206,33 @@ h2 {
   flex-wrap: wrap;
   gap: 0.45rem;
 }
+.measurement-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.measurement-charts article {
+  min-width: 0;
+}
+.progress-chart.compact svg {
+  max-height: 120px;
+}
+.training-analytics > article {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 1rem;
+}
+.muscle-volume {
+  display: grid;
+  gap: 0.55rem;
+}
+.muscle-volume article {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) auto;
+  gap: 0.25rem 0.75rem;
+}
+.muscle-volume progress {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--volt);
+}
