@@ -1,5 +1,10 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import { queueItemSchema, type QueueItem } from '../core/validation';
+import {
+  queueItemSchema,
+  syncConflictSchema,
+  type QueueItem,
+  type SyncConflict,
+} from '../core/validation';
 
 interface KyroDatabase extends DBSchema {
   cache: { key: string; value: unknown };
@@ -9,12 +14,13 @@ interface KyroDatabase extends DBSchema {
     value: { id: string; uid: string; date: string; file: Blob; createdAt: number };
     indexes: { 'by-uid': string };
   };
+  conflicts: { key: string; value: SyncConflict; indexes: { 'by-uid': string } };
 }
 
 let connection: Promise<IDBPDatabase<KyroDatabase>> | undefined;
 
 export function database(): Promise<IDBPDatabase<KyroDatabase>> {
-  connection ??= openDB<KyroDatabase>('kyro-v4', 2, {
+  connection ??= openDB<KyroDatabase>('kyro-v4', 3, {
     upgrade(db, oldVersion) {
       if (oldVersion < 1) {
         db.createObjectStore('cache');
@@ -24,6 +30,10 @@ export function database(): Promise<IDBPDatabase<KyroDatabase>> {
       if (oldVersion < 2) {
         const photos = db.createObjectStore('photoQueue', { keyPath: 'id' });
         photos.createIndex('by-uid', 'uid');
+      }
+      if (oldVersion < 3) {
+        const conflicts = db.createObjectStore('conflicts', { keyPath: 'id' });
+        conflicts.createIndex('by-uid', 'uid');
       }
     },
   });
@@ -55,6 +65,16 @@ export async function queueDelete(id: string): Promise<void> {
   await (await database()).delete('queue', id);
 }
 
+export async function conflictPut(value: SyncConflict): Promise<void> {
+  await (await database()).put('conflicts', syncConflictSchema.parse(value));
+}
+export async function conflictsForUser(uid: string): Promise<SyncConflict[]> {
+  return (await database()).getAllFromIndex('conflicts', 'by-uid', uid);
+}
+export async function conflictDelete(id: string): Promise<void> {
+  await (await database()).delete('conflicts', id);
+}
+
 export async function pendingPhotoPut(value: {
   id: string;
   uid: string;
@@ -73,11 +93,12 @@ export async function pendingPhotoDelete(id: string): Promise<void> {
 
 export async function clearLocalData(): Promise<void> {
   const db = await database();
-  const transaction = db.transaction(['cache', 'queue', 'photoQueue'], 'readwrite');
+  const transaction = db.transaction(['cache', 'queue', 'photoQueue', 'conflicts'], 'readwrite');
   await Promise.all([
     transaction.objectStore('cache').clear(),
     transaction.objectStore('queue').clear(),
     transaction.objectStore('photoQueue').clear(),
+    transaction.objectStore('conflicts').clear(),
     transaction.done,
   ]);
 }

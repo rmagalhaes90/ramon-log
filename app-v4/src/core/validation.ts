@@ -12,3 +12,15 @@ export const queueItemSchema = z.object({
 });
 
 export type QueueItem = z.infer<typeof queueItemSchema>;
+
+export const syncConflictSchema = z.object({
+  id: z.string().min(1).max(256),
+  uid: z.string().min(1).max(128),
+  key: z.string().min(1).max(64),
+  localValue: z.unknown(),
+  remoteValue: z.unknown(),
+  localUpdatedAt: z.iso.datetime(),
+  remoteUpdatedAt: z.iso.datetime(),
+  detectedAt: z.iso.datetime(),
+});
+export type SyncConflict = z.infer<typeof syncConflictSchema>;

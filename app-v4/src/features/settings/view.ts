@@ -8,11 +8,17 @@ import {
   requestNotificationAccess,
   showLocalNotification,
 } from '../notifications';
-import { clearLocalData } from '../../services/database';
-import { loadUserData, saveUserData } from '../../services/user-data';
+import { clearLocalData, queueList } from '../../services/database';
+import {
+  listSyncConflicts,
+  loadUserData,
+  resolveSyncConflict,
+  saveUserData,
+} from '../../services/user-data';
 import { formatBytes, requestPersistentStorage, storageHealth } from '../offline/storage';
 import { resetFeatureGroup, type ResetGroup } from './reset';
 import { loadEntitlements } from '../subscriptions';
+import { photoQueueCount } from '../photos/offline';
 
 interface SettingsViewOptions {
   copy: (key: MessageKey) => string;
@@ -47,6 +53,71 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   persistButton.textContent = copy('protectStorage');
   storageCard.append(storageTitle, storageStatus, persistButton);
   document.querySelector('.backup-card')?.before(storageCard);
+  const syncCard = document.createElement('article');
+  syncCard.className = 'sync-card';
+  const syncTitle = document.createElement('h2');
+  syncTitle.textContent = copy('syncDetails');
+  const syncStatus = document.createElement('p');
+  syncStatus.textContent = copy('checkingSync');
+  const syncList = document.createElement('div');
+  syncList.className = 'sync-list';
+  syncCard.append(syncTitle, syncStatus, syncList);
+  storageCard.after(syncCard);
+  void Promise.all([queueList(), photoQueueCount(user), listSyncConflicts(user)])
+    .then(([queued, photos, conflicts]) => {
+      const userQueue = queued.filter((item) => item.id.startsWith(`${user.uid}-`));
+      syncStatus.textContent = `${userQueue.length + photos} ${copy('pendingItems')} · ${conflicts.length} ${copy('conflicts')}`;
+      userQueue.forEach((item) => {
+        const row = document.createElement('article');
+        const label = document.createElement('strong');
+        label.textContent = item.path;
+        const detail = document.createElement('small');
+        detail.textContent = `${copy('attempts')}: ${item.attempts} · ${copy('nextAttempt')}: ${new Date(item.nextAttemptAt).toLocaleString(options.locale)}`;
+        row.append(label, detail);
+        syncList.append(row);
+      });
+      if (photos) {
+        const row = document.createElement('article');
+        row.textContent = `${photos} ${copy('photosPending')}`;
+        syncList.append(row);
+      }
+      conflicts.forEach((conflict) => {
+        const row = document.createElement('article');
+        row.className = 'sync-conflict';
+        const label = document.createElement('strong');
+        label.textContent = `${copy('conflictDetected')}: ${conflict.key}`;
+        const detail = document.createElement('small');
+        detail.textContent = `${copy('localVersion')}: ${new Date(conflict.localUpdatedAt).toLocaleString(options.locale)} · ${copy('cloudVersion')}: ${new Date(conflict.remoteUpdatedAt).toLocaleString(options.locale)}`;
+        const actions = document.createElement('div');
+        const keepLocal = document.createElement('button');
+        keepLocal.textContent = copy('keepLocal');
+        keepLocal.disabled = !navigator.onLine;
+        const useCloud = document.createElement('button');
+        useCloud.textContent = copy('useCloud');
+        const resolve = (choice: 'local' | 'remote') => {
+          keepLocal.disabled = true;
+          useCloud.disabled = true;
+          void resolveSyncConflict(user, conflict, choice)
+            .then(() => renderSettingsView(user, options))
+            .catch((error: unknown) => {
+              keepLocal.disabled = !navigator.onLine;
+              useCloud.disabled = false;
+              reportError(error, 'sync/resolve');
+            });
+        };
+        keepLocal.addEventListener('click', () => resolve('local'));
+        useCloud.addEventListener('click', () => resolve('remote'));
+        actions.append(keepLocal, useCloud);
+        row.append(label, detail, actions);
+        syncList.append(row);
+      });
+      if (!userQueue.length && !photos && !conflicts.length)
+        syncList.textContent = copy('syncClear');
+    })
+    .catch((error: unknown) => {
+      syncStatus.textContent = copy('syncUnavailable');
+      reportError(error, 'sync/status');
+    });
   const planCard = document.createElement('article');
   planCard.className = 'subscription-card';
   const planTitle = document.createElement('h2');

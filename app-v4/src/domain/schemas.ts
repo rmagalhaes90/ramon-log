@@ -83,6 +83,18 @@ export const exerciseRecordSchema = z.object({
   maxE1rmDate: dateKeySchema.nullable(),
 });
 export const exerciseRecordsSchema = z.record(z.string().max(120), exerciseRecordSchema);
+export const progressionDecisionSchema = z.object({
+  id: safeIdSchema,
+  exercise: z.string().trim().min(1).max(120),
+  action: z.enum(['increase', 'maintain', 'deload', 'plateau']),
+  accepted: z.boolean(),
+  suggestedLoad: finite(0, 1000).nullable(),
+  evidenceDate: dateKeySchema.optional(),
+  reason: boundedText(300),
+  decidedAt: z.iso.datetime(),
+});
+export type ProgressionDecision = z.infer<typeof progressionDecisionSchema>;
+export const progressionDecisionsSchema = z.array(progressionDecisionSchema).max(500);
 
 export const workoutSchema = z.object({
   title: z.string().trim().min(1).max(80),
@@ -186,6 +198,7 @@ export const userDataSchemas = {
   supplementLog: supplementLogSchema,
   exerciseHistory: exerciseHistorySchema,
   exerciseRecords: exerciseRecordsSchema,
+  progressionDecisions: progressionDecisionsSchema,
   notificationSettings: notificationSettingsSchema,
 } as const;
 

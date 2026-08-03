@@ -4,6 +4,7 @@ import {
   exerciseHistoryEntrySchema,
   exerciseSchema,
   readinessLogSchema,
+  progressionDecisionsSchema,
 } from '../src/domain/schemas';
 
 describe('domain schemas', () => {
@@ -70,5 +71,22 @@ describe('domain schemas', () => {
         },
       })['2026-08-03']?.plannedClassification,
     ).toBe('high');
+  });
+
+  it('validates persisted progression decisions', () => {
+    expect(
+      progressionDecisionsSchema.parse([
+        {
+          id: 'decision_1',
+          exercise: 'Squat',
+          action: 'increase',
+          accepted: true,
+          suggestedLoad: 102.5,
+          evidenceDate: '2026-08-03',
+          reason: '',
+          decidedAt: '2026-08-03T12:00:00.000Z',
+        },
+      ]),
+    ).toHaveLength(1);
   });
 });

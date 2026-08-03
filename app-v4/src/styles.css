@@ -1163,3 +1163,29 @@ h2 {
   border-color: color-mix(in srgb, #f0a34a 55%, transparent);
   background: color-mix(in srgb, #f0a34a 10%, transparent);
 }
+.progression-actions,
+.sync-conflict > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.55rem 0;
+}
+.progression-decision {
+  display: block;
+  color: var(--dim);
+  margin-bottom: 0.75rem;
+}
+.sync-list {
+  display: grid;
+  gap: 0.6rem;
+}
+.sync-list > article {
+  display: grid;
+  gap: 0.3rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.65rem;
+}
+.sync-conflict {
+  border-left: 3px solid #ffb74d;
+  padding-left: 0.7rem;
+}

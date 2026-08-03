@@ -18,6 +18,7 @@ const backupDataSchema = z
     supplementLog: userDataSchemas.supplementLog.optional(),
     exerciseHistory: userDataSchemas.exerciseHistory.optional(),
     exerciseRecords: userDataSchemas.exerciseRecords.optional(),
+    progressionDecisions: userDataSchemas.progressionDecisions.optional(),
     notificationSettings: userDataSchemas.notificationSettings.optional(),
   })
   .strict();

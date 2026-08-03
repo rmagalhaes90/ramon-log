@@ -2,7 +2,7 @@ import './styles.css';
 import type { User } from 'firebase/auth';
 import { installGlobalErrorHandlers, onError, reportError } from './core/errors';
 import { createI18n, type Locale, type MessageKey } from './core/i18n';
-import type { NutritionDay, Workouts } from './domain/schemas';
+import type { NutritionDay, ProgressionDecision, Workouts } from './domain/schemas';
 import {
   authErrorKey,
   createAccount,
@@ -849,10 +849,11 @@ async function renderSupplements(user: User): Promise<void> {
 
 async function renderWorkout(user: User): Promise<void> {
   clearWorkoutTimers();
-  const [workoutsValue, draft, exerciseHistory] = await Promise.all([
+  const [workoutsValue, draft, exerciseHistory, progressionDecisions] = await Promise.all([
     loadUserData(user, 'workouts'),
     loadWorkoutDraft(user, selectedDay),
     loadUserData(user, 'exerciseHistory'),
+    loadUserData(user, 'progressionDecisions').then((value) => value ?? []),
   ]);
   const workouts = workoutsValue ?? {};
   const freshEntries = createEntries(workouts, selectedDay);
@@ -868,7 +869,7 @@ async function renderWorkout(user: User): Promise<void> {
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
   renderDayButtons(user, workouts);
-  renderExerciseEntries(user, workouts, exerciseHistory ?? {});
+  renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions);
   const updateClock = () => {
     const elapsed = Math.max(
       0,
@@ -1026,6 +1027,7 @@ function renderExerciseEntries(
   user: User,
   workouts: Workouts,
   exerciseHistory: Record<string, PerformanceEntry[]>,
+  progressionDecisions: ProgressionDecision[],
 ): void {
   const list = document.querySelector('#exercise-list');
   if (!list) return;
@@ -1092,7 +1094,11 @@ function renderExerciseEntries(
       exerciseHistory[entry.exercise.name] ?? [],
       entry.exercise.reps,
     );
+    const evidenceDate = [...(exerciseHistory[entry.exercise.name] ?? [])].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    )[0]?.date;
     if (recommendation.action !== 'insufficient') {
+      const action = recommendation.action;
       const insight = document.createElement('p');
       insight.className = `progression-insight ${recommendation.action}`;
       const recommendationText = copy(`progression_${recommendation.action}` as MessageKey);
@@ -1100,6 +1106,65 @@ function renderExerciseEntries(
         ? `${recommendationText} ${recommendation.suggestedLoad} kg.`
         : recommendationText;
       card.append(insight);
+      const existingDecision = [...progressionDecisions]
+        .reverse()
+        .find(
+          (decision) =>
+            decision.exercise === entry.exercise.name &&
+            decision.action === action &&
+            decision.suggestedLoad === recommendation.suggestedLoad &&
+            decision.evidenceDate === evidenceDate,
+        );
+      if (existingDecision) {
+        const decisionStatus = document.createElement('small');
+        decisionStatus.className = 'progression-decision';
+        decisionStatus.textContent = copy(
+          existingDecision.accepted ? 'suggestionAccepted' : 'suggestionRejected',
+        );
+        card.append(decisionStatus);
+      } else {
+        const decisionActions = document.createElement('div');
+        decisionActions.className = 'progression-actions';
+        const decide = (accepted: boolean) => {
+          const reason = accepted
+            ? ''
+            : (prompt(copy('rejectionReason')) ?? '').trim().slice(0, 300);
+          const decision: ProgressionDecision = {
+            id: crypto.randomUUID().slice(0, 60),
+            exercise: entry.exercise.name,
+            action,
+            accepted,
+            suggestedLoad: recommendation.suggestedLoad,
+            ...(evidenceDate ? { evidenceDate } : {}),
+            reason,
+            decidedAt: new Date().toISOString(),
+          };
+          if (accepted && recommendation.suggestedLoad)
+            entry.sets
+              .filter((set) => !set.done)
+              .forEach((set) => (set.kg = recommendation.suggestedLoad ?? set.kg));
+          void Promise.all([
+            saveUserData(
+              user,
+              'progressionDecisions',
+              [...progressionDecisions, decision].slice(-500),
+            ),
+            accepted ? persistDraft() : Promise.resolve(),
+          ])
+            .then(() => renderWorkout(user))
+            .catch((error: unknown) => reportError(error, 'progression/decision'));
+        };
+        const accept = document.createElement('button');
+        accept.type = 'button';
+        accept.textContent = copy('acceptSuggestion');
+        accept.addEventListener('click', () => decide(true));
+        const reject = document.createElement('button');
+        reject.type = 'button';
+        reject.textContent = copy('rejectSuggestion');
+        reject.addEventListener('click', () => decide(false));
+        decisionActions.append(accept, reject);
+        card.append(decisionActions);
+      }
     }
     if (entry.exercise.videoUrl) {
       const video = document.createElement('a');

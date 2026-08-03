@@ -2,7 +2,13 @@ import type { User } from 'firebase/auth';
 import { saveUserData } from '../../services/user-data';
 export type ResetGroup = 'training' | 'progress' | 'nutrition';
 export const resetKeys: Record<ResetGroup, string[]> = {
-  training: ['workouts', 'sessionLog', 'exerciseHistory', 'exerciseRecords'],
+  training: [
+    'workouts',
+    'sessionLog',
+    'exerciseHistory',
+    'exerciseRecords',
+    'progressionDecisions',
+  ],
   progress: ['bodyWeights', 'bodyMeasurements', 'readinessLog'],
   nutrition: ['nutritionLog', 'mySupplements', 'supplementLog'],
 };
@@ -13,6 +19,7 @@ export async function resetFeatureGroup(user: User, group: ResetGroup): Promise<
       saveUserData(user, 'sessionLog', []),
       saveUserData(user, 'exerciseHistory', {}),
       saveUserData(user, 'exerciseRecords', {}),
+      saveUserData(user, 'progressionDecisions', []),
     ]);
     return;
   }
