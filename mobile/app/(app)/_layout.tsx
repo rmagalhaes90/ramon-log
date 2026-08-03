@@ -2,9 +2,11 @@ import { Redirect, Tabs } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/auth/AuthProvider';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { tokens } from '@/theme/tokens';
 
 export default function ProtectedLayout() {
+  const { t } = useLocale();
   const { status, logout } = useAuth();
   if (status === 'loading')
     return (
@@ -34,12 +36,13 @@ export default function ProtectedLayout() {
         tabBarStyle: styles.tabBar,
       }}
     >
-      <Tabs.Screen name="dashboard" options={{ title: 'Hoje' }} />
-      <Tabs.Screen name="workouts" options={{ title: 'Treinos' }} />
-      <Tabs.Screen name="progress" options={{ title: 'Progresso' }} />
-      <Tabs.Screen name="nutrition" options={{ title: 'Nutrição' }} />
-      <Tabs.Screen name="supplements" options={{ title: 'Suplementos' }} />
-      <Tabs.Screen name="photos" options={{ title: 'Fotos' }} />
+      <Tabs.Screen name="dashboard" options={{ title: t('today') }} />
+      <Tabs.Screen name="workouts" options={{ title: t('workouts') }} />
+      <Tabs.Screen name="progress" options={{ title: t('progress') }} />
+      <Tabs.Screen name="nutrition" options={{ title: t('nutrition') }} />
+      <Tabs.Screen name="supplements" options={{ title: t('supplements') }} />
+      <Tabs.Screen name="photos" options={{ title: t('photos') }} />
+      <Tabs.Screen name="settings" options={{ title: t('settings') }} />
     </Tabs>
   );
 }

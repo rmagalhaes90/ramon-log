@@ -10,6 +10,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { z } from 'zod';
 
 import { useAuth } from '@/auth/AuthProvider';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { loadUserData, saveUserData, SyncConflictError } from '@/services/user-data';
 import { tokens } from '@/theme/tokens';
 
@@ -52,6 +53,7 @@ const classificationLabels = {
 
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
+  const { locale, setLocale, t } = useLocale();
   const [data, setData] = useState<DashboardSummary | null>(null);
   const [readiness, setReadiness] = useState<ReadinessLog>({});
   const [answers, setAnswers] = useState<Record<ScaleKey, number>>({
@@ -129,14 +131,19 @@ export default function DashboardScreen() {
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.eyebrow}>VISÃO DE HOJE</Text>
+          <Text style={styles.eyebrow}>{t('overview')}</Text>
           <Text accessibilityRole="header" style={styles.title}>
-            Olá, {user?.displayName ?? user?.email?.split('@')[0] ?? 'atleta'}
+            {t('hello')}, {user?.displayName ?? user?.email?.split('@')[0] ?? 'atleta'}
           </Text>
         </View>
-        <Pressable onPress={() => void logout()}>
-          <Text style={styles.logout}>Sair</Text>
-        </Pressable>
+        <View>
+          <Pressable onPress={() => setLocale(locale === 'pt' ? 'en' : 'pt')}>
+            <Text style={styles.logout}>{t('language')}</Text>
+          </Pressable>
+          <Pressable onPress={() => void logout()}>
+            <Text style={styles.logout}>{t('logout')}</Text>
+          </Pressable>
+        </View>
       </View>
       {error ? (
         <Text accessibilityLiveRegion="polite" style={styles.error}>
@@ -151,7 +158,7 @@ export default function DashboardScreen() {
             <Text style={styles.heroValue}>
               {data.readiness === null ? '—' : Math.round(data.readiness)}
             </Text>
-            <Text style={styles.heroHint}>Pontuação registrada hoje</Text>
+            <Text style={styles.heroHint}>{t('readiness')}</Text>
           </View>
           <View style={styles.grid}>
             <Metric
@@ -170,7 +177,7 @@ export default function DashboardScreen() {
           <View style={styles.card}>
             <View style={styles.readinessHeader}>
               <View>
-                <Text style={styles.cardTitle}>Check-in diário</Text>
+                <Text style={styles.cardTitle}>{t('checkin')}</Text>
                 <Text style={styles.muted}>{classificationLabels[previewClass]}</Text>
               </View>
               <Text style={styles.score}>{previewScore}</Text>
@@ -209,7 +216,7 @@ export default function DashboardScreen() {
               </Text>
             ) : null}
             <Pressable onPress={() => void saveReadiness()} style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Salvar check-in</Text>
+              <Text style={styles.primaryButtonText}>{t('saveCheckin')}</Text>
             </Pressable>
           </View>
         </>

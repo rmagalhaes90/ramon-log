@@ -159,3 +159,7 @@ Typecheck strict, ESLint, Prettier e **65 testes unitários** passaram. O build 
 ## Rodada 2026-08-03 — alertas de descanso mobile alpha.22
 
 O treino mobile agora solicita permissão somente quando o atleta ativa o recurso, persiste a preferência pela fila offline e cria um canal Android de alta importância. Ao concluir uma série, agenda um alerta local usando o descanso específico do exercício; o handler também mostra o alerta com o aplicativo em primeiro plano.
+
+## Rodada 2026-08-03 — i18n mobile alpha.23
+
+Um provider de locale persistido em AsyncStorage agora alterna português/inglês sem reiniciar o aplicativo. A navegação principal, saudação, ações de sessão e check-in do dashboard foram migrados para chaves tipadas; novas telas podem consumir o mesmo catálogo sem criar globais ou listeners adicionais.
