@@ -7,7 +7,7 @@ import { tokens } from '@/theme/tokens';
 
 export default function ProtectedLayout() {
   const { t } = useLocale();
-  const { status, logout } = useAuth();
+  const { status, logout, isAdmin } = useAuth();
   if (status === 'loading')
     return (
       <View style={styles.center}>
@@ -43,6 +43,7 @@ export default function ProtectedLayout() {
       <Tabs.Screen name="supplements" options={{ title: t('supplements') }} />
       <Tabs.Screen name="photos" options={{ title: t('photos') }} />
       <Tabs.Screen name="settings" options={{ title: t('settings') }} />
+      <Tabs.Screen name="admin" options={{ title: 'Admin', ...(isAdmin ? {} : { href: null }) }} />
     </Tabs>
   );
 }

@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
@@ -20,7 +20,7 @@ function requireAdmin(request) {
 }
 
 export const setAdminRole = onCall(async (request) => {
-  requireAdmin(request);
+  const actor = requireAdmin(request);
   const { uid, isAdmin } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof isAdmin !== 'boolean')
     throw new HttpsError('invalid-argument', 'Invalid role request');
@@ -29,16 +29,30 @@ export const setAdminRole = onCall(async (request) => {
     throw new HttpsError('failed-precondition', 'Bootstrap admin cannot be revoked');
   await getAuth().setCustomUserClaims(uid, { ...user.customClaims, admin: isAdmin });
   await getFirestore().doc(`sharedUsers/${uid}`).set({ isAdmin }, { merge: true });
+  await getFirestore().collection('adminAudit').add({
+    action: 'role',
+    actorUid: actor.uid,
+    targetUid: uid,
+    value: isAdmin,
+    at: FieldValue.serverTimestamp(),
+  });
   return { uid, isAdmin };
 });
 
 export const setUserBlocked = onCall(async (request) => {
-  requireAdmin(request);
+  const actor = requireAdmin(request);
   const { uid, blocked } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof blocked !== 'boolean')
     throw new HttpsError('invalid-argument', 'Invalid block request');
   await getAuth().updateUser(uid, { disabled: blocked });
   await getFirestore().doc(`sharedUsers/${uid}`).set({ blocked }, { merge: true });
+  await getFirestore().collection('adminAudit').add({
+    action: 'blocked',
+    actorUid: actor.uid,
+    targetUid: uid,
+    value: blocked,
+    at: FieldValue.serverTimestamp(),
+  });
   return { uid, blocked };
 });
 
