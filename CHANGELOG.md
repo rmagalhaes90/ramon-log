@@ -56,6 +56,7 @@
 - Alpha.10: esforço por série (RIR/RPE), override auditável do readiness, substituições contextuais de exercício e correção da política de builds do CI.
 - Alpha.11: proteção contra conflitos multi-dispositivo, resolução local/nuvem, inspeção da fila offline e decisões persistidas de progressão.
 - Alpha.12: fibra e meta diária, refeições favoritas, cópia entre datas e duplicação não destrutiva do dia alimentar.
+- Alpha.13: gráficos de cinco medidas, tendências, volume muscular em 28 dias e correlação readiness × desempenho.
 
 ### Preserved
 

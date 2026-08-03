@@ -16,7 +16,7 @@ Legenda: **Pronto** = implementado/testado; **Parcial** = base funcional, expans
 | Offline e sync                                 | Pronto  | IndexedDB v3, fila visível e resolução explícita local/nuvem sem overwrite   |
 | PWA e atualização                              | Pronto  | Worker, manifesto, ícones e update consentido; gate iOS real                 |
 | Compartilhamento                               | Parcial | Web Share/fallback prontos; templates sociais avançados pendentes            |
-| Relatório e conquistas                         | Parcial | Semanal/streak/conquistas prontos; analytics muscular avançado pendente      |
+| Relatório e conquistas                         | Pronto  | Semanal, streak, conquistas, medidas, volume muscular e correlação readiness |
 | Entitlements Free/Pro/Coach                    | Parcial | Autoridade callable pronta; webhooks e produtos externos pendentes           |
 | Stripe/RevenueCat/lojas                        | Externo | Requer contas, produtos, secrets, fiscalidade e aprovação                    |
 | IA                                             | Externo | Arquitetura e guardrails documentados; provedor/consentimento/custo ausentes |
