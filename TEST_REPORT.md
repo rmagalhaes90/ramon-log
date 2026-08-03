@@ -139,3 +139,9 @@ O build Vite de produção passou com 154 módulos. O bundle Android passou com 
 O mobile agora permite selecionar o dia, iniciar o treino, registrar carga e repetições, concluir séries e finalizar uma sessão com duração, volume e número de exercícios. O rascunho é persistido por usuário no AsyncStorage a cada alteração e permanece recuperável depois de fechar o aplicativo. A sessão final usa a fila transacional offline e não descarta o rascunho em falhas ou conflitos.
 
 Typecheck strict, ESLint, Prettier, **60 testes web** e **4 testes de domínio** passaram. O build Vite passou com 154 módulos; o bundle Android passou com 1.356 módulos e Hermes de 4,9 MB. Playwright passou os smoke tests em Chromium e WebKit móvel (**2 passed**) e ignorou os 2 cenários que exigem Firebase Emulators, não iniciados nesta rodada.
+
+## Rodada 2026-08-03 — fotos mobile alpha.19
+
+O mobile recebeu captura por câmera, seleção da galeria, reprocessamento JPEG sem EXIF, limite local e remoto de 3 MB, armazenamento privado por UID, galeria autenticada e exclusão com confirmação. A fila preserva no diretório de documentos até o Storage e o índice Firestore serem confirmados; falhas e conflitos não descartam o arquivo recuperável. As permissões iOS/Android explicam explicitamente o uso de câmera e fotos, sem solicitar microfone.
+
+Typecheck strict, ESLint, Prettier, **60 testes web** e **4 testes de domínio** passaram. O build Vite passou com 154 módulos. O bundle Android com Image Picker, Image Manipulator e File System passou com **1.387 módulos** e Hermes de **5 MB**. Playwright passou 2 smoke tests em Chromium/WebKit móvel e ignorou os 2 cenários dependentes dos Firebase Emulators, que não foram iniciados.
