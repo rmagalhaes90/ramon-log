@@ -25,7 +25,8 @@
           "cameraPermission": "O KYRO usa a câmera somente para registrar fotos de progresso.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true

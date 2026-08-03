@@ -1,5 +1,6 @@
 import { dateKey } from '@kyro/domain';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
@@ -15,6 +16,7 @@ import {
   pendingPhotoCount,
   photoUrl,
   preparePhoto,
+  shareablePhoto,
   type PendingPhoto,
 } from '@/services/photo-storage';
 import { saveUserData, SyncConflictError } from '@/services/user-data';
@@ -44,6 +46,7 @@ export default function PhotosScreen() {
   const [localPhotos, setLocalPhotos] = useState<z.infer<typeof photoIndexSchema>>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
 
@@ -161,6 +164,7 @@ export default function PhotosScreen() {
               const next = localPhotos.filter((photo) => photo.id !== id);
               await saveUserData(user.uid, 'photoIndex', photoIndexSchema, next);
               setLocalPhotos(next);
+              setSelected((current) => current.filter((selectedId) => selectedId !== id));
               setStatus('Foto excluída.');
             } catch {
               setStatus('Não foi possível excluir a foto.');
@@ -171,6 +175,42 @@ export default function PhotosScreen() {
         },
       },
     ]);
+  }
+
+  function toggleSelected(id: string) {
+    setSelected((current) => {
+      if (current.includes(id)) return current.filter((selectedId) => selectedId !== id);
+      if (current.length >= 2) return [current[1] ?? id, id];
+      return [...current, id];
+    });
+  }
+
+  async function shareSelected() {
+    if (!user || selected.length !== 1) return;
+    const id = selected[0];
+    const remoteUrl = id ? urls[id] : undefined;
+    if (!id || !remoteUrl) {
+      setStatus('Aguarde a foto terminar de carregar.');
+      return;
+    }
+    setBusy(true);
+    try {
+      if (!(await Sharing.isAvailableAsync())) {
+        setStatus('Compartilhamento de arquivos não está disponível neste aparelho.');
+        return;
+      }
+      const file = await shareablePhoto(user.uid, id, remoteUrl);
+      await Sharing.shareAsync(file.uri, {
+        dialogTitle: 'Compartilhar progresso KYRO',
+        mimeType: 'image/jpeg',
+        UTI: 'public.jpeg',
+      });
+      setStatus('Compartilhamento aberto.');
+    } catch {
+      setStatus('Não foi possível compartilhar a foto.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -210,6 +250,37 @@ export default function PhotosScreen() {
       {!photos.loading && !localPhotos.length ? (
         <StateMessage>Nenhuma foto de progresso.</StateMessage>
       ) : null}
+      {selected.length ? (
+        <Card>
+          <Text style={featureStyles.cardTitle}>
+            {selected.length === 2 ? 'Comparação selecionada' : 'Foto selecionada'}
+          </Text>
+          <View style={styles.comparison}>
+            {selected.map((id) =>
+              urls[id] ? (
+                <Image key={id} source={{ uri: urls[id] }} style={styles.comparisonImage} />
+              ) : null,
+            )}
+          </View>
+          <Text style={featureStyles.muted}>
+            {selected.length === 2
+              ? 'Compare as duas datas lado a lado.'
+              : 'Selecione duas fotos para comparar ou compartilhe esta foto.'}
+          </Text>
+          <View style={styles.actions}>
+            <Pressable
+              disabled={busy || selected.length !== 1}
+              onPress={() => void shareSelected()}
+              style={[styles.primaryButton, selected.length !== 1 && styles.disabledButton]}
+            >
+              <Text style={styles.primaryButtonText}>Compartilhar</Text>
+            </Pressable>
+            <Pressable onPress={() => setSelected([])} style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>Limpar</Text>
+            </Pressable>
+          </View>
+        </Card>
+      ) : null}
       <View style={styles.grid}>
         {[...localPhotos].reverse().map((photo) => (
           <View key={photo.id} style={styles.photoCard}>
@@ -225,7 +296,21 @@ export default function PhotosScreen() {
               </View>
             )}
             <View style={styles.photoMeta}>
-              <Text style={featureStyles.muted}>{photo.d}</Text>
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: selected.includes(photo.id) }}
+                onPress={() => toggleSelected(photo.id)}
+                style={[
+                  styles.selectButton,
+                  selected.includes(photo.id) && styles.selectButtonActive,
+                ]}
+              >
+                <Text
+                  style={selected.includes(photo.id) ? styles.selectTextActive : styles.selectText}
+                >
+                  {selected.includes(photo.id) ? '✓ Selecionada' : photo.d}
+                </Text>
+              </Pressable>
               <Pressable disabled={busy} onPress={() => confirmDelete(photo.id)}>
                 <Text style={styles.deleteText}>Excluir</Text>
               </Pressable>
@@ -256,6 +341,14 @@ const styles = StyleSheet.create({
     padding: tokens.spacing.md,
   },
   secondaryButtonText: { color: tokens.colors.text, fontWeight: '800' },
+  disabledButton: { opacity: 0.4 },
+  comparison: { flexDirection: 'row', gap: tokens.spacing.sm },
+  comparisonImage: {
+    aspectRatio: 3 / 4,
+    backgroundColor: tokens.colors.surfaceElevated,
+    borderRadius: tokens.radius.sm,
+    flex: 1,
+  },
   grid: { gap: tokens.spacing.md },
   photoCard: {
     backgroundColor: tokens.colors.surface,
@@ -278,5 +371,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: tokens.spacing.md,
   },
+  selectButton: {
+    borderColor: tokens.colors.border,
+    borderRadius: tokens.radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: tokens.spacing.md,
+    paddingVertical: tokens.spacing.sm,
+  },
+  selectButtonActive: {
+    backgroundColor: tokens.colors.primary,
+    borderColor: tokens.colors.primary,
+  },
+  selectText: { color: tokens.colors.muted, fontWeight: '700' },
+  selectTextActive: { color: tokens.colors.primaryText, fontWeight: '800' },
   deleteText: { color: tokens.colors.danger, fontWeight: '700' },
 });

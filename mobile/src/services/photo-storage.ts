@@ -103,3 +103,10 @@ export async function deletePhoto(uid: string, id: string): Promise<void> {
     (await readQueue(uid)).filter((item) => item.id !== id),
   );
 }
+
+export async function shareablePhoto(uid: string, id: string, remoteUrl: string): Promise<File> {
+  const local = new File(Paths.document, 'kyro-photos', uid, `${id}.jpg`);
+  if (local.exists) return local;
+  const shared = new File(Paths.cache, `kyro-share-${id}.jpg`);
+  return File.downloadFileAsync(remoteUrl, shared, { idempotent: true });
+}
