@@ -12,6 +12,7 @@ const responseSchema = z.object({
           proteins_100g: finite.optional(),
           carbohydrates_100g: finite.optional(),
           fat_100g: finite.optional(),
+          fiber_100g: finite.optional(),
         })
         .default({}),
     })
@@ -23,6 +24,7 @@ export interface BarcodeFood {
   protein: number;
   carb: number;
   fat: number;
+  fiber: number;
 }
 export function validBarcode(value: string): boolean {
   return /^\d{8,14}$/.test(value.trim());
@@ -39,6 +41,7 @@ export function parseBarcodeProduct(value: unknown): BarcodeFood | null {
     protein: product.nutriments.proteins_100g ?? 0,
     carb: product.nutriments.carbohydrates_100g ?? 0,
     fat: product.nutriments.fat_100g ?? 0,
+    fiber: product.nutriments.fiber_100g ?? 0,
   };
 }
 export async function lookupBarcode(

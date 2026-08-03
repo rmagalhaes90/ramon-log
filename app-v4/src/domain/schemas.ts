@@ -158,23 +158,32 @@ export const mealSchema = z.object({
   prot: finite(0, 1000),
   carb: finite(0, 1000),
   fat: finite(0, 1000),
+  fiber: finite(0, 1000).default(0),
   t: z.iso.datetime(),
 });
+export type Meal = z.infer<typeof mealSchema>;
 export const nutritionDaySchema = z.object({
   kcal: finite(0, 50_000),
   protein: finite(0, 5000),
   carb: finite(0, 5000),
   fat: finite(0, 5000),
+  fiber: finite(0, 5000).default(0),
   water: finite(0, 50),
   meals: z.array(mealSchema).max(200),
   kcalGoal: finite(1, 10_000),
   proteinGoal: finite(1, 1000),
   carbGoal: finite(1, 1000),
   fatGoal: finite(1, 1000),
+  fiberGoal: finite(1, 1000).default(30),
   waterGoal: finite(0.5, 20),
 });
 export type NutritionDay = z.infer<typeof nutritionDaySchema>;
 export const nutritionLogSchema = z.record(dateKeySchema, nutritionDaySchema);
+export const favoriteMealSchema = mealSchema
+  .omit({ t: true })
+  .extend({ id: safeIdSchema, createdAt: z.iso.datetime() });
+export type FavoriteMeal = z.infer<typeof favoriteMealSchema>;
+export const favoriteMealsSchema = z.array(favoriteMealSchema).max(100);
 
 export const profileSchema = z.object({
   height: finite(50, 250).nullable().default(null),
@@ -192,6 +201,7 @@ export const userDataSchemas = {
   sessionLog: sessionLogSchema,
   readinessLog: readinessLogSchema,
   nutritionLog: nutritionLogSchema,
+  favoriteMeals: favoriteMealsSchema,
   profile: profileSchema,
   photoIndex: photoIndexSchema,
   mySupplements: supplementsSchema,

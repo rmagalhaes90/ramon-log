@@ -1189,3 +1189,20 @@ h2 {
   border-left: 3px solid #ffb74d;
   padding-left: 0.7rem;
 }
+.nutrition-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+.nutrition-copy h2,
+.nutrition-copy p {
+  flex-basis: 100%;
+  margin: 0;
+}
+.history-list article > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}

@@ -12,6 +12,7 @@ const backupDataSchema = z
     sessionLog: userDataSchemas.sessionLog.optional(),
     readinessLog: userDataSchemas.readinessLog.optional(),
     nutritionLog: userDataSchemas.nutritionLog.optional(),
+    favoriteMeals: userDataSchemas.favoriteMeals.optional(),
     profile: userDataSchemas.profile.optional(),
     photoIndex: userDataSchemas.photoIndex.optional(),
     mySupplements: userDataSchemas.mySupplements.optional(),

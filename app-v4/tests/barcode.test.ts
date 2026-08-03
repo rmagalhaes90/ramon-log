@@ -15,10 +15,11 @@ describe('barcode nutrition', () => {
             proteins_100g: 10,
             carbohydrates_100g: 20,
             fat_100g: 5,
+            fiber_100g: 7,
           },
         },
       }),
-    ).toEqual({ name: 'Food', kcal: 250, protein: 10, carb: 20, fat: 5 });
+    ).toEqual({ name: 'Food', kcal: 250, protein: 10, carb: 20, fat: 5, fiber: 7 });
     expect(parseBarcodeProduct({ status: 0 })).toBeNull();
   });
 });

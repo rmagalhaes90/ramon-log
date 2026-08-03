@@ -2,7 +2,7 @@ import './styles.css';
 import type { User } from 'firebase/auth';
 import { installGlobalErrorHandlers, onError, reportError } from './core/errors';
 import { createI18n, type Locale, type MessageKey } from './core/i18n';
-import type { NutritionDay, ProgressionDecision, Workouts } from './domain/schemas';
+import type { FavoriteMeal, NutritionDay, ProgressionDecision, Workouts } from './domain/schemas';
 import {
   authErrorKey,
   createAccount,
@@ -42,7 +42,13 @@ import { rankExerciseAlternatives } from './features/workouts/substitutions';
 import { clearWorkoutDraft, loadWorkoutDraft, saveWorkoutDraft } from './features/workouts/draft';
 import { trainingStreak, unlockedAchievements, weeklyReport } from './features/reports/model';
 import { renderSettingsView } from './features/settings/view';
-import { emptyNutritionDay, percentage } from './features/nutrition/model';
+import {
+  addMealToDay,
+  copyMeal,
+  emptyNutritionDay,
+  mergeNutritionDays,
+  percentage,
+} from './features/nutrition/model';
 import { lookupBarcode } from './features/nutrition/barcode';
 import { barcodeCameraSupported, startBarcodeCamera } from './features/nutrition/camera';
 import { readinessClass, readinessScore, weightDelta } from './features/progress/model';
@@ -568,7 +574,10 @@ async function renderPhotos(user: User): Promise<void> {
 }
 
 async function renderNutrition(user: User): Promise<void> {
-  const log = (await loadUserData(user, 'nutritionLog')) ?? {};
+  const [log, favorites] = await Promise.all([
+    loadUserData(user, 'nutritionLog').then((value) => value ?? {}),
+    loadUserData(user, 'favoriteMeals').then((value) => value ?? []),
+  ]);
   const today = dateKey();
   const previous = Object.keys(log)
     .sort()
@@ -577,11 +586,54 @@ async function renderNutrition(user: User): Promise<void> {
     .at(-1);
   const day = log[today] ?? emptyNutritionDay(previous);
   shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">03 · FUEL</p><h1>${copy('nutrition')}</h1>
-    <div class="metric-grid nutrition-metrics"><article><span>${copy('calories')}</span><strong>${Math.round(day.kcal)}</strong><small>${Math.round(percentage(day.kcal, day.kcalGoal))}%</small></article><article><span>${copy('protein')}</span><strong>${Math.round(day.protein)}g</strong><small>${Math.round(percentage(day.protein, day.proteinGoal))}%</small></article><article><span>${copy('water')}</span><strong>${day.water.toFixed(2)}L</strong><button id="add-water">+ 250ml</button></article></div><button id="open-supplements" class="secondary">${copy('supplements')}</button><form id="barcode-form" class="barcode-form"><label>${copy('barcode')}<input name="barcode" inputmode="numeric" pattern="[0-9]{8,14}" maxlength="14" required></label><button type="submit">${copy('lookup')}</button><button type="button" id="scan-barcode" ${barcodeCameraSupported() ? '' : 'disabled'}>${copy('scanBarcode')}</button><video id="barcode-video" hidden muted></video><span id="barcode-status" role="status"></span></form>
-    <form id="meal-form" class="meal-form"><label>${copy('mealName')}<input name="name" maxlength="120" required></label><label>${copy('calories')}<input name="kcal" type="number" min="0" max="10000" required></label><label>${copy('protein')}<input name="protein" type="number" min="0" max="1000" step="0.1"></label><label>${copy('carbs')}<input name="carb" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fat')}<input name="fat" type="number" min="0" max="1000" step="0.1"></label><button class="primary">${copy('add')} ${copy('meal')}</button></form>
-    <div id="meal-list" class="history-list"></div></section>`);
+    <div class="metric-grid nutrition-metrics"><article><span>${copy('calories')}</span><strong>${Math.round(day.kcal)}</strong><small>${Math.round(percentage(day.kcal, day.kcalGoal))}%</small></article><article><span>${copy('protein')}</span><strong>${Math.round(day.protein)}g</strong><small>${Math.round(percentage(day.protein, day.proteinGoal))}%</small></article><article><span>${copy('fiber')}</span><strong>${Math.round(day.fiber)}g</strong><small>${Math.round(percentage(day.fiber, day.fiberGoal))}%</small></article><article><span>${copy('water')}</span><strong>${day.water.toFixed(2)}L</strong><button id="add-water">+ 250ml</button></article></div><button id="open-supplements" class="secondary">${copy('supplements')}</button><form id="barcode-form" class="barcode-form"><label>${copy('barcode')}<input name="barcode" inputmode="numeric" pattern="[0-9]{8,14}" maxlength="14" required></label><button type="submit">${copy('lookup')}</button><button type="button" id="scan-barcode" ${barcodeCameraSupported() ? '' : 'disabled'}>${copy('scanBarcode')}</button><video id="barcode-video" hidden muted></video><span id="barcode-status" role="status"></span></form>
+    <form id="meal-form" class="meal-form"><label>${copy('mealName')}<input name="name" maxlength="120" required></label><label>${copy('calories')}<input name="kcal" type="number" min="0" max="10000" required></label><label>${copy('protein')}<input name="protein" type="number" min="0" max="1000" step="0.1"></label><label>${copy('carbs')}<input name="carb" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fat')}<input name="fat" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fiber')}<input name="fiber" type="number" min="0" max="1000" step="0.1"></label><button class="primary">${copy('add')} ${copy('meal')}</button></form>
+    <section class="nutrition-copy"><h2>${copy('copyMeals')}</h2><label>${copy('targetDate')}<input id="nutrition-target-date" type="date" value="${today}"></label><button id="duplicate-day">${copy('duplicateDay')}</button><p id="nutrition-copy-status" role="status"></p></section><section><h2>${copy('favoriteMeals')}</h2><div id="favorite-meals" class="history-list"></div></section><div id="meal-list" class="history-list"></div></section>`);
   bindBack(user);
   const list = document.querySelector('#meal-list');
+  const favoriteList = document.querySelector('#favorite-meals');
+  let currentLog = log;
+  let logWrite = Promise.resolve();
+  const targetDate = () =>
+    document.querySelector<HTMLInputElement>('#nutrition-target-date')?.value || today;
+  const saveLog = async (nextLog: typeof log) => {
+    await saveUserData(user, 'nutritionLog', nextLog);
+    currentLog = nextLog;
+  };
+  const updateLog = (update: (value: typeof log) => typeof log) => {
+    logWrite = logWrite.then(async () => {
+      const nextLog = update(currentLog);
+      await saveLog(nextLog);
+    });
+    return logWrite;
+  };
+  const persistLog = (nextLog: typeof log) => saveLog(nextLog).then(() => renderNutrition(user));
+  const persist = (next: NutritionDay) => persistLog({ ...currentLog, [today]: next });
+  const saveFavorite = (meal: NutritionDay['meals'][number]) => {
+    const duplicate = favorites.some(
+      (favorite) =>
+        favorite.name.toLocaleLowerCase() === meal.name.toLocaleLowerCase() &&
+        favorite.kcal === meal.kcal &&
+        favorite.prot === meal.prot &&
+        favorite.carb === meal.carb &&
+        favorite.fat === meal.fat &&
+        favorite.fiber === meal.fiber,
+    );
+    if (duplicate) return Promise.resolve();
+    const favorite: FavoriteMeal = {
+      id: crypto.randomUUID().slice(0, 60),
+      name: meal.name,
+      kcal: meal.kcal,
+      prot: meal.prot,
+      carb: meal.carb,
+      fat: meal.fat,
+      fiber: meal.fiber,
+      createdAt: new Date().toISOString(),
+    };
+    return saveUserData(user, 'favoriteMeals', [...favorites, favorite].slice(-100)).then(() =>
+      renderNutrition(user),
+    );
+  };
   day.meals
     .slice()
     .reverse()
@@ -590,12 +642,72 @@ async function renderNutrition(user: User): Promise<void> {
       const name = document.createElement('strong');
       name.textContent = meal.name;
       const meta = document.createElement('span');
-      meta.textContent = `${Math.round(meal.kcal)} kcal · P ${Math.round(meal.prot)}g · C ${Math.round(meal.carb)}g · F ${Math.round(meal.fat)}g`;
-      row.append(name, meta);
+      meta.textContent = `${Math.round(meal.kcal)} kcal · P ${Math.round(meal.prot)}g · C ${Math.round(meal.carb)}g · F ${Math.round(meal.fat)}g · ${copy('fiber')} ${Math.round(meal.fiber)}g`;
+      const actions = document.createElement('div');
+      const favorite = document.createElement('button');
+      favorite.type = 'button';
+      favorite.textContent = copy('saveFavorite');
+      favorite.addEventListener('click', () => {
+        void saveFavorite(meal).catch((error: unknown) => reportError(error, 'nutrition/favorite'));
+      });
+      const copyButton = document.createElement('button');
+      copyButton.type = 'button';
+      copyButton.textContent = copy('copyMeal');
+      copyButton.addEventListener('click', () => {
+        const target = targetDate();
+        const copied = copyMeal(meal, crypto.randomUUID().slice(0, 60));
+        void updateLog((latest) => ({
+          ...latest,
+          [target]: addMealToDay(latest[target] ?? emptyNutritionDay(day), copied),
+        }))
+          .then(() => {
+            const status = document.querySelector('#nutrition-copy-status');
+            if (status) status.textContent = `${copy('copyComplete')} ${target}`;
+          })
+          .catch((error: unknown) => reportError(error, 'nutrition/copy-meal'));
+      });
+      actions.append(favorite, copyButton);
+      row.append(name, meta, actions);
       list?.append(row);
     });
-  const persist = (next: NutritionDay) =>
-    saveUserData(user, 'nutritionLog', { ...log, [today]: next }).then(() => renderNutrition(user));
+  favorites.forEach((favorite) => {
+    const row = document.createElement('article');
+    const name = document.createElement('strong');
+    name.textContent = favorite.name;
+    const addFavorite = document.createElement('button');
+    addFavorite.type = 'button';
+    addFavorite.textContent = `${copy('add')} ${copy('meal')}`;
+    addFavorite.addEventListener('click', () => {
+      const meal = {
+        id: crypto.randomUUID().slice(0, 60),
+        name: favorite.name,
+        kcal: favorite.kcal,
+        prot: favorite.prot,
+        carb: favorite.carb,
+        fat: favorite.fat,
+        fiber: favorite.fiber,
+        t: new Date().toISOString(),
+      };
+      void persist(addMealToDay(day, meal)).catch((error: unknown) =>
+        reportError(error, 'nutrition/use-favorite'),
+      );
+    });
+    const removeFavorite = document.createElement('button');
+    removeFavorite.type = 'button';
+    removeFavorite.textContent = copy('remove');
+    removeFavorite.addEventListener('click', () => {
+      void saveUserData(
+        user,
+        'favoriteMeals',
+        favorites.filter((item) => item.id !== favorite.id),
+      )
+        .then(() => renderNutrition(user))
+        .catch((error: unknown) => reportError(error, 'nutrition/remove-favorite'));
+    });
+    row.append(name, addFavorite, removeFavorite);
+    favoriteList?.append(row);
+  });
+  if (!favorites.length && favoriteList) favoriteList.textContent = copy('noFavoriteMeals');
   document
     .querySelector('#add-water')
     ?.addEventListener(
@@ -608,6 +720,28 @@ async function renderNutrition(user: User): Promise<void> {
   document.querySelector('#open-supplements')?.addEventListener('click', () => {
     currentView = 'supplements';
     void renderSupplements(user);
+  });
+  document.querySelector('#duplicate-day')?.addEventListener('click', () => {
+    const target = targetDate();
+    const status = document.querySelector('#nutrition-copy-status');
+    if (target === today) {
+      if (status) status.textContent = copy('chooseAnotherDate');
+      return;
+    }
+    try {
+      void updateLog((latest) => ({
+        ...latest,
+        [target]: mergeNutritionDays(latest[target] ?? emptyNutritionDay(day), day, () =>
+          crypto.randomUUID().slice(0, 60),
+        ),
+      }))
+        .then(() => {
+          if (status) status.textContent = `${copy('copyComplete')} ${target}`;
+        })
+        .catch((error: unknown) => reportError(error, 'nutrition/duplicate-day'));
+    } catch (error) {
+      reportError(error, 'nutrition/duplicate-day');
+    }
   });
   document.querySelector('#barcode-form')?.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -628,8 +762,14 @@ async function renderNutrition(user: User): Promise<void> {
           return;
         }
         const mealForm = document.querySelector<HTMLFormElement>('#meal-form');
-        const values: { name: string; kcal: number; protein: number; carb: number; fat: number } =
-          food;
+        const values: {
+          name: string;
+          kcal: number;
+          protein: number;
+          carb: number;
+          fat: number;
+          fiber: number;
+        } = food;
         Object.entries(values).forEach(([key, value]) => {
           const input = mealForm?.elements.namedItem(key);
           if (input instanceof HTMLInputElement) input.value = String(value);
@@ -683,16 +823,10 @@ async function renderNutrition(user: User): Promise<void> {
       prot: Number(data.get('protein')) || 0,
       carb: Number(data.get('carb')) || 0,
       fat: Number(data.get('fat')) || 0,
+      fiber: Number(data.get('fiber')) || 0,
       t: new Date().toISOString(),
     };
-    const next = {
-      ...day,
-      kcal: day.kcal + meal.kcal,
-      protein: day.protein + meal.prot,
-      carb: day.carb + meal.carb,
-      fat: day.fat + meal.fat,
-      meals: [...day.meals, meal],
-    };
+    const next = addMealToDay(day, meal);
     void persist(next).catch((error: unknown) => reportError(error, 'nutrition/meal'));
   });
 }

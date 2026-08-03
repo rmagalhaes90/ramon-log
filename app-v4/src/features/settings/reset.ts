@@ -10,7 +10,7 @@ export const resetKeys: Record<ResetGroup, string[]> = {
     'progressionDecisions',
   ],
   progress: ['bodyWeights', 'bodyMeasurements', 'readinessLog'],
-  nutrition: ['nutritionLog', 'mySupplements', 'supplementLog'],
+  nutrition: ['nutritionLog', 'favoriteMeals', 'mySupplements', 'supplementLog'],
 };
 export async function resetFeatureGroup(user: User, group: ResetGroup): Promise<void> {
   if (group === 'training') {
@@ -33,6 +33,7 @@ export async function resetFeatureGroup(user: User, group: ResetGroup): Promise<
   }
   await Promise.all([
     saveUserData(user, 'nutritionLog', {}),
+    saveUserData(user, 'favoriteMeals', []),
     saveUserData(user, 'mySupplements', []),
     saveUserData(user, 'supplementLog', {}),
   ]);
