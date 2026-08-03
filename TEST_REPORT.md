@@ -133,3 +133,9 @@ A escrita mobile usa transação Firestore, revisão-base, cache otimista e fila
 Typecheck strict, ESLint, **60 testes web** e **4 testes de domínio** passaram. Água diária e adesão por horário de suplemento agora usam a escrita transacional/offline da alpha.16. Os schemas móveis preservam campos adicionais dos documentos existentes para impedir perda de metas, fibra, timestamps ou metadados durante uma atualização parcial.
 
 O build Vite de produção passou com 154 módulos. O bundle Android passou com 1.356 módulos e bytecode Hermes de 4,9 MB. No Playwright, os smoke tests passaram em Chromium e WebKit móvel (**2 passed**); os **2 testes de autenticação foram ignorados**, conforme esperado, porque os Firebase Emulators não estavam ativos nesta rodada.
+
+## Rodada 2026-08-03 — treino ativo mobile alpha.18
+
+O mobile agora permite selecionar o dia, iniciar o treino, registrar carga e repetições, concluir séries e finalizar uma sessão com duração, volume e número de exercícios. O rascunho é persistido por usuário no AsyncStorage a cada alteração e permanece recuperável depois de fechar o aplicativo. A sessão final usa a fila transacional offline e não descarta o rascunho em falhas ou conflitos.
+
+Typecheck strict, ESLint, Prettier, **60 testes web** e **4 testes de domínio** passaram. O build Vite passou com 154 módulos; o bundle Android passou com 1.356 módulos e Hermes de 4,9 MB. Playwright passou os smoke tests em Chromium e WebKit móvel (**2 passed**) e ignorou os 2 cenários que exigem Firebase Emulators, não iniciados nesta rodada.

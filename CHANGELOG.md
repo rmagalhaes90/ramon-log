@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.18: treino ativo mobile com rascunho recuperável, séries, carga, repetições, volume e finalização offline.
 - Fase alpha.17: registro mobile offline de água e adesão aos horários de suplementos, preservando campos legados.
 - Fase alpha.16: escrita mobile transacional, fila offline por UID, proteção de revisão remota e registro de peso/cintura.
 - Fase alpha.15: autenticação mobile completa, cache isolado por UID, dashboard conectado e navegação protegida para treinos, progresso, nutrição e suplementos.
