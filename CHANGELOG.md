@@ -54,6 +54,7 @@
 - Configuração local fixa o projeto isolado `demo-kyro-v4`, evitando divergência entre o usuário exibido no Emulator UI e o projeto usado pelo SDK.
 - Alpha.9: motor de progressão/plateau/deload, transcodificação de fotos sem EXIF, entitlements no servidor, PWA manifest completo, headers de segurança, CI e pacote documental de publicação.
 - Alpha.10: esforço por série (RIR/RPE), override auditável do readiness, substituições contextuais de exercício e correção da política de builds do CI.
+- Alpha.11: proteção contra conflitos multi-dispositivo, resolução local/nuvem, inspeção da fila offline e decisões persistidas de progressão.
 
 ### Preserved
 

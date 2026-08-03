@@ -8,12 +8,12 @@ Legenda: **Pronto** = implementado/testado; **Parcial** = base funcional, expans
 | Auth, verificação, reset, Google               | Parcial | Email e Emulator E2E prontos; Google real exige projeto homologado           |
 | Custom claims, admin, bloqueio e exclusão      | Pronto  | Functions/Rules Emulator                                                     |
 | Treinos, rotinas, séries, drafts e timers      | Pronto  | Fluxo v4 e testes unitários                                                  |
-| Progressão, plateau e deload determinísticos   | Parcial | Motor e RIR/RPE alpha.10 prontos; falta aceite da recomendação persistido    |
+| Progressão, plateau e deload determinísticos   | Pronto  | Motor, RIR/RPE e aceite/recusa persistidos com aplicação da carga            |
 | Readiness                                      | Pronto  | Score, plano automático e override com motivo persistido                     |
 | Gym Occupied/substituições                     | Pronto  | Ranking muscular/equipamento e troca segura na rotina                        |
 | Nutrição e barcode                             | Parcial | Macros/água/refeições/câmera prontos; fibra/favoritos/cópia pendentes        |
 | Fotos privadas e comparação                    | Pronto  | Storage privado, fila, EXIF removido e resize local                          |
-| Offline e sync                                 | Parcial | IndexedDB/backoff/idempotência prontos; UI de conflito multi-device pendente |
+| Offline e sync                                 | Pronto  | IndexedDB v3, fila visível e resolução explícita local/nuvem sem overwrite   |
 | PWA e atualização                              | Pronto  | Worker, manifesto, ícones e update consentido; gate iOS real                 |
 | Compartilhamento                               | Parcial | Web Share/fallback prontos; templates sociais avançados pendentes            |
 | Relatório e conquistas                         | Parcial | Semanal/streak/conquistas prontos; analytics muscular avançado pendente      |
