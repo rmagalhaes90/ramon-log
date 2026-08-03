@@ -6,6 +6,8 @@ import {
   estimatedOneRepMax,
   hasRevisionConflict,
   pearsonCorrelation,
+  readinessClass,
+  readinessScore,
 } from '../src';
 
 describe('shared KYRO domain', () => {
@@ -54,5 +56,11 @@ describe('shared KYRO domain', () => {
     expect(
       hasRevisionConflict('2026-08-03T12:00:00Z', '2026-08-03T10:00:00Z', { kg: 80 }, { kg: 80 }),
     ).toBe(false);
+  });
+
+  it('keeps readiness scoring identical on web and native', () => {
+    expect(readinessScore(5, 5, 1, 1)).toBe(100);
+    expect(readinessScore(1, 1, 5, 5)).toBe(0);
+    expect(readinessClass(60)).toBe('normal');
   });
 });

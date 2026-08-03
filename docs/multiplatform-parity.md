@@ -1,17 +1,17 @@
 # Paridade multiplataforma e percentual geral
 
-Atualizado em 2026-08-03 após `4.0.0-alpha.19`.
+Atualizado em 2026-08-03 após `4.0.0-alpha.20`.
 
 O percentual geral usa pesos estáveis para impedir que uma nova tela esconda lacunas de segurança ou publicação.
 
-| Área                                   |     Peso | Conclusão |     Contribuição | Evidência principal                                                                                                       |
-| -------------------------------------- | -------: | --------: | ---------------: | ------------------------------------------------------------------------------------------------------------------------- |
-| Web/PWA completo                       |      35% |       97% |           33,95% | Funcionalidades principais, offline, PWA, PT/EN, testes e baseline preservado.                                            |
-| Backend e segurança Firebase           |      20% |       92% |           18,40% | Rules, Storage, claims, bloqueio e exclusão testados em Emulator.                                                         |
-| Admin Web                              |      10% |       70% |            7,00% | Usuários e ações protegidas existem; auditoria/paginação avançada permanecem parciais.                                    |
-| Domínio e infraestrutura compartilhada |      10% |       60% |            6,00% | Workspace, cálculos, dashboard e proteção de revisão compartilhados; schemas completos seguem em extração.                |
-| Mobile iOS/Android                     |      20% |       70% |           14,00% | Auth, treino ativo, escrita offline e fotos privadas com fila; comparação/compartilhamento e notificações ainda parciais. |
-| Release, lojas e observabilidade       |       5% |       35% |            1,75% | CI e EAS preparados; builds assinados, lojas, Crashlytics/App Check nativo pendentes.                                     |
-| **Total geral**                        | **100%** |           | **81,10% ≈ 81%** | Medição do escopo ampliado Web + Admin + Mobile + Firebase.                                                               |
+| Área                                   |     Peso | Conclusão |     Contribuição | Evidência principal                                                                                                   |
+| -------------------------------------- | -------: | --------: | ---------------: | --------------------------------------------------------------------------------------------------------------------- |
+| Web/PWA completo                       |      35% |       97% |           33,95% | Funcionalidades principais, offline, PWA, PT/EN, testes e baseline preservado.                                        |
+| Backend e segurança Firebase           |      20% |       92% |           18,40% | Rules, Storage, claims, bloqueio e exclusão testados em Emulator.                                                     |
+| Admin Web                              |      10% |       70% |            7,00% | Usuários e ações protegidas existem; auditoria/paginação avançada permanecem parciais.                                |
+| Domínio e infraestrutura compartilhada |      10% |       65% |            6,50% | Workspace, dashboard, readiness, cálculos e proteção de revisão compartilhados; schemas completos seguem em extração. |
+| Mobile iOS/Android                     |      20% |       74% |           14,80% | Auth, treino, readiness, escrita offline e fotos privadas; comparação/compartilhamento e notificações ainda parciais. |
+| Release, lojas e observabilidade       |       5% |       35% |            1,75% | CI e EAS preparados; builds assinados, lojas, Crashlytics/App Check nativo pendentes.                                 |
+| **Total geral**                        | **100%** |           | **82,40% ≈ 82%** | Medição do escopo ampliado Web + Admin + Mobile + Firebase.                                                           |
 
 O percentual da migração web original permanece em aproximadamente **97%**. O percentual geral é menor porque o novo prompt adicionou um aplicativo nativo completo e preparação para lojas ao escopo.

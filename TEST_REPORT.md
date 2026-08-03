@@ -145,3 +145,7 @@ Typecheck strict, ESLint, Prettier, **60 testes web** e **4 testes de domínio**
 O mobile recebeu captura por câmera, seleção da galeria, reprocessamento JPEG sem EXIF, limite local e remoto de 3 MB, armazenamento privado por UID, galeria autenticada e exclusão com confirmação. A fila preserva no diretório de documentos até o Storage e o índice Firestore serem confirmados; falhas e conflitos não descartam o arquivo recuperável. As permissões iOS/Android explicam explicitamente o uso de câmera e fotos, sem solicitar microfone.
 
 Typecheck strict, ESLint, Prettier, **60 testes web** e **4 testes de domínio** passaram. O build Vite passou com 154 módulos. O bundle Android com Image Picker, Image Manipulator e File System passou com **1.387 módulos** e Hermes de **5 MB**. Playwright passou 2 smoke tests em Chromium/WebKit móvel e ignorou os 2 cenários dependentes dos Firebase Emulators, que não foram iniciados.
+
+## Rodada 2026-08-03 — readiness mobile alpha.20
+
+O dashboard mobile agora registra sono, energia, dor muscular e estresse em escala de 1 a 5, mostra score/classificação em tempo real e salva o check-in pela camada transacional offline. O cálculo duplicado foi removido do web e centralizado em `@kyro/domain`, com um novo teste que garante os mesmos extremos e limiares em ambas as plataformas. Typecheck, ESLint e **65 testes unitários** passaram nesta fase.

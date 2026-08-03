@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.20: check-in readiness mobile offline e cálculo idêntico centralizado no domínio web/native.
 - Fase alpha.19: câmera/galeria mobile, sanitização JPEG, galeria privada e fila de upload confirmada com o índice Firestore.
 - Fase alpha.18: treino ativo mobile com rascunho recuperável, séries, carga, repetições, volume e finalização offline.
 - Fase alpha.17: registro mobile offline de água e adesão aos horários de suplementos, preservando campos legados.
