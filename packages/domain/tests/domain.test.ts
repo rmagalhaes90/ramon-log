@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculatePlates, dashboardSummary, estimatedOneRepMax, pearsonCorrelation } from '../src';
+import {
+  calculatePlates,
+  dashboardSummary,
+  estimatedOneRepMax,
+  hasRevisionConflict,
+  pearsonCorrelation,
+} from '../src';
 
 describe('shared KYRO domain', () => {
   it('keeps workout calculations platform independent', () => {
@@ -39,5 +45,14 @@ describe('shared KYRO domain', () => {
       protein: 170,
       water: 2.5,
     });
+  });
+
+  it('prevents an older device from overwriting a newer remote revision', () => {
+    expect(
+      hasRevisionConflict('2026-08-03T12:00:00Z', '2026-08-03T10:00:00Z', { kg: 81 }, { kg: 80 }),
+    ).toBe(true);
+    expect(
+      hasRevisionConflict('2026-08-03T12:00:00Z', '2026-08-03T10:00:00Z', { kg: 80 }, { kg: 80 }),
+    ).toBe(false);
   });
 });

@@ -11,6 +11,7 @@ import {
 
 import { getMobileAuth, getMobileFirestore } from '@/services/firebase';
 import { clearUserCache } from '@/services/local-data';
+import { flushPendingWrites } from '@/services/user-data';
 
 export type AuthStatus = 'loading' | 'signed-out' | 'unverified' | 'blocked' | 'ready';
 interface AuthContextValue {
@@ -67,6 +68,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           if (current !== generation) return;
           setIsAdmin(access.isAdmin);
           setStatus(access.blocked ? 'blocked' : 'ready');
+          if (!access.blocked) void flushPendingWrites(nextUser.uid).catch(() => undefined);
         })
         .catch(() => {
           if (current === generation) void signOut(getMobileAuth());
