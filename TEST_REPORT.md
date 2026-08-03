@@ -181,3 +181,9 @@ Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build 
 O catálogo PT/EN persistente passou a cobrir títulos, navegação, estados vazios, carregamento e ações principais de dashboard, treinos, progresso, nutrição, suplementos, fotos, conta e admin. Todas as chamadas usam chaves inferidas pelo TypeScript; renomes ou ausências interrompem o typecheck. Valores do usuário e nomes de exercícios/suplementos permanecem inalterados.
 
 Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build Vite passou com 155 módulos. Android exportou 1.463 módulos/5,2 MB e iOS exportou 1.332 módulos/4,9 MB. Playwright passou 2 smoke tests em Chromium e WebKit móvel; 2 cenários dependentes dos Emulators ficaram ignorados localmente e permanecem cobertos pelo CI.
+
+## Rodada 2026-08-03 — preparação do GitHub Pages
+
+`pnpm install --frozen-lockfile`, typecheck strict conjunto (web, domínio e mobile), ESLint, **65 testes unitários** e build Vite de produção passaram. O web aprovou 27 arquivos/60 testes e o domínio compartilhado aprovou 1 arquivo/5 testes.
+
+O build transformou 155 módulos; app JS 213,37 kB (60,46 kB gzip), CSS 18,70 kB (3,96 kB gzip), Firestore 433,72 kB (128,61 kB gzip), Auth 108,00 kB (32,36 kB gzip) e Storage 31,78 kB (10,51 kB gzip). O workflow do Pages repete typecheck web, ESLint, testes web e build antes de liberar o artefato `dist-v4` para publicação.
