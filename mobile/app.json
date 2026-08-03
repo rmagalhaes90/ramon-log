@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "KYRO",
+    "slug": "kyro",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "kyro",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.kyro.mobile"
+    },
+    "android": {
+      "package": "app.kyro.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#080d0b"
+      }
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

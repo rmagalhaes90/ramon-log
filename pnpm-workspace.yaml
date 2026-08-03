@@ -1,3 +1,7 @@
+packages:
+  - 'packages/*'
+  - 'mobile'
+
 allowBuilds:
   '@firebase/util': true
   esbuild: true

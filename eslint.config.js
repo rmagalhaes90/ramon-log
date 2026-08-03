@@ -14,7 +14,14 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
-    files: ['app-v4/src/**/*.ts', 'app-v4/tests/**/*.ts', '*.config.ts'],
+    files: [
+      'app-v4/src/**/*.ts',
+      'app-v4/tests/**/*.ts',
+      'packages/domain/src/**/*.ts',
+      'packages/domain/tests/**/*.ts',
+      'mobile/**/*.{ts,tsx}',
+      '*.config.ts',
+    ],
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
       globals: { ...globals.browser, ...globals.node },
