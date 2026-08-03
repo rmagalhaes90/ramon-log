@@ -149,3 +149,9 @@ Typecheck strict, ESLint, Prettier, **60 testes web** e **4 testes de domínio**
 ## Rodada 2026-08-03 — readiness mobile alpha.20
 
 O dashboard mobile agora registra sono, energia, dor muscular e estresse em escala de 1 a 5, mostra score/classificação em tempo real e salva o check-in pela camada transacional offline. O cálculo duplicado foi removido do web e centralizado em `@kyro/domain`, com um novo teste que garante os mesmos extremos e limiares em ambas as plataformas. Typecheck, ESLint e **65 testes unitários** passaram nesta fase.
+
+## Rodada 2026-08-03 — comparação e compartilhamento mobile alpha.21
+
+A galeria permite selecionar até duas fotos para comparação lado a lado e usa estados acessíveis de checkbox. Uma foto selecionada pode ser compartilhada pela folha nativa do sistema: o aplicativo usa o JPEG persistido localmente ou baixa uma cópia temporária autenticada, sem compartilhar a URL privada do Storage. A disponibilidade do recurso é verificada antes de abrir a folha nativa.
+
+Typecheck strict, ESLint, Prettier e **65 testes unitários** passaram. O build Vite passou com 155 módulos; o bundle Android passou com **1.392 módulos** e Hermes de **5,1 MB**. Playwright passou os 2 smoke tests em Chromium e WebKit móvel e ignorou os 2 cenários dependentes dos Firebase Emulators, não iniciados nesta rodada.
