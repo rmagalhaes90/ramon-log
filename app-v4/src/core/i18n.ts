@@ -191,6 +191,13 @@ const messages = {
     resetComplete: 'Dados apagados',
     watchVideo: 'Ver demonstração',
     shareReport: 'Compartilhar relatório',
+    progression_increase: 'Progressão sugerida: aumente para',
+    progression_maintain: 'Mantenha a carga e consolide a execução em',
+    progression_deload: 'Regressão consistente detectada: considere uma sessão leve em',
+    progression_plateau: 'Possível estagnação: mantenha ou ajuste repetições em',
+    yourPlan: 'Seu plano',
+    checkingPlan: 'Verificando permissões no servidor…',
+    planUnavailable: 'Plano indisponível no momento. Seus dados continuam acessíveis.',
   },
   en: {
     tagline: 'Training and progress, even offline.',
@@ -381,6 +388,13 @@ const messages = {
     resetComplete: 'Data deleted',
     watchVideo: 'Watch demonstration',
     shareReport: 'Share report',
+    progression_increase: 'Suggested progression: increase to',
+    progression_maintain: 'Maintain the load and consolidate technique at',
+    progression_deload: 'Consistent regression detected: consider a lighter session at',
+    progression_plateau: 'Possible plateau: maintain or adjust repetitions at',
+    yourPlan: 'Your plan',
+    checkingPlan: 'Checking server entitlements…',
+    planUnavailable: 'Plan unavailable right now. Your data remains accessible.',
   },
 } as const;
 

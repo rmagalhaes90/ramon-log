@@ -1,6 +1,14 @@
-const VERSION = '4.0.0-alpha.8';
+const VERSION = '4.0.0-alpha.9';
 const SHELL = `kyro-v4-shell-${VERSION}`;
-const PRECACHE = ['./', './index.html', './manifest.webmanifest', './version.json'];
+const PRECACHE = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './version.json',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(SHELL).then((cache) => cache.addAll(PRECACHE)));

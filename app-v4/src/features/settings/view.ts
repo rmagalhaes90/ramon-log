@@ -12,6 +12,7 @@ import { clearLocalData } from '../../services/database';
 import { loadUserData, saveUserData } from '../../services/user-data';
 import { formatBytes, requestPersistentStorage, storageHealth } from '../offline/storage';
 import { resetFeatureGroup, type ResetGroup } from './reset';
+import { loadEntitlements } from '../subscriptions';
 
 interface SettingsViewOptions {
   copy: (key: MessageKey) => string;
@@ -46,6 +47,21 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   persistButton.textContent = copy('protectStorage');
   storageCard.append(storageTitle, storageStatus, persistButton);
   document.querySelector('.backup-card')?.before(storageCard);
+  const planCard = document.createElement('article');
+  planCard.className = 'subscription-card';
+  const planTitle = document.createElement('h2');
+  planTitle.textContent = copy('yourPlan');
+  const planStatus = document.createElement('p');
+  planStatus.textContent = copy('checkingPlan');
+  planCard.append(planTitle, planStatus);
+  storageCard.before(planCard);
+  void loadEntitlements()
+    .then((entitlements) => {
+      planStatus.textContent = `${entitlements.plan.toUpperCase()} · ${entitlements.status}`;
+    })
+    .catch(() => {
+      planStatus.textContent = copy('planUnavailable');
+    });
   void storageHealth()
     .then((health) => {
       storageStatus.textContent = health

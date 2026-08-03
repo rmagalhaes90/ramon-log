@@ -45,15 +45,14 @@ async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAd
     const token = await getIdTokenResult(user);
     return {
       blocked: false,
-      isAdmin:
-        token.claims.admin === true || user.email?.toLowerCase() === 'rmagalhaes90@gmail.com',
+      isAdmin: token.claims.admin === true,
     };
   }
   const data = snapshot.data();
   const token = await getIdTokenResult(user);
   return {
     blocked: data.blocked === true,
-    isAdmin: token.claims.admin === true || user.email?.toLowerCase() === 'rmagalhaes90@gmail.com',
+    isAdmin: token.claims.admin === true,
   };
 }
 

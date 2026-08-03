@@ -1,0 +1,41 @@
+name: KYRO quality
+
+on:
+  pull_request:
+  push:
+    branches: [refactor/kyro-v4-vite-typescript]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir functions --ignore-workspace install --frozen-lockfile --ignore-scripts
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm test:e2e
+      - run: pnpm test:emulator:auth
+      - run: pnpm test:e2e:auth
+      - run: pnpm test:emulator:rules
+      - run: pnpm test:emulator:functions
+      - run: pnpm audit --audit-level high

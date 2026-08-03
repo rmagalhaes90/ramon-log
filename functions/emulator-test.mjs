@@ -44,6 +44,9 @@ assert.equal((await getAuth().getUser(target.localId)).customClaims?.admin, true
 await call('setUserBlocked', bootstrap.idToken, { uid: target.localId, blocked: true });
 assert.equal((await getAuth().getUser(target.localId)).disabled, true);
 
+const entitlements = await call('getEntitlements', bootstrap.idToken);
+assert.deepEqual(entitlements, { plan: 'free', status: 'inactive', features: ['history'] });
+
 const disposable = await signUp(`delete-${Date.now()}@example.test`);
 await call('deleteOwnAccount', disposable.idToken);
 await assert.rejects(getAuth().getUser(disposable.localId), /no user record|user-not-found/i);

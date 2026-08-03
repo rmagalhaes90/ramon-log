@@ -22,7 +22,10 @@ function extractLiteral(name, opener) {
       else if (character === quote) quote = '';
       continue;
     }
-    if (character === '"' || character === "'" || character === '`') { quote = character; continue; }
+    if (character === '"' || character === "'" || character === '`') {
+      quote = character;
+      continue;
+    }
     if (character === opener) depth += 1;
     else if (character === closer) {
       depth -= 1;
@@ -35,8 +38,14 @@ function extractLiteral(name, opener) {
 async function exportJson(constantName, opener, fileName) {
   const literal = extractLiteral(constantName, opener);
   const value = vm.runInNewContext(`(${literal})`, Object.create(null), { timeout: 1000 });
-  await writeFile(new URL(fileName, outputDirectory), `${JSON.stringify(value, null, 2)}\n`, 'utf8');
-  console.log(`${constantName}: ${Array.isArray(value) ? value.length : Object.keys(value).length} entries`);
+  await writeFile(
+    new URL(fileName, outputDirectory),
+    `${JSON.stringify(value, null, 2)}\n`,
+    'utf8',
+  );
+  console.log(
+    `${constantName}: ${Array.isArray(value) ? value.length : Object.keys(value).length} entries`,
+  );
 }
 
 await exportJson('EXERCISE_DB', '[', 'exercises.json');

@@ -22,6 +22,10 @@ import { flushPhotoUploads, photoQueueCount } from './features/photos/offline';
 import { renderPhotosView } from './features/photos/view';
 import { shareOrFallback } from './features/share';
 import {
+  progressionRecommendation,
+  type PerformanceEntry,
+} from './features/intelligence/progression';
+import {
   bestCompletedSet,
   calculatePlates,
   completedExerciseCount,
@@ -832,9 +836,10 @@ async function renderSupplements(user: User): Promise<void> {
 
 async function renderWorkout(user: User): Promise<void> {
   clearWorkoutTimers();
-  const [workoutsValue, draft] = await Promise.all([
+  const [workoutsValue, draft, exerciseHistory] = await Promise.all([
     loadUserData(user, 'workouts'),
     loadWorkoutDraft(user, selectedDay),
+    loadUserData(user, 'exerciseHistory'),
   ]);
   const workouts = workoutsValue ?? {};
   const freshEntries = createEntries(workouts, selectedDay);
@@ -850,7 +855,7 @@ async function renderWorkout(user: User): Promise<void> {
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
   renderDayButtons(user, workouts);
-  renderExerciseEntries(user, workouts);
+  renderExerciseEntries(user, workouts, exerciseHistory ?? {});
   const updateClock = () => {
     const elapsed = Math.max(
       0,
@@ -1004,7 +1009,11 @@ function renderDayButtons(user: User, workouts: Workouts): void {
   });
 }
 
-function renderExerciseEntries(user: User, workouts: Workouts): void {
+function renderExerciseEntries(
+  user: User,
+  workouts: Workouts,
+  exerciseHistory: Record<string, PerformanceEntry[]>,
+): void {
   const list = document.querySelector('#exercise-list');
   if (!list) return;
   const persistDraft = () =>
@@ -1066,6 +1075,19 @@ function renderExerciseEntries(user: User, workouts: Workouts): void {
     meta.className = 'exercise-meta';
     meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`;
     card.append(meta);
+    const recommendation = progressionRecommendation(
+      exerciseHistory[entry.exercise.name] ?? [],
+      entry.exercise.reps,
+    );
+    if (recommendation.action !== 'insufficient') {
+      const insight = document.createElement('p');
+      insight.className = `progression-insight ${recommendation.action}`;
+      const recommendationText = copy(`progression_${recommendation.action}` as MessageKey);
+      insight.textContent = recommendation.suggestedLoad
+        ? `${recommendationText} ${recommendation.suggestedLoad} kg.`
+        : recommendationText;
+      card.append(insight);
+    }
     if (entry.exercise.videoUrl) {
       const video = document.createElement('a');
       video.className = 'exercise-video';

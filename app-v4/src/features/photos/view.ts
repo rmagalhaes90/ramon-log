@@ -7,6 +7,7 @@ import { shareOrFallback } from '../share';
 import { dateKey } from '../workouts/model';
 import { comparisonReady, validatePhoto } from './model';
 import { enqueuePhoto, photoQueueCount } from './offline';
+import { sanitizePhoto } from './sanitize';
 interface Options {
   copy: (key: MessageKey) => string;
   shell: (content: string) => void;
@@ -139,17 +140,21 @@ export async function renderPhotosView(user: User, options: Options): Promise<vo
     const progress = document.querySelector<HTMLProgressElement>('#photo-progress');
     if (progress) progress.hidden = false;
     const id = crypto.randomUUID().slice(0, 60);
-    const run = navigator.onLine
-      ? uploadPhoto(user, id, file, (value) => {
-          if (progress) progress.value = value;
-        }).then(() => saveUserData(user, 'photoIndex', [...photos, { id, d: dateKey() }]))
-      : enqueuePhoto(user, id, file);
+    let sanitized: File | undefined;
+    const run = sanitizePhoto(file).then((clean) => {
+      sanitized = clean;
+      return navigator.onLine
+        ? uploadPhoto(user, id, clean, (value) => {
+            if (progress) progress.value = value;
+          }).then(() => saveUserData(user, 'photoIndex', [...photos, { id, d: dateKey() }]))
+        : enqueuePhoto(user, id, clean);
+    });
     void run
       .then(() => renderPhotosView(user, options))
       .catch(async (error: unknown) => {
-        if (!navigator.onLine) {
+        if (!navigator.onLine && sanitized) {
           try {
-            await enqueuePhoto(user, id, file);
+            await enqueuePhoto(user, id, sanitized);
             await renderPhotosView(user, options);
             return;
           } catch (queueError) {

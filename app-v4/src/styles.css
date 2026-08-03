@@ -1130,3 +1130,19 @@ h2 {
     transition: none !important;
   }
 }
+
+.progression-insight {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.progression-insight.deload,
+.progression-insight.plateau {
+  border-color: color-mix(in srgb, #f0a34a 55%, transparent);
+  background: color-mix(in srgb, #f0a34a 10%, transparent);
+}

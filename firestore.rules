@@ -29,6 +29,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Billing state is server-owned. Clients receive a normalized feature set
+    // through the getEntitlements callable function instead of reading it here.
+    match /subscriptions/{uid} {
+      allow read, write: if false;
+    }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

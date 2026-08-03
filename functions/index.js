@@ -59,3 +59,18 @@ export const deleteOwnAccount = onCall(async (request) => {
     });
   return { deleted: true };
 });
+
+export const getEntitlements = onCall(async (request) => {
+  const { uid } = requireUser(request);
+  const snapshot = await getFirestore().doc(`subscriptions/${uid}`).get();
+  const data = snapshot.data() ?? {};
+  const active = ['trialing', 'active', 'past_due_grace'].includes(data.status);
+  const plan = active && ['pro', 'coach'].includes(data.plan) ? data.plan : 'free';
+  const features =
+    plan === 'coach'
+      ? ['history', 'progression', 'reports', 'photos', 'coach']
+      : plan === 'pro'
+        ? ['history', 'progression', 'reports', 'photos']
+        : ['history'];
+  return { plan, status: active ? data.status : 'inactive', features };
+});

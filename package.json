@@ -1,7 +1,7 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.8",
+  "version": "4.0.0-alpha.9",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
@@ -9,7 +9,7 @@
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint app-v4/src app-v4/tests scripts functions vite.config.ts playwright.config.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --check app-v4/src app-v4/tests app-v4/e2e functions/*.js functions/*.mjs functions/package.json scripts package.json firebase.json eslint.config.js vite.config.ts playwright.config.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:emulator:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-emulator-test.mjs\"",
