@@ -52,6 +52,7 @@
 - Regras Firestore/Storage aprovadas no Emulator com isolamento entre contas, controles administrativos, MIME e limite de upload; release `4.0.0-alpha.7`.
 - Cloud Functions v2 para custom claims, bloqueio sincronizado e exclusão idempotente, integradas ao SDK modular e aprovadas no Emulator; marco final de implementação `4.0.0-alpha.8`.
 - Configuração local fixa o projeto isolado `demo-kyro-v4`, evitando divergência entre o usuário exibido no Emulator UI e o projeto usado pelo SDK.
+- Alpha.9: motor de progressão/plateau/deload, transcodificação de fotos sem EXIF, entitlements no servidor, PWA manifest completo, headers de segurança, CI e pacote documental de publicação.
 
 ### Preserved
 

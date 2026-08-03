@@ -46,3 +46,7 @@ Percentual do escopo de implementação desta migração: **100%**. A fundação
 - Finalizar o tour completo de onboarding e a validação visual de todas as telas antes de promover a v4.
 
 Esses gates exigem credenciais/dispositivos/infraestrutura de homologação e não autorizam deploy automático. Não reduzem a conclusão do escopo de implementação, mas impedem declarar a v4 pronta para substituir o baseline.
+
+## Escopo premium ampliado em 2026-08-03
+
+O marco de 100% acima refere-se à migração funcional originalmente acordada, não ao novo roadmap comercial de 52 seções. Para esse roadmap ampliado, consulte [REQUIREMENTS_MATRIX.md](REQUIREMENTS_MATRIX.md). Recursos que exigem Stripe, Apple/Google stores, provedor de IA, textos jurídicos aprovados ou aparelhos físicos não são declarados como concluídos.

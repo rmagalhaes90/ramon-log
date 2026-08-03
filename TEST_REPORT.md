@@ -73,3 +73,13 @@ As Functions `setAdminRole`, `setUserBlocked` e `deleteOwnAccount` carregaram no
 A bateria final passou: typecheck strict, lint incluindo `functions/`, **21 arquivos/46 testes Vitest**, build de 144 módulos e Playwright público em Chromium/WebKit (**2/2**, com os dois cenários autenticados corretamente ignorados fora do Emulator). O app JS ficou em 191,16 kB (53,80 kB gzip), Firestore em 433,72 kB (128,61 kB gzip), Storage em 31,78 kB (10,51 kB gzip) e CSS em 16,96 kB (3,54 kB gzip). Nenhum deploy foi executado.
 
 Na validação manual posterior, foi identificado que a flag local conectava os SDKs aos ports do Emulator, mas preservava o project ID de produção. A configuração foi corrigida para forçar `demo-kyro-v4` e seu bucket somente quando a flag estiver ativa, mantendo produção como padrão.
+
+## Rodada 2026-08-03 — fundação premium alpha.9
+
+A bateria final desta rodada passou com código 0: instalação/lockfile via pnpm 11.9.0, typecheck strict, ESLint, **24 arquivos/50 testes Vitest** e build Vite com 147 módulos. O bundle gerado contém app JS de 195,04 kB (55,15 kB gzip), Firestore de 433,72 kB (128,61 kB gzip), Auth de 108,00 kB (32,36 kB gzip), Storage de 31,78 kB (10,51 kB gzip) e CSS de 17,37 kB (3,65 kB gzip).
+
+Playwright público passou em Chromium e WebKit mobile (**2/2**); os cenários autenticados foram ignorados nessa execução sem Emulator e depois passaram isoladamente no Auth Emulator em ambos os browsers (**2/2**), incluindo o bloqueio até verificação de email. O teste direto do Auth Emulator também aprovou criação, login e exclusão.
+
+Firestore/Storage Emulator aprovou ownership, administração e limites de upload. Functions Emulator carregou `deleteOwnAccount`, `getEntitlements`, `setAdminRole` e `setUserBlocked`; claims, bloqueio, plano free padrão e exclusão idempotente passaram. Uma primeira tentativa falhou porque um Emulator antigo ocupava as portas e ainda mantinha a versão alpha.8 em memória; após reiniciar somente esse processo local, a execução limpa passou. O host emitiu avisos não bloqueantes por usar Node 24 enquanto a runtime declarada é Node 22 e por uma dependência transitiva antiga do Firebase CLI usar `url.parse()`.
+
+Nenhum deploy ou publicação no GitHub Pages foi executado.
