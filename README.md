@@ -33,9 +33,13 @@ Consulte [TESTING.md](TESTING.md), [FIREBASE_SETUP.md](FIREBASE_SETUP.md) e [DEP
 
 - `app-v4/src/features`: domínios funcionais.
 - `app-v4/src/services`: Firebase, IndexedDB, sync, Storage e PWA.
+- `mobile`: aplicativo Expo/React Native paralelo, sem substituir o web.
+- `packages/domain`: regras puras compartilhadas entre web e mobile.
 - `functions`: backend confiável para claims, bloqueio e exclusão.
 - `app-v4/tests` e `app-v4/e2e`: Vitest e Playwright.
 - `index.html`: baseline preservado; não é a composition root da v4.
+
+Consulte [mobile-app.md](docs/mobile-app.md), [multiplatform-architecture.md](docs/multiplatform-architecture.md) e [current-state-audit.md](docs/current-state-audit.md) para a fundação multiplataforma.
 
 ## Segurança e privacidade
 

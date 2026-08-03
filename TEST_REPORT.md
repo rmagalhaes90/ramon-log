@@ -107,3 +107,11 @@ Favoritos são limitados a 100 e refeições a 200 por dia pelos schemas. A dupl
 Formatação, typecheck strict, ESLint, **27 arquivos/60 testes Vitest**, build e Playwright público passaram. Os testes novos validam ordenação e delta das medidas, distribuição ponderada do volume por grupo muscular e correlação de Pearson entre readiness e volume apenas com pelo menos três datas comparáveis. O Playwright aprovou o smoke em Chromium e WebKit mobile (**2/2**); os dois cenários autenticados foram ignorados porque esta execução não iniciou o Auth Emulator.
 
 O build transformou 149 módulos; app JS 213,37 kB (60,44 kB gzip), CSS 18,70 kB (3,96 kB gzip), Firestore 433,72 kB (128,61 kB gzip), Auth 108,00 kB (32,36 kB gzip) e Storage 31,78 kB (10,51 kB gzip). Nenhum deploy ou publicação no GitHub Pages foi executado.
+
+## Rodada 2026-08-03 — fundação multiplataforma alpha.14
+
+`pnpm install`, formatação, typecheck strict conjunto (web, domínio e mobile), ESLint e os testes passaram. O web manteve **27 arquivos/60 testes Vitest**; o novo `@kyro/domain` aprovou **1 arquivo/2 testes**. Playwright público passou em Chromium e WebKit mobile (**2/2**), com os dois testes autenticados corretamente ignorados sem Auth Emulator.
+
+O build web passou com 152 módulos: app JS 213,37 kB (60,46 kB gzip), CSS 18,70 kB (3,96 kB gzip), Firestore 433,72 kB (128,61 kB gzip), Auth 108,00 kB (32,36 kB gzip) e Storage 31,78 kB (10,51 kB gzip). O Metro produziu um bundle Android Hermes real com 1.332 módulos e 3,5 MB em `mobile/dist/android`; o diretório gerado permanece ignorado.
+
+O Expo Doctor aprovou 16 de 20 verificações e não encontrou mais incompatibilidades de schema ou versões. As quatro verificações restantes dependem de executar `npm` internamente e falharam com `spawn npm ENOENT` neste runtime pnpm-only. `pnpm peers check` passou sem qualquer problema depois de alinhar React Native, Screens, Safe Area, Worklets e React DOM ao SDK 57. Nenhum build EAS, deploy, publicação em loja ou GitHub Pages foi executado.

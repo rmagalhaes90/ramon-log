@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.14: workspace multiplataforma, domínio compartilhado e fundação Expo SDK 57 com login Firebase persistente, Router, tokens KYRO, EAS preparatório e bundle Android validado.
 - Fundação paralela Vite + TypeScript strict, sem substituir o baseline.
 - ESLint type-aware, Prettier, Vitest e Playwright (Chromium/WebKit mobile).
 - Firebase SDK modular com ambiente validado.
