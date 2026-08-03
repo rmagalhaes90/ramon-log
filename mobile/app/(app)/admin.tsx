@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/auth/AuthProvider';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
 import {
   listAdminAudit,
@@ -16,6 +17,7 @@ import { tokens } from '@/theme/tokens';
 
 export default function AdminScreen() {
   const { isAdmin, user } = useAuth();
+  const { t } = useLocale();
   const [users, setUsers] = useState<SharedUser[]>([]);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,17 +56,17 @@ export default function AdminScreen() {
     }
   }
   return (
-    <FeatureScreen eyebrow="ADMIN" title="Usuários">
+    <FeatureScreen eyebrow="ADMIN" title={t('users')}>
       <Text style={featureStyles.muted}>
         Até 100 contas. Ações exigem claim admin e são validadas novamente pela Cloud Function.
       </Text>
-      {loading ? <StateMessage>Carregando usuários…</StateMessage> : null}
+      {loading ? <StateMessage>{t('loadingUsers')}</StateMessage> : null}
       {status ? <StateMessage>{status}</StateMessage> : null}
       {users.map((item) => (
         <Card key={item.uid}>
           <Text style={featureStyles.cardTitle}>{item.email || item.uid}</Text>
           <Text style={featureStyles.muted}>
-            {item.blocked ? 'Bloqueada' : 'Ativa'} · {item.isAdmin ? 'Admin' : 'Usuário'}
+            {item.blocked ? t('blocked') : t('active')} · {item.isAdmin ? 'Admin' : t('user')}
           </Text>
           <View style={styles.actions}>
             <Pressable
@@ -86,7 +88,7 @@ export default function AdminScreen() {
           </View>
         </Card>
       ))}
-      <Text style={featureStyles.cardTitle}>Auditoria recente</Text>
+      <Text style={featureStyles.cardTitle}>{t('recentAudit')}</Text>
       {audit.map((entry) => (
         <Card key={entry.id}>
           <Text style={featureStyles.muted}>

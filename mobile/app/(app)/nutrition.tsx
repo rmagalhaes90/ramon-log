@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
 import { useAuth } from '@/auth/AuthProvider';
 import { useUserData } from '@/hooks/useUserData';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { saveUserData, SyncConflictError } from '@/services/user-data';
 import { tokens } from '@/theme/tokens';
 
@@ -37,6 +38,7 @@ const nutritionSchema = z.record(
 
 export default function NutritionScreen() {
   const { user } = useAuth();
+  const { t } = useLocale();
   const { data, loading, error } = useUserData('nutritionLog', nutritionSchema);
   const today = data?.[dateKey()];
   const [status, setStatus] = useState('');
@@ -59,10 +61,10 @@ export default function NutritionScreen() {
     }
   }
   return (
-    <FeatureScreen eyebrow="RESUMO DIÁRIO" title="Nutrição">
-      {loading ? <StateMessage>Carregando nutrição…</StateMessage> : null}
-      {error ? <StateMessage error>Não foi possível carregar a nutrição.</StateMessage> : null}
-      {!loading && !today ? <StateMessage>Nenhum registro para hoje.</StateMessage> : null}
+    <FeatureScreen eyebrow={t('dailySummary')} title={t('nutrition')}>
+      {loading ? <StateMessage>{t('loadingNutrition')}</StateMessage> : null}
+      {error ? <StateMessage error>{t('nutritionError')}</StateMessage> : null}
+      {!loading && !today ? <StateMessage>{t('noToday')}</StateMessage> : null}
       {today ? (
         <>
           <Card>
@@ -91,7 +93,7 @@ export default function NutritionScreen() {
             </Text>
           </Card>
           <Card>
-            <Text style={featureStyles.cardTitle}>Refeições</Text>
+            <Text style={featureStyles.cardTitle}>{t('meals')}</Text>
             {today.meals.map((meal) => (
               <Text key={meal.id} style={featureStyles.muted}>
                 {meal.name} · {Math.round(meal.kcal)} kcal · P {Math.round(meal.prot)} g

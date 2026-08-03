@@ -162,17 +162,17 @@ export default function DashboardScreen() {
           </View>
           <View style={styles.grid}>
             <Metric
-              label="Peso atual"
+              label={t('currentWeight')}
               value={data.weight === null ? '—' : `${data.weight.toFixed(1)} kg`}
             />
-            <Metric label="Treinos em 7 dias" value={String(data.weeklySessions)} />
+            <Metric label={t('workouts7d')} value={String(data.weeklySessions)} />
             <Metric
-              label="Volume semanal"
+              label={t('weeklyVolume')}
               value={`${Math.round(data.weeklyVolume).toLocaleString('pt')} kg`}
             />
-            <Metric label="Calorias hoje" value={`${Math.round(data.calories)} kcal`} />
-            <Metric label="Proteína hoje" value={`${Math.round(data.protein)} g`} />
-            <Metric label="Água hoje" value={`${data.water.toFixed(1)} L`} />
+            <Metric label={t('caloriesToday')} value={`${Math.round(data.calories)} kcal`} />
+            <Metric label={t('proteinToday')} value={`${Math.round(data.protein)} g`} />
+            <Metric label={t('waterToday')} value={`${data.water.toFixed(1)} L`} />
           </View>
           <View style={styles.card}>
             <View style={styles.readinessHeader}>

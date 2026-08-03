@@ -3,11 +3,13 @@ import { Alert, Pressable, StyleSheet, Text, TextInput } from 'react-native';
 
 import { useAuth } from '@/auth/AuthProvider';
 import { Card, FeatureScreen, featureStyles } from '@/components/FeatureScreen';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { deleteOwnAccount, usesPassword } from '@/services/account';
 import { tokens } from '@/theme/tokens';
 
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
+  const { t } = useLocale();
   const [phrase, setPhrase] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -53,16 +55,16 @@ export default function SettingsScreen() {
   }
 
   return (
-    <FeatureScreen eyebrow="CONTA" title="Configurações">
+    <FeatureScreen eyebrow={t('account')} title={t('accountSettings')}>
       <Card>
-        <Text style={featureStyles.cardTitle}>Sessão</Text>
+        <Text style={featureStyles.cardTitle}>{t('session')}</Text>
         <Text style={featureStyles.muted}>{user?.email}</Text>
         <Pressable disabled={busy} onPress={() => void logout()} style={styles.secondaryButton}>
-          <Text style={styles.secondaryText}>Sair</Text>
+          <Text style={styles.secondaryText}>{t('logout')}</Text>
         </Pressable>
       </Card>
       <Card>
-        <Text style={styles.dangerTitle}>Excluir conta e dados</Text>
+        <Text style={styles.dangerTitle}>{t('deleteAccount')}</Text>
         <Text style={featureStyles.muted}>
           Remove permanentemente autenticação, documentos Firestore e fotos privadas do Storage.
         </Text>
@@ -92,7 +94,7 @@ export default function SettingsScreen() {
           </Text>
         ) : null}
         <Pressable disabled={busy} onPress={confirmDeletion} style={styles.dangerButton}>
-          <Text style={styles.dangerButtonText}>Excluir permanentemente</Text>
+          <Text style={styles.dangerButtonText}>{t('deleteForever')}</Text>
         </Pressable>
       </Card>
     </FeatureScreen>

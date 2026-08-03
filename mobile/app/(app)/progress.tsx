@@ -6,6 +6,7 @@ import { Pressable, StyleSheet, Text, TextInput } from 'react-native';
 import { useAuth } from '@/auth/AuthProvider';
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
 import { useUserData } from '@/hooks/useUserData';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { saveUserData, SyncConflictError } from '@/services/user-data';
 import { tokens } from '@/theme/tokens';
 
@@ -23,6 +24,7 @@ const measurementsSchema = z.record(
 
 export default function ProgressScreen() {
   const { user } = useAuth();
+  const { t } = useLocale();
   const [weightInput, setWeightInput] = useState('');
   const [waistInput, setWaistInput] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
@@ -80,11 +82,11 @@ export default function ProgressScreen() {
     }
   }
   return (
-    <FeatureScreen eyebrow="EVOLUÇÃO" title="Progresso">
-      {loading ? <StateMessage>Carregando progresso…</StateMessage> : null}
-      {error ? <StateMessage error>Parte dos dados não pôde ser carregada.</StateMessage> : null}
+    <FeatureScreen eyebrow={t('evolution')} title={t('progress')}>
+      {loading ? <StateMessage>{t('loadingProgress')}</StateMessage> : null}
+      {error ? <StateMessage error>{t('progressError')}</StateMessage> : null}
       <Card>
-        <Text style={featureStyles.cardTitle}>Registrar hoje</Text>
+        <Text style={featureStyles.cardTitle}>{t('registerToday')}</Text>
         <TextInput
           keyboardType="decimal-pad"
           onChangeText={setWeightInput}
@@ -107,11 +109,11 @@ export default function ProgressScreen() {
           </Text>
         ) : null}
         <Pressable onPress={() => void saveProgress()} style={styles.button}>
-          <Text style={styles.buttonText}>Salvar progresso</Text>
+          <Text style={styles.buttonText}>{t('saveProgress')}</Text>
         </Pressable>
       </Card>
       <Card>
-        <Text style={featureStyles.cardTitle}>Peso recente</Text>
+        <Text style={featureStyles.cardTitle}>{t('recentWeight')}</Text>
         {latestWeights.length ? (
           latestWeights.map((entry) => (
             <Text key={entry.d} style={featureStyles.muted}>
@@ -119,11 +121,11 @@ export default function ProgressScreen() {
             </Text>
           ))
         ) : (
-          <Text style={featureStyles.muted}>Sem registros.</Text>
+          <Text style={featureStyles.muted}>{t('noRecords')}</Text>
         )}
       </Card>
       <Card>
-        <Text style={featureStyles.cardTitle}>Medidas recentes</Text>
+        <Text style={featureStyles.cardTitle}>{t('recentMeasures')}</Text>
         {latestMeasurements.length ? (
           latestMeasurements.map(([date, values]) => (
             <Text key={date} style={featureStyles.muted}>
@@ -134,7 +136,7 @@ export default function ProgressScreen() {
             </Text>
           ))
         ) : (
-          <Text style={featureStyles.muted}>Sem registros.</Text>
+          <Text style={featureStyles.muted}>{t('noRecords')}</Text>
         )}
       </Card>
     </FeatureScreen>

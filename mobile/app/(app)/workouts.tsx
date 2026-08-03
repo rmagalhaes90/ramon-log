@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useAuth } from '@/auth/AuthProvider';
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
 import { useUserData } from '@/hooks/useUserData';
+import { useLocale } from '@/i18n/LocaleProvider';
 import { readUserCache, writeUserCache } from '@/services/local-data';
 import { enableRestNotifications, scheduleRestNotification } from '@/services/notifications';
 import { saveUserData, SyncConflictError } from '@/services/user-data';
@@ -91,6 +92,7 @@ function createDraft(day: DayKey, workout: z.infer<typeof workoutSchema>): Worko
 
 export default function WorkoutsScreen() {
   const { user } = useAuth();
+  const { t } = useLocale();
   const { data, loading, error } = useUserData('workouts', workoutsSchema);
   const sessions = useUserData('sessionLog', sessionLogSchema);
   const notificationSettings = useUserData('notificationSettings', notificationSettingsSchema);
@@ -216,7 +218,7 @@ export default function WorkoutsScreen() {
   }
 
   return (
-    <FeatureScreen eyebrow="PLANO SEMANAL" title="Treinos">
+    <FeatureScreen eyebrow={t('weeklyPlan')} title={t('workouts')}>
       <View style={styles.days}>
         {dayKeys.map((day) => (
           <Pressable
@@ -235,11 +237,9 @@ export default function WorkoutsScreen() {
           </Pressable>
         ))}
       </View>
-      {loading ? <StateMessage>Carregando treinos…</StateMessage> : null}
-      {error ? <StateMessage error>Não foi possível carregar os treinos.</StateMessage> : null}
-      {!loading && !error && !workout ? (
-        <StateMessage>Nenhum treino configurado neste dia.</StateMessage>
-      ) : null}
+      {loading ? <StateMessage>{t('loadingWorkouts')}</StateMessage> : null}
+      {error ? <StateMessage error>{t('workoutsError')}</StateMessage> : null}
+      {!loading && !error && !workout ? <StateMessage>{t('noWorkout')}</StateMessage> : null}
       {workout && !draft ? (
         <Card>
           <Text style={featureStyles.cardTitle}>{workout.title}</Text>
@@ -250,7 +250,7 @@ export default function WorkoutsScreen() {
             onPress={() => void persistDraft(createDraft(selectedDay, workout))}
             style={styles.primaryButton}
           >
-            <Text style={styles.primaryButtonText}>Iniciar treino</Text>
+            <Text style={styles.primaryButtonText}>{t('startWorkout')}</Text>
           </Pressable>
         </Card>
       ) : null}
@@ -293,7 +293,7 @@ export default function WorkoutsScreen() {
       ))}
       {draft ? (
         <Card>
-          <Text style={featureStyles.cardTitle}>Resumo do treino</Text>
+          <Text style={featureStyles.cardTitle}>{t('workoutSummary')}</Text>
           <Text style={featureStyles.muted}>
             {totals.sets} séries · {totals.exercises} exercícios · {totals.volume.toFixed(0)} kg
           </Text>
@@ -315,7 +315,7 @@ export default function WorkoutsScreen() {
             </Text>
           </Pressable>
           <Pressable onPress={() => void finishWorkout()} style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Finalizar treino</Text>
+            <Text style={styles.primaryButtonText}>{t('finishWorkout')}</Text>
           </Pressable>
         </Card>
       ) : status ? (

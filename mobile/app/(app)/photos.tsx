@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { useAuth } from '@/auth/AuthProvider';
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
 import { useUserData } from '@/hooks/useUserData';
+import { useLocale } from '@/i18n/LocaleProvider';
 import {
   acknowledgePhotos,
   deletePhoto,
@@ -42,6 +43,7 @@ function mergeIndex(
 
 export default function PhotosScreen() {
   const { user } = useAuth();
+  const { t } = useLocale();
   const photos = useUserData('photoIndex', photoIndexSchema);
   const [localPhotos, setLocalPhotos] = useState<z.infer<typeof photoIndexSchema>>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
@@ -214,9 +216,9 @@ export default function PhotosScreen() {
   }
 
   return (
-    <FeatureScreen eyebrow="PROGRESSO VISUAL" title="Fotos">
+    <FeatureScreen eyebrow={t('visualProgress')} title={t('photos')}>
       <Card>
-        <Text style={featureStyles.cardTitle}>Nova foto de progresso</Text>
+        <Text style={featureStyles.cardTitle}>{t('newPhoto')}</Text>
         <Text style={featureStyles.muted}>
           JPEG otimizado, sem metadados EXIF e limitado a 3 MB.
         </Text>
@@ -226,14 +228,14 @@ export default function PhotosScreen() {
             onPress={() => void choosePhoto(true)}
             style={styles.primaryButton}
           >
-            <Text style={styles.primaryButtonText}>Câmera</Text>
+            <Text style={styles.primaryButtonText}>{t('camera')}</Text>
           </Pressable>
           <Pressable
             disabled={busy}
             onPress={() => void choosePhoto(false)}
             style={styles.secondaryButton}
           >
-            <Text style={styles.secondaryButtonText}>Galeria</Text>
+            <Text style={styles.secondaryButtonText}>{t('gallery')}</Text>
           </Pressable>
         </View>
         {pending ? <Text style={featureStyles.muted}>{pending} upload(s) pendente(s).</Text> : null}
@@ -243,13 +245,9 @@ export default function PhotosScreen() {
           </Text>
         ) : null}
       </Card>
-      {photos.loading ? <StateMessage>Carregando fotos…</StateMessage> : null}
-      {photos.error ? (
-        <StateMessage error>Não foi possível carregar o índice de fotos.</StateMessage>
-      ) : null}
-      {!photos.loading && !localPhotos.length ? (
-        <StateMessage>Nenhuma foto de progresso.</StateMessage>
-      ) : null}
+      {photos.loading ? <StateMessage>{t('loadingPhotos')}</StateMessage> : null}
+      {photos.error ? <StateMessage error>{t('photosError')}</StateMessage> : null}
+      {!photos.loading && !localPhotos.length ? <StateMessage>{t('noPhotos')}</StateMessage> : null}
       {selected.length ? (
         <Card>
           <Text style={featureStyles.cardTitle}>
@@ -273,10 +271,10 @@ export default function PhotosScreen() {
               onPress={() => void shareSelected()}
               style={[styles.primaryButton, selected.length !== 1 && styles.disabledButton]}
             >
-              <Text style={styles.primaryButtonText}>Compartilhar</Text>
+              <Text style={styles.primaryButtonText}>{t('share')}</Text>
             </Pressable>
             <Pressable onPress={() => setSelected([])} style={styles.secondaryButton}>
-              <Text style={styles.secondaryButtonText}>Limpar</Text>
+              <Text style={styles.secondaryButtonText}>{t('clear')}</Text>
             </Pressable>
           </View>
         </Card>
@@ -312,7 +310,7 @@ export default function PhotosScreen() {
                 </Text>
               </Pressable>
               <Pressable disabled={busy} onPress={() => confirmDelete(photo.id)}>
-                <Text style={styles.deleteText}>Excluir</Text>
+                <Text style={styles.deleteText}>{t('remove')}</Text>
               </Pressable>
             </View>
           </View>

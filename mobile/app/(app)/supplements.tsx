@@ -15,6 +15,7 @@ const logSchema = z.record(z.string(), z.record(z.string(), z.array(z.boolean())
 
 export default function SupplementsScreen() {
   const { user } = useAuth();
+  const { t } = useLocale();
   const supplements = useUserData('mySupplements', supplementsSchema);
   const logs = useUserData('supplementLog', logSchema);
   const today = logs.data?.[dateKey()] ?? {};
@@ -43,15 +44,15 @@ export default function SupplementsScreen() {
     }
   }
   return (
-    <FeatureScreen eyebrow="ROTINA" title="Suplementos">
+    <FeatureScreen eyebrow={t('routine')} title={t('supplements')}>
       {supplements.loading || logs.loading ? (
-        <StateMessage>Carregando suplementos…</StateMessage>
+        <StateMessage>{t('loadingSupplements')}</StateMessage>
       ) : null}
       {supplements.error || logs.error ? (
-        <StateMessage error>Parte da rotina não pôde ser carregada.</StateMessage>
+        <StateMessage error>{t('supplementsError')}</StateMessage>
       ) : null}
       {!supplements.loading && !supplements.data?.length ? (
-        <StateMessage>Nenhum suplemento configurado.</StateMessage>
+        <StateMessage>{t('noSupplements')}</StateMessage>
       ) : null}
       {supplements.data?.map((supplement) => {
         const completed = localToday[supplement.id]?.filter(Boolean).length ?? 0;
@@ -103,3 +104,4 @@ const styles = StyleSheet.create({
   doneText: { color: tokens.colors.primaryText, fontWeight: '800' },
 });
 import { useAuth } from '@/auth/AuthProvider';
+import { useLocale } from '@/i18n/LocaleProvider';
