@@ -127,3 +127,9 @@ O Metro gerou novamente o bundle Android com sucesso: 1.355 módulos e bytecode 
 Typecheck strict web/domínio/mobile, ESLint e testes passaram. O web manteve **27 arquivos/60 testes** e o domínio compartilhado passou **4 testes**, adicionando garantia contra overwrite quando a revisão remota é mais nova e o conteúdo diverge.
 
 A escrita mobile usa transação Firestore, revisão-base, cache otimista e fila AsyncStorage separada por UID. Falhas de rede geram estado pendente; o login tenta flush automático e conflitos não são convertidos em overwrite. Peso e cintura já podem ser registrados pela tela de progresso. Nenhum dado real, deploy ou publicação foi executado.
+
+## Rodada 2026-08-03 — nutrição e suplementos mobile alpha.17
+
+Typecheck strict, ESLint, **60 testes web** e **4 testes de domínio** passaram. Água diária e adesão por horário de suplemento agora usam a escrita transacional/offline da alpha.16. Os schemas móveis preservam campos adicionais dos documentos existentes para impedir perda de metas, fibra, timestamps ou metadados durante uma atualização parcial.
+
+O build Vite de produção passou com 154 módulos. O bundle Android passou com 1.356 módulos e bytecode Hermes de 4,9 MB. No Playwright, os smoke tests passaram em Chromium e WebKit móvel (**2 passed**); os **2 testes de autenticação foram ignorados**, conforme esperado, porque os Firebase Emulators não estavam ativos nesta rodada.

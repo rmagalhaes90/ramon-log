@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.17: registro mobile offline de água e adesão aos horários de suplementos, preservando campos legados.
 - Fase alpha.16: escrita mobile transacional, fila offline por UID, proteção de revisão remota e registro de peso/cintura.
 - Fase alpha.15: autenticação mobile completa, cache isolado por UID, dashboard conectado e navegação protegida para treinos, progresso, nutrição e suplementos.
 - Fase alpha.14: workspace multiplataforma, domínio compartilhado e fundação Expo SDK 57 com login Firebase persistente, Router, tokens KYRO, EAS preparatório e bundle Android validado.
