@@ -115,3 +115,9 @@ O build transformou 149 módulos; app JS 213,37 kB (60,44 kB gzip), CSS 18,70 kB
 O build web passou com 152 módulos: app JS 213,37 kB (60,46 kB gzip), CSS 18,70 kB (3,96 kB gzip), Firestore 433,72 kB (128,61 kB gzip), Auth 108,00 kB (32,36 kB gzip) e Storage 31,78 kB (10,51 kB gzip). O Metro produziu um bundle Android Hermes real com 1.332 módulos e 3,5 MB em `mobile/dist/android`; o diretório gerado permanece ignorado.
 
 O Expo Doctor aprovou 16 de 20 verificações e não encontrou mais incompatibilidades de schema ou versões. As quatro verificações restantes dependem de executar `npm` internamente e falharam com `spawn npm ENOENT` neste runtime pnpm-only. `pnpm peers check` passou sem qualquer problema depois de alinhar React Native, Screens, Safe Area, Worklets e React DOM ao SDK 57. Nenhum build EAS, deploy, publicação em loja ou GitHub Pages foi executado.
+
+## Rodada 2026-08-03 — autenticação e leitura mobile alpha.15
+
+Typecheck strict web/domínio/mobile, ESLint e testes passaram. O web manteve **27 arquivos/60 testes Vitest** e o domínio compartilhado avançou para **1 arquivo/3 testes**, incluindo o resumo determinístico do dashboard. O teste garante que peso mais recente, janela semanal, readiness e nutrição produzam o mesmo resultado em qualquer plataforma.
+
+O Metro gerou novamente o bundle Android com sucesso: 1.355 módulos e bytecode Hermes de 4,8 MB. O bundle inclui Firebase Auth persistente, Firestore, cache AsyncStorage isolado por UID, Expo Router Tabs, cadastro, recuperação, verificação de e-mail, conta bloqueada, dashboard e telas de leitura para treinos, progresso, nutrição e suplementos. Nenhum dado de produção foi usado e nenhum deploy, build EAS ou publicação foi executado.

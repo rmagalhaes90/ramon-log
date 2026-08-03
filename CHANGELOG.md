@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.15: autenticação mobile completa, cache isolado por UID, dashboard conectado e navegação protegida para treinos, progresso, nutrição e suplementos.
 - Fase alpha.14: workspace multiplataforma, domínio compartilhado e fundação Expo SDK 57 com login Firebase persistente, Router, tokens KYRO, EAS preparatório e bundle Android validado.
 - Fundação paralela Vite + TypeScript strict, sem substituir o baseline.
 - ESLint type-aware, Prettier, Vitest e Playwright (Chromium/WebKit mobile).

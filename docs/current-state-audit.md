@@ -14,7 +14,7 @@ A recomendação é manter o web e adicionar Expo em paralelo. Domínio puro ser
 | ---------- | ------------ | ------------------------------------------------------------------------------------------------- |
 | P0         | Coberto      | Isolamento entre usuários, claims administrativas e exclusão via backend possuem testes Emulator. |
 | P1         | Em andamento | Extrair contratos e schemas compartilháveis sem dependências de interface.                        |
-| P1         | Em andamento | Implementar autenticação e limpeza de estado por UID no mobile.                                   |
+| P1         | Coberto      | Autenticação, verificação, bloqueio e limpeza de cache por UID no mobile.                         |
 | P1         | Parcial      | Completar Admin Web sem expor dados pessoais.                                                     |
 | P2         | Planejado    | Paridade mobile por dashboard, treino, progresso, nutrição, suplementos e fotos.                  |
 | P2         | Planejado    | Testes de componente e E2E mobile em ambiente com Android/iOS.                                    |
@@ -24,10 +24,10 @@ A recomendação é manter o web e adicionar Expo em paralelo. Domínio puro ser
 
 | Módulo       | Web atual        | Mobile                | Compartilhamento                 |
 | ------------ | ---------------- | --------------------- | -------------------------------- |
-| Autenticação | Funcional        | Fundação de login     | Contratos e políticas            |
-| Treinos      | Funcional        | Planejado             | Cálculos e schemas               |
-| Progresso    | Funcional        | Planejado             | Analytics puros                  |
-| Nutrição     | Funcional        | Planejado             | Schemas e cálculos               |
+| Autenticação | Funcional        | Fluxo completo        | Contratos e políticas            |
+| Treinos      | Funcional        | Leitura do plano      | Cálculos e schemas               |
+| Progresso    | Funcional        | Peso e medidas        | Analytics puros                  |
+| Nutrição     | Funcional        | Resumo e refeições    | Schemas e cálculos               |
 | Fotos        | Funcional        | Planejado             | Metadados e contratos            |
 | Offline      | IndexedDB + fila | AsyncStorage inicial  | Estados e resolução de conflitos |
 | Admin        | Web parcial      | Fora do escopo mobile | Backend seguro                   |

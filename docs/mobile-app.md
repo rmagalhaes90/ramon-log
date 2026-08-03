@@ -25,11 +25,15 @@ No terminal do Expo, use `a` para Android. iOS nativo exige macOS/Xcode. O QR co
 - Tokens visuais KYRO e safe area.
 - Tela inicial consumindo `@kyro/domain`.
 - Login Firebase por e-mail/senha.
+- Cadastro com política de senha forte, recuperação e verificação de e-mail com cooldown.
 - Persistência de sessão com AsyncStorage.
 - Bloqueio local imediato para e-mail não verificado.
+- Proteção de rotas, tratamento de conta bloqueada e logout com limpeza de cache por UID.
+- Dashboard conectado a peso, readiness, sessões e nutrição.
+- Visualização autenticada de treinos, progresso, nutrição e suplementos.
 - Configuração EAS apenas preparatória; nenhum projeto EAS, build remoto ou publicação foi criado.
 
-Cadastro, recuperação, verificação, dashboard autenticado e repositórios de dados serão migrados nas próximas fases, sempre mantendo o web operacional.
+Edição de treinos, registros de progresso/nutrição, fotos, notificações e fila offline de escrita ainda serão migrados, sempre mantendo o web operacional.
 
 ## Verificações
 
