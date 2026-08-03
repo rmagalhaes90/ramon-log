@@ -32,6 +32,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm mobile:bundle
+      - run: pnpm mobile:bundle:ios
       - run: pnpm exec playwright install --with-deps chromium webkit
       - run: pnpm test:e2e
       - run: pnpm test:emulator:auth

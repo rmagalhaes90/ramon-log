@@ -1,4 +1,4 @@
-const VERSION = '4.0.0-alpha.24';
+const VERSION = '4.0.0-alpha.25';
 const SHELL = `kyro-v4-shell-${VERSION}`;
 const PRECACHE = [
   './',

@@ -1,7 +1,7 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.24",
+  "version": "4.0.0-alpha.25",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "mobile:start": "pnpm --filter kyro-mobile start",
     "mobile:bundle": "pnpm --filter kyro-mobile bundle:android",
+    "mobile:bundle:ios": "pnpm --filter kyro-mobile bundle:ios",
     "mobile:check": "pnpm --filter kyro-mobile typecheck && pnpm --filter kyro-mobile expo:doctor",
     "test:emulator:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-emulator-test.mjs\"",
     "test:e2e:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-e2e-runner.mjs\"",
