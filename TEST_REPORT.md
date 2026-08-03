@@ -121,3 +121,9 @@ O Expo Doctor aprovou 16 de 20 verificações e não encontrou mais incompatibil
 Typecheck strict web/domínio/mobile, ESLint e testes passaram. O web manteve **27 arquivos/60 testes Vitest** e o domínio compartilhado avançou para **1 arquivo/3 testes**, incluindo o resumo determinístico do dashboard. O teste garante que peso mais recente, janela semanal, readiness e nutrição produzam o mesmo resultado em qualquer plataforma.
 
 O Metro gerou novamente o bundle Android com sucesso: 1.355 módulos e bytecode Hermes de 4,8 MB. O bundle inclui Firebase Auth persistente, Firestore, cache AsyncStorage isolado por UID, Expo Router Tabs, cadastro, recuperação, verificação de e-mail, conta bloqueada, dashboard e telas de leitura para treinos, progresso, nutrição e suplementos. Nenhum dado de produção foi usado e nenhum deploy, build EAS ou publicação foi executado.
+
+## Rodada 2026-08-03 — escrita e sincronização mobile alpha.16
+
+Typecheck strict web/domínio/mobile, ESLint e testes passaram. O web manteve **27 arquivos/60 testes** e o domínio compartilhado passou **4 testes**, adicionando garantia contra overwrite quando a revisão remota é mais nova e o conteúdo diverge.
+
+A escrita mobile usa transação Firestore, revisão-base, cache otimista e fila AsyncStorage separada por UID. Falhas de rede geram estado pendente; o login tenta flush automático e conflitos não são convertidos em overwrite. Peso e cintura já podem ser registrados pela tela de progresso. Nenhum dado real, deploy ou publicação foi executado.
