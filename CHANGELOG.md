@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.24: configurações mobile e exclusão integral de conta com reautenticação e confirmação em duas etapas.
 - Fase alpha.23: provider i18n mobile PT/EN persistente, navegação e dashboard principal traduzíveis sem reload.
 - Fase alpha.22: preferência offline e notificações locais de descanso por exercício no treino mobile.
 - Fase alpha.21: seleção acessível, comparação lado a lado e compartilhamento nativo privado das fotos mobile.

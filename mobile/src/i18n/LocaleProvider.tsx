@@ -54,16 +54,18 @@ const LocaleContext = createContext<LocaleContextValue | null>(null);
 export function LocaleProvider({ children }: PropsWithChildren) {
   const [locale, setLocaleState] = useState<Locale>('pt');
   useEffect(() => {
-    void AsyncStorage.getItem('@kyro:locale').then((value) => {
-      if (value === 'pt' || value === 'en') setLocaleState(value);
-    });
+    void AsyncStorage.getItem('@kyro:locale')
+      .then((value) => {
+        if (value === 'pt' || value === 'en') setLocaleState(value);
+      })
+      .catch(() => undefined);
   }, []);
   const value = useMemo<LocaleContextValue>(
     () => ({
       locale,
       setLocale: (next) => {
         setLocaleState(next);
-        void AsyncStorage.setItem('@kyro:locale', next);
+        void AsyncStorage.setItem('@kyro:locale', next).catch(() => undefined);
       },
       t: (key) => messages[locale][key],
     }),

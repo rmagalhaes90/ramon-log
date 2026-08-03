@@ -163,3 +163,9 @@ O treino mobile agora solicita permissão somente quando o atleta ativa o recurs
 ## Rodada 2026-08-03 — i18n mobile alpha.23
 
 Um provider de locale persistido em AsyncStorage agora alterna português/inglês sem reiniciar o aplicativo. A navegação principal, saudação, ações de sessão e check-in do dashboard foram migrados para chaves tipadas; novas telas podem consumir o mesmo catálogo sem criar globais ou listeners adicionais.
+
+## Rodada 2026-08-03 — conta e exclusão mobile alpha.24
+
+A nova área de conta oferece logout e exclusão integral. A ação exige a frase `EXCLUIR`, confirmação nativa destrutiva e, para contas password, reautenticação com a senha atual. A callable autenticada remove fotos do Storage, documentos Firestore, índice compartilhado e usuário Auth; o cache local só é apagado depois da confirmação server-side. Falhas mantêm os dados locais e mostram estado assertivo.
+
+Na matriz final das três fases, Prettier, typecheck strict, ESLint e **65 testes unitários** passaram. O build Vite passou com 155 módulos; o bundle Android com Notifications e Functions passou com **1.459 módulos** e Hermes de **5,2 MB**. Playwright passou 2 smoke tests em Chromium/WebKit móvel e ignorou 2 cenários dependentes dos Firebase Emulators, não iniciados nesta rodada.
