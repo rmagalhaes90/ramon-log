@@ -1,35 +1,63 @@
 import { dateKey } from '@kyro/domain';
-import { Text } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
+import { useAuth } from '@/auth/AuthProvider';
 import { useUserData } from '@/hooks/useUserData';
+import { saveUserData, SyncConflictError } from '@/services/user-data';
+import { tokens } from '@/theme/tokens';
 
-const mealSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  kcal: z.number(),
-  prot: z.number(),
-  carb: z.number(),
-  fat: z.number(),
-});
-const nutritionSchema = z.record(
-  z.string(),
-  z.object({
+const mealSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
     kcal: z.number(),
-    protein: z.number(),
+    prot: z.number(),
     carb: z.number(),
     fat: z.number(),
-    water: z.number(),
-    kcalGoal: z.number(),
-    proteinGoal: z.number(),
-    meals: z.array(mealSchema),
-  }),
+  })
+  .passthrough();
+const nutritionSchema = z.record(
+  z.string(),
+  z
+    .object({
+      kcal: z.number(),
+      protein: z.number(),
+      carb: z.number(),
+      fat: z.number(),
+      water: z.number(),
+      kcalGoal: z.number(),
+      proteinGoal: z.number(),
+      meals: z.array(mealSchema),
+    })
+    .passthrough(),
 );
 
 export default function NutritionScreen() {
+  const { user } = useAuth();
   const { data, loading, error } = useUserData('nutritionLog', nutritionSchema);
   const today = data?.[dateKey()];
+  const [status, setStatus] = useState('');
+
+  async function addWater(liters: number) {
+    if (!user || !today || !data) return;
+    const next = {
+      ...data,
+      [dateKey()]: { ...today, water: Math.max(0, Math.min(20, today.water + liters)) },
+    };
+    try {
+      const result = await saveUserData(user.uid, 'nutritionLog', nutritionSchema, next);
+      setStatus(result === 'queued' ? 'Água salva offline.' : 'Água sincronizada.');
+    } catch (cause) {
+      setStatus(
+        cause instanceof SyncConflictError
+          ? 'Conflito detectado. Atualize os dados.'
+          : 'Falha ao salvar.',
+      );
+    }
+  }
   return (
     <FeatureScreen eyebrow="RESUMO DIÁRIO" title="Nutrição">
       {loading ? <StateMessage>Carregando nutrição…</StateMessage> : null}
@@ -45,6 +73,19 @@ export default function NutritionScreen() {
               Proteína {Math.round(today.protein)} / {Math.round(today.proteinGoal)} g · Água{' '}
               {today.water.toFixed(1)} L
             </Text>
+            <View style={styles.actions}>
+              <Pressable onPress={() => void addWater(-0.25)} style={styles.secondary}>
+                <Text style={styles.secondaryText}>− 250 ml</Text>
+              </Pressable>
+              <Pressable onPress={() => void addWater(0.25)} style={styles.primary}>
+                <Text style={styles.primaryText}>+ 250 ml</Text>
+              </Pressable>
+            </View>
+            {status ? (
+              <Text accessibilityLiveRegion="polite" style={featureStyles.muted}>
+                {status}
+              </Text>
+            ) : null}
             <Text style={featureStyles.muted}>
               Carboidratos {Math.round(today.carb)} g · Gorduras {Math.round(today.fat)} g
             </Text>
@@ -62,3 +103,20 @@ export default function NutritionScreen() {
     </FeatureScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  actions: { flexDirection: 'row', gap: tokens.spacing.sm },
+  primary: {
+    backgroundColor: tokens.colors.primary,
+    borderRadius: tokens.radius.pill,
+    padding: tokens.spacing.sm,
+  },
+  primaryText: { color: tokens.colors.primaryText, fontWeight: '800' },
+  secondary: {
+    borderColor: tokens.colors.border,
+    borderRadius: tokens.radius.pill,
+    borderWidth: 1,
+    padding: tokens.spacing.sm,
+  },
+  secondaryText: { color: tokens.colors.text, fontWeight: '700' },
+});
