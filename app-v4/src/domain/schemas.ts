@@ -23,7 +23,12 @@ const videoUrlSchema = z
   }, 'Only HTTPS YouTube URLs are supported')
   .default('');
 
-export const loggedSetSchema = z.object({ kg: finite(0.01, 1000), reps: finite(1, 1000) });
+export const loggedSetSchema = z.object({
+  kg: finite(0.01, 1000),
+  reps: finite(1, 1000),
+  rir: finite(0, 10).optional(),
+  rpe: finite(1, 10).optional(),
+});
 export type LoggedSet = z.infer<typeof loggedSetSchema>;
 
 export const exerciseSchema = z.object({
@@ -128,6 +133,8 @@ export const readinessSchema = z.object({
   stress: z.number().int().min(1).max(5),
   score: finite(0, 100),
   classification: boundedText(60),
+  plannedClassification: boundedText(60).optional(),
+  overrideReason: boundedText(300).optional(),
   recordedAt: z.iso.datetime(),
 });
 export const readinessLogSchema = z.record(dateKeySchema, readinessSchema);

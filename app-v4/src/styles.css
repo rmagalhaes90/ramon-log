@@ -325,11 +325,20 @@ h2 {
 }
 .set-row {
   display: grid;
-  grid-template-columns: 2rem 1fr 1fr 2.5rem;
+  grid-template-columns: 2rem repeat(4, minmax(3.4rem, 1fr)) 2.5rem;
   gap: 0.5rem;
   align-items: center;
   padding: 0.45rem 0;
   border-top: 1px solid var(--line);
+}
+@media (max-width: 520px) {
+  .set-row {
+    grid-template-columns: 1.5rem repeat(4, minmax(0, 1fr)) 2rem;
+    gap: 0.25rem;
+  }
+  .set-row input[type='number'] {
+    padding: 0.55rem 0.35rem;
+  }
 }
 .set-row > span {
   text-align: center;
@@ -353,6 +362,14 @@ h2 {
 }
 .set-row.done {
   background: #d7ff3d0a;
+}
+.exercise-alternatives {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.5rem 0 1rem;
+}
+.exercise-alternatives button {
+  text-align: left;
 }
 .empty-state {
   padding: 3rem 1rem;

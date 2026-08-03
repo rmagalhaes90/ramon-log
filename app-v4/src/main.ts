@@ -16,7 +16,7 @@ import {
   type AuthState,
 } from './features/auth';
 import { listSharedUsers, setUserAdmin, setUserBlocked } from './features/admin';
-import { searchExercises, supplementCatalog } from './features/catalog';
+import { exerciseCatalog, searchExercises, supplementCatalog } from './features/catalog';
 import { dosesTakenToday, normalizeTimes } from './features/supplements/model';
 import { flushPhotoUploads, photoQueueCount } from './features/photos/offline';
 import { renderPhotosView } from './features/photos/view';
@@ -38,6 +38,7 @@ import {
   type ExerciseEntry,
 } from './features/workouts/model';
 import { createTemplate, moveExercise, type TemplateKey } from './features/workouts/templates';
+import { rankExerciseAlternatives } from './features/workouts/substitutions';
 import { clearWorkoutDraft, loadWorkoutDraft, saveWorkoutDraft } from './features/workouts/draft';
 import { trainingStreak, unlockedAchievements, weeklyReport } from './features/reports/model';
 import { renderSettingsView } from './features/settings/view';
@@ -404,7 +405,7 @@ async function renderProgress(user: User): Promise<void> {
     <div class="metric-grid"><article><span>${copy('weight')}</span><strong id="latest-weight">—</strong><small id="weight-delta"></small></article><article><span>${copy('readiness')}</span><strong id="readiness-score">—</strong><small id="readiness-class"></small></article><article><span>${copy('history')}</span><strong>${sessions.length}</strong></article></div>
     <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form>
     <form id="measurements-form" class="measurements-form"><label>${copy('waist')}<input name="waist" type="number" min="20" max="300" step="0.1"></label><label>${copy('chest')}<input name="chest" type="number" min="20" max="300" step="0.1"></label><label>${copy('arm')}<input name="arm" type="number" min="10" max="150" step="0.1"></label><label>${copy('hip')}<input name="hip" type="number" min="20" max="300" step="0.1"></label><label>${copy('thigh')}<input name="thigh" type="number" min="10" max="200" step="0.1"></label><button class="primary">${copy('saveMeasurements')}</button></form>
-    <form id="readiness-form" class="readiness-form">${(['sleep', 'energy', 'soreness', 'stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<button class="primary">${copy('save')}</button></form>
+    <form id="readiness-form" class="readiness-form">${(['sleep', 'energy', 'soreness', 'stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<label>${copy('readinessOverride')}<select name="override"><option value="">${copy('automatic')}</option>${(['high', 'normal', 'reduce', 'light', 'rest'] as const).map((value) => `<option value="${value}">${copy(`readiness_${value}` as MessageKey)}</option>`).join('')}</select></label><label>${copy('overrideReason')}<input name="overrideReason" maxlength="300"></label><button class="primary">${copy('save')}</button></form>
     <section class="weekly-report"><h2>${copy('weeklyReport')}</h2><div><article><strong>${report.sessions}</strong><span>${copy('sessions')}</span></article><article><strong>${Math.round(report.volume)}</strong><span>${copy('volume')}</span></article><article><strong>${Math.round(report.minutes)}</strong><span>${copy('minutes')}</span></article><article><strong>${streak}</strong><span>${copy('streak')}</span></article></div><button id="share-report">${copy('shareReport')}</button></section><section><h2>${copy('achievements')}</h2><div id="achievement-list" class="achievement-list"></div></section><button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
   const weightTarget = document.querySelector('#latest-weight');
   if (weightTarget) weightTarget.textContent = latest ? `${latest.kg.toFixed(1)} kg` : '—';
@@ -491,6 +492,16 @@ async function renderProgress(user: User): Promise<void> {
     const values = ['sleep', 'energy', 'soreness', 'stress'].map((key) => Number(data.get(key)));
     const [sleep = 3, energy = 3, soreness = 3, stress = 3] = values;
     const score = readinessScore(sleep, energy, soreness, stress);
+    const plannedClassification = readinessClass(score);
+    const overrideValue = data.get('override');
+    const override = typeof overrideValue === 'string' ? overrideValue : '';
+    const classification = ['high', 'normal', 'reduce', 'light', 'rest'].includes(override)
+      ? override
+      : plannedClassification;
+    const reasonValue = data.get('overrideReason');
+    const overrideReason = (typeof reasonValue === 'string' ? reasonValue : '')
+      .trim()
+      .slice(0, 300);
     const next = {
       ...readiness,
       [dateKey()]: {
@@ -499,7 +510,9 @@ async function renderProgress(user: User): Promise<void> {
         soreness,
         stress,
         score,
-        classification: readinessClass(score),
+        classification,
+        plannedClassification,
+        overrideReason: classification === plannedClassification ? '' : overrideReason,
         recordedAt: new Date().toISOString(),
       },
     };
@@ -1119,6 +1132,54 @@ function renderExerciseEntries(
     });
     tools.append(rest, notes);
     card.append(tools);
+    const alternatives = rankExerciseAlternatives(entry.exercise, exerciseCatalog);
+    if (alternatives.length) {
+      const alternativesButton = document.createElement('button');
+      alternativesButton.className = 'link-button';
+      alternativesButton.textContent = copy('findAlternative');
+      const alternativesList = document.createElement('div');
+      alternativesList.className = 'exercise-alternatives';
+      alternativesList.hidden = true;
+      alternatives.forEach(({ exercise, sharedMuscles }) => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.textContent = `${exercise.name} · ${exercise.equipment} · ${sharedMuscles.join(', ')}`;
+        option.addEventListener('click', () => {
+          const current = workouts[selectedDay];
+          if (!current) return;
+          const replacement = (item: (typeof current.exercises)[number]) => ({
+            ...exercise,
+            sets: item.sets,
+            reps: item.reps,
+            rest: item.rest,
+            notes: item.notes,
+          });
+          const exercises = current.exercises.map((item, index) =>
+            index === exerciseIndex ? replacement(item) : item,
+          );
+          const abdominalIndex = exerciseIndex - current.exercises.length;
+          const abs = current.abs.map((item, index) =>
+            index === abdominalIndex
+              ? {
+                  ...replacement(item),
+                }
+              : item,
+          );
+          void saveUserData(user, 'workouts', {
+            ...workouts,
+            [selectedDay]: { ...current, exercises, abs },
+          })
+            .then(() => clearWorkoutDraft(user, selectedDay))
+            .then(() => renderWorkout(user))
+            .catch((error: unknown) => reportError(error, 'workout/substitution'));
+        });
+        alternativesList.append(option);
+      });
+      alternativesButton.addEventListener('click', () => {
+        alternativesList.hidden = !alternativesList.hidden;
+      });
+      card.append(alternativesButton, alternativesList);
+    }
     entry.sets.forEach((set, setIndex) => {
       const row = document.createElement('div');
       row.className = 'set-row';
@@ -1140,6 +1201,22 @@ function renderExerciseEntries(
       reps.inputMode = 'numeric';
       reps.placeholder = copy('reps');
       reps.ariaLabel = `${copy('reps')} ${setIndex + 1}`;
+      const rir = document.createElement('input');
+      rir.type = 'number';
+      rir.min = '0';
+      rir.max = '10';
+      rir.step = '1';
+      rir.inputMode = 'numeric';
+      rir.placeholder = copy('rir');
+      rir.ariaLabel = `${copy('rir')} ${setIndex + 1}`;
+      const rpe = document.createElement('input');
+      rpe.type = 'number';
+      rpe.min = '1';
+      rpe.max = '10';
+      rpe.step = '0.5';
+      rpe.inputMode = 'decimal';
+      rpe.placeholder = copy('rpe');
+      rpe.ariaLabel = `${copy('rpe')} ${setIndex + 1}`;
       const done = document.createElement('input');
       done.type = 'checkbox';
       done.ariaLabel = `${copy('continue')} ${setIndex + 1}`;
@@ -1147,6 +1224,8 @@ function renderExerciseEntries(
       guidance.className = 'set-guidance';
       kg.value = set.kg ? String(set.kg) : '';
       reps.value = set.reps ? String(set.reps) : '';
+      rir.value = set.rir === undefined ? '' : String(set.rir);
+      rpe.value = set.rpe === undefined ? '' : String(set.rpe);
       done.checked = set.done;
       row.classList.toggle('done', set.done);
       kg.addEventListener('input', () => {
@@ -1162,12 +1241,20 @@ function renderExerciseEntries(
         set.reps = Number(reps.value) || 0;
         persistDraft();
       });
+      rir.addEventListener('input', () => {
+        set.rir = rir.value === '' ? undefined : Number(rir.value);
+        persistDraft();
+      });
+      rpe.addEventListener('input', () => {
+        set.rpe = rpe.value === '' ? undefined : Number(rpe.value);
+        persistDraft();
+      });
       done.addEventListener('change', () => {
         set.done = done.checked;
         row.classList.toggle('done', done.checked);
         persistDraft();
       });
-      row.append(number, kg, reps, done);
+      row.append(number, kg, reps, rir, rpe, done);
       card.append(row);
       card.append(guidance);
     });
@@ -1228,7 +1315,7 @@ async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   for (const entry of workoutEntries) {
     const completed = entry.sets
       .filter((set) => set.done && set.kg > 0 && set.reps > 0)
-      .map(({ kg, reps }) => ({ kg, reps }));
+      .map(({ kg, reps, rir, rpe }) => ({ kg, reps, rir, rpe }));
     const best = bestCompletedSet(entry);
     if (!completed.length || !best) continue;
     nextHistory[entry.exercise.name] = [

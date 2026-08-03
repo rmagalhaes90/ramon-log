@@ -43,4 +43,15 @@ describe('progression engine', () => {
       ).action,
     ).toBe('plateau');
   });
+
+  it('does not increase load when the latest set reached failure', () => {
+    const result = progressionRecommendation(
+      [
+        { ...entry('2026-08-01', 30, 12), sets: [{ kg: 30, reps: 12, rir: 0 }] },
+        entry('2026-07-28', 30, 12),
+      ],
+      '8-12',
+    );
+    expect(result.action).toBe('maintain');
+  });
 });

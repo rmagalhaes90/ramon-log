@@ -34,7 +34,13 @@ export function createEntries(workouts: Workouts, day: DayKey): ExerciseEntry[] 
   if (!workout) return [];
   return [...workout.exercises, ...workout.abs].map((exercise) => ({
     exercise,
-    sets: Array.from({ length: exercise.sets }, () => ({ kg: 0, reps: 0, done: false })),
+    sets: Array.from({ length: exercise.sets }, () => ({
+      kg: 0,
+      reps: 0,
+      done: false,
+      rir: undefined,
+      rpe: undefined,
+    })),
   }));
 }
 

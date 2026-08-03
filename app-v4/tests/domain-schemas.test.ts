@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { bodyWeightsSchema, exerciseSchema, readinessLogSchema } from '../src/domain/schemas';
+import {
+  bodyWeightsSchema,
+  exerciseHistoryEntrySchema,
+  exerciseSchema,
+  readinessLogSchema,
+} from '../src/domain/schemas';
 
 describe('domain schemas', () => {
   it('accepts a bounded exercise compatible with the baseline', () => {
@@ -40,5 +45,30 @@ describe('domain schemas', () => {
         },
       }),
     ).toThrow();
+  });
+
+  it('preserves bounded effort and a readiness override', () => {
+    expect(
+      exerciseHistoryEntrySchema.parse({
+        date: '2026-08-03',
+        sets: [{ kg: 80, reps: 8, rir: 2, rpe: 8 }],
+        e1rm: 101,
+      }).sets[0],
+    ).toMatchObject({ rir: 2, rpe: 8 });
+    expect(
+      readinessLogSchema.parse({
+        '2026-08-03': {
+          sleep: 5,
+          energy: 5,
+          soreness: 1,
+          stress: 1,
+          score: 100,
+          classification: 'light',
+          plannedClassification: 'high',
+          overrideReason: 'Return after illness',
+          recordedAt: '2026-08-03T12:00:00.000Z',
+        },
+      })['2026-08-03']?.plannedClassification,
+    ).toBe('high');
   });
 });

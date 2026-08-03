@@ -2,7 +2,12 @@ export type ProgressionAction = 'insufficient' | 'increase' | 'maintain' | 'delo
 
 export interface PerformanceEntry {
   date: string;
-  sets: Array<{ kg: number; reps: number }>;
+  sets: Array<{
+    kg: number;
+    reps: number;
+    rir?: number | undefined;
+    rpe?: number | undefined;
+  }>;
   e1rm: number;
 }
 
@@ -12,7 +17,7 @@ export interface ProgressionRecommendation {
   suggestedLoad: number | null;
 }
 
-function bestSet(entry: PerformanceEntry): { kg: number; reps: number } | null {
+function bestSet(entry: PerformanceEntry): PerformanceEntry['sets'][number] | null {
   return [...entry.sets].sort((a, b) => b.kg - a.kg || b.reps - a.reps)[0] ?? null;
 }
 
@@ -34,7 +39,14 @@ export function progressionRecommendation(
 
   const target = targetRepMaximum(repRange);
   const previous = best[1];
-  if (previous && latest.reps >= target && previous.reps >= target && latest.kg >= previous.kg) {
+  const latestEffortSafe = latest.rir === undefined || latest.rir >= 1;
+  if (
+    previous &&
+    latest.reps >= target &&
+    previous.reps >= target &&
+    latest.kg >= previous.kg &&
+    latestEffortSafe
+  ) {
     const step = Math.max(0.25, increment);
     const suggestedLoad = Math.round((latest.kg + step) / step) * step;
     return {

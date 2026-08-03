@@ -8,6 +8,8 @@ const draftSetSchema = z.object({
   kg: z.number().finite().min(0).max(1000),
   reps: z.number().finite().int().min(0).max(1000),
   done: z.boolean(),
+  rir: z.number().finite().min(0).max(10).optional(),
+  rpe: z.number().finite().min(1).max(10).optional(),
 });
 const draftSchema = z.object({
   day: z.enum(['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']),
