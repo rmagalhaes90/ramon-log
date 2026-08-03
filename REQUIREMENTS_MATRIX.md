@@ -8,9 +8,9 @@ Legenda: **Pronto** = implementado/testado; **Parcial** = base funcional, expans
 | Auth, verificação, reset, Google               | Parcial | Email e Emulator E2E prontos; Google real exige projeto homologado           |
 | Custom claims, admin, bloqueio e exclusão      | Pronto  | Functions/Rules Emulator                                                     |
 | Treinos, rotinas, séries, drafts e timers      | Pronto  | Fluxo v4 e testes unitários                                                  |
-| Progressão, plateau e deload determinísticos   | Parcial | Motor alpha.9 pronto; faltam RIR/RPE e aceite/override persistido            |
-| Readiness                                      | Parcial | Score/classificação prontos; falta registrar override e correlação           |
-| Gym Occupied/substituições                     | Parcial | Catálogo/equipamento existem; ranking contextual ainda pendente              |
+| Progressão, plateau e deload determinísticos   | Parcial | Motor e RIR/RPE alpha.10 prontos; falta aceite da recomendação persistido    |
+| Readiness                                      | Pronto  | Score, plano automático e override com motivo persistido                     |
+| Gym Occupied/substituições                     | Pronto  | Ranking muscular/equipamento e troca segura na rotina                        |
 | Nutrição e barcode                             | Parcial | Macros/água/refeições/câmera prontos; fibra/favoritos/cópia pendentes        |
 | Fotos privadas e comparação                    | Pronto  | Storage privado, fila, EXIF removido e resize local                          |
 | Offline e sync                                 | Parcial | IndexedDB/backoff/idempotência prontos; UI de conflito multi-device pendente |
