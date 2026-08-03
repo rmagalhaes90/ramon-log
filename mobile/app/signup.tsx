@@ -1,5 +1,5 @@
 import { FirebaseError } from 'firebase/app';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput } from 'react-native';
@@ -8,29 +8,38 @@ import { Screen } from '@/components/Screen';
 import { getMobileAuth } from '@/services/firebase';
 import { tokens } from '@/theme/tokens';
 
-export default function LoginScreen() {
+function strongPassword(value: string): boolean {
+  return value.length >= 12 && /[a-z]/.test(value) && /[A-Z]/.test(value) && /\d/.test(value);
+}
+
+export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function submit() {
-    if (loading) return;
+    if (!strongPassword(password)) {
+      setError('Use ao menos 12 caracteres, com maiúscula, minúscula e número.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
       const auth = getMobileAuth();
-      const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-      if (!credential.user.emailVerified) {
-        router.replace('/verify-email');
-        return;
-      }
-      router.replace('/(app)/dashboard');
+      auth.languageCode = 'pt';
+      const credential = await createUserWithEmailAndPassword(
+        auth,
+        email.trim().toLowerCase().slice(0, 254),
+        password.slice(0, 128),
+      );
+      await sendEmailVerification(credential.user);
+      router.replace('/verify-email');
     } catch (cause) {
       setError(
-        cause instanceof FirebaseError
-          ? 'Não foi possível entrar com essas credenciais.'
-          : 'Erro inesperado. Tente novamente.',
+        cause instanceof FirebaseError && cause.code === 'auth/email-already-in-use'
+          ? 'Este e-mail já possui uma conta.'
+          : 'Não foi possível criar a conta.',
       );
     } finally {
       setLoading(false);
@@ -40,9 +49,8 @@ export default function LoginScreen() {
   return (
     <Screen>
       <Text accessibilityRole="header" style={styles.title}>
-        Entrar
+        Criar conta
       </Text>
-      <Text style={styles.subtitle}>Use a mesma conta do KYRO Web.</Text>
       <TextInput
         autoCapitalize="none"
         autoComplete="email"
@@ -55,9 +63,9 @@ export default function LoginScreen() {
       />
       <TextInput
         autoCapitalize="none"
-        autoComplete="current-password"
+        autoComplete="new-password"
         onChangeText={setPassword}
-        placeholder="Senha"
+        placeholder="Senha forte"
         placeholderTextColor={tokens.colors.muted}
         secureTextEntry
         style={styles.input}
@@ -69,22 +77,18 @@ export default function LoginScreen() {
         </Text>
       ) : null}
       <Pressable
-        accessibilityRole="button"
         disabled={loading || !email || !password}
         onPress={() => void submit()}
-        style={({ pressed }) => [styles.button, (pressed || loading) && styles.disabled]}
+        style={styles.button}
       >
         {loading ? (
           <ActivityIndicator color={tokens.colors.primaryText} />
         ) : (
-          <Text style={styles.buttonText}>Entrar</Text>
+          <Text style={styles.buttonText}>Criar conta</Text>
         )}
       </Pressable>
-      <Link href="/forgot-password" style={styles.link}>
-        Esqueci minha senha
-      </Link>
-      <Link href="/signup" style={styles.link}>
-        Criar uma conta
+      <Link href="/login" style={styles.link}>
+        Já tenho uma conta
       </Link>
     </Screen>
   );
@@ -93,15 +97,10 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   title: {
     color: tokens.colors.text,
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: '800',
-    marginTop: tokens.spacing.xl,
-  },
-  subtitle: {
-    color: tokens.colors.muted,
-    fontSize: 16,
     marginBottom: tokens.spacing.lg,
-    marginTop: tokens.spacing.sm,
+    marginTop: tokens.spacing.xl,
   },
   input: {
     backgroundColor: tokens.colors.surface,
@@ -118,10 +117,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: tokens.colors.primary,
     borderRadius: tokens.radius.pill,
-    marginTop: tokens.spacing.sm,
     padding: tokens.spacing.md,
   },
   buttonText: { color: tokens.colors.primaryText, fontSize: 16, fontWeight: '800' },
-  disabled: { opacity: 0.55 },
-  link: { color: tokens.colors.primary, marginTop: tokens.spacing.md, textAlign: 'center' },
+  link: { color: tokens.colors.primary, marginTop: tokens.spacing.lg, textAlign: 'center' },
 });
