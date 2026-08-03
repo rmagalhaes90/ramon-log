@@ -4,6 +4,7 @@
 
 ### Added
 
+- Fase alpha.22: preferência offline e notificações locais de descanso por exercício no treino mobile.
 - Fase alpha.21: seleção acessível, comparação lado a lado e compartilhamento nativo privado das fotos mobile.
 - Fase alpha.20: check-in readiness mobile offline e cálculo idêntico centralizado no domínio web/native.
 - Fase alpha.19: câmera/galeria mobile, sanitização JPEG, galeria privada e fila de upload confirmada com o índice Firestore.

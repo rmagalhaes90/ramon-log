@@ -155,3 +155,7 @@ O dashboard mobile agora registra sono, energia, dor muscular e estresse em esca
 A galeria permite selecionar até duas fotos para comparação lado a lado e usa estados acessíveis de checkbox. Uma foto selecionada pode ser compartilhada pela folha nativa do sistema: o aplicativo usa o JPEG persistido localmente ou baixa uma cópia temporária autenticada, sem compartilhar a URL privada do Storage. A disponibilidade do recurso é verificada antes de abrir a folha nativa.
 
 Typecheck strict, ESLint, Prettier e **65 testes unitários** passaram. O build Vite passou com 155 módulos; o bundle Android passou com **1.392 módulos** e Hermes de **5,1 MB**. Playwright passou os 2 smoke tests em Chromium e WebKit móvel e ignorou os 2 cenários dependentes dos Firebase Emulators, não iniciados nesta rodada.
+
+## Rodada 2026-08-03 — alertas de descanso mobile alpha.22
+
+O treino mobile agora solicita permissão somente quando o atleta ativa o recurso, persiste a preferência pela fila offline e cria um canal Android de alta importância. Ao concluir uma série, agenda um alerta local usando o descanso específico do exercício; o handler também mostra o alerta com o aplicativo em primeiro plano.

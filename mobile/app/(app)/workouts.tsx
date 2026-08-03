@@ -7,6 +7,7 @@ import { useAuth } from '@/auth/AuthProvider';
 import { Card, FeatureScreen, StateMessage, featureStyles } from '@/components/FeatureScreen';
 import { useUserData } from '@/hooks/useUserData';
 import { readUserCache, writeUserCache } from '@/services/local-data';
+import { enableRestNotifications, scheduleRestNotification } from '@/services/notifications';
 import { saveUserData, SyncConflictError } from '@/services/user-data';
 import { tokens } from '@/theme/tokens';
 
@@ -36,6 +37,7 @@ const sessionSchema = z
   })
   .passthrough();
 const sessionLogSchema = z.array(sessionSchema).max(450);
+const notificationSettingsSchema = z.object({ restEnabled: z.boolean() }).passthrough();
 
 interface SetDraft {
   kg: string;
@@ -91,14 +93,20 @@ export default function WorkoutsScreen() {
   const { user } = useAuth();
   const { data, loading, error } = useUserData('workouts', workoutsSchema);
   const sessions = useUserData('sessionLog', sessionLogSchema);
+  const notificationSettings = useUserData('notificationSettings', notificationSettingsSchema);
   const [localSessions, setLocalSessions] = useState<z.infer<typeof sessionLogSchema>>([]);
   const [selectedDay, setSelectedDay] = useState<DayKey>(todayDayKey());
   const [draft, setDraft] = useState<WorkoutDraft | null>(null);
   const [status, setStatus] = useState('');
+  const [restAlerts, setRestAlerts] = useState(false);
   const workout = data?.[selectedDay];
   const draftKey = `workout-draft:${selectedDay}`;
 
   useEffect(() => setLocalSessions(sessions.data ?? []), [sessions.data]);
+  useEffect(
+    () => setRestAlerts(notificationSettings.data?.restEnabled === true),
+    [notificationSettings.data],
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -138,6 +146,32 @@ export default function WorkoutsScreen() {
     if (!target) return;
     Object.assign(target, patch);
     void persistDraft(next);
+    if (patch.done === true && restAlerts) {
+      const exercise = next.exercises[exerciseIndex];
+      if (exercise) void scheduleRestNotification(exercise.rest, exercise.name);
+    }
+  }
+
+  async function toggleRestAlerts() {
+    if (restAlerts) {
+      setRestAlerts(false);
+      if (user)
+        await saveUserData(user.uid, 'notificationSettings', notificationSettingsSchema, {
+          ...(notificationSettings.data ?? {}),
+          restEnabled: false,
+        });
+      return;
+    }
+    const enabled = await enableRestNotifications();
+    setRestAlerts(enabled);
+    if (enabled && user)
+      await saveUserData(user.uid, 'notificationSettings', notificationSettingsSchema, {
+        ...(notificationSettings.data ?? {}),
+        restEnabled: true,
+      });
+    setStatus(
+      enabled ? 'Alertas de descanso ativados.' : 'Permissão de notificações não concedida.',
+    );
   }
 
   async function finishWorkout() {
@@ -268,6 +302,18 @@ export default function WorkoutsScreen() {
               {status}
             </Text>
           ) : null}
+          <Pressable
+            onPress={() =>
+              void toggleRestAlerts().catch(() =>
+                setStatus('Não foi possível salvar a preferência.'),
+              )
+            }
+            style={styles.secondaryButton}
+          >
+            <Text style={styles.secondaryButtonText}>
+              {restAlerts ? 'Desativar alertas de descanso' : 'Ativar alertas de descanso'}
+            </Text>
+          </Pressable>
           <Pressable onPress={() => void finishWorkout()} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Finalizar treino</Text>
           </Pressable>
@@ -323,4 +369,12 @@ const styles = StyleSheet.create({
     padding: tokens.spacing.md,
   },
   primaryButtonText: { color: tokens.colors.primaryText, fontWeight: '800' },
+  secondaryButton: {
+    alignItems: 'center',
+    borderColor: tokens.colors.border,
+    borderRadius: tokens.radius.pill,
+    borderWidth: 1,
+    padding: tokens.spacing.md,
+  },
+  secondaryButtonText: { color: tokens.colors.text, fontWeight: '800' },
 });
