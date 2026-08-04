@@ -84,3 +84,9 @@
 ### Not yet migrated
 
 - Features de produto permanecem no baseline até implementação e validação item a item na matriz de paridade.
+
+# 4.0.0-alpha.32
+
+- Added branded KYRO handlers for email verification, password reset and email recovery.
+- Added localized, strict Firebase action-link processing for web and mobile.
+- Prepared and audited the `thingsofthings.ie` sender-domain configuration, including SPF and DMARC.

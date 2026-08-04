@@ -14,7 +14,12 @@ export default function ForgotPasswordScreen() {
 
   async function submit() {
     try {
-      await sendPasswordResetEmail(getMobileAuth(), email.trim().toLowerCase().slice(0, 254));
+      const auth = getMobileAuth();
+      auth.languageCode = 'pt';
+      await sendPasswordResetEmail(auth, email.trim().toLowerCase().slice(0, 254), {
+        url: 'https://rmagalhaes90.github.io/ramon-log/',
+        handleCodeInApp: false,
+      });
       setMessage('Se a conta existir, você receberá as instruções por e-mail.');
     } catch (cause) {
       setMessage(

@@ -27,7 +27,10 @@ export default function VerifyEmailScreen() {
       setMessage('Aguarde um minuto antes de reenviar.');
       return;
     }
-    await sendEmailVerification(user);
+    await sendEmailVerification(user, {
+      url: 'https://rmagalhaes90.github.io/ramon-log/',
+      handleCodeInApp: false,
+    });
     await AsyncStorage.setItem(key, String(Date.now()));
     setMessage('Novo e-mail enviado.');
   }

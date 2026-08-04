@@ -45,3 +45,10 @@ Protegemos dados de saúde/treino, fotos, identidade, permissões administrativa
 ## Reporte
 
 Não abra issue pública contendo dados pessoais, credenciais ou caminhos exploráveis. Revogue credenciais expostas e comunique o mantenedor por canal privado.
+
+# Authentication email delivery
+
+- Web and mobile verification/reset requests return to the branded KYRO action handler.
+- `thingsofthings.ie` has Firebase SPF ownership records and a monitoring DMARC policy configured in Hosting Ireland.
+- Firebase requires two DKIM CNAME records. Hosting Ireland's DNS Manager currently rejects their valid `_domainkey` targets as `Invalid Domain`; registrar support must add them.
+- Firebase currently reports `Email template updates are currently unavailable for this project`; custom sender activation must wait for Firebase support and DKIM verification.

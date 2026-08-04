@@ -5,14 +5,19 @@ import { createI18n, type Locale, type MessageKey } from './core/i18n';
 import type { FavoriteMeal, NutritionDay, ProgressionDecision, Workouts } from './domain/schemas';
 import {
   authErrorKey,
+  completeEmailAction,
+  completePasswordReset,
   createAccount,
   loginWithGoogle,
   loginWithPassword,
   logout,
   observeAuth,
+  parseEmailAction,
   refreshVerification,
   requestPasswordReset,
   resendVerification,
+  verifyEmailActionCode,
+  verifyResetActionCode,
   type AuthState,
 } from './features/auth';
 import { listSharedUsers, setUserAdmin, setUserBlocked } from './features/admin';
@@ -71,6 +76,7 @@ i18n.setLocale(i18n.locale);
 const root = document.querySelector<HTMLDivElement>('#app');
 if (!root) throw new Error('Missing #app root');
 const appRoot = root;
+const emailAction = parseEmailAction(location.search);
 
 let authState: AuthState = { status: 'loading', user: null, isAdmin: false };
 let authMode: 'login' | 'signup' = 'login';
@@ -146,6 +152,69 @@ function setBusy(busy: boolean): void {
   });
   const card = document.querySelector<HTMLElement>('.auth-card');
   if (card) card.ariaBusy = String(busy);
+}
+
+function renderEmailActionMessage(title: string, body: string, successful = false): void {
+  shell(`<section class="auth-card verify" aria-labelledby="email-action-title">
+    <p class="eyebrow">KYRO · SECURITY</p><h1 id="email-action-title"></h1>
+    <p id="email-action-body"></p><a class="primary action-link" href="./">${copy('emailActionBack')}</a>
+  </section>`);
+  const heading = document.querySelector('#email-action-title');
+  const message = document.querySelector('#email-action-body');
+  if (heading) heading.textContent = title;
+  if (message) message.textContent = body;
+  document.querySelector('.auth-card')?.classList.toggle('action-success', successful);
+}
+
+async function renderEmailAction(): Promise<void> {
+  if (!emailAction) return;
+  if (emailAction.mode === 'resetPassword') {
+    try {
+      const email = await verifyResetActionCode(emailAction.code);
+      shell(`<section class="auth-card verify" aria-labelledby="email-action-title">
+        <p class="eyebrow">KYRO · SECURITY</p><h1 id="email-action-title">${copy('resetActionTitle')}</h1>
+        <p>${copy('resetActionBody')}</p><strong class="email-address"></strong>
+        <p id="auth-error" class="form-error" role="alert" hidden></p>
+        <form id="reset-action-form"><label>${copy('newPassword')}<input id="new-password" type="password" maxlength="128" autocomplete="new-password" required></label>
+        <p class="hint">${copy('passwordHint')}</p><button class="primary" type="submit">${copy('savePassword')}</button></form>
+      </section>`);
+      const address = document.querySelector('.email-address');
+      if (address) address.textContent = email;
+      document.querySelector('#reset-action-form')?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const password = document.querySelector<HTMLInputElement>('#new-password')?.value ?? '';
+        setBusy(true);
+        void completePasswordReset(emailAction.code, password)
+          .then(() =>
+            renderEmailActionMessage(
+              copy('resetActionCompleteTitle'),
+              copy('resetActionCompleteBody'),
+              true,
+            ),
+          )
+          .catch((error: unknown) => setFormError(copy(authErrorKey(error))))
+          .finally(() => setBusy(false));
+      });
+    } catch {
+      renderEmailActionMessage(copy('emailActionInvalidTitle'), copy('emailActionInvalidBody'));
+    }
+    return;
+  }
+  try {
+    await verifyEmailActionCode(emailAction.code);
+    await completeEmailAction(emailAction.code);
+    renderEmailActionMessage(
+      emailAction.mode === 'verifyEmail'
+        ? copy('verifyActionCompleteTitle')
+        : copy('recoverActionCompleteTitle'),
+      emailAction.mode === 'verifyEmail'
+        ? copy('verifyActionCompleteBody')
+        : copy('recoverActionCompleteBody'),
+      true,
+    );
+  } catch {
+    renderEmailActionMessage(copy('emailActionInvalidTitle'), copy('emailActionInvalidBody'));
+  }
 }
 
 function renderAuth(): void {
@@ -1659,14 +1728,18 @@ onError(() => {
     toast.hidden = false;
   }
 });
-observeAuth((state) => {
-  authState = state;
+if (emailAction) {
+  void renderEmailAction();
+} else {
+  observeAuth((state) => {
+    authState = state;
+    render();
+  });
+  window.addEventListener('online', render);
+  window.addEventListener('offline', render);
   render();
-});
-window.addEventListener('online', render);
-window.addEventListener('offline', render);
+}
 navigator.serviceWorker?.addEventListener('controllerchange', () => location.reload());
-render();
 void registerPwaUpdates((registration) => {
   updateRegistration = registration;
   document.querySelector<HTMLElement>('#update')?.removeAttribute('hidden');

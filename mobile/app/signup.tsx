@@ -33,7 +33,10 @@ export default function SignupScreen() {
         email.trim().toLowerCase().slice(0, 254),
         password.slice(0, 128),
       );
-      await sendEmailVerification(credential.user);
+      await sendEmailVerification(credential.user, {
+        url: 'https://rmagalhaes90.github.io/ramon-log/',
+        handleCodeInApp: false,
+      });
       router.replace('/verify-email');
     } catch (cause) {
       setError(
