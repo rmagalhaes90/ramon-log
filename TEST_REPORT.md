@@ -1,5 +1,9 @@
 # Relatório de testes
 
+## Rodada 2026-08-04 — validação de séries alpha.28
+
+Os campos da série agora respeitam as restrições HTML antes de alterar ou persistir o rascunho. A conclusão é cancelada e o navegador aponta o primeiro campo inválido, impedindo que RPE acima de 10 ou outros valores fora do contrato cheguem ao schema e gerem um alerta global.
+
 ## Rodada 2026-08-04 — compatibilidade de treinos alpha.27
 
 Typecheck web, ESLint, **27 arquivos/61 testes Vitest web** e build Vite passaram. O novo teste de regressão confirma que dias de descanso legados gravados como `null` são ignorados sem remover rotinas válidas. Histórico de exercício ou decisões de progressão incompatíveis agora usam estado auxiliar vazio e não bloqueiam a abertura da tela de treino; nenhum documento remoto é alterado durante essa recuperação.

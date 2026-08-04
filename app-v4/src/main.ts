@@ -1482,6 +1482,7 @@ function renderExerciseEntries(
       done.checked = set.done;
       row.classList.toggle('done', set.done);
       kg.addEventListener('input', () => {
+        if (!kg.checkValidity()) return;
         set.kg = Number(kg.value) || 0;
         const plates = calculatePlates(set.kg);
         guidance.textContent =
@@ -1491,18 +1492,30 @@ function renderExerciseEntries(
         persistDraft();
       });
       reps.addEventListener('input', () => {
+        if (!reps.checkValidity()) return;
         set.reps = Number(reps.value) || 0;
         persistDraft();
       });
       rir.addEventListener('input', () => {
+        if (!rir.checkValidity()) return;
         set.rir = rir.value === '' ? undefined : Number(rir.value);
         persistDraft();
       });
       rpe.addEventListener('input', () => {
+        if (!rpe.checkValidity()) return;
         set.rpe = rpe.value === '' ? undefined : Number(rpe.value);
         persistDraft();
       });
       done.addEventListener('change', () => {
+        const invalid = [kg, reps, rir, rpe].find((input) => !input.checkValidity());
+        if (invalid) {
+          done.checked = false;
+          set.done = false;
+          row.classList.remove('done');
+          invalid.reportValidity();
+          invalid.focus();
+          return;
+        }
         set.done = done.checked;
         row.classList.toggle('done', done.checked);
         persistDraft();

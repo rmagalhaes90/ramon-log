@@ -1,5 +1,6 @@
 # Changelog
 
+- Fase alpha.28: campos de série inválidos deixam de acionar o erro global; carga, repetições, RIR e RPE são validados no próprio input antes de atualizar o rascunho ou concluir a série.
 - Fase alpha.27: compatibilidade de treinos com dias de descanso legados gravados como `null`; falhas em histórico ou decisões de progressão não impedem mais a abertura da rotina, e o cache PWA foi versionado para distribuir a correção.
 
 ## Unreleased — KYRO v4 foundation
