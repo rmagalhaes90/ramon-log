@@ -1139,6 +1139,10 @@ async function renderWorkout(user: User): Promise<void> {
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
+  if (draftMatches) {
+    const status = document.querySelector('#workout-status');
+    if (status) status.textContent = copy('sessionResumed');
+  }
   renderDayButtons(user, workouts);
   renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions ?? []);
   const updateClock = () => {
@@ -1673,7 +1677,11 @@ function startRestTimer(seconds: number): void {
 
 async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   const count = completedExerciseCount(workoutEntries);
-  if (!count) return;
+  if (!count) {
+    const status = document.querySelector('#workout-status');
+    if (status) status.textContent = copy('finishNeedsSet');
+    return;
+  }
   const endedAt = new Date();
   const [existing, history, records] = await Promise.all([
     loadUserData(user, 'sessionLog').then((value) => value ?? []),

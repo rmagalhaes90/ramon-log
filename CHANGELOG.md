@@ -1,5 +1,6 @@
 # Changelog
 
+- Fase alpha.34: corrige três queixas reais de uso — "Finalizar" não dava feedback quando nenhuma série estava marcada como concluída, o timer de descanso ficava fora da viewport em rotinas longas (sticky após a lista de exercícios) e sessões retomadas de um rascunho antigo não avisavam por que o cronômetro já começava com tempo decorrido.
 - Fase alpha.33: drag-and-drop nativo (mouse/desktop) para reordenar exercícios do treino, complementando os botões ↑/↓ que continuam sendo o caminho acessível e o único funcional em touch (iOS/Android não disparam eventos HTML5 de drag).
 - Fase alpha.32: backup completo em .zip (dados + fotos originais do Storage) com restauração de dados e reenvio das fotos; formato ZIP STORE implementado sem dependência externa.
 - Fase alpha.31: Rules Firestore/Storage e quatro Functions v2 Node 22 publicadas em produção; Functions Framework/allowlist pnpm configurados, invoker Cloud Run reproduzível, domínio Pages validado e smoke autenticado de Auth/Firestore/Storage/entitlements/admin/exclusão aprovado.

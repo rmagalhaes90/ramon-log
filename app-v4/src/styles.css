@@ -519,9 +519,13 @@ h2 {
   margin: 0.15rem 0 0.3rem 2.5rem;
 }
 .rest-timer {
-  position: sticky;
-  top: 1rem;
-  z-index: 50;
+  position: fixed;
+  top: calc(1rem + env(safe-area-inset-top));
+  left: 1rem;
+  right: 1rem;
+  max-width: 32rem;
+  margin: 0 auto;
+  z-index: 60;
   background: var(--volt);
   color: #0b0c0e;
   border-radius: 0.7rem;
