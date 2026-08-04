@@ -288,22 +288,24 @@ async function renderReady(user: User): Promise<void> {
 
 function renderDashboard(user: User): void {
   shell(`<section class="hero"><p class="eyebrow">${copy('foundation')}</p><h1>${copy('tagline')}</h1>
-    <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><span>${copy('queue')}: <b id="queue-count">0</b></span></div>
+    <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><button id="open-sync" class="status-link">${copy('queue')}: <b id="queue-count">0</b></button></div>
     <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin ? `<button id="open-admin" class="secondary">${copy('admin')}</button>` : ''}<button id="logout" class="link-button">${copy('logout')}</button></section>
-    <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>Workouts, routines, exercises and sets.</p></article>
-    <article><span>02</span><h2>RECOVER</h2><p>Readiness, history and progress.</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>Nutrition and supplements.</p><button id="open-nutrition">${copy('nutrition')}</button></article>
-    <article><span>04</span><h2>SYNC</h2><p>Offline-first, private and resilient.</p><button id="open-settings">${copy('settings')}</button></article></section>`);
+    <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>${copy('trainModule')}</p><button id="open-workout-card">${copy('train')}</button></article>
+    <article><span>02</span><h2>RECOVER</h2><p>${copy('recoverModule')}</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>${copy('fuelModule')}</p><button id="open-nutrition">${copy('nutrition')}</button></article>
+    <article><span>04</span><h2>SYNC</h2><p>${copy('syncModule')}</p><button id="open-settings">${copy('settings')}</button></article></section>`);
   document
     .querySelector('#logout')
     ?.addEventListener(
       'click',
       () => void logout().catch((error: unknown) => reportError(error, 'auth/logout')),
     );
-  document.querySelector('#start-workout')?.addEventListener('click', () => {
+  const openWorkout = () => {
     currentView = 'workout';
     workoutStartedAt = new Date().toISOString();
     void renderWorkout(user);
-  });
+  };
+  document.querySelector('#start-workout')?.addEventListener('click', openWorkout);
+  document.querySelector('#open-workout-card')?.addEventListener('click', openWorkout);
   document.querySelector('#open-progress')?.addEventListener('click', () => {
     currentView = 'progress';
     void renderProgress(user);
@@ -316,19 +318,26 @@ function renderDashboard(user: User): void {
     currentView = 'settings';
     void renderSettings(user);
   });
+  document.querySelector('#open-sync')?.addEventListener('click', () => {
+    currentView = 'settings';
+    void renderSettings(user);
+  });
   document.querySelector('#open-admin')?.addEventListener('click', () => {
     currentView = 'admin';
     void renderAdmin(user);
   });
-  void Promise.all([flushUserDataQueue(user), flushPhotoUploads(user)]).catch((error: unknown) =>
-    reportError(error, 'sync/flush'),
-  );
-  void Promise.all([queueList(), photoQueueCount(user)])
-    .then(([items, photos]) => {
-      const count = document.querySelector('#queue-count');
-      if (count) count.textContent = String(items.length + photos);
-    })
-    .catch((error: unknown) => reportError(error, 'queue/render'));
+  const refreshQueueCount = () =>
+    Promise.all([queueList(), photoQueueCount(user)])
+      .then(([items, photos]) => {
+        const count = document.querySelector('#queue-count');
+        const ownItems = items.filter((item) => item.id.startsWith(`${user.uid}-`));
+        if (count) count.textContent = String(ownItems.length + photos);
+      })
+      .catch((error: unknown) => reportError(error, 'queue/render'));
+  void Promise.all([flushUserDataQueue(user), flushPhotoUploads(user)])
+    .then(refreshQueueCount)
+    .catch(() => refreshQueueCount());
+  void refreshQueueCount();
 }
 
 async function renderAdmin(user: User): Promise<void> {
@@ -1433,6 +1442,14 @@ function renderExerciseEntries(
       });
       card.append(alternativesButton, alternativesList);
     }
+    const setHeader = document.createElement('div');
+    setHeader.className = 'set-row set-header';
+    ['', copy('load'), copy('reps'), copy('rir'), copy('rpe'), '✓'].forEach((label) => {
+      const cell = document.createElement('span');
+      cell.textContent = label;
+      setHeader.append(cell);
+    });
+    card.append(setHeader);
     entry.sets.forEach((set, setIndex) => {
       const row = document.createElement('div');
       row.className = 'set-row';

@@ -86,6 +86,15 @@ h2 {
   margin: 1.5rem 0 0.5rem;
   font-size: 0.85rem;
 }
+.status-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
 .auth-state {
   color: var(--dim);
   margin: 0 0 2rem;
@@ -362,6 +371,17 @@ h2 {
 }
 .set-row.done {
   background: #d7ff3d0a;
+}
+.set-header {
+  border-top: 0;
+  padding-bottom: 0.2rem;
+}
+.set-header > span {
+  overflow: hidden;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 .exercise-alternatives {
   display: grid;
@@ -1085,19 +1105,45 @@ h2 {
   color: white;
 }
 @media (max-width: 760px) {
+  main {
+    padding: 1rem max(0.85rem, env(safe-area-inset-right)) calc(5rem + env(safe-area-inset-bottom))
+      max(0.85rem, env(safe-area-inset-left));
+  }
+  .topbar {
+    padding-bottom: 0.5rem;
+  }
   .feature-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 2rem;
+  }
+  .feature-grid article {
+    display: flex;
+    min-height: 10rem;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  .feature-grid article button {
+    width: 100%;
+    margin-top: auto;
   }
   .hero h1 {
-    font-size: clamp(3.6rem, 18vw, 6rem);
+    font-size: clamp(3rem, 14vw, 5rem);
   }
 }
 @media (max-width: 420px) {
   .feature-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
   .feature-grid article {
-    min-height: auto;
+    min-height: 9.5rem;
+  }
+  .feature-grid h2 {
+    margin-top: 0.4rem;
+  }
+  .feature-grid p {
+    margin: 0.35rem 0 0.75rem;
+    font-size: 0.72rem;
   }
 }
 @media (max-width: 600px) {

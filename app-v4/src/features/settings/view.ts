@@ -14,11 +14,12 @@ import {
   loadUserData,
   resolveSyncConflict,
   saveUserData,
+  flushUserDataQueue,
 } from '../../services/user-data';
 import { formatBytes, requestPersistentStorage, storageHealth } from '../offline/storage';
 import { resetFeatureGroup, type ResetGroup } from './reset';
 import { loadEntitlements } from '../subscriptions';
-import { photoQueueCount } from '../photos/offline';
+import { flushPhotoUploads, photoQueueCount } from '../photos/offline';
 
 interface SettingsViewOptions {
   copy: (key: MessageKey) => string;
@@ -61,7 +62,22 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   syncStatus.textContent = copy('checkingSync');
   const syncList = document.createElement('div');
   syncList.className = 'sync-list';
-  syncCard.append(syncTitle, syncStatus, syncList);
+  const retrySync = document.createElement('button');
+  retrySync.textContent = copy('retrySync');
+  retrySync.disabled = !navigator.onLine;
+  retrySync.addEventListener('click', () => {
+    retrySync.disabled = true;
+    retrySync.textContent = copy('syncing');
+    void Promise.all([flushUserDataQueue(user), flushPhotoUploads(user)])
+      .then(() => renderSettingsView(user, options))
+      .catch((error: unknown) => {
+        retrySync.disabled = !navigator.onLine;
+        retrySync.textContent = copy('retrySync');
+        syncStatus.textContent = copy('syncUnavailable');
+        console.warn('[sync/retry]', error);
+      });
+  });
+  syncCard.append(syncTitle, syncStatus, retrySync, syncList);
   storageCard.after(syncCard);
   void Promise.all([queueList(), photoQueueCount(user), listSyncConflicts(user)])
     .then(([queued, photos, conflicts]) => {

@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-04 — experiência web mobile e sync alpha.30
+
+O dashboard passa a usar quatro cartões compactos e navegáveis em telas pequenas, com descrições PT/EN e safe areas. A tela de treino identifica visualmente Carga, Reps, RIR e RPE. O contador considera apenas a fila do usuário autenticado, atualiza após flush e a área de ajustes oferece retry manual sem remover itens não confirmados.
+
+Prettier dos arquivos da fase, typecheck strict web/domínio/mobile, ESLint, **62 testes web**, **5 testes de domínio** e build Vite passaram. A inspeção visual em viewport 390×844 confirmou grade 2×2, ausência de overflow horizontal e cartões de 169×188 px. O smoke Chromium passou; no WebKit móvel a página e todos os elementos esperados renderizaram, mas a execução excedeu o timeout global de 30 segundos e não foi marcada como aprovada. O `format:check` global local apontou somente `mobile/expo-env.d.ts`, modificado anteriormente pelo Expo e mantido fora desta fase.
+
+O Firebase CLI local não estava autenticado (`Failed to authenticate`), portanto Rules, Storage e Functions de produção não foram publicados nem declarados como validados nesta rodada.
+
 ## Rodada 2026-08-04 — retry offline silencioso alpha.29
 
 Um teste dedicado garante que falhas recuperáveis de sincronização em background sejam registradas sem notificar os listeners da interface, enquanto erros de ações explícitas continuam acionando o tratamento global. A fila, tentativas e backoff permanecem inalterados.
