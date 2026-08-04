@@ -1,5 +1,23 @@
 # Relatório de testes
 
+## Rodada 2026-08-04 — backup .zip, drag-and-drop e emuladores completos alpha.32/33
+
+Ambiente sem Node/npm/pnpm/Java no `PATH`; Node 24.19.0 LTS, pnpm 11.20.0 (via `corepack`/`npm install -g`) e Microsoft OpenJDK 21 foram instalados localmente via `winget` para viabilizar o toolchain completo, incluindo os Emulators que dependem de Java. Nenhum instalador foi commitado.
+
+**alpha.32** — `PARITY_MATRIX.md` apontava que o backup exportava só o índice de fotos (metadados), não os JPEGs do Storage. Foi implementado um escritor/leitor ZIP (método STORE, sem dependência externa) e um fluxo de backup completo que baixa cada foto do Storage, empacota com `backup.json` e, na restauração, reenvia as fotos reportando falhas parciais. Teste novo cobre round-trip binário exato, arquivo vazio e arquivo corrompido.
+
+**alpha.33** — a mesma matriz apontava falta de drag-and-drop na reordenação de exercícios (só havia botões ↑/↓). Foi adicionado `reorderExercise` (índice arbitrário) do qual `moveExercise` passou a derivar, com eventos HTML5 de drag como reforço apenas para mouse/desktop — os botões ↑/↓ permanecem o único caminho em touch (iOS/Android não disparam os eventos de HTML5 DnD) e continuam intactos.
+
+Cada fase rodou isoladamente do zero: `pnpm typecheck` (web/domínio/mobile), `pnpm lint`, `pnpm test` e `pnpm build` com código 0. A suíte web fechou em **29 arquivos/68 testes**, domínio em **5 testes** (73 no total). A versão foi sincronizada duas vezes (`4.0.0-alpha.32` e depois `4.0.0-alpha.33`) em `package.json`, `version.json` e `sw.js`, confirmado pelo teste de alinhamento do PWA.
+
+Com o Java disponível pela primeira vez nesta máquina, as três suítes de Emulator rodaram até o fim e passaram com código 0: `test:emulator:auth` (criação/login/exclusão), `test:emulator:rules` (ownership, admin e limites de upload em Firestore/Storage) e `test:emulator:functions` (`setAdminRole`, `setUserBlocked`, `getEntitlements`, `deleteOwnAccount`). O emulador de Functions avisou que a versão declarada de `firebase-functions` está desatualizada e que a runtime local (Node 24) diverge da declarada (Node 22); nenhuma falha funcional resultou disso e nada foi alterado para não reabrir o ajuste já feito em `fix: make Firebase functions deployable with pnpm`.
+
+O Playwright (`playwright test`) não foi executado nesta rodada: a config usa a porta fixa `127.0.0.1:5173`, já ocupada por um processo `node.exe` (PID 12076) presente antes desta sessão e não iniciado por ela — não foi encerrado por segurança, então o E2E autenticado (Chromium/WebKit) fica pendente de uma execução com essa porta livre.
+
+Verificação manual em navegador ficou limitada à tela de login/PWA (Service Worker registrado, manifest OK, sem erros de console): fluxos autenticados (clicar nos novos botões de backup/drag-and-drop) exigiriam login real, que não é executado por esta sessão.
+
+Dois commits pequenos e reversíveis foram enviados a `origin/refactor/kyro-v4-vite-typescript`: `502b7da` (backup .zip) e `7bd36fe` (drag-and-drop).
+
 ## Rodada 2026-08-04 — Firebase de produção alpha.31
 
 As duas execuções completas do CI de `alpha.30` passaram, incluindo Auth Emulator, E2E autenticado, Firestore/Storage Rules e Functions Emulator. Em produção, `firestore.rules` e `storage.rules` compilaram e foram publicadas no projeto confirmado `traincontrollog`. As callables `deleteOwnAccount`, `getEntitlements`, `setAdminRole` e `setUserBlocked` foram implantadas como Functions v2, Node 22, 256 MB, `us-central1`; o Artifact Registry recebeu política de limpeza de sete dias.
