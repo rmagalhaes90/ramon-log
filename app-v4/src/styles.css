@@ -334,6 +334,13 @@ h2 {
   border-radius: 1rem;
   padding: 1rem;
   margin: 1rem 0;
+  cursor: grab;
+}
+.exercise-card.dragging {
+  opacity: 0.5;
+}
+.exercise-card.drag-over {
+  border-color: var(--accent);
 }
 .exercise-card h2 {
   font-family: 'Space Grotesk';

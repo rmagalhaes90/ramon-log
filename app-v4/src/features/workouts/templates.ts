@@ -65,19 +65,28 @@ export function createTemplate(key: TemplateKey): Workouts {
   };
 }
 
+export function reorderExercise(
+  workouts: Workouts,
+  day: DayKey,
+  fromIndex: number,
+  toIndex: number,
+): Workouts {
+  const current = workouts[day];
+  if (!current) return workouts;
+  const { length } = current.exercises;
+  if (fromIndex < 0 || fromIndex >= length || toIndex < 0 || toIndex >= length) return workouts;
+  const exercises = [...current.exercises];
+  const [item] = exercises.splice(fromIndex, 1);
+  if (!item) return workouts;
+  exercises.splice(toIndex, 0, item);
+  return { ...workouts, [day]: { ...current, exercises } };
+}
+
 export function moveExercise(
   workouts: Workouts,
   day: DayKey,
   index: number,
   direction: -1 | 1,
 ): Workouts {
-  const current = workouts[day];
-  if (!current) return workouts;
-  const target = index + direction;
-  if (target < 0 || target >= current.exercises.length) return workouts;
-  const exercises = [...current.exercises];
-  const [item] = exercises.splice(index, 1);
-  if (!item) return workouts;
-  exercises.splice(target, 0, item);
-  return { ...workouts, [day]: { ...current, exercises } };
+  return reorderExercise(workouts, day, index, index + direction);
 }

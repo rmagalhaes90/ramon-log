@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createTemplate, moveExercise, pickExercises } from '../src/features/workouts/templates';
+import {
+  createTemplate,
+  moveExercise,
+  pickExercises,
+  reorderExercise,
+} from '../src/features/workouts/templates';
 import { trainingStreak, unlockedAchievements, weeklyReport } from '../src/features/reports/model';
 import { sessionsCsv } from '../src/features/backup/csv';
 
@@ -11,6 +16,21 @@ describe('templates reports and CSV', () => {
     const moved = moveExercise(plan, 'segunda', 0, 1);
     expect(moved.segunda?.exercises[1]?.name).toBe(plan.segunda?.exercises[0]?.name);
     expect(pickExercises(['chest'], 3)).toHaveLength(3);
+  });
+  it('drags exercises to an arbitrary position without mutating the source', () => {
+    const plan = createTemplate('ppl');
+    const originalFirst = plan.segunda?.exercises[0]?.name;
+    const originalLast = plan.segunda?.exercises.at(-1)?.name;
+    const lastIndex = (plan.segunda?.exercises.length ?? 1) - 1;
+    const dragged = reorderExercise(plan, 'segunda', 0, lastIndex);
+    expect(dragged.segunda?.exercises.at(-1)?.name).toBe(originalFirst);
+    expect(plan.segunda?.exercises[0]?.name).toBe(originalFirst);
+    expect(dragged.segunda?.exercises).toHaveLength(plan.segunda?.exercises.length ?? 0);
+    expect(reorderExercise(plan, 'segunda', 0, 0).segunda?.exercises[0]?.name).toBe(originalFirst);
+    expect(reorderExercise(plan, 'segunda', -1, 1)).toBe(plan);
+    expect(reorderExercise(plan, 'segunda', 0, 99)).toBe(plan);
+    expect(reorderExercise(plan, 'domingo', 0, 1)).toBe(plan);
+    expect(originalLast).toBeDefined();
   });
   it('calculates weekly totals streaks and achievements', () => {
     const sessions = [

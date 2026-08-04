@@ -42,7 +42,12 @@ import {
   type DayKey,
   type ExerciseEntry,
 } from './features/workouts/model';
-import { createTemplate, moveExercise, type TemplateKey } from './features/workouts/templates';
+import {
+  createTemplate,
+  moveExercise,
+  reorderExercise,
+  type TemplateKey,
+} from './features/workouts/templates';
 import { rankExerciseAlternatives } from './features/workouts/substitutions';
 import { clearWorkoutDraft, loadWorkoutDraft, saveWorkoutDraft } from './features/workouts/draft';
 import { trainingStreak, unlockedAchievements, weeklyReport } from './features/reports/model';
@@ -1311,6 +1316,33 @@ function renderExerciseEntries(
   workoutEntries.forEach((entry, exerciseIndex) => {
     const card = document.createElement('article');
     card.className = 'exercise-card';
+    card.draggable = true;
+    card.addEventListener('dragstart', (event) => {
+      event.dataTransfer?.setData('text/plain', String(exerciseIndex));
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    card.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+      card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', (event) => {
+      event.preventDefault();
+      card.classList.remove('drag-over');
+      const fromIndex = Number(event.dataTransfer?.getData('text/plain'));
+      if (!Number.isInteger(fromIndex) || fromIndex === exerciseIndex) return;
+      void saveUserData(
+        user,
+        'workouts',
+        reorderExercise(workouts, selectedDay, fromIndex, exerciseIndex),
+      )
+        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() => renderWorkout(user))
+        .catch((error: unknown) => reportError(error, 'workout/reorder'));
+    });
     const top = document.createElement('div');
     top.className = 'exercise-top';
     const heading = document.createElement('h2');
