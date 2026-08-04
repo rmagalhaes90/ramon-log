@@ -1,5 +1,9 @@
 # Relatório de testes
 
+## Rodada 2026-08-04 — compatibilidade de treinos alpha.27
+
+Typecheck web, ESLint, **27 arquivos/61 testes Vitest web** e build Vite passaram. O novo teste de regressão confirma que dias de descanso legados gravados como `null` são ignorados sem remover rotinas válidas. Histórico de exercício ou decisões de progressão incompatíveis agora usam estado auxiliar vazio e não bloqueiam a abertura da tela de treino; nenhum documento remoto é alterado durante essa recuperação.
+
 Atualizado em 2026-08-02.
 
 ## Baseline inicial

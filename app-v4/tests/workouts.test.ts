@@ -8,6 +8,7 @@ import {
   estimatedOneRepMax,
   workoutVolume,
 } from '../src/features/workouts/model';
+import { workoutsSchema } from '../src/domain/schemas';
 
 describe('workouts', () => {
   const workouts = {
@@ -57,5 +58,12 @@ describe('workouts', () => {
     first.sets[0] = { kg: 100, reps: 5, done: true };
     first.sets[1] = { kg: 120, reps: 3, done: false };
     expect(bestCompletedSet(first)?.maxWeight).toBe(100);
+  });
+
+  it('accepts legacy rest days stored as null without losing valid routines', () => {
+    const parsed = workoutsSchema.parse({ ...workouts, terca: null, domingo: null });
+    expect(parsed.segunda?.title).toBe('Push');
+    expect(parsed.terca).toBeUndefined();
+    expect(parsed.domingo).toBeUndefined();
   });
 });

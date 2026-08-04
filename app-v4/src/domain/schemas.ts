@@ -103,9 +103,26 @@ export const workoutSchema = z.object({
   exercises: z.array(exerciseSchema).max(60).default([]),
   abs: z.array(exerciseSchema).max(30).default([]),
 });
-export const workoutsSchema = z.partialRecord(
-  z.enum(['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']),
-  workoutSchema,
+const dayKeyValues = [
+  'domingo',
+  'segunda',
+  'terca',
+  'quarta',
+  'quinta',
+  'sexta',
+  'sabado',
+] as const;
+
+export const workoutsSchema = z.preprocess(
+  (value) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        ([day, workout]) => dayKeyValues.includes(day as (typeof dayKeyValues)[number]) && workout,
+      ),
+    );
+  },
+  z.partialRecord(z.enum(dayKeyValues), workoutSchema),
 );
 export type Workouts = z.infer<typeof workoutsSchema>;
 

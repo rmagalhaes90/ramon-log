@@ -1,5 +1,7 @@
 # Changelog
 
+- Fase alpha.27: compatibilidade de treinos com dias de descanso legados gravados como `null`; falhas em histórico ou decisões de progressão não impedem mais a abertura da rotina, e o cache PWA foi versionado para distribuir a correção.
+
 ## Unreleased — KYRO v4 foundation
 
 ### Added

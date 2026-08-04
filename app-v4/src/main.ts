@@ -1040,8 +1040,8 @@ async function renderWorkout(user: User): Promise<void> {
   const [workoutsValue, draft, exerciseHistory, progressionDecisions] = await Promise.all([
     loadUserData(user, 'workouts'),
     loadWorkoutDraft(user, selectedDay),
-    loadUserData(user, 'exerciseHistory'),
-    loadUserData(user, 'progressionDecisions').then((value) => value ?? []),
+    loadUserData(user, 'exerciseHistory').catch(() => null),
+    loadUserData(user, 'progressionDecisions').catch(() => null),
   ]);
   const workouts = workoutsValue ?? {};
   const freshEntries = createEntries(workouts, selectedDay);
@@ -1057,7 +1057,7 @@ async function renderWorkout(user: User): Promise<void> {
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
   renderDayButtons(user, workouts);
-  renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions);
+  renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions ?? []);
   const updateClock = () => {
     const elapsed = Math.max(
       0,
