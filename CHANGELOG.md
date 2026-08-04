@@ -1,5 +1,6 @@
 # Changelog
 
+- Fase alpha.31: Rules Firestore/Storage e quatro Functions v2 Node 22 publicadas em produção; Functions Framework/allowlist pnpm configurados, invoker Cloud Run reproduzível, domínio Pages validado e smoke autenticado de Auth/Firestore/Storage/entitlements/admin/exclusão aprovado.
 - Fase alpha.30: dashboard web mobile compacto em grade 2×2, navegação por todos os cartões, descrições PT/EN, labels de Carga/Reps/RIR/RPE, contador de fila isolado por usuário e retry manual de sincronização.
 - Fase alpha.29: retries recuperáveis da fila offline deixam de acionar o alerta global; itens continuam preservados, visíveis e sujeitos ao backoff até a sincronização ser confirmada.
 - Fase alpha.28: campos de série inválidos deixam de acionar o erro global; carga, repetições, RIR e RPE são validados no próprio input antes de atualizar o rascunho ou concluir a série.

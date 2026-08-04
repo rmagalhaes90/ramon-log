@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-04 — Firebase de produção alpha.31
+
+As duas execuções completas do CI de `alpha.30` passaram, incluindo Auth Emulator, E2E autenticado, Firestore/Storage Rules e Functions Emulator. Em produção, `firestore.rules` e `storage.rules` compilaram e foram publicadas no projeto confirmado `traincontrollog`. As callables `deleteOwnAccount`, `getEntitlements`, `setAdminRole` e `setUserBlocked` foram implantadas como Functions v2, Node 22, 256 MB, `us-central1`; o Artifact Registry recebeu política de limpeza de sete dias.
+
+O builder pnpm exigiu allowlist explícita para `@firebase/util`/`protobufjs` e dependência direta `@google-cloud/functions-framework` 5.0.5. Após os ajustes, as quatro Functions foram listadas e o smoke sem autenticação retornou HTTP 401 `UNAUTHENTICATED` em todos os endpoints. Um teste isolado de produção criou uma conta `.invalid`, confirmou escrita/leitura privada no Firestore, upload JPEG privado no Storage, entitlement Free autenticado, negação `PERMISSION_DENIED` para autoelevação administrativa e exclusão integral pela callable. A conta e os dados técnicos foram removidos pela própria Function.
+
+O app web registrado, App ID, bucket, API key, authDomain e sender ID coincidem com a configuração do código. `rmagalhaes90.github.io` já constava nos domínios autorizados do Firebase Auth.
+
 ## Rodada 2026-08-04 — experiência web mobile e sync alpha.30
 
 O dashboard passa a usar quatro cartões compactos e navegáveis em telas pequenas, com descrições PT/EN e safe areas. A tela de treino identifica visualmente Carga, Reps, RIR e RPE. O contador considera apenas a fila do usuário autenticado, atualiza após flush e a área de ajustes oferece retry manual sem remover itens não confirmados.

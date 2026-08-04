@@ -1,5 +1,7 @@
 # Segurança
 
+As callables v2 usam transporte público no Cloud Run para que tokens Firebase possam chegar ao runtime, mas todas as operações exigem `request.auth`; administração exige claim `admin` ou o bootstrap email. O smoke de produção confirmou HTTP 401 sem autenticação, entitlement autenticado, negação de autoelevação e exclusão integral. A política do Artifact Registry remove imagens de build com mais de sete dias.
+
 As alterações administrativas de bloqueio e role são autorizadas novamente por callable Functions e registradas em `adminAudit` com ator, alvo, ação, valor e timestamp server-side. Clientes não podem criar, alterar ou excluir essa trilha; somente administradores autenticados podem consultá-la.
 
 ## Emuladores locais
