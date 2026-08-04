@@ -1,5 +1,9 @@
 # Relatório de testes
 
+## Rodada 2026-08-04 — retry offline silencioso alpha.29
+
+Um teste dedicado garante que falhas recuperáveis de sincronização em background sejam registradas sem notificar os listeners da interface, enquanto erros de ações explícitas continuam acionando o tratamento global. A fila, tentativas e backoff permanecem inalterados.
+
 ## Rodada 2026-08-04 — validação de séries alpha.28
 
 Os campos da série agora respeitam as restrições HTML antes de alterar ou persistir o rascunho. A conclusão é cancelada e o navegador aponta o primeiro campo inválido, impedindo que RPE acima de 10 ou outros valores fora do contrato cheguem ao schema e gerem um alerta global.

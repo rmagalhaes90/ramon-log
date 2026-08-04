@@ -1,4 +1,4 @@
-import { reportError } from '../core/errors';
+import { reportBackgroundError } from '../core/errors';
 import type { QueueItem } from '../core/validation';
 import { queueDelete, queueList, queuePut } from './database';
 
@@ -31,7 +31,7 @@ export async function flushQueue(
     } catch (error) {
       const attempts = item.attempts + 1;
       await queuePut({ ...item, attempts, nextAttemptAt: now + retryDelay(attempts) });
-      reportError(error, 'offline-sync');
+      reportBackgroundError(error, 'offline-sync');
     }
   }
   return completed;

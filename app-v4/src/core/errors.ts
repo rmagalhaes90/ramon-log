@@ -28,6 +28,12 @@ export function reportError(value: unknown, code?: string): KyroError {
   return error;
 }
 
+export function reportBackgroundError(value: unknown, code?: string): KyroError {
+  const error = normalizeError(value, code);
+  console.warn(`[${error.code}]`, error);
+  return error;
+}
+
 export function onError(listener: ErrorListener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
