@@ -19,7 +19,7 @@ function requireAdmin(request) {
   return auth;
 }
 
-export const setAdminRole = onCall(async (request) => {
+export const setAdminRole = onCall({ invoker: 'public' }, async (request) => {
   const actor = requireAdmin(request);
   const { uid, isAdmin } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof isAdmin !== 'boolean')
@@ -39,7 +39,7 @@ export const setAdminRole = onCall(async (request) => {
   return { uid, isAdmin };
 });
 
-export const setUserBlocked = onCall(async (request) => {
+export const setUserBlocked = onCall({ invoker: 'public' }, async (request) => {
   const actor = requireAdmin(request);
   const { uid, blocked } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof blocked !== 'boolean')
@@ -56,7 +56,7 @@ export const setUserBlocked = onCall(async (request) => {
   return { uid, blocked };
 });
 
-export const deleteOwnAccount = onCall(async (request) => {
+export const deleteOwnAccount = onCall({ invoker: 'public' }, async (request) => {
   const { uid } = requireUser(request);
   await getStorage()
     .bucket()
@@ -74,7 +74,7 @@ export const deleteOwnAccount = onCall(async (request) => {
   return { deleted: true };
 });
 
-export const getEntitlements = onCall(async (request) => {
+export const getEntitlements = onCall({ invoker: 'public' }, async (request) => {
   const { uid } = requireUser(request);
   const snapshot = await getFirestore().doc(`subscriptions/${uid}`).get();
   const data = snapshot.data() ?? {};
