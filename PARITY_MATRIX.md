@@ -20,7 +20,7 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | Notificações                      |       ✅ |  🟡 | Permissão por gesto, preferência sincronizada, teste e alerta local de descanso; faltam push remoto/FCM e lembretes fechados no iOS                                                     |
 | Admin                             |       ✅ |  🟡 | Listagem, bloqueio e concessão/revogação por custom claims aprovados no Emulator                                                                                                        |
 | Exclusão de conta                 |       ✅ |  🟡 | Fluxo modular e backend idempotente aprovados no Emulator                                                                                                                               |
-| Import/export/reset               |       ✅ |  🟡 | JSON versionado, limite, validação, backup prévio, rollback lógico, CSV seguro e reset seletivo por domínio; fotos binárias ainda não entram no backup                                  |
+| Import/export/reset               |       ✅ |  🟡 | JSON versionado, limite, validação, backup prévio, rollback lógico, CSV seguro, reset seletivo por domínio e backup completo em .zip com fotos originais                               |
 
 Paridade global: **não atingida**. O baseline continua sendo a versão operacional.
 

@@ -1,7 +1,13 @@
 import type { User } from 'firebase/auth';
-import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import {
+  deleteObject,
+  getBytes,
+  getDownloadURL,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage';
 import { getFirebaseServices } from './firebase';
-import { photoFileName, validatePhoto } from '../features/photos/model';
+import { MAX_PHOTO_BYTES, photoFileName, validatePhoto } from '../features/photos/model';
 
 function photoReference(user: User, id: string) {
   const services = getFirebaseServices();
@@ -35,6 +41,11 @@ export async function uploadPhoto(
 
 export async function photoUrl(user: User, id: string): Promise<string> {
   return getDownloadURL(photoReference(user, id));
+}
+
+export async function downloadPhotoBytes(user: User, id: string): Promise<Uint8Array> {
+  const buffer = await getBytes(photoReference(user, id), MAX_PHOTO_BYTES);
+  return new Uint8Array(buffer);
 }
 
 export async function deletePhoto(user: User, id: string): Promise<void> {

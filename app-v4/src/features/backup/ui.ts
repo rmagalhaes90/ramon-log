@@ -4,6 +4,7 @@ import { reportError } from '../../core/errors';
 import { loadUserData } from '../../services/user-data';
 import { dateKey } from '../workouts/model';
 import { createBackup, parseBackup, restoreBackup } from './index';
+import { createFullBackup, restoreFullBackup } from './full';
 import { sessionsCsv } from './csv';
 
 type Copy = (key: MessageKey) => string;
@@ -77,4 +78,43 @@ export function bindDataPortability(user: User, copy: Copy): void {
           );
       });
   });
+  document.querySelector('#export-data-zip')?.addEventListener('click', () => {
+    const status = document.querySelector('#backup-status');
+    if (status) status.textContent = copy('exportingZip');
+    void createFullBackup(user)
+      .then((zip) => {
+        download(new Uint8Array(zip), 'application/zip', `kyro-backup-${dateKey()}.zip`);
+        if (status) status.textContent = copy('exportZipReady');
+      })
+      .catch((error: unknown) => reportError(error, 'backup/export-zip'));
+  });
+  document
+    .querySelector<HTMLInputElement>('#import-data-zip')
+    ?.addEventListener('change', (event) => {
+      const file = (event.currentTarget as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const status = document.querySelector('#backup-status');
+      if (status) status.textContent = copy('validatingZip');
+      void file
+        .arrayBuffer()
+        .then(async (buffer) => {
+          const zip = new Uint8Array(buffer);
+          const safety = await createBackup(user);
+          download(
+            JSON.stringify(safety, null, 2),
+            'application/json',
+            `kyro-before-import-${dateKey()}.json`,
+          );
+          if (!confirm(copy('importConfirm'))) throw new DOMException('Cancelled', 'AbortError');
+          if (status) status.textContent = copy('restoringPhotos');
+          const { failedPhotos } = await restoreFullBackup(user, zip);
+          if (status)
+            status.textContent = copy(failedPhotos > 0 ? 'importZipPartial' : 'importZipComplete');
+        })
+        .catch((error: unknown) => {
+          if ((error as Error).name === 'AbortError') return;
+          reportError(error, 'backup/import-zip');
+          if (status) status.textContent = copy('zipInvalid');
+        });
+    });
 }
