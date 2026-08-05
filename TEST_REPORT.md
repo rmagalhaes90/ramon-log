@@ -1,5 +1,15 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — separação Treino/Rotina, vídeo embutido e celebração alpha.38
+
+Feedback direto do usuário sobre a alpha.37: "os vídeos eram carregados embeds" (não link externo), "no html tinha treino com animação no final" (o baseline tem uma tela "TREINO COMPLETO!" com confete/sequência) e "não quero ficar com as opções abertas no treino, tem que ser em outro lugar" (a edição de séries/reps/descanso adicionada na alpha.37 estava na tela errada). Todos os três confirmados diretamente no `main` legado antes de implementar:
+
+- `buildExCard` (tela "Dia"/execução ao vivo do legado) mostra sets/reps/descanso como texto somente-leitura e não tem botão de editar; `buildRoutineExerciseItem` (tela "Rotinas", separada) é quem tem o botão "✎" que abre `openExerciseConfig`. O v4 tinha as duas coisas misturadas numa tela só. Criada `renderRoutine`/`renderRoutineExercises` como tela dedicada (`currentView = 'routine'`), acessada por um botão no cabeçalho do Treino; a edição de alvo saiu do card de execução.
+- `openVideoPlayer` no legado cria um `<iframe>` para `youtube-nocookie.com/embed/{id}` dentro de um modal (`videoPlayerModal`); o v4 antes só abria um link externo. Implementado `openVideoModal`/`closeVideoModal` com o mesmo domínio `-nocookie`. `app-v4/index.html` não define CSP, então nada bloqueava o iframe.
+- O legado tem um overlay de celebração (`#celebrateOverlay`, canvas de confete, sequência de dias, compartilhar) disparado ao finalizar o treino; o v4 só atualizava um texto discreto de status. Implementada `showCelebration`/`spawnConfetti` (CSS, sem canvas) reutilizando `trainingStreak` e `shareOrFallback` já existentes.
+
+Bateria completa após as mudanças: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **73 testes Vitest** e `build`, todos com código 0. Inspeção manual do shell sem login confirmou carregamento limpo, sem erros de console; os fluxos autenticados (Treino, Rotina, celebração) não puderam ser exercitados nesta sessão por exigirem login real. Versão sincronizada para `4.0.0-alpha.38`.
+
 ## Rodada 2026-08-05 — paridade de vídeos e edição de treino alpha.37
 
 Ao investigar queixas reais de uso ("não vejo como fazer os exercícios", "não consigo trocar séries/reps/descanso"), a branch `main` (o app "bulletproof" legado, servido como `index.html` monolítico de ~650 KB, referenciado pelo link "Open stable version"/baseline) foi inspecionada diretamente. Confirmou-se que:

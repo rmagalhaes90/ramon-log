@@ -95,6 +95,7 @@ let updateRegistration: ServiceWorkerRegistration | null = null;
 let currentView:
   | 'dashboard'
   | 'workout'
+  | 'routine'
   | 'progress'
   | 'photos'
   | 'nutrition'
@@ -414,6 +415,7 @@ async function renderReady(user: User): Promise<void> {
     notificationUid = user.uid;
   }
   if (currentView === 'workout') await renderWorkout(user);
+  else if (currentView === 'routine') await renderRoutine(user);
   else if (currentView === 'progress') await renderProgress(user);
   else if (currentView === 'photos') await renderPhotos(user);
   else if (currentView === 'nutrition') await renderNutrition(user);
@@ -1199,7 +1201,7 @@ async function renderWorkout(user: User): Promise<void> {
   workoutEntries = draftMatches ? draft.entries : freshEntries;
   if (draftMatches) workoutStartedAt = draft.startedAt;
   shell(`<section class="workout-view"><button id="workout-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
-    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong><button id="session-pause" type="button"></button></div><div class="routine-actions"><button id="rename-routine">${copy('editRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button></div></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
+    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong><button id="session-pause" type="button"></button></div><button id="edit-routine" class="link-button">${copy('editRoutineTitle')}</button></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
@@ -1242,6 +1244,26 @@ async function renderWorkout(user: User): Promise<void> {
   document
     .querySelector('#finish-workout')
     ?.addEventListener('click', () => void finishWorkout(user, workouts));
+  document.querySelector('#edit-routine')?.addEventListener('click', () => {
+    clearWorkoutTimers();
+    currentView = 'routine';
+    void renderRoutine(user);
+  });
+}
+
+async function renderRoutine(user: User): Promise<void> {
+  const workoutsValue = await loadUserData(user, 'workouts');
+  const workouts = workoutsValue ?? {};
+  shell(`<section class="workout-view"><button id="routine-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
+    <header class="workout-heading"><p class="eyebrow">${copy('routineExercises')}</p><h1 id="routine-title"></h1><div class="routine-actions"><button id="rename-routine">${copy('renameRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button></div></header><div id="routine-exercise-list"></div></section>`);
+  const title = document.querySelector('#routine-title');
+  if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
+  renderDayButtons(user, workouts, () => void renderRoutine(user));
+  renderRoutineExercises(user, workouts);
+  document.querySelector('#routine-back')?.addEventListener('click', () => {
+    currentView = 'workout';
+    void renderWorkout(user);
+  });
   document
     .querySelector('#add-exercise')
     ?.addEventListener('click', () => renderExerciseCatalog(user, workouts));
@@ -1249,8 +1271,8 @@ async function renderWorkout(user: User): Promise<void> {
     .querySelector('#routine-template')
     ?.addEventListener('click', () => renderTemplatePicker(user, workouts));
   document.querySelector('#rename-routine')?.addEventListener('click', () => {
-    const title = prompt(copy('routineName'), workouts[selectedDay]?.title ?? '');
-    if (title?.trim()) {
+    const newTitle = prompt(copy('routineName'), workouts[selectedDay]?.title ?? '');
+    if (newTitle?.trim()) {
       const current = workouts[selectedDay] ?? {
         title: selectedDay,
         titleEn: '',
@@ -1260,11 +1282,104 @@ async function renderWorkout(user: User): Promise<void> {
       };
       void saveUserData(user, 'workouts', {
         ...workouts,
-        [selectedDay]: { ...current, title: title.trim().slice(0, 80) },
+        [selectedDay]: { ...current, title: newTitle.trim().slice(0, 80) },
       })
-        .then(() => renderWorkout(user))
+        .then(() => renderRoutine(user))
         .catch((error: unknown) => reportError(error, 'workout/rename'));
     }
+  });
+}
+
+function renderRoutineExercises(user: User, workouts: Workouts): void {
+  const list = document.querySelector('#routine-exercise-list');
+  if (!list) return;
+  const exercises = workouts[selectedDay]?.exercises ?? [];
+  if (!exercises.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-state';
+    empty.textContent = copy('noWorkout');
+    list.append(empty);
+    return;
+  }
+  exercises.forEach((exercise, exerciseIndex) => {
+    const card = document.createElement('article');
+    card.className = 'exercise-card';
+    const top = document.createElement('div');
+    top.className = 'exercise-top';
+    const heading = document.createElement('h2');
+    heading.textContent = exercise.name;
+    const remove = document.createElement('button');
+    remove.textContent = copy('remove');
+    remove.addEventListener('click', () => {
+      const current = workouts[selectedDay];
+      if (!current) return;
+      void saveUserData(user, 'workouts', {
+        ...workouts,
+        [selectedDay]: {
+          ...current,
+          exercises: current.exercises.filter((_, index) => index !== exerciseIndex),
+        },
+      })
+        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() => renderRoutine(user))
+        .catch((error: unknown) => reportError(error, 'workout/remove'));
+    });
+    top.append(heading, remove);
+    card.append(top);
+    const meta = document.createElement('div');
+    meta.className = 'exercise-meta';
+    const updateTarget = (patch: Partial<Pick<Exercise, 'sets' | 'reps' | 'rest'>>) => {
+      const current = workouts[selectedDay];
+      if (!current) return;
+      const nextExercises = current.exercises.map((item, index) =>
+        index === exerciseIndex ? { ...item, ...patch } : item,
+      );
+      void saveUserData(user, 'workouts', {
+        ...workouts,
+        [selectedDay]: { ...current, exercises: nextExercises },
+      })
+        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() => renderRoutine(user))
+        .catch((error: unknown) => reportError(error, 'workout/edit-target'));
+    };
+    const setsInput = document.createElement('input');
+    setsInput.type = 'number';
+    setsInput.min = '1';
+    setsInput.max = '20';
+    setsInput.step = '1';
+    setsInput.value = String(exercise.sets);
+    setsInput.ariaLabel = copy('sets');
+    setsInput.addEventListener('change', () =>
+      updateTarget({ sets: Math.min(20, Math.max(1, Math.round(Number(setsInput.value)) || 1)) }),
+    );
+    const repsInput = document.createElement('input');
+    repsInput.type = 'text';
+    repsInput.maxLength = 20;
+    repsInput.value = exercise.reps;
+    repsInput.ariaLabel = copy('reps');
+    repsInput.addEventListener('change', () =>
+      updateTarget({ reps: repsInput.value.trim().slice(0, 20) || '10' }),
+    );
+    const restInput = document.createElement('input');
+    restInput.type = 'number';
+    restInput.min = '0';
+    restInput.max = '1800';
+    restInput.step = '5';
+    restInput.value = String(exercise.rest);
+    restInput.ariaLabel = copy('rest');
+    restInput.addEventListener('change', () =>
+      updateTarget({ rest: Math.min(1800, Math.max(0, Math.round(Number(restInput.value)) || 0)) }),
+    );
+    meta.append(
+      setsInput,
+      document.createTextNode(' × '),
+      repsInput,
+      document.createTextNode(` · ${copy('rest')} `),
+      restInput,
+      document.createTextNode('s'),
+    );
+    card.append(meta);
+    list.append(card);
   });
 }
 
@@ -1274,7 +1389,7 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
   );
   document
     .querySelector('#template-back')
-    ?.addEventListener('click', () => void renderWorkout(user));
+    ?.addEventListener('click', () => void renderRoutine(user));
   const list = document.querySelector('#template-list');
   (['fullbody', 'upperLower', 'ppl'] as TemplateKey[]).forEach((key) => {
     const card = document.createElement('article');
@@ -1293,9 +1408,7 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
         )
         .then(() => {
           selectedDay = (Object.keys(generated)[0] as DayKey | undefined) ?? 'segunda';
-          workoutStartedAt = new Date().toISOString();
-          resetWorkoutClock();
-          return renderWorkout(user);
+          return renderRoutine(user);
         })
         .catch((error: unknown) => reportError(error, 'workout/template'));
     });
@@ -1338,7 +1451,7 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
           };
           void saveUserData(user, 'workouts', next)
             .then(() => clearWorkoutDraft(user, selectedDay))
-            .then(() => renderWorkout(user))
+            .then(() => renderRoutine(user))
             .catch((error: unknown) => reportError(error, 'workout/add'));
         });
         row.append(body, add);
@@ -1348,13 +1461,17 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
   draw();
   document
     .querySelector('#catalog-back')
-    ?.addEventListener('click', () => void renderWorkout(user));
+    ?.addEventListener('click', () => void renderRoutine(user));
   document
     .querySelector<HTMLInputElement>('#catalog-search')
     ?.addEventListener('input', (event) => draw((event.currentTarget as HTMLInputElement).value));
 }
 
-function renderDayButtons(user: User, workouts: Workouts): void {
+function renderDayButtons(
+  user: User,
+  workouts: Workouts,
+  onSelect: () => void = () => void renderWorkout(user),
+): void {
   const container = document.querySelector('#days');
   if (!container) return;
   dayKeys.forEach((day) => {
@@ -1364,7 +1481,7 @@ function renderDayButtons(user: User, workouts: Workouts): void {
     button.ariaPressed = String(day === selectedDay);
     button.addEventListener('click', () => {
       selectedDay = day;
-      void renderWorkout(user);
+      onSelect();
     });
     if (!workouts[day]) button.classList.add('empty');
     container.append(button);
@@ -1461,55 +1578,9 @@ function renderExerciseEntries(
     actions.append(up, down, remove);
     top.append(heading, actions);
     card.append(top);
-    const meta = document.createElement('div');
+    const meta = document.createElement('p');
     meta.className = 'exercise-meta';
-    const updateTarget = (patch: Partial<Pick<Exercise, 'sets' | 'reps' | 'rest'>>) => {
-      const current = workouts[selectedDay];
-      if (!current) return;
-      const exercises = current.exercises.map((exercise, index) =>
-        index === exerciseIndex ? { ...exercise, ...patch } : exercise,
-      );
-      void saveUserData(user, 'workouts', { ...workouts, [selectedDay]: { ...current, exercises } })
-        .then(() => clearWorkoutDraft(user, selectedDay))
-        .then(() => renderWorkout(user))
-        .catch((error: unknown) => reportError(error, 'workout/edit-target'));
-    };
-    const setsInput = document.createElement('input');
-    setsInput.type = 'number';
-    setsInput.min = '1';
-    setsInput.max = '20';
-    setsInput.step = '1';
-    setsInput.value = String(entry.exercise.sets);
-    setsInput.ariaLabel = copy('sets');
-    setsInput.addEventListener('change', () =>
-      updateTarget({ sets: Math.min(20, Math.max(1, Math.round(Number(setsInput.value)) || 1)) }),
-    );
-    const repsInput = document.createElement('input');
-    repsInput.type = 'text';
-    repsInput.maxLength = 20;
-    repsInput.value = entry.exercise.reps;
-    repsInput.ariaLabel = copy('reps');
-    repsInput.addEventListener('change', () =>
-      updateTarget({ reps: repsInput.value.trim().slice(0, 20) || '10' }),
-    );
-    const restInput = document.createElement('input');
-    restInput.type = 'number';
-    restInput.min = '0';
-    restInput.max = '1800';
-    restInput.step = '5';
-    restInput.value = String(entry.exercise.rest);
-    restInput.ariaLabel = copy('rest');
-    restInput.addEventListener('change', () =>
-      updateTarget({ rest: Math.min(1800, Math.max(0, Math.round(Number(restInput.value)) || 0)) }),
-    );
-    meta.append(
-      setsInput,
-      document.createTextNode(' × '),
-      repsInput,
-      document.createTextNode(` · ${copy('rest')} `),
-      restInput,
-      document.createTextNode('s'),
-    );
+    meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`;
     card.append(meta);
     const recommendation = progressionRecommendation(
       exerciseHistory[entry.exercise.name] ?? [],
@@ -1588,12 +1659,13 @@ function renderExerciseEntries(
       }
     }
     if (entry.exercise.videoUrl) {
-      const video = document.createElement('a');
+      const video = document.createElement('button');
+      video.type = 'button';
       video.className = 'exercise-video';
-      video.href = entry.exercise.videoUrl;
-      video.target = '_blank';
-      video.rel = 'noopener noreferrer';
       video.textContent = copy('watchVideo');
+      video.addEventListener('click', () =>
+        openVideoModal(entry.exercise.videoUrl, entry.exercise.name),
+      );
       card.append(video);
     }
     const tools = document.createElement('div');
@@ -1769,6 +1841,51 @@ function renderExerciseEntries(
   });
 }
 
+function extractYouTubeId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === 'youtu.be') return parsed.pathname.slice(1) || null;
+    if (parsed.pathname === '/watch') return parsed.searchParams.get('v');
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function closeVideoModal(): void {
+  document.querySelector('.video-modal')?.remove();
+}
+
+function openVideoModal(url: string, title: string): void {
+  const videoId = extractYouTubeId(url);
+  if (!videoId) return;
+  closeVideoModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'video-modal';
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeVideoModal();
+  });
+  const frame = document.createElement('div');
+  frame.className = 'video-modal-frame';
+  const heading = document.createElement('h2');
+  heading.textContent = title;
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = '✕';
+  close.ariaLabel = copy('close');
+  close.addEventListener('click', closeVideoModal);
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&playsinline=1`;
+  iframe.title = title;
+  iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+  iframe.allowFullscreen = true;
+  iframe.loading = 'lazy';
+  iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+  frame.append(heading, close, iframe);
+  overlay.append(frame);
+  document.body.append(overlay);
+}
+
 function startRestTimer(seconds: number): void {
   if (restClock) window.clearInterval(restClock);
   const target = document.querySelector<HTMLElement>('#rest-timer');
@@ -1858,8 +1975,9 @@ async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
           : (previous?.maxE1rmDate ?? null),
     };
   }
+  const nextSessions = [...existing, session].slice(-450);
   await Promise.all([
-    saveUserData(user, 'sessionLog', [...existing, session].slice(-450)),
+    saveUserData(user, 'sessionLog', nextSessions),
     saveUserData(user, 'exerciseHistory', nextHistory),
     saveUserData(user, 'exerciseRecords', nextRecords),
   ]);
@@ -1869,6 +1987,68 @@ async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   clearWorkoutTimers();
   workoutStartedAt = endedAt.toISOString();
   resetWorkoutClock();
+  showCelebration(
+    trainingStreak(nextSessions),
+    `${copy('weeklyReport')}: ${session.exerciseCount} ${copy('sessions')} · ${Math.round(session.volume)} kg`,
+  );
+}
+
+function spawnConfetti(): void {
+  const container = document.createElement('div');
+  container.className = 'confetti-burst';
+  const colors = ['#d7ff3d', '#4dc3ff', '#ff4d5e', '#eef0f2'];
+  for (let i = 0; i < 40; i += 1) {
+    const piece = document.createElement('span');
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)] ?? '#d7ff3d';
+    piece.style.animationDelay = `${Math.random() * 0.4}s`;
+    piece.style.animationDuration = `${1.6 + Math.random() * 0.8}s`;
+    container.append(piece);
+  }
+  document.body.append(container);
+  window.setTimeout(() => container.remove(), 3000);
+}
+
+function showCelebration(streak: number, shareText: string): void {
+  const overlay = document.createElement('div');
+  overlay.className = 'celebrate-overlay show';
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) overlay.remove();
+  });
+  const card = document.createElement('div');
+  card.className = 'celebrate-card';
+  const title = document.createElement('h1');
+  title.innerHTML = copy('celebrationTitle');
+  const body = document.createElement('p');
+  body.textContent = copy('celebrationBody');
+  card.append(title, body);
+  if (streak > 0) {
+    const streakBadge = document.createElement('div');
+    streakBadge.className = 'celebrate-streak';
+    streakBadge.textContent = `🔥 ${streak} ${copy('celebrationStreak')}`;
+    card.append(streakBadge);
+  }
+  const actions = document.createElement('div');
+  actions.className = 'cel-actions';
+  const share = document.createElement('button');
+  share.type = 'button';
+  share.textContent = copy('shareReport');
+  share.addEventListener(
+    'click',
+    () =>
+      void shareOrFallback({ title: 'KYRO', text: shareText }).catch((error: unknown) => {
+        if ((error as Error).name !== 'AbortError') reportError(error, 'workout/celebrate-share');
+      }),
+  );
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = copy('close');
+  close.addEventListener('click', () => overlay.remove());
+  actions.append(share, close);
+  card.append(actions);
+  overlay.append(card);
+  document.body.append(overlay);
+  spawnConfetti();
 }
 
 function render(): void {
