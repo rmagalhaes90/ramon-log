@@ -38,6 +38,7 @@ jobs:
       - run: pnpm test:e2e
       - run: pnpm test:emulator:auth
       - run: pnpm test:e2e:auth
+      - run: pnpm test:e2e:share
       - run: pnpm test:emulator:rules
       - run: pnpm test:emulator:functions
       - run: pnpm audit --audit-level high

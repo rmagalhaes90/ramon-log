@@ -1,5 +1,19 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — tour de onboarding, correção de reconexão do Firestore e E2E de compartilhamento alpha.35/36
+
+**alpha.35** — `PARITY_MATRIX.md` apontava falta de um tour completo do produto no onboarding. Foi adicionado um tour guiado de quatro passos (Train/Recover/Fuel/Sync) exibido uma vez por conta logo após a escolha de unidades, com avançar/voltar/pular, usando o mesmo mecanismo `cacheGet`/`cacheSet` por UID já usado pelo onboarding.
+
+**alpha.36** — ao escrever um E2E autenticado real para compartilhamento (cadastro → verificação por link → login → onboarding → tour → compartilhar relatório), foi descoberto um bug real de robustez: logo após um login recém-verificado, o Firestore pode se reportar `client is offline` na primeiríssima leitura (antes de confirmar seu primeiro round-trip bem-sucedido), e `ensureSharedProfile` tratava **qualquer** falha nessa leitura como motivo para deslogar o usuário silenciosamente — sem tentativa adicional, sem qualquer aviso. Um usuário recém-verificado podia ser jogado de volta para a tela de login sem explicação nenhuma. A correção adiciona novas tentativas com backoff (1s/2s/4s) antes de desistir, e o Firestore passou a usar `experimentalAutoDetectLongPolling` para reduzir a chance de precisar delas.
+
+O diagnóstico foi longo porque o sintoma variava por ambiente: testes manuais no navegador (mais lentos, com pausas naturais entre ações) nunca reproduziam a corrida; o Playwright, ao agir mais rápido e de forma mais mecânica, reproduzia de forma consistente. Também foram encontrados e eliminados, no caminho, dois processos Node/Java órfãos de execuções anteriores desta sessão que ocupavam as portas 5173/8080, o que inicialmente mascarou a causa real atrás de erros de conectividade genéricos.
+
+Novo teste `app-v4/e2e/share-emulator.spec.ts` (script `pnpm test:e2e:share`, também adicionado ao CI) usa o REST de inspeção do Auth Emulator (`GET /emulator/v1/projects/{id}/oobCodes`) para aplicar a verificação de email sem depender de e-mail real, e intercepta `navigator.clipboard.writeText` diretamente (em vez de depender de permissão real de clipboard, que o WebKit não permite conceder via automação) para validar o fallback de compartilhamento sem `navigator.share`. Passou **2/2** (Chromium e WebKit mobile) de forma consistente em múltiplas execuções.
+
+Bateria completa executada do zero após as mudanças: `typecheck`, `lint`, `format:check`, **73 testes Vitest**, `build`, `test:e2e` (smoke, 2/2), `test:emulator:auth`, `test:emulator:rules`, `test:emulator:functions` e `test:e2e:auth` (2/2) — todos com código 0. Versão sincronizada para `4.0.0-alpha.36` em `package.json`/`version.json`/`sw.js`.
+
+Também foi adicionado `pnpm dev:emulator` (via `scripts/dev-emulator-server.mjs`) para subir o Vite já conectado aos Emulators manualmente, útil para reproduzir este tipo de problema interativamente no navegador.
+
 ## Rodada 2026-08-04 — backup .zip, drag-and-drop e emuladores completos alpha.32/33
 
 Ambiente sem Node/npm/pnpm/Java no `PATH`; Node 24.19.0 LTS, pnpm 11.20.0 (via `corepack`/`npm install -g`) e Microsoft OpenJDK 21 foram instalados localmente via `winget` para viabilizar o toolchain completo, incluindo os Emulators que dependem de Java. Nenhum instalador foi commitado.

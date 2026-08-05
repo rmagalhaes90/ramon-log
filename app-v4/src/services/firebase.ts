@@ -1,6 +1,6 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
-import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
+import { connectFirestoreEmulator, initializeFirestore, type Firestore } from 'firebase/firestore';
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from 'firebase/storage';
 import { connectFunctionsEmulator, getFunctions, type Functions } from 'firebase/functions';
 import { env } from '../env';
@@ -33,7 +33,7 @@ export function getFirebaseServices(): FirebaseServices | null {
     const current = {
       app,
       auth: getAuth(app),
-      firestore: getFirestore(app),
+      firestore: initializeFirestore(app, { experimentalAutoDetectLongPolling: true }),
       storage: getStorage(app),
       functions: getFunctions(app, 'us-central1'),
     };

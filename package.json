@@ -1,10 +1,11 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.35",
+  "version": "4.0.0-alpha.36",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
+    "dev:emulator": "node scripts/dev-emulator-server.mjs",
     "build": "tsc -b && vite build --config vite.config.ts",
     "typecheck": "pnpm typecheck:web && pnpm --filter @kyro/domain typecheck && pnpm --filter kyro-mobile typecheck",
     "typecheck:web": "tsc -b --pretty false",
@@ -21,6 +22,7 @@
     "mobile:check": "pnpm --filter kyro-mobile typecheck && pnpm --filter kyro-mobile expo:doctor",
     "test:emulator:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-emulator-test.mjs\"",
     "test:e2e:auth": "firebase emulators:exec --only auth --project demo-kyro-v4 \"node scripts/auth-e2e-runner.mjs\"",
+    "test:e2e:share": "firebase emulators:exec --only auth,firestore --project demo-kyro-v4 \"node scripts/share-e2e-runner.mjs\"",
     "test:emulator:rules": "firebase emulators:exec --only firestore,storage --project demo-kyro-v4 \"node scripts/firebase-rules-test.mjs\"",
     "test:emulator:functions": "firebase emulators:exec --only auth,firestore,storage,functions --project demo-kyro-v4 \"pnpm --dir functions test:emulator\"",
     "firebase:auth-email:check": "node scripts/configure-auth-email.mjs",

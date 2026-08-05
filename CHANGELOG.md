@@ -1,5 +1,6 @@
 # Changelog
 
+- Fase alpha.36: corrige uma condição de corrida real onde o Firestore podia se reportar temporariamente offline logo após um login recém-verificado, derrubando o usuário de volta para a tela de login sem aviso (agora com novas tentativas); habilita detecção automática de long-polling no Firestore; adiciona E2E autenticado (Chromium/WebKit) cobrindo cadastro, verificação por link e compartilhamento do relatório semanal via fallback de clipboard, fechando o gap de `PARITY_MATRIX.md`.
 - Fase alpha.35: tour guiado pós-onboarding (Train/Recover/Fuel/Sync) exibido uma vez por conta, com avançar/voltar/pular, fechando o gap "falta portar tour completo do produto" do `PARITY_MATRIX.md`.
 - Fase alpha.34: corrige três queixas reais de uso — "Finalizar" não dava feedback quando nenhuma série estava marcada como concluída, o timer de descanso ficava fora da viewport em rotinas longas (sticky após a lista de exercícios) e sessões retomadas de um rascunho antigo não avisavam por que o cronômetro já começava com tempo decorrido.
 - Fase alpha.33: drag-and-drop nativo (mouse/desktop) para reordenar exercícios do treino, complementando os botões ↑/↓ que continuam sendo o caminho acessível e o único funcional em touch (iOS/Android não disparam eventos HTML5 de drag).
