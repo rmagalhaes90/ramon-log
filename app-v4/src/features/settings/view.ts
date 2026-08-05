@@ -1,5 +1,6 @@
 import type { User } from 'firebase/auth';
 import type { Locale, MessageKey } from '../../core/i18n';
+import type { UnitSystem } from '../../core/units';
 import { reportError } from '../../core/errors';
 import { deleteOwnAccount } from '../account/delete-account';
 import { bindDataPortability } from '../backup/ui';
@@ -27,6 +28,8 @@ interface SettingsViewOptions {
   shell: (content: string) => void;
   onBack: () => void;
   onRestNotificationsChange: (enabled: boolean) => void;
+  unitSystem: UnitSystem;
+  onUnitSystemChange: (units: UnitSystem) => void;
 }
 const formText = (data: FormData, key: string) => {
   const value = data.get(key);
@@ -134,6 +137,25 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
       syncStatus.textContent = copy('syncUnavailable');
       reportError(error, 'sync/status');
     });
+  const unitsCard = document.createElement('article');
+  unitsCard.className = 'units-card';
+  const unitsTitle = document.createElement('h2');
+  unitsTitle.textContent = copy('unitsLabel');
+  const unitsChoice = document.createElement('div');
+  (['metric', 'imperial'] as UnitSystem[]).forEach((value) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = copy(value);
+    button.ariaPressed = String(value === options.unitSystem);
+    button.addEventListener('click', () => {
+      if (value === options.unitSystem) return;
+      options.onUnitSystemChange(value);
+      void renderSettingsView(user, options);
+    });
+    unitsChoice.append(button);
+  });
+  unitsCard.append(unitsTitle, unitsChoice);
+  document.querySelector('.notification-card')?.after(unitsCard);
   const planCard = document.createElement('article');
   planCard.className = 'subscription-card';
   const planTitle = document.createElement('h2');

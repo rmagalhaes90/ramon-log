@@ -1,5 +1,15 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — auditoria completa legado-vs-v4 e correção de unidades alpha.39
+
+A pedido do usuário, foi feita uma auditoria sistemática comparando o app legado (`main`, monólito de ~650KB/11.068 linhas) com o v4 módulo a módulo (agente dedicado, ~388 funções top-level mapeadas no legado), não mais reativa a queixas pontuais. Resultado completo arquivado na conversa; achados de maior confiança viraram a lista de prioridade combinada com o usuário: unidades (corrigido nesta rodada), gerador automático de treino, gerenciador de exercícios pelo admin, superset grouping, badge de PR/histórico por exercício, metas de nutrição editáveis, shuffle/repetir última sessão, calculadora de % de gordura — ainda pendentes.
+
+**Bug real confirmado e corrigido**: `unitSystem` (métrico/imperial) era perguntado no onboarding e salvo via `cacheSet`, mas nenhuma tela do v4 jamais lia esse valor — todo peso/medida ficava fixo em kg/cm mesmo para quem escolhia imperial. Confirmado contra o legado que a conversão (`fmtWeight`/`fmtLength`/`kgToLb`/`cmToIn` em `main`) só se aplica a peso corporal e medidas — o peso levantado nos treinos e a calculadora de anilhas (`computePlates`) sempre usam kg em ambas as versões, então o escopo da correção ficou deliberadamente restrito à tela de Progresso.
+
+Implementado `app-v4/src/core/units.ts` (conversão pura, testado) e conectado à tela de Progresso (peso corporal, 5 medidas, gráficos, limites de campo) e a um novo controle em Configurações para trocar a unidade a qualquer momento (o onboarding só perguntava uma vez, sem chance de mudar depois).
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **30 arquivos/77 testes Vitest** (72 web + 5 domínio, incluindo o novo `units.test.ts`) e `build`, todos com código 0.
+
 ## Rodada 2026-08-05 — correção do flake de CI no teste de compartilhamento
 
 Após o push de alpha.38, o CI passou a falhar de forma intermitente em `test:e2e:share` (webkit-mobile), na mesma corrida "client is offline" do Firestore corrigida em `52ab852`. Duas rodadas de aumento de margem fixa (1s/2s/4s → 1s/2s/4s/8s) não resolveram — inclusive com o mesmo commit passando no CI do Pull Request e falhando no CI do push, confirmando que era carga variável do runner, não determinístico.

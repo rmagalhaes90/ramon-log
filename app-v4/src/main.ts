@@ -77,6 +77,15 @@ import {
   type MeasurementKey,
 } from './features/progress/analytics';
 import { showLocalNotification } from './features/notifications';
+import {
+  displayLength,
+  displayWeight,
+  lengthUnitLabel,
+  parseLengthInput,
+  parseWeightInput,
+  weightUnitLabel,
+  type UnitSystem,
+} from './core/units';
 import { cacheGet, cacheSet, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
@@ -110,6 +119,8 @@ let restClock: number | undefined;
 let notificationUid = '';
 let restNotificationsEnabled = false;
 let activeCameraStop: (() => void) | undefined;
+let unitsUid = '';
+let unitSystem: UnitSystem = 'metric';
 let workoutPausedAt: number | null = null;
 let workoutPausedMs = 0;
 
@@ -349,7 +360,12 @@ function renderOnboarding(user: User): void {
     <label class="choice"><input type="radio" name="units" value="imperial"> ${copy('imperial')}</label><button class="primary" type="submit">${copy('continue')}</button></form></section>`);
   document.querySelector('#onboarding-form')?.addEventListener('submit', (event) => {
     event.preventDefault();
-    const units = new FormData(event.currentTarget as HTMLFormElement).get('units');
+    const units: UnitSystem =
+      new FormData(event.currentTarget as HTMLFormElement).get('units') === 'imperial'
+        ? 'imperial'
+        : 'metric';
+    unitSystem = units;
+    unitsUid = user.uid;
     void Promise.all([
       cacheSet(`units:${user.uid}`, units),
       cacheSet(`onboarding:${user.uid}`, true),
@@ -413,6 +429,11 @@ async function renderReady(user: User): Promise<void> {
     const settings = await loadUserData(user, 'notificationSettings');
     restNotificationsEnabled = settings?.restEnabled ?? false;
     notificationUid = user.uid;
+  }
+  if (unitsUid !== user.uid) {
+    const savedUnits = await cacheGet<UnitSystem>(`units:${user.uid}`);
+    unitSystem = savedUnits === 'imperial' ? 'imperial' : 'metric';
+    unitsUid = user.uid;
   }
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'routine') await renderRoutine(user);
@@ -536,6 +557,11 @@ async function renderSettings(user: User): Promise<void> {
     onRestNotificationsChange: (enabled) => {
       restNotificationsEnabled = enabled;
     },
+    unitSystem,
+    onUnitSystemChange: (units) => {
+      unitSystem = units;
+      void cacheSet(`units:${user.uid}`, units);
+    },
   });
 }
 
@@ -564,18 +590,29 @@ async function renderProgress(user: User): Promise<void> {
     sessions.reduce((sum, item) => sum + item.volume, 0),
     streak,
   );
+  const weightUnit = weightUnitLabel(unitSystem);
+  const lengthUnit = lengthUnitLabel(unitSystem);
+  const weightBound = (kg: number) => displayWeight(kg, unitSystem, 0);
+  const lengthBound = (cm: number) => displayLength(cm, unitSystem, 0);
+  const measurementField = (key: MeasurementKey, min: number, max: number) =>
+    `<label>${copy(key)} (${lengthUnit})<input name="${key}" type="number" min="${lengthBound(min)}" max="${lengthBound(max)}" step="0.1"></label>`;
   shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">02 · RECOVER</p><h1>${copy('progress')}</h1>
     <div class="metric-grid"><article><span>${copy('weight')}</span><strong id="latest-weight">—</strong><small id="weight-delta"></small></article><article><span>${copy('readiness')}</span><strong id="readiness-score">—</strong><small id="readiness-class"></small></article><article><span>${copy('history')}</span><strong>${sessions.length}</strong></article></div>
-    <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')}<input id="weight-input" type="number" min="1" max="1000" step="0.1" required></label><button class="primary">${copy('add')}</button></form><section><h2>${copy('measurementTrends')}</h2><div id="measurement-charts" class="measurement-charts"></div></section>
-    <form id="measurements-form" class="measurements-form"><label>${copy('waist')}<input name="waist" type="number" min="20" max="300" step="0.1"></label><label>${copy('chest')}<input name="chest" type="number" min="20" max="300" step="0.1"></label><label>${copy('arm')}<input name="arm" type="number" min="10" max="150" step="0.1"></label><label>${copy('hip')}<input name="hip" type="number" min="20" max="300" step="0.1"></label><label>${copy('thigh')}<input name="thigh" type="number" min="10" max="200" step="0.1"></label><button class="primary">${copy('saveMeasurements')}</button></form>
+    <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')} (${weightUnit})<input id="weight-input" type="number" min="${weightBound(1)}" max="${weightBound(1000)}" step="0.1" required></label><button class="primary">${copy('add')}</button></form><section><h2>${copy('measurementTrends')}</h2><div id="measurement-charts" class="measurement-charts"></div></section>
+    <form id="measurements-form" class="measurements-form">${measurementField('waist', 20, 300)}${measurementField('chest', 20, 300)}${measurementField('arm', 10, 150)}${measurementField('hip', 20, 300)}${measurementField('thigh', 10, 200)}<button class="primary">${copy('saveMeasurements')}</button></form>
     <form id="readiness-form" class="readiness-form">${(['sleep', 'energy', 'soreness', 'stress'] as const).map((key) => `<label>${copy(key)}<input name="${key}" type="range" min="1" max="5" value="3"></label>`).join('')}<label>${copy('readinessOverride')}<select name="override"><option value="">${copy('automatic')}</option>${(['high', 'normal', 'reduce', 'light', 'rest'] as const).map((value) => `<option value="${value}">${copy(`readiness_${value}` as MessageKey)}</option>`).join('')}</select></label><label>${copy('overrideReason')}<input name="overrideReason" maxlength="300"></label><button class="primary">${copy('save')}</button></form>
     <section class="training-analytics"><h2>${copy('trainingAnalytics')}</h2><article><strong id="readiness-correlation">—</strong><span>${copy('readinessCorrelation')}</span><small id="correlation-samples"></small></article><div id="muscle-volume" class="muscle-volume"></div></section><section class="weekly-report"><h2>${copy('weeklyReport')}</h2><div><article><strong>${report.sessions}</strong><span>${copy('sessions')}</span></article><article><strong>${Math.round(report.volume)}</strong><span>${copy('volume')}</span></article><article><strong>${Math.round(report.minutes)}</strong><span>${copy('minutes')}</span></article><article><strong>${streak}</strong><span>${copy('streak')}</span></article></div><button id="share-report">${copy('shareReport')}</button></section><section><h2>${copy('achievements')}</h2><div id="achievement-list" class="achievement-list"></div></section><button id="open-photos" class="secondary">${copy('progressPhotos')}</button><div id="session-history" class="history-list"></div></section>`);
   const weightTarget = document.querySelector('#latest-weight');
-  if (weightTarget) weightTarget.textContent = latest ? `${latest.kg.toFixed(1)} kg` : '—';
+  if (weightTarget)
+    weightTarget.textContent = latest
+      ? `${displayWeight(latest.kg, unitSystem)} ${weightUnit}`
+      : '—';
   const deltaTarget = document.querySelector('#weight-delta');
-  if (deltaTarget)
+  if (deltaTarget) {
+    const displayDelta = delta === null ? null : displayWeight(delta, unitSystem);
     deltaTarget.textContent =
-      delta === null ? '' : `${delta >= 0 ? '+' : ''}${delta.toFixed(1)} kg`;
+      displayDelta === null ? '' : `${displayDelta >= 0 ? '+' : ''}${displayDelta} ${weightUnit}`;
+  }
   const scoreTarget = document.querySelector('#readiness-score');
   if (scoreTarget) scoreTarget.textContent = todayReadiness ? String(todayReadiness.score) : '—';
   const classTarget = document.querySelector('#readiness-class');
@@ -616,26 +653,31 @@ async function renderProgress(user: User): Promise<void> {
   });
   drawProgressChart(
     document.querySelector('#weight-chart'),
-    weights.map((item) => ({ d: item.d, value: item.kg })),
+    weights.map((item) => ({ d: item.d, value: displayWeight(item.kg, unitSystem) })),
   );
   const measurementCharts = document.querySelector('#measurement-charts');
   (['waist', 'chest', 'arm', 'hip', 'thigh'] as MeasurementKey[]).forEach((key) => {
     const series = measurementSeries(measurements, key);
+    const displaySeries = series.map((point) => ({
+      ...point,
+      value: displayLength(point.value, unitSystem),
+    }));
     const card = document.createElement('article');
     const heading = document.createElement('h3');
-    heading.textContent = copy(key);
+    heading.textContent = `${copy(key)} (${lengthUnit})`;
     const delta = document.createElement('small');
     const change = seriesDelta(series);
+    const displayChange = change === null ? null : displayLength(change, unitSystem);
     delta.textContent =
-      change === null
+      displayChange === null
         ? copy('insufficientTrend')
-        : `${change >= 0 ? '+' : ''}${change.toFixed(1)} cm`;
+        : `${displayChange >= 0 ? '+' : ''}${displayChange} ${lengthUnit}`;
     const chart = document.createElement('div');
     chart.className = 'progress-chart compact';
     chart.ariaLabel = `${copy(key)} · ${copy('measurementTrends')}`;
     card.append(heading, delta, chart);
     measurementCharts?.append(card);
-    drawProgressChart(chart, series);
+    drawProgressChart(chart, displaySeries);
   });
   const correlation = readinessPerformanceCorrelation(readiness, sessions);
   const correlationTarget = document.querySelector('#readiness-correlation');
@@ -672,8 +714,10 @@ async function renderProgress(user: User): Promise<void> {
   document.querySelector('#weight-form')?.addEventListener('submit', (event) => {
     event.preventDefault();
     const input = document.querySelector<HTMLInputElement>('#weight-input');
-    const kg = Number(input?.value);
-    if (!Number.isFinite(kg) || kg <= 0 || kg > 1000) return;
+    const typed = Number(input?.value);
+    if (!Number.isFinite(typed) || typed <= 0) return;
+    const kg = parseWeightInput(typed, unitSystem);
+    if (kg <= 0 || kg > 1000) return;
     const next = [...weights.filter((item) => item.d !== dateKey()), { d: dateKey(), kg }].sort(
       (a, b) => a.d.localeCompare(b.d),
     );
@@ -686,8 +730,10 @@ async function renderProgress(user: User): Promise<void> {
     const data = new FormData(event.currentTarget as HTMLFormElement);
     const entry = Object.fromEntries(
       ['waist', 'chest', 'arm', 'hip', 'thigh'].flatMap((key) => {
-        const value = Number(data.get(key));
-        return Number.isFinite(value) && value > 0 ? [[key, value]] : [];
+        const typed = Number(data.get(key));
+        if (!Number.isFinite(typed) || typed <= 0) return [];
+        const cm = parseLengthInput(typed, unitSystem);
+        return cm > 0 ? [[key, cm]] : [];
       }),
     );
     if (!Object.keys(entry).length) return;
