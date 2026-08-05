@@ -2,7 +2,13 @@ import './styles.css';
 import type { User } from 'firebase/auth';
 import { installGlobalErrorHandlers, onError, reportError } from './core/errors';
 import { createI18n, type Locale, type MessageKey } from './core/i18n';
-import type { FavoriteMeal, NutritionDay, ProgressionDecision, Workouts } from './domain/schemas';
+import type {
+  Exercise,
+  FavoriteMeal,
+  NutritionDay,
+  ProgressionDecision,
+  Workouts,
+} from './domain/schemas';
 import {
   authErrorKey,
   completeEmailAction,
@@ -103,6 +109,18 @@ let restClock: number | undefined;
 let notificationUid = '';
 let restNotificationsEnabled = false;
 let activeCameraStop: (() => void) | undefined;
+let workoutPausedAt: number | null = null;
+let workoutPausedMs = 0;
+
+function resetWorkoutClock(): void {
+  workoutPausedAt = null;
+  workoutPausedMs = 0;
+}
+
+function sessionElapsedMs(now = Date.now()): number {
+  const pausedNow = workoutPausedAt !== null ? now - workoutPausedAt : 0;
+  return now - new Date(workoutStartedAt).getTime() - workoutPausedMs - pausedNow;
+}
 
 function clearWorkoutTimers(): void {
   if (sessionClock) window.clearInterval(sessionClock);
@@ -421,6 +439,7 @@ function renderDashboard(user: User): void {
   const openWorkout = () => {
     currentView = 'workout';
     workoutStartedAt = new Date().toISOString();
+    resetWorkoutClock();
     void renderWorkout(user);
   };
   document.querySelector('#start-workout')?.addEventListener('click', openWorkout);
@@ -1180,7 +1199,7 @@ async function renderWorkout(user: User): Promise<void> {
   workoutEntries = draftMatches ? draft.entries : freshEntries;
   if (draftMatches) workoutStartedAt = draft.startedAt;
   shell(`<section class="workout-view"><button id="workout-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
-    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong></div><div class="routine-actions"><button id="rename-routine">${copy('editRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button></div></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
+    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong><button id="session-pause" type="button"></button></div><div class="routine-actions"><button id="rename-routine">${copy('editRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button></div></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
@@ -1190,11 +1209,9 @@ async function renderWorkout(user: User): Promise<void> {
   }
   renderDayButtons(user, workouts);
   renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions ?? []);
+  const pauseButton = document.querySelector<HTMLButtonElement>('#session-pause');
   const updateClock = () => {
-    const elapsed = Math.max(
-      0,
-      Math.floor((Date.now() - new Date(workoutStartedAt).getTime()) / 1000),
-    );
+    const elapsed = Math.max(0, Math.floor(sessionElapsedMs() / 1000));
     const target = document.querySelector('#session-clock');
     if (target)
       target.textContent = [
@@ -1204,9 +1221,19 @@ async function renderWorkout(user: User): Promise<void> {
       ]
         .map((value) => String(value).padStart(2, '0'))
         .join(':');
+    if (pauseButton) pauseButton.textContent = copy(workoutPausedAt !== null ? 'resume' : 'pause');
   };
   updateClock();
   sessionClock = window.setInterval(updateClock, 1000);
+  pauseButton?.addEventListener('click', () => {
+    if (workoutPausedAt !== null) {
+      workoutPausedMs += Date.now() - workoutPausedAt;
+      workoutPausedAt = null;
+    } else {
+      workoutPausedAt = Date.now();
+    }
+    updateClock();
+  });
   document.querySelector('#workout-back')?.addEventListener('click', () => {
     clearWorkoutTimers();
     currentView = 'dashboard';
@@ -1267,6 +1294,7 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
         .then(() => {
           selectedDay = (Object.keys(generated)[0] as DayKey | undefined) ?? 'segunda';
           workoutStartedAt = new Date().toISOString();
+          resetWorkoutClock();
           return renderWorkout(user);
         })
         .catch((error: unknown) => reportError(error, 'workout/template'));
@@ -1433,9 +1461,55 @@ function renderExerciseEntries(
     actions.append(up, down, remove);
     top.append(heading, actions);
     card.append(top);
-    const meta = document.createElement('p');
+    const meta = document.createElement('div');
     meta.className = 'exercise-meta';
-    meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`;
+    const updateTarget = (patch: Partial<Pick<Exercise, 'sets' | 'reps' | 'rest'>>) => {
+      const current = workouts[selectedDay];
+      if (!current) return;
+      const exercises = current.exercises.map((exercise, index) =>
+        index === exerciseIndex ? { ...exercise, ...patch } : exercise,
+      );
+      void saveUserData(user, 'workouts', { ...workouts, [selectedDay]: { ...current, exercises } })
+        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() => renderWorkout(user))
+        .catch((error: unknown) => reportError(error, 'workout/edit-target'));
+    };
+    const setsInput = document.createElement('input');
+    setsInput.type = 'number';
+    setsInput.min = '1';
+    setsInput.max = '20';
+    setsInput.step = '1';
+    setsInput.value = String(entry.exercise.sets);
+    setsInput.ariaLabel = copy('sets');
+    setsInput.addEventListener('change', () =>
+      updateTarget({ sets: Math.min(20, Math.max(1, Math.round(Number(setsInput.value)) || 1)) }),
+    );
+    const repsInput = document.createElement('input');
+    repsInput.type = 'text';
+    repsInput.maxLength = 20;
+    repsInput.value = entry.exercise.reps;
+    repsInput.ariaLabel = copy('reps');
+    repsInput.addEventListener('change', () =>
+      updateTarget({ reps: repsInput.value.trim().slice(0, 20) || '10' }),
+    );
+    const restInput = document.createElement('input');
+    restInput.type = 'number';
+    restInput.min = '0';
+    restInput.max = '1800';
+    restInput.step = '5';
+    restInput.value = String(entry.exercise.rest);
+    restInput.ariaLabel = copy('rest');
+    restInput.addEventListener('change', () =>
+      updateTarget({ rest: Math.min(1800, Math.max(0, Math.round(Number(restInput.value)) || 0)) }),
+    );
+    meta.append(
+      setsInput,
+      document.createTextNode(' × '),
+      repsInput,
+      document.createTextNode(` · ${copy('rest')} `),
+      restInput,
+      document.createTextNode('s'),
+    );
     card.append(meta);
     const recommendation = progressionRecommendation(
       exerciseHistory[entry.exercise.name] ?? [],
@@ -1701,10 +1775,20 @@ function startRestTimer(seconds: number): void {
   if (!target) return;
   const end = Date.now() + Math.max(0, seconds) * 1000;
   target.hidden = false;
+  target.textContent = '';
+  const label = document.createElement('span');
+  const stop = document.createElement('button');
+  stop.type = 'button';
+  stop.textContent = copy('stopRest');
+  stop.addEventListener('click', () => {
+    if (restClock) window.clearInterval(restClock);
+    target.hidden = true;
+  });
+  target.append(label, stop);
   let notified = false;
   const tick = () => {
     const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
-    target.textContent = `${copy('rest')} ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    label.textContent = `${copy('rest')} ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
     if (left <= 0) {
       if (restClock) window.clearInterval(restClock);
       target.hidden = true;
@@ -1740,10 +1824,7 @@ async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
     title: workouts[selectedDay]?.title ?? selectedDay,
     startedAt: workoutStartedAt,
     endedAt: endedAt.toISOString(),
-    durationSec: Math.max(
-      0,
-      Math.round((endedAt.getTime() - new Date(workoutStartedAt).getTime()) / 1000),
-    ),
+    durationSec: Math.max(0, Math.round(sessionElapsedMs(endedAt.getTime()) / 1000)),
     volume: workoutVolume(workoutEntries),
     exerciseCount: count,
   };
@@ -1787,6 +1868,7 @@ async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   if (status) status.textContent = navigator.onLine ? copy('workoutSaved') : copy('syncPending');
   clearWorkoutTimers();
   workoutStartedAt = endedAt.toISOString();
+  resetWorkoutClock();
 }
 
 function render(): void {

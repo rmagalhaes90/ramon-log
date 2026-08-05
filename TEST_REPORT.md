@@ -1,5 +1,16 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — paridade de vídeos e edição de treino alpha.37
+
+Ao investigar queixas reais de uso ("não vejo como fazer os exercícios", "não consigo trocar séries/reps/descanso"), a branch `main` (o app "bulletproof" legado, servido como `index.html` monolítico de ~650 KB, referenciado pelo link "Open stable version"/baseline) foi inspecionada diretamente. Confirmou-se que:
+
+- O legado tem um `GEN_VIDEO_MAP` com **170 vídeos reais do YouTube** por nome de exercício; o catálogo v4 (`app-v4/src/data/exercises.json`) tem o mesmo schema/campo `videoUrl` já validado (`videoUrlSchema`, HTTPS YouTube apenas) mas **nenhum exercício tinha o campo preenchido** — uma lacuna de migração de dados, não de código. Os 170 nomes bateram 1:1 com o catálogo v4 (mesma base de dados original); todos os vídeos foram portados.
+- O legado tem um modal "✎ editar" por exercício (`openExerciseConfig`) que permite alterar séries/reps/descanso/notas depois de adicionado à rotina; o v4 só tinha reordenar (↑↓) e remover — uma regressão real da reescrita, não um recurso nunca planejado. Implementado como inputs diretamente editáveis na própria linha do exercício (consistente com o padrão já usado nos campos de série), sem modal.
+- Pausar o cronômetro do treino e cancelar o descanso em andamento **não existem em nenhuma das duas versões** — são recursos novos, não regressões. Implementados: pausar exclui o tempo pausado do `durationSec` final registrado; o timer de descanso ganhou um botão de cancelar.
+- Tipos de equipamento (kettlebell, corda, cardio) e o papel "Coach" **também não existem no legado** — confirmado como pedidos de recurso novo/roadmap comercial (`REQUIREMENTS_MATRIX.md`), não itens perdidos na migração. Não implementados nesta rodada; ficam para decisão de escopo.
+
+Bateria completa após as mudanças: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **73 testes Vitest** e `build` — todos com código 0. Inspeção manual do shell (sem login, que exige senha) confirmou carregamento limpo. Versão sincronizada para `4.0.0-alpha.37`.
+
 ## Rodada 2026-08-05 — tour de onboarding, correção de reconexão do Firestore e E2E de compartilhamento alpha.35/36
 
 **alpha.35** — `PARITY_MATRIX.md` apontava falta de um tour completo do produto no onboarding. Foi adicionado um tour guiado de quatro passos (Train/Recover/Fuel/Sync) exibido uma vez por conta logo após a escolha de unidades, com avançar/voltar/pular, usando o mesmo mecanismo `cacheGet`/`cacheSet` por UID já usado pelo onboarding.

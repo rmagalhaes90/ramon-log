@@ -10,7 +10,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=rM6SDUdl9fs"
   },
   {
     "name": "Leg Press",
@@ -21,7 +22,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=YmKd0StxtXQ"
   },
   {
     "name": "Cadeira Extensora",
@@ -31,7 +33,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=Svq2T3L9oKo"
   },
   {
     "name": "Stiff",
@@ -43,7 +46,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=BHfY5-jGNDA"
   },
   {
     "name": "Mesa Flexora",
@@ -53,7 +57,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=8Nat6GRiEoc"
   },
   {
     "name": "Afundo com Halteres",
@@ -64,7 +69,8 @@
     "sets": "3",
     "reps": "10",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=mKRq_p3hQr4"
   },
   {
     "name": "Panturrilha em Pé",
@@ -74,7 +80,8 @@
     "sets": "4",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Panturrilha Sentada",
@@ -84,7 +91,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=Bx6elAOgxMI"
   },
   {
     "name": "Cable Crunch",
@@ -94,7 +102,8 @@
     "sets": "3",
     "reps": "15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=I64bjVbs7XI"
   },
   {
     "name": "Elevação de Pernas",
@@ -104,7 +113,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=oq4Xb_xI618"
   },
   {
     "name": "Prancha",
@@ -115,7 +125,8 @@
     "sets": "3",
     "reps": "45-60s",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=Yu0wjtD5FkU"
   },
   {
     "name": "Desenvolvimento com Halteres",
@@ -126,7 +137,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=dgnvHzvNOIk"
   },
   {
     "name": "Elevação Lateral",
@@ -136,7 +148,8 @@
     "sets": "4",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=W5hRdgwEoEA"
   },
   {
     "name": "Elevação Lateral no Cabo",
@@ -146,7 +159,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=W5hRdgwEoEA"
   },
   {
     "name": "Peck Deck Invertido",
@@ -158,7 +172,8 @@
     "sets": "4",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=vVDeOaw1T5g"
   },
   {
     "name": "Desenvolvimento Arnold",
@@ -169,7 +184,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=dgnvHzvNOIk"
   },
   {
     "name": "Encolhimento com Halteres",
@@ -179,7 +195,8 @@
     "sets": "4",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=cZLgyI2OKcs"
   },
   {
     "name": "Russian Twist",
@@ -190,7 +207,8 @@
     "sets": "3",
     "reps": "20",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=4AFJrgd7HkU"
   },
   {
     "name": "Rosca Direta",
@@ -201,7 +219,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca Inclinada",
@@ -211,7 +230,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=tiWfdwgbrBQ"
   },
   {
     "name": "Rosca Martelo",
@@ -222,7 +242,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=5vPGH1uTtbs"
   },
   {
     "name": "Tríceps Corda",
@@ -232,7 +253,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=YQ6MRBeyIAE"
   },
   {
     "name": "Tríceps Francês",
@@ -242,7 +264,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=gB-QMYMlHLs"
   },
   {
     "name": "Mergulho",
@@ -254,7 +277,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=BbE-ikrlwBw"
   },
   {
     "name": "Supino com Barra",
@@ -266,7 +290,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=vIGvt-vgrvY"
   },
   {
     "name": "Supino Inclinado",
@@ -277,7 +302,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=rCPwrZkrVVQ"
   },
   {
     "name": "Crucifixo Cabos",
@@ -287,7 +313,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=mNWyWEJNCDM"
   },
   {
     "name": "Rosca Scotch",
@@ -297,7 +324,8 @@
     "sets": "3",
     "reps": "8-10",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=wWKrF4iSU_8"
   },
   {
     "name": "Barra Fixa",
@@ -309,7 +337,8 @@
     "sets": "4",
     "reps": "8-12",
     "rest": 90,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=hTaY3y09eLc"
   },
   {
     "name": "Remada com Halteres",
@@ -320,7 +349,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=JE3XUqMyHXo"
   },
   {
     "name": "Remada em Máquina",
@@ -331,7 +361,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=2YebbYuuBJQ"
   },
   {
     "name": "Desenvolvimento com Barra",
@@ -342,7 +373,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=dgnvHzvNOIk"
   },
   {
     "name": "Elevação Frontal",
@@ -352,7 +384,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=jhxLYSm_P-k"
   },
   {
     "name": "Face Pulls",
@@ -364,7 +397,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=On1ysBmSWrA"
   },
   {
     "name": "Pulley Frontal",
@@ -375,7 +409,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 90,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=yzlQK3s-a_Y"
   },
   {
     "name": "Supino Reto",
@@ -387,7 +422,8 @@
     "sets": "4",
     "reps": "6-8",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=vIGvt-vgrvY"
   },
   {
     "name": "Crucifixo Polia",
@@ -397,7 +433,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=mNWyWEJNCDM"
   },
   {
     "name": "Peck Deck",
@@ -407,7 +444,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=FwtqdGlRgig"
   },
   {
     "name": "Tríceps Testa",
@@ -417,7 +455,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=r0Xf7A3k5e4"
   },
   {
     "name": "Puxada Frente",
@@ -428,7 +467,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=yzlQK3s-a_Y"
   },
   {
     "name": "Puxada Aberta",
@@ -439,7 +479,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=hTaY3y09eLc"
   },
   {
     "name": "Remada Baixa",
@@ -450,7 +491,8 @@
     "sets": "4",
     "reps": "10",
     "rest": 90,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=2YebbYuuBJQ"
   },
   {
     "name": "Remada Unilateral",
@@ -461,7 +503,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=JE3XUqMyHXo"
   },
   {
     "name": "Pulldown",
@@ -472,7 +515,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=V-Z_RntYhZg"
   },
   {
     "name": "Rosca Scott",
@@ -482,7 +526,8 @@
     "sets": "3",
     "reps": "12",
     "rest": 60,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=wWKrF4iSU_8"
   },
   {
     "name": "Agachamento",
@@ -495,7 +540,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=rM6SDUdl9fs"
   },
   {
     "name": "Extensora",
@@ -505,7 +551,8 @@
     "sets": "3",
     "reps": "15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=Svq2T3L9oKo"
   },
   {
     "name": "Desenvolvimento",
@@ -516,7 +563,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=dgnvHzvNOIk"
   },
   {
     "name": "Desenvolvimento Halteres",
@@ -527,7 +575,8 @@
     "sets": "3",
     "reps": "10",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=dgnvHzvNOIk"
   },
   {
     "name": "Crucifixo Invertido Polia",
@@ -539,7 +588,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=vVDeOaw1T5g"
   },
   {
     "name": "Face Pull",
@@ -551,7 +601,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=On1ysBmSWrA"
   },
   {
     "name": "Encolhimento",
@@ -561,7 +612,8 @@
     "sets": "4",
     "reps": "12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=cZLgyI2OKcs"
   },
   {
     "name": "Remada",
@@ -572,7 +624,8 @@
     "sets": "3",
     "reps": "8-10",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=mxvS-iwm53o"
   },
   {
     "name": "Supino Declinado",
@@ -583,7 +636,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=ifWEwZDWMAw"
   },
   {
     "name": "Supino com Halteres",
@@ -595,7 +649,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=pvgTksLWjaA"
   },
   {
     "name": "Supino Inclinado com Halteres",
@@ -606,7 +661,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=RGeSgQmO1EU"
   },
   {
     "name": "Supino Declinado com Halteres",
@@ -617,7 +673,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=5oUAqXhViSg"
   },
   {
     "name": "Crucifixo Reto com Halteres",
@@ -627,7 +684,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=pma0D65cKTk"
   },
   {
     "name": "Crucifixo Inclinado com Halteres",
@@ -638,7 +696,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=pma0D65cKTk"
   },
   {
     "name": "Crucifixo Declinado com Halteres",
@@ -648,7 +707,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=pma0D65cKTk"
   },
   {
     "name": "Peck Deck Máquina",
@@ -658,7 +718,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=FwtqdGlRgig"
   },
   {
     "name": "Crossover na Polia",
@@ -668,7 +729,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=E3aha5zhlc0"
   },
   {
     "name": "Crossover Baixo",
@@ -679,7 +741,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=E3aha5zhlc0"
   },
   {
     "name": "Flexão de Braço",
@@ -692,7 +755,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=UkDVBs9GEWo"
   },
   {
     "name": "Flexão Diamante",
@@ -703,7 +767,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=UkDVBs9GEWo"
   },
   {
     "name": "Flexão Inclinada",
@@ -715,7 +780,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=UkDVBs9GEWo"
   },
   {
     "name": "Flexão Declinada",
@@ -727,7 +793,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=UkDVBs9GEWo"
   },
   {
     "name": "Supino Máquina",
@@ -738,7 +805,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=qmSOsrheLEg"
   },
   {
     "name": "Chest Press Máquina",
@@ -750,7 +818,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=KlhflSA6624"
   },
   {
     "name": "Pullover com Halter",
@@ -762,7 +831,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=UicU0kXYKTI"
   },
   {
     "name": "Mergulho nas Paralelas (Peito)",
@@ -774,7 +844,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=BbE-ikrlwBw"
   },
   {
     "name": "Supino Guilhotina",
@@ -785,7 +856,8 @@
     "sets": "3",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=QWxGQgd4Vag"
   },
   {
     "name": "Puxada Triângulo",
@@ -797,7 +869,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=SIyWK5Uy1yM"
   },
   {
     "name": "Puxada Supinada",
@@ -808,7 +881,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=uA3IrbUAVKA"
   },
   {
     "name": "Remada Curvada com Barra",
@@ -820,7 +894,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=_vO2dAnz__c"
   },
   {
     "name": "Remada Cavalinho (T-bar)",
@@ -831,7 +906,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=hr5ma7i2ggE"
   },
   {
     "name": "Barra Fixa Supinada (Chin-up)",
@@ -842,7 +918,8 @@
     "sets": "3",
     "reps": "6-10",
     "rest": 90,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=hTaY3y09eLc"
   },
   {
     "name": "Pull-over na Polia Alta",
@@ -853,7 +930,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=UicU0kXYKTI"
   },
   {
     "name": "Remada Sentada no Cabo",
@@ -865,7 +943,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=2YebbYuuBJQ"
   },
   {
     "name": "Levantamento Terra",
@@ -878,7 +957,8 @@
     "sets": "4",
     "reps": "5-8",
     "rest": 120,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=QiqUXcz2iyA"
   },
   {
     "name": "Levantamento Terra Sumô",
@@ -891,7 +971,8 @@
     "sets": "4",
     "reps": "5-8",
     "rest": 120,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=F1aY4AIim_E"
   },
   {
     "name": "Remada com Elástico",
@@ -902,7 +983,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=_vO2dAnz__c"
   },
   {
     "name": "Australian Pull-up (Remada Invertida)",
@@ -914,7 +996,8 @@
     "sets": "3",
     "reps": "10-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=_vO2dAnz__c"
   },
   {
     "name": "Remada Serrote",
@@ -926,7 +1009,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=JE3XUqMyHXo"
   },
   {
     "name": "Puxada Neutra",
@@ -938,7 +1022,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=093htCVTlOE"
   },
   {
     "name": "Superman (Lombar)",
@@ -949,7 +1034,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=q4GZN3scJxE"
   },
   {
     "name": "Hiperextensão Lombar",
@@ -961,7 +1047,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=q4GZN3scJxE"
   },
   {
     "name": "Desenvolvimento Militar",
@@ -972,7 +1059,8 @@
     "sets": "4",
     "reps": "6-8",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=PZBZboWL_tY"
   },
   {
     "name": "Desenvolvimento Máquina",
@@ -983,7 +1071,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=PZBZboWL_tY"
   },
   {
     "name": "Elevação Frontal com Barra",
@@ -993,7 +1082,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=jhxLYSm_P-k"
   },
   {
     "name": "Elevação Frontal com Halteres",
@@ -1003,7 +1093,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=jhxLYSm_P-k"
   },
   {
     "name": "Crucifixo Invertido com Halteres",
@@ -1015,7 +1106,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=vVDeOaw1T5g"
   },
   {
     "name": "Remada Alta",
@@ -1026,7 +1118,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=PZBZboWL_tY"
   },
   {
     "name": "Remada Alta com Halteres",
@@ -1037,7 +1130,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=PZBZboWL_tY"
   },
   {
     "name": "Encolhimento com Barra",
@@ -1047,7 +1141,8 @@
     "sets": "4",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=cZLgyI2OKcs"
   },
   {
     "name": "Encolhimento na Polia",
@@ -1057,7 +1152,8 @@
     "sets": "4",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=cZLgyI2OKcs"
   },
   {
     "name": "Manguito Rotador (Rotação Externa)",
@@ -1067,7 +1163,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=On1ysBmSWrA"
   },
   {
     "name": "Elevação Lateral Máquina",
@@ -1077,7 +1174,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=W5hRdgwEoEA"
   },
   {
     "name": "Desenvolvimento na Máquina Articulado",
@@ -1088,7 +1186,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=PZBZboWL_tY"
   },
   {
     "name": "Elevação em Y",
@@ -1099,7 +1198,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 45,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=W5hRdgwEoEA"
   },
   {
     "name": "Rosca Direta com Halteres",
@@ -1110,7 +1210,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca Alternada",
@@ -1121,7 +1222,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca Scott com Halteres",
@@ -1131,7 +1233,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=wWKrF4iSU_8"
   },
   {
     "name": "Rosca Concentrada",
@@ -1141,7 +1244,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=wWKrF4iSU_8"
   },
   {
     "name": "Rosca 21",
@@ -1152,7 +1256,8 @@
     "sets": "3",
     "reps": "21",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca no Cabo",
@@ -1162,7 +1267,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca Spider",
@@ -1172,7 +1278,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=wWKrF4iSU_8"
   },
   {
     "name": "Rosca Barra W",
@@ -1183,7 +1290,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca Cross Body (Martelo Cruzado)",
@@ -1194,7 +1302,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=5vPGH1uTtbs"
   },
   {
     "name": "Rosca Punho Supinado",
@@ -1205,7 +1314,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Tríceps Coice (Kickback)",
@@ -1215,7 +1325,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 45,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=gB-QMYMlHLs"
   },
   {
     "name": "Tríceps Barra Reta na Polia",
@@ -1225,7 +1336,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=YQ6MRBeyIAE"
   },
   {
     "name": "Mergulho no Banco",
@@ -1237,7 +1349,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=BbE-ikrlwBw"
   },
   {
     "name": "Supino Pegada Fechada",
@@ -1248,7 +1361,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=YQ6MRBeyIAE"
   },
   {
     "name": "Tríceps Overhead com Halter",
@@ -1258,7 +1372,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=gB-QMYMlHLs"
   },
   {
     "name": "Tríceps Francês Unilateral",
@@ -1268,7 +1383,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=gB-QMYMlHLs"
   },
   {
     "name": "Extensão de Tríceps na Polia (V)",
@@ -1278,7 +1394,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=YQ6MRBeyIAE"
   },
   {
     "name": "Rosca de Punho",
@@ -1288,7 +1405,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Rosca de Punho Invertida",
@@ -1298,7 +1416,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Farmer's Walk",
@@ -1310,7 +1429,8 @@
     "sets": "3",
     "reps": "30-40m",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=CeUKHZFNYHs"
   },
   {
     "name": "Rosca de Punho com Halteres",
@@ -1320,7 +1440,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Et1wgGMGW8w"
   },
   {
     "name": "Abdominal Infra",
@@ -1330,7 +1451,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=oq4Xb_xI618"
   },
   {
     "name": "Abdominal Supra",
@@ -1340,7 +1462,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=I64bjVbs7XI"
   },
   {
     "name": "Abdominal Bicicleta",
@@ -1351,7 +1474,8 @@
     "sets": "3",
     "reps": "20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=4AFJrgd7HkU"
   },
   {
     "name": "Prancha Lateral",
@@ -1362,7 +1486,8 @@
     "sets": "3",
     "reps": "30-45s",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=A0RGKVDnUok"
   },
   {
     "name": "Ab Wheel (Roda Abdominal)",
@@ -1373,7 +1498,8 @@
     "sets": "3",
     "reps": "10-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=vF5u9MLbZWA"
   },
   {
     "name": "Sit-up",
@@ -1383,7 +1509,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=I64bjVbs7XI"
   },
   {
     "name": "Elevação de Joelhos na Barra",
@@ -1393,7 +1520,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=oq4Xb_xI618"
   },
   {
     "name": "Oblíquo no Cabo (Wood Chop)",
@@ -1404,7 +1532,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=4AFJrgd7HkU"
   },
   {
     "name": "Abdominal na Polia",
@@ -1414,7 +1543,8 @@
     "sets": "4",
     "reps": "15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=I64bjVbs7XI"
   },
   {
     "name": "Prancha com Elevação de Perna",
@@ -1425,7 +1555,8 @@
     "sets": "3",
     "reps": "30-45s",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=Yu0wjtD5FkU"
   },
   {
     "name": "Dead Bug",
@@ -1436,7 +1567,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=Yu0wjtD5FkU"
   },
   {
     "name": "Abdominal Canivete (V-up)",
@@ -1446,7 +1578,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=oq4Xb_xI618"
   },
   {
     "name": "Agachamento Búlgaro",
@@ -1457,7 +1590,8 @@
     "sets": "3",
     "reps": "10-12 cada",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=a3-bQbTdA_0"
   },
   {
     "name": "Agachamento Frontal",
@@ -1469,7 +1603,8 @@
     "sets": "4",
     "reps": "6-8",
     "rest": 105,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=Lk2bQ4INdlA"
   },
   {
     "name": "Hack Squat",
@@ -1480,7 +1615,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=Whp712OHPl8"
   },
   {
     "name": "Passada (Lunge)",
@@ -1491,7 +1627,8 @@
     "sets": "3",
     "reps": "10-12 cada",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=mKRq_p3hQr4"
   },
   {
     "name": "Passada com Barra",
@@ -1502,7 +1639,8 @@
     "sets": "3",
     "reps": "10-12 cada",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=mKRq_p3hQr4"
   },
   {
     "name": "Agachamento Sumô",
@@ -1514,7 +1652,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=u_TTcv8FvOk"
   },
   {
     "name": "Leg Press Unilateral",
@@ -1525,7 +1664,8 @@
     "sets": "3",
     "reps": "10-12 cada",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=YmKd0StxtXQ"
   },
   {
     "name": "Agachamento na Máquina Smith",
@@ -1536,7 +1676,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=rM6SDUdl9fs"
   },
   {
     "name": "Agachamento Sissy",
@@ -1546,7 +1687,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=Lk2bQ4INdlA"
   },
   {
     "name": "Step Up (Subida no Banco)",
@@ -1557,7 +1699,8 @@
     "sets": "3",
     "reps": "10-12 cada",
     "rest": 60,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=9LBlAgBjDKM"
   },
   {
     "name": "Agachamento Livre com Halteres (Goblet)",
@@ -1569,7 +1712,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=a3-bQbTdA_0"
   },
   {
     "name": "Flexora em Pé",
@@ -1579,7 +1723,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=8Nat6GRiEoc"
   },
   {
     "name": "Levantamento Terra Romeno",
@@ -1591,7 +1736,8 @@
     "sets": "4",
     "reps": "8-10",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=jSomWOwLiGE"
   },
   {
     "name": "Levantamento Terra Romeno com Halteres",
@@ -1603,7 +1749,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=jSomWOwLiGE"
   },
   {
     "name": "Good Morning",
@@ -1615,7 +1762,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=q4GZN3scJxE"
   },
   {
     "name": "Cadeira Flexora",
@@ -1625,7 +1773,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=8Nat6GRiEoc"
   },
   {
     "name": "Stiff com Halteres",
@@ -1637,7 +1786,8 @@
     "sets": "3",
     "reps": "10-12",
     "rest": 75,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=BHfY5-jGNDA"
   },
   {
     "name": "Flexora Deitado",
@@ -1647,7 +1797,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=8Nat6GRiEoc"
   },
   {
     "name": "Elevação Pélvica (Hip Thrust)",
@@ -1658,7 +1809,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 90,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Hip Thrust na Máquina",
@@ -1669,7 +1821,8 @@
     "sets": "4",
     "reps": "10-12",
     "rest": 90,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Glúteo no Cabo (Kickback)",
@@ -1679,7 +1832,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Abdução de Quadril na Máquina",
@@ -1689,7 +1843,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Abdução de Quadril no Cabo",
@@ -1699,7 +1854,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "cable"
+    "equipment": "cable",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Ponte de Glúteo",
@@ -1711,7 +1867,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Coice na Máquina (Glúteo)",
@@ -1721,7 +1878,8 @@
     "sets": "3",
     "reps": "12-15",
     "rest": 60,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Cadeira Abdutora",
@@ -1731,7 +1889,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=3mnHo-F-U4Q"
   },
   {
     "name": "Panturrilha no Leg Press",
@@ -1741,7 +1900,8 @@
     "sets": "4",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Panturrilha Unilateral",
@@ -1751,7 +1911,8 @@
     "sets": "3",
     "reps": "15-20 cada",
     "rest": 45,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Panturrilha no Smith",
@@ -1761,7 +1922,8 @@
     "sets": "4",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Panturrilha com Halteres",
@@ -1771,7 +1933,8 @@
     "sets": "4",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "dumbbell"
+    "equipment": "dumbbell",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Rotação de Tronco com Barra",
@@ -1782,7 +1945,8 @@
     "sets": "3",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "barbell"
+    "equipment": "barbell",
+    "videoUrl": "https://www.youtube.com/watch?v=4AFJrgd7HkU"
   },
   {
     "name": "Prancha Lateral com Rotação",
@@ -1793,7 +1957,8 @@
     "sets": "3",
     "reps": "12-15 cada",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=afuP1EXLp5c"
   },
   {
     "name": "Elevação de Perna Lateral Deitado",
@@ -1803,7 +1968,8 @@
     "sets": "3",
     "reps": "15-20 cada",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=A0RGKVDnUok"
   },
   {
     "name": "Abdominal Oblíquo no Solo",
@@ -1814,7 +1980,8 @@
     "sets": "3",
     "reps": "15-20 cada",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=4AFJrgd7HkU"
   },
   {
     "name": "Panturrilha na Barra Guiada",
@@ -1824,7 +1991,8 @@
     "sets": "4",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Panturrilha Burrinho",
@@ -1834,7 +2002,8 @@
     "sets": "4",
     "reps": "15-20",
     "rest": 45,
-    "equipment": "machine"
+    "equipment": "machine",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   },
   {
     "name": "Pulo de Corda (Panturrilha)",
@@ -1844,6 +2013,7 @@
     "sets": "3",
     "reps": "30-45s",
     "rest": 45,
-    "equipment": "bodyweight"
+    "equipment": "bodyweight",
+    "videoUrl": "https://www.youtube.com/watch?v=qWHH0We_9r0"
   }
 ]
