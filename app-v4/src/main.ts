@@ -56,6 +56,11 @@ import {
 } from './features/workouts/templates';
 import { rankExerciseAlternatives } from './features/workouts/substitutions';
 import { clearWorkoutDraft, loadWorkoutDraft, saveWorkoutDraft } from './features/workouts/draft';
+import {
+  generateWorkout,
+  type IntensityKey,
+  type MuscleGroupKey,
+} from './features/workouts/generator';
 import { trainingStreak, unlockedAchievements, weeklyReport } from './features/reports/model';
 import { renderSettingsView } from './features/settings/view';
 import {
@@ -1301,7 +1306,7 @@ async function renderRoutine(user: User): Promise<void> {
   const workoutsValue = await loadUserData(user, 'workouts');
   const workouts = workoutsValue ?? {};
   shell(`<section class="workout-view"><button id="routine-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
-    <header class="workout-heading"><p class="eyebrow">${copy('routineExercises')}</p><h1 id="routine-title"></h1><div class="routine-actions"><button id="rename-routine">${copy('renameRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button></div></header><div id="routine-exercise-list"></div></section>`);
+    <header class="workout-heading"><p class="eyebrow">${copy('routineExercises')}</p><h1 id="routine-title"></h1><div class="routine-actions"><button id="rename-routine">${copy('renameRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button><button id="routine-autogen">${copy('autoGenerate')}</button></div></header><div id="routine-exercise-list"></div></section>`);
   const title = document.querySelector('#routine-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
   renderDayButtons(user, workouts, () => void renderRoutine(user));
@@ -1316,6 +1321,9 @@ async function renderRoutine(user: User): Promise<void> {
   document
     .querySelector('#routine-template')
     ?.addEventListener('click', () => renderTemplatePicker(user, workouts));
+  document
+    .querySelector('#routine-autogen')
+    ?.addEventListener('click', () => renderWorkoutGenerator(user, workouts));
   document.querySelector('#rename-routine')?.addEventListener('click', () => {
     const newTitle = prompt(copy('routineName'), workouts[selectedDay]?.title ?? '');
     if (newTitle?.trim()) {
@@ -1461,6 +1469,185 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
     card.append(title, description, apply);
     list?.append(card);
   });
+}
+
+function renderWorkoutGenerator(user: User, workouts: Workouts): void {
+  const groupKeys: MuscleGroupKey[] = [
+    'chest',
+    'back',
+    'legs',
+    'shoulders',
+    'arms',
+    'abs',
+    'push',
+    'pull',
+    'fullbody',
+  ];
+  const groupLabels: Record<MuscleGroupKey, MessageKey> = {
+    chest: 'genChest',
+    back: 'genBack',
+    legs: 'genLegs',
+    shoulders: 'genShoulders',
+    arms: 'genArms',
+    abs: 'genAbsGroup',
+    push: 'genPush',
+    pull: 'genPull',
+    fullbody: 'genFullBody',
+  };
+  const equipmentKeys: Exercise['equipment'][] = [
+    'barbell',
+    'dumbbell',
+    'machine',
+    'cable',
+    'bodyweight',
+  ];
+  const equipmentLabels: Record<string, MessageKey> = {
+    barbell: 'equipBarbell',
+    dumbbell: 'equipDumbbell',
+    machine: 'equipMachine',
+    cable: 'equipCable',
+    bodyweight: 'equipBodyweight',
+  };
+  const intensityKeys: IntensityKey[] = ['light', 'medium', 'heavy'];
+  const intensityLabels: Record<IntensityKey, { title: MessageKey; desc: MessageKey }> = {
+    light: { title: 'genLight', desc: 'genLightDesc' },
+    medium: { title: 'genMedium', desc: 'genMediumDesc' },
+    heavy: { title: 'genHeavy', desc: 'genHeavyDesc' },
+  };
+
+  const selectedGroups = new Set<MuscleGroupKey>();
+  const selectedEquipment = new Set<Exercise['equipment']>();
+  let selectedIntensity: IntensityKey | null = null;
+  let preview: ReturnType<typeof generateWorkout> | null = null;
+
+  shell(
+    `<section class="feature-view"><button id="gen-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">KYRO BUILDER</p><h1>${copy('autoGenerate')}</h1><div id="gen-body"></div></section>`,
+  );
+  document.querySelector('#gen-back')?.addEventListener('click', () => void renderRoutine(user));
+
+  const renderBody = () => {
+    const body = document.querySelector('#gen-body');
+    if (!body) return;
+    body.replaceChildren();
+
+    const groupsSection = document.createElement('section');
+    const groupsHeading = document.createElement('h2');
+    groupsHeading.textContent = copy('genGroups');
+    const groupsGrid = document.createElement('div');
+    groupsGrid.className = 'chip-grid';
+    groupKeys.forEach((key) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.textContent = copy(groupLabels[key]);
+      chip.ariaPressed = String(selectedGroups.has(key));
+      chip.addEventListener('click', () => {
+        if (selectedGroups.has(key)) selectedGroups.delete(key);
+        else selectedGroups.add(key);
+        preview = null;
+        renderBody();
+      });
+      groupsGrid.append(chip);
+    });
+    groupsSection.append(groupsHeading, groupsGrid);
+    body.append(groupsSection);
+
+    const equipmentSection = document.createElement('section');
+    const equipmentHeading = document.createElement('h2');
+    equipmentHeading.textContent = copy('genEquipment');
+    const equipmentGrid = document.createElement('div');
+    equipmentGrid.className = 'chip-grid';
+    equipmentKeys.forEach((key) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.textContent = copy(equipmentLabels[key] ?? 'equipBarbell');
+      chip.ariaPressed = String(selectedEquipment.has(key));
+      chip.addEventListener('click', () => {
+        if (selectedEquipment.has(key)) selectedEquipment.delete(key);
+        else selectedEquipment.add(key);
+        preview = null;
+        renderBody();
+      });
+      equipmentGrid.append(chip);
+    });
+    equipmentSection.append(equipmentHeading, equipmentGrid);
+    body.append(equipmentSection);
+
+    const intensitySection = document.createElement('section');
+    const intensityHeading = document.createElement('h2');
+    intensityHeading.textContent = copy('genIntensity');
+    const intensityGrid = document.createElement('div');
+    intensityGrid.className = 'intensity-grid';
+    intensityKeys.forEach((key) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      const title = document.createElement('strong');
+      title.textContent = copy(intensityLabels[key].title);
+      const desc = document.createElement('small');
+      desc.textContent = copy(intensityLabels[key].desc);
+      button.append(title, desc);
+      button.ariaPressed = String(selectedIntensity === key);
+      button.addEventListener('click', () => {
+        selectedIntensity = key;
+        preview = null;
+        renderBody();
+      });
+      intensityGrid.append(button);
+    });
+    intensitySection.append(intensityHeading, intensityGrid);
+    body.append(intensitySection);
+
+    if (!preview && selectedGroups.size && selectedIntensity) {
+      preview = generateWorkout([...selectedGroups], selectedIntensity, [...selectedEquipment]);
+    }
+
+    if (preview) {
+      const previewSection = document.createElement('section');
+      const previewHeading = document.createElement('h2');
+      previewHeading.textContent = copy('genPreview');
+      previewSection.append(previewHeading);
+      [...preview.exercises, ...preview.abs].forEach((exercise) => {
+        const row = document.createElement('p');
+        row.textContent = `${exercise.name} — ${exercise.sets} × ${exercise.reps}`;
+        previewSection.append(row);
+      });
+      const actions = document.createElement('div');
+      const reroll = document.createElement('button');
+      reroll.type = 'button';
+      reroll.textContent = copy('genReroll');
+      reroll.addEventListener('click', () => {
+        preview = generateWorkout([...selectedGroups], selectedIntensity as IntensityKey, [
+          ...selectedEquipment,
+        ]);
+        renderBody();
+      });
+      const apply = document.createElement('button');
+      apply.type = 'button';
+      apply.className = 'primary';
+      apply.textContent = copy('genApply');
+      apply.addEventListener('click', () => {
+        if (!confirm(copy('genConfirm')) || !preview) return;
+        const groupLabelText = [...selectedGroups].map((key) => copy(groupLabels[key])).join(' + ');
+        const generated = {
+          ...preview,
+          title: groupLabelText.slice(0, 80),
+          titleEn: groupLabelText.slice(0, 80),
+        };
+        void saveUserData(user, 'workouts', { ...workouts, [selectedDay]: generated })
+          .then(() => clearWorkoutDraft(user, selectedDay))
+          .then(() => renderRoutine(user))
+          .catch((error: unknown) => reportError(error, 'workout/generate'));
+      });
+      actions.append(reroll, apply);
+      previewSection.append(actions);
+      body.append(previewSection);
+    } else if (selectedGroups.size || selectedIntensity) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = copy('genEmpty');
+      body.append(hint);
+    }
+  };
+  renderBody();
 }
 
 function renderExerciseCatalog(user: User, workouts: Workouts): void {

@@ -1,5 +1,15 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — gerador automático de treino alpha.40
+
+Segundo item da lista de prioridade combinada com o usuário ("Seguir a ordem de impacto que você listou"), depois da correção de unidades. O baseline (`main`) tem um gerador que monta uma rotina do zero a partir de grupo muscular + intensidade, distribuindo exercícios entre os músculos primários pra evitar repetição — recurso que o v4 não tinha (só templates fixos de 3 dias/upper-lower/PPL).
+
+Implementado em duas camadas: `app-v4/src/features/workouts/generator.ts` (lógica pura, testável sem DOM) com `MUSCLE_GROUPS` (9 grupos, incluindo combinações como push/pull/corpo inteiro), `INTENSITY_LEVELS` (leve/médio/forte com séries/reps/descanso fixos por nível) e `pickDiverseExercises` — que distribui a escolha entre baldes por músculo primário embaralhados, igual ao algoritmo do legado, evitando que o gerador sempre devolva os mesmos exercícios "óbvios". A tela (`renderWorkoutGenerator` em `main.ts`) fica atrás de um botão na Rotina, com chips de grupo/equipamento e cartões de intensidade, prévia dos exercícios gerados, "sortear de novo" (reroll sem reabrir a tela) e "aplicar" (com `confirm()` porque sobrescreve a rotina do dia).
+
+Bug incidental encontrado e corrigido durante a pesquisa: `templates.ts` (o gerador de templates fixos, não o novo) usava a chave de músculo `'back'` nos grupos pull/upper/full, mas nenhum exercício no catálogo tem essa chave (só `upperback`/`lats` separados, confirmado varrendo `exercises.json`) — ou seja, esse termo nunca contribuiu pontuação nenhuma na seleção desde sempre. Corrigido para `'upperback'`.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **31 arquivos/78 testes Vitest** (73 web + 5 domínio, incluindo os 6 novos em `generator.test.ts`) e `build`, todos com código 0. Inspeção manual do shell sem login confirmou carregamento limpo, sem erros de console; o fluxo autenticado (Rotina → Gerar treino) não pôde ser exercitado nesta sessão por exigir login real — segue o padrão já estabelecido de validar interativamente após o deploy. Versão sincronizada para `4.0.0-alpha.40`.
+
 ## Rodada 2026-08-05 — auditoria completa legado-vs-v4 e correção de unidades alpha.39
 
 A pedido do usuário, foi feita uma auditoria sistemática comparando o app legado (`main`, monólito de ~650KB/11.068 linhas) com o v4 módulo a módulo (agente dedicado, ~388 funções top-level mapeadas no legado), não mais reativa a queixas pontuais. Resultado completo arquivado na conversa; achados de maior confiança viraram a lista de prioridade combinada com o usuário: unidades (corrigido nesta rodada), gerador automático de treino, gerenciador de exercícios pelo admin, superset grouping, badge de PR/histórico por exercício, metas de nutrição editáveis, shuffle/repetir última sessão, calculadora de % de gordura — ainda pendentes.

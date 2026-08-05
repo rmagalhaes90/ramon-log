@@ -5,10 +5,10 @@ import type { DayKey } from './model';
 export type TemplateKey = 'fullbody' | 'upperLower' | 'ppl';
 const muscleGroups: Record<string, string[]> = {
   push: ['chest', 'shoulders', 'triceps'],
-  pull: ['back', 'lats', 'biceps'],
+  pull: ['upperback', 'lats', 'biceps'],
   legs: ['quads', 'glutes', 'hamstrings', 'calves'],
-  upper: ['chest', 'shoulders', 'back', 'lats', 'biceps', 'triceps'],
-  full: ['quads', 'glutes', 'chest', 'back', 'lats', 'shoulders'],
+  upper: ['chest', 'shoulders', 'upperback', 'lats', 'biceps', 'triceps'],
+  full: ['quads', 'glutes', 'chest', 'upperback', 'lats', 'shoulders'],
 };
 
 export function pickExercises(
