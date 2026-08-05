@@ -1,5 +1,15 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — bootstrap admin não aparecia no cliente alpha.45
+
+Depois da alpha.44, o usuário confirmou estar logado com `rmagalhaes90@gmail.com` (visível no novo indicador "Conectado como") e mesmo assim o botão "Admin" não aparecia. Investigação:
+
+`firestore.rules` já tem `isSuperAdmin() { return ... request.auth.token.email == 'rmagalhaes90@gmail.com'; }` e `functions/index.js`'s `requireAdmin()` tem o mesmo bypass por e-mail — essa conta sempre teve acesso total no backend, independente de qualquer custom claim. Mas `ensureSharedProfile()` em `features/auth/index.ts` (que alimenta `AuthState.isAdmin`, usado só pra decidir se mostra o botão no cliente) calculava `isAdmin` unicamente a partir de `token.claims.admin === true` — e essa claim nunca tinha sido de fato atribuída à conta real de produção. Ou seja: a conta sempre teve admin no backend, mas o app nunca mostrava a UI porque só o backend tinha o atalho do bootstrap, não o cliente.
+
+Corrigido replicando o mesmo bypass no cliente: `isBootstrapAdmin(user)` compara o e-mail, usado em `ensureSharedProfile` como `isBootstrapAdmin(user) || token.claims.admin === true`.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente) e **31 arquivos/78 testes Vitest**, todos com código 0. Versão sincronizada para `4.0.0-alpha.45`.
+
 ## Rodada 2026-08-05 — visibilidade de conta logada e seletor do Google alpha.44
 
 Feedback direto após publicar a alpha.43: "não consigo ver qual conta está logada, não aparece em lugar algum... quando clico em Google ele loga direto... não vejo as edições de exercício pra mudar link". Dois bugs de UX confirmados e corrigidos:

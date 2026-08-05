@@ -32,6 +32,14 @@ const configuredServices = getFirebaseServices();
 if (!configuredServices) throw new KyroError('Firebase unavailable', 'firebase/unconfigured');
 const services = configuredServices;
 
+// Mirrors the bootstrap-admin bypass already present in firestore.rules
+// (isSuperAdmin) and functions/index.js (requireAdmin) — this account is
+// always treated as admin even before the `admin` custom claim is set.
+const bootstrapEmail = 'rmagalhaes90@gmail.com';
+function isBootstrapAdmin(user: User): boolean {
+  return user.email?.toLowerCase() === bootstrapEmail;
+}
+
 export type EmailActionMode = 'resetPassword' | 'recoverEmail' | 'verifyEmail';
 
 export interface EmailActionRequest {
@@ -103,7 +111,7 @@ async function ensureSharedProfile(
     const token = await getIdTokenResult(user);
     return {
       blocked: false,
-      isAdmin: token.claims.admin === true,
+      isAdmin: isBootstrapAdmin(user) || token.claims.admin === true,
       isCoach: token.claims.coach === true,
     };
   }
@@ -111,7 +119,7 @@ async function ensureSharedProfile(
   const token = await getIdTokenResult(user);
   return {
     blocked: data.blocked === true,
-    isAdmin: token.claims.admin === true,
+    isAdmin: isBootstrapAdmin(user) || token.claims.admin === true,
     isCoach: token.claims.coach === true,
   };
 }
