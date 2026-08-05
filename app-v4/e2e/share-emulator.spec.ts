@@ -10,7 +10,7 @@ interface OobCode {
 test('verifies an account and shares the weekly report via the clipboard fallback', async ({
   page,
 }) => {
-  test.setTimeout(90000);
+  test.setTimeout(150000);
   await page.addInitScript(() => {
     Object.defineProperty(window.navigator, 'share', { value: undefined, configurable: true });
     // Capturing the write directly avoids depending on OS clipboard
@@ -48,11 +48,12 @@ test('verifies an account and shares the weekly report via the clipboard fallbac
   ).toBeVisible();
   await page.getByRole('link', { name: /voltar ao kyro|back to kyro/i }).click();
 
-  // Onboarding may take a moment: Firestore's first read right after a
+  // Onboarding may take a while: Firestore's first read right after a
   // fresh sign-in can transiently report itself offline before the app's
-  // retries (up to ~15s of backoff) recover, plus extra slack for slower
-  // CI runners, so give this a much more generous timeout than default.
-  await expect(page.locator('#onboarding-form')).toBeVisible({ timeout: 40000 });
+  // retries (up to 60s of capped backoff) recover. CI runners have shown
+  // this taking over 40s for webkit specifically, so match the app's own
+  // retry deadline plus slack rather than guessing a shorter number again.
+  await expect(page.locator('#onboarding-form')).toBeVisible({ timeout: 75000 });
   await page.locator('#onboarding-form button[type="submit"]').click();
 
   await expect(page.locator('#tour-title')).toBeVisible({ timeout: 20000 });

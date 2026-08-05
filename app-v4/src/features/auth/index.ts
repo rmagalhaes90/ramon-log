@@ -113,15 +113,15 @@ async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAd
 
 async function retryEnsureSharedProfile(
   user: User,
-  delaysMs: readonly number[],
+  deadline: number,
+  delayMs = 1000,
 ): Promise<{ blocked: boolean; isAdmin: boolean }> {
   try {
     return await ensureSharedProfile(user);
   } catch (error) {
-    const [delay, ...rest] = delaysMs;
-    if (delay === undefined) throw error;
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    return retryEnsureSharedProfile(user, rest);
+    if (Date.now() >= deadline) throw error;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return retryEnsureSharedProfile(user, deadline, Math.min(delayMs * 2, 5000));
   }
 }
 
@@ -141,9 +141,10 @@ export function observeAuth(listener: AuthListener): () => void {
     // Firestore can briefly report itself offline right after a fresh
     // sign-in (before its first successful round-trip), which would
     // otherwise bounce a legitimately signed-in user back to the login
-    // screen with no explanation. A couple of retries absorb that
-    // transient state without waiting indefinitely on a real outage.
-    void retryEnsureSharedProfile(user, [1000, 2000, 4000, 8000])
+    // screen with no explanation. Retrying with backoff for up to a
+    // minute absorbs that transient state without waiting indefinitely
+    // on a real outage.
+    void retryEnsureSharedProfile(user, Date.now() + 60000)
       .then(({ blocked, isAdmin }) => {
         if (current === generation)
           listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin });
