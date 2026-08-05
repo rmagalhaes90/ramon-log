@@ -8,7 +8,7 @@ Legenda: ✅ fundação implementada; 🟡 iniciado; ⬜ ainda no baseline; 🔴
 | PT/EN e unidades                  |       ✅ |  🟡 | Fundação traduzida e unidade persistida; faltam strings das features                                                                                                                    |
 | Auth email/Google/reset           |       ✅ |  🟡 | SDK modular e Auth Emulator; cadastro/login/exclusão local e E2E Chromium/WebKit aprovados; Google real permanece manual                                                                |
 | Verificação de email              |       ✅ |  🟡 | Bloqueio, reenvio/cooldown e reload implementados; bloqueio de conta não verificada aprovado no E2E local                                                                               |
-| Onboarding                        |       ✅ |  🟡 | Preferência inicial persistida; falta portar tour completo do produto                                                                                                                   |
+| Onboarding                        |       ✅ |  🟡 | Preferência inicial persistida e tour guiado dos quatro módulos (Train/Recover/Fuel/Sync) exibido uma vez por conta; falta validação visual em dispositivo real                         |
 | Treinos/rotinas/exercícios/séries |       ✅ |  🟡 | Catálogo completo, edição, reordenação por botões (acessível/mobile) e drag-and-drop nativo para mouse/desktop, três templates/gerador, séries, notas, timers, aquecimento, anilhas, e1RM, PR, rascunho recuperável e links de vídeo HTTPS; drag-and-drop por toque em iOS/Android segue pendente (HTML5 DnD não cobre touch) |
 | Histórico/relatórios/conquistas   |       ✅ |  🟡 | Sessões, histórico por exercício, recordes, relatório semanal compartilhável, streak e seis conquistas implementados; faltam relatórios avançados                                       |
 | Readiness/progresso/medidas       |       ✅ |  ✅ | Peso, cinco gráficos de medidas, tendências, sessões, readiness, volume muscular e correlação de desempenho                                                                             |
@@ -31,7 +31,7 @@ Percentual do escopo de implementação desta migração: **100%**. A fundação
 | Fase                                           | Progresso | Estado                                                                                                                               |
 | ---------------------------------------------- | --------: | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Fundação, contratos, qualidade e design system |       85% | TypeScript strict, ferramentas, i18n, erros e tokens ativos; falta ampliar componentes reutilizáveis                                 |
-| Auth, verificação, onboarding e conta          |       92% | Auth Emulator, E2E de cadastro/verificação em Chromium/WebKit e exclusão modular; faltam Google real e tour completo                 |
+| Auth, verificação, onboarding e conta          |       94% | Auth Emulator, E2E de cadastro/verificação em Chromium/WebKit, exclusão modular e tour guiado pós-onboarding; falta Google real      |
 | Treinos, rotinas, catálogo e histórico         |       94% | Núcleo, templates, gerador, reorder, rascunhos, PR/e1RM, vídeos, relatório compartilhável e conquistas implementados                 |
 | Progresso, readiness e nutrição                |       92% | Peso, gráfico, medidas, readiness, suplementos com agenda editável e barcode manual/câmera implementados                             |
 | Fotos, compartilhamento e notificações         |       82% | Fotos privadas sem EXIF, fila offline, comparação, Web Share e alertas locais migrados; falta push remoto                            |
@@ -43,7 +43,7 @@ Percentual do escopo de implementação desta migração: **100%**. A fundação
 
 - Homologar Google Sign-In, Web Share de arquivos e instalação/atualização em dispositivos Safari/iOS reais.
 - Completar retry offline de blobs/EXIF, resolução interativa de conflitos e push remoto/FCM.
-- Finalizar o tour completo de onboarding e a validação visual de todas as telas antes de promover a v4.
+- Validar visualmente o tour de onboarding e as demais telas em dispositivo real antes de promover a v4.
 
 Esses gates exigem credenciais/dispositivos/infraestrutura de homologação e não autorizam deploy automático. Não reduzem a conclusão do escopo de implementação, mas impedem declarar a v4 pronta para substituir o baseline.
 

@@ -335,14 +335,59 @@ function renderOnboarding(user: User): void {
       cacheSet(`units:${user.uid}`, units),
       cacheSet(`onboarding:${user.uid}`, true),
     ])
-      .then(() => renderDashboard(user))
+      .then(() => renderTour(user))
       .catch((error: unknown) => reportError(error, 'onboarding/save'));
   });
+}
+
+async function needsTour(user: User): Promise<boolean> {
+  return (await cacheGet<boolean>(`tour:${user.uid}`)) !== true;
+}
+
+function renderTour(user: User): void {
+  const steps: { eyebrow: string; title: string; body: string }[] = [
+    { eyebrow: 'KYRO', title: copy('welcome'), body: copy('tourIntro') },
+    { eyebrow: '01 · TRAIN', title: copy('train'), body: copy('trainModule') },
+    { eyebrow: '02 · RECOVER', title: copy('progress'), body: copy('recoverModule') },
+    { eyebrow: '03 · FUEL', title: copy('nutrition'), body: copy('fuelModule') },
+    { eyebrow: '04 · SYNC', title: copy('settings'), body: copy('syncModule') },
+  ];
+  let stepIndex = 0;
+  const finishTour = () =>
+    void cacheSet(`tour:${user.uid}`, true)
+      .then(() => renderDashboard(user))
+      .catch((error: unknown) => reportError(error, 'tour/save'));
+  const renderStep = () => {
+    const step = steps[stepIndex];
+    if (!step) return;
+    const isLast = stepIndex === steps.length - 1;
+    shell(`<section class="auth-card tour" aria-labelledby="tour-title"><p class="eyebrow">${step.eyebrow}</p><h1 id="tour-title">${step.title}</h1>
+      <p>${step.body}</p><p class="tour-progress">${stepIndex + 1} / ${steps.length}</p>
+      <div class="tour-actions">${stepIndex > 0 ? `<button id="tour-back" class="secondary">${copy('tourBack')}</button>` : ''}<button id="tour-next" class="primary">${isLast ? copy('tourFinish') : copy('tourNext')}</button></div>
+      <button id="tour-skip" class="link-button">${copy('tourSkip')}</button></section>`);
+    document.querySelector('#tour-back')?.addEventListener('click', () => {
+      stepIndex = Math.max(0, stepIndex - 1);
+      renderStep();
+    });
+    document.querySelector('#tour-next')?.addEventListener('click', () => {
+      if (isLast) finishTour();
+      else {
+        stepIndex += 1;
+        renderStep();
+      }
+    });
+    document.querySelector('#tour-skip')?.addEventListener('click', finishTour);
+  };
+  renderStep();
 }
 
 async function renderReady(user: User): Promise<void> {
   if (await needsOnboarding(user)) {
     renderOnboarding(user);
+    return;
+  }
+  if (await needsTour(user)) {
+    renderTour(user);
     return;
   }
   if (notificationUid !== user.uid) {

@@ -201,6 +201,19 @@ h2 {
   color: var(--dim);
   margin-top: 0.6rem;
 }
+.tour-progress {
+  color: var(--dim);
+  font-size: 0.8rem;
+}
+.tour-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.tour-actions button {
+  width: auto;
+  flex: 1;
+}
 .divider {
   display: flex;
   align-items: center;
