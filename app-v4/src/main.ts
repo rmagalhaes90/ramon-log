@@ -485,6 +485,7 @@ async function renderReady(user: User): Promise<void> {
 
 function renderDashboard(user: User): void {
   shell(`<section class="hero"><p class="eyebrow">${copy('foundation')}</p><h1>${copy('tagline')}</h1>
+    <p class="account-email">${copy('loggedInAs')}: <strong>${user.email ?? user.uid}</strong></p>
     <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><button id="open-sync" class="status-link">${copy('queue')}: <b id="queue-count">0</b></button></div>
     <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin ? `<button id="open-admin" class="secondary">${copy('admin')}</button>` : ''}${authState.isCoach ? `<button id="open-coach" class="secondary">${copy('coach')}</button>` : ''}<button id="logout" class="link-button">${copy('logout')}</button></section>
     <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>${copy('trainModule')}</p><button id="open-workout-card">${copy('train')}</button></article>

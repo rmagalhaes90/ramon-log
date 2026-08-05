@@ -1,5 +1,16 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — visibilidade de conta logada e seletor do Google alpha.44
+
+Feedback direto após publicar a alpha.43: "não consigo ver qual conta está logada, não aparece em lugar algum... quando clico em Google ele loga direto... não vejo as edições de exercício pra mudar link". Dois bugs de UX confirmados e corrigidos:
+
+- Não havia nenhum lugar no app mostrando o e-mail da conta logada — corrigido com uma linha "Conectado como: {e-mail}" logo abaixo do título do dashboard.
+- `loginWithGoogle()` chamava `signInWithPopup` sem `prompt: 'select_account'`, então se o navegador já tinha uma sessão do Google ativa, o popup logava direto nela sem oferecer escolha — corrigido.
+
+Hipótese em aberto para "não vejo as edições de exercício": o Firebase Auth pode ter criado uma conta (UID) diferente da original ao logar via Google, mesmo com o mesmo e-mail — nesse caso a claim de admin da conta original não vale para essa nova identidade. Só será possível confirmar depois que o usuário verificar qual e-mail aparece agora no dashboard; nenhuma mudança de permissão foi feita nesta rodada até essa confirmação.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente) e **31 arquivos/78 testes Vitest**, todos com código 0. Versão sincronizada para `4.0.0-alpha.44`.
+
 ## Rodada 2026-08-05 — papel Coach, vínculo aluno↔treinador e gerenciador de exercícios alpha.43
 
 A pedido direto do usuário: "precisa colocar link em inglês quando o app tiver em inglês e em português quando tiver em português... eu preciso ter acesso a trocar os links... o que tem que implementar são perfis, admin, usuário normal, coach... no app antigo eu tinha acesso a bloquear outros usuários e dar acesso admin, precisa ter perfis". Bloquear/desbloquear e conceder/revogar admin já existiam (implementados antes nesta sessão); o restante é novo.

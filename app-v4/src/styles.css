@@ -79,6 +79,14 @@ h2 {
   letter-spacing: 0.015em;
   max-width: 13ch;
 }
+.account-email {
+  color: var(--dim);
+  font-size: 0.8rem;
+  margin: 0.4rem 0 0;
+}
+.account-email strong {
+  color: var(--volt);
+}
 .status {
   display: flex;
   gap: 0.6rem;

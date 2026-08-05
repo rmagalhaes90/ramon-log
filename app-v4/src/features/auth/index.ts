@@ -189,7 +189,9 @@ export async function createAccount(email: string, password: string): Promise<vo
 }
 
 export async function loginWithGoogle(): Promise<void> {
-  await signInWithPopup(services.auth, new GoogleAuthProvider());
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  await signInWithPopup(services.auth, provider);
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
