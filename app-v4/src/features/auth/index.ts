@@ -143,7 +143,7 @@ export function observeAuth(listener: AuthListener): () => void {
     // otherwise bounce a legitimately signed-in user back to the login
     // screen with no explanation. A couple of retries absorb that
     // transient state without waiting indefinitely on a real outage.
-    void retryEnsureSharedProfile(user, [1000, 2000, 4000])
+    void retryEnsureSharedProfile(user, [1000, 2000, 4000, 8000])
       .then(({ blocked, isAdmin }) => {
         if (current === generation)
           listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin });

@@ -10,7 +10,7 @@ interface OobCode {
 test('verifies an account and shares the weekly report via the clipboard fallback', async ({
   page,
 }) => {
-  test.setTimeout(60000);
+  test.setTimeout(90000);
   await page.addInitScript(() => {
     Object.defineProperty(window.navigator, 'share', { value: undefined, configurable: true });
     // Capturing the write directly avoids depending on OS clipboard
@@ -50,8 +50,9 @@ test('verifies an account and shares the weekly report via the clipboard fallbac
 
   // Onboarding may take a moment: Firestore's first read right after a
   // fresh sign-in can transiently report itself offline before the app's
-  // retries recover, so give this a more generous timeout than default.
-  await expect(page.locator('#onboarding-form')).toBeVisible({ timeout: 25000 });
+  // retries (up to ~15s of backoff) recover, plus extra slack for slower
+  // CI runners, so give this a much more generous timeout than default.
+  await expect(page.locator('#onboarding-form')).toBeVisible({ timeout: 40000 });
   await page.locator('#onboarding-form button[type="submit"]').click();
 
   await expect(page.locator('#tour-title')).toBeVisible({ timeout: 20000 });
