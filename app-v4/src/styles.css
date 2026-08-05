@@ -663,6 +663,9 @@ h2 {
   justify-content: space-between;
   gap: 0.8rem;
 }
+.rest-timer[hidden] {
+  display: none;
+}
 .rest-timer button {
   background: #0b0c0e;
   color: var(--volt);

@@ -2368,7 +2368,12 @@ if (emailAction) {
   window.addEventListener('offline', render);
   render();
 }
-navigator.serviceWorker?.addEventListener('controllerchange', () => location.reload());
+let swRefreshing = false;
+navigator.serviceWorker?.addEventListener('controllerchange', () => {
+  if (swRefreshing) return;
+  swRefreshing = true;
+  location.reload();
+});
 void registerPwaUpdates((registration) => {
   updateRegistration = registration;
   document.querySelector<HTMLElement>('#update')?.removeAttribute('hidden');
