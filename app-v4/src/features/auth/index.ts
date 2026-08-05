@@ -16,7 +16,7 @@ import {
   verifyPasswordResetCode,
 } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { KyroError } from '../../core/errors';
+import { KyroError, reportBackgroundError } from '../../core/errors';
 import { getFirebaseServices } from '../../services/firebase';
 
 export type AuthStatus = 'loading' | 'signed-out' | 'unverified' | 'blocked' | 'ready';
@@ -119,7 +119,7 @@ async function retryEnsureSharedProfile(
   try {
     return await ensureSharedProfile(user);
   } catch (error) {
-    console.warn('[retryEnsureSharedProfile]', Date.now() - deadline, error);
+    reportBackgroundError(error, 'auth/shared-profile-retry');
     if (Date.now() >= deadline) throw error;
     await new Promise((resolve) => setTimeout(resolve, delayMs));
     return retryEnsureSharedProfile(user, deadline, Math.min(delayMs * 2, 5000));

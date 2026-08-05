@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — correção do flake de CI no teste de compartilhamento
+
+Após o push de alpha.38, o CI passou a falhar de forma intermitente em `test:e2e:share` (webkit-mobile), na mesma corrida "client is offline" do Firestore corrigida em `52ab852`. Duas rodadas de aumento de margem fixa (1s/2s/4s → 1s/2s/4s/8s) não resolveram — inclusive com o mesmo commit passando no CI do Pull Request e falhando no CI do push, confirmando que era carga variável do runner, não determinístico.
+
+A causa raiz: `retryEnsureSharedProfile` usava uma lista fixa de atrasos, então o orçamento total de espera era um número fixo escolhido às cegas. Substituído por um prazo (`deadline`) com backoff exponencial capado em 5s por tentativa, até 60s de orçamento total — se o ambiente está rápido, não gasta nada disso; se está lento, continua tentando até o prazo. Logging de diagnóstico temporário (`console.warn` por tentativa) confirmou, numa rodada que passou limpo, que **nenhuma tentativa extra foi necessária** — ou seja, o mecanismo só entra em ação quando realmente preciso, sem custo no caminho normal. O logging temporário foi substituído por `reportBackgroundError` (mesmo padrão já usado em `offline-queue.ts` para falhas transitórias não fatais) e mantido permanentemente para observabilidade real, não só depuração desta sessão.
+
+Após a limpeza: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **73 testes Vitest** e `build`, todos com código 0.
+
 ## Rodada 2026-08-05 — separação Treino/Rotina, vídeo embutido e celebração alpha.38
 
 Feedback direto do usuário sobre a alpha.37: "os vídeos eram carregados embeds" (não link externo), "no html tinha treino com animação no final" (o baseline tem uma tela "TREINO COMPLETO!" com confete/sequência) e "não quero ficar com as opções abertas no treino, tem que ser em outro lugar" (a edição de séries/reps/descanso adicionada na alpha.37 estava na tela errada). Todos os três confirmados diretamente no `main` legado antes de implementar:

@@ -11,7 +11,6 @@ test('verifies an account and shares the weekly report via the clipboard fallbac
   page,
 }) => {
   test.setTimeout(180000);
-  page.on('console', (msg) => console.log('[browser]', msg.type(), msg.text()));
   await page.addInitScript(() => {
     Object.defineProperty(window.navigator, 'share', { value: undefined, configurable: true });
     // Capturing the write directly avoids depending on OS clipboard
