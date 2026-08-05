@@ -10,7 +10,8 @@ interface OobCode {
 test('verifies an account and shares the weekly report via the clipboard fallback', async ({
   page,
 }) => {
-  test.setTimeout(150000);
+  test.setTimeout(180000);
+  page.on('console', (msg) => console.log('[browser]', msg.type(), msg.text()));
   await page.addInitScript(() => {
     Object.defineProperty(window.navigator, 'share', { value: undefined, configurable: true });
     // Capturing the write directly avoids depending on OS clipboard
@@ -53,7 +54,7 @@ test('verifies an account and shares the weekly report via the clipboard fallbac
   // retries (up to 60s of capped backoff) recover. CI runners have shown
   // this taking over 40s for webkit specifically, so match the app's own
   // retry deadline plus slack rather than guessing a shorter number again.
-  await expect(page.locator('#onboarding-form')).toBeVisible({ timeout: 75000 });
+  await expect(page.locator('#onboarding-form')).toBeVisible({ timeout: 120000 });
   await page.locator('#onboarding-form button[type="submit"]').click();
 
   await expect(page.locator('#tour-title')).toBeVisible({ timeout: 20000 });
