@@ -510,6 +510,32 @@ h2 {
   text-align: center;
   color: var(--dim);
 }
+.onboard-card {
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  margin: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.onboard-title {
+  color: #eef0f2;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.onboard-sub {
+  color: var(--dim);
+  font-size: 0.85rem;
+}
+.onboard-actions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+.onboard-actions button {
+  border-radius: 0.65rem;
+  padding: 0.8rem;
+  cursor: pointer;
+}
 .workout-view > .primary {
   width: 100%;
   border: 0;

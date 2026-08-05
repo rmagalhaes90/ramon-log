@@ -118,7 +118,7 @@ let currentView:
   | 'admin' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
-let workoutStartedAt = new Date().toISOString();
+let workoutStartedAt: string | null = null;
 let sessionClock: number | undefined;
 let restClock: number | undefined;
 let notificationUid = '';
@@ -135,8 +135,15 @@ function resetWorkoutClock(): void {
 }
 
 function sessionElapsedMs(now = Date.now()): number {
+  if (!workoutStartedAt) return 0;
   const pausedNow = workoutPausedAt !== null ? now - workoutPausedAt : 0;
   return now - new Date(workoutStartedAt).getTime() - workoutPausedMs - pausedNow;
+}
+
+function startWorkoutSession(): void {
+  if (workoutStartedAt) return;
+  workoutStartedAt = new Date().toISOString();
+  resetWorkoutClock();
 }
 
 function clearWorkoutTimers(): void {
@@ -466,8 +473,6 @@ function renderDashboard(user: User): void {
     );
   const openWorkout = () => {
     currentView = 'workout';
-    workoutStartedAt = new Date().toISOString();
-    resetWorkoutClock();
     void renderWorkout(user);
   };
   document.querySelector('#start-workout')?.addEventListener('click', openWorkout);
@@ -1244,15 +1249,20 @@ async function renderWorkout(user: User): Promise<void> {
     loadUserData(user, 'progressionDecisions').catch(() => null),
   ]);
   const workouts = workoutsValue ?? {};
+  if (!workouts[selectedDay]) {
+    renderWorkoutEmptyState(user, workouts);
+    return;
+  }
   const freshEntries = createEntries(workouts, selectedDay);
   const draftMatches =
     draft &&
     draft.entries.map((item) => item.exercise.name).join('\n') ===
       freshEntries.map((item) => item.exercise.name).join('\n');
   workoutEntries = draftMatches ? draft.entries : freshEntries;
-  if (draftMatches) workoutStartedAt = draft.startedAt;
+  workoutStartedAt = draftMatches ? draft.startedAt : null;
+  resetWorkoutClock();
   shell(`<section class="workout-view"><button id="workout-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
-    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong><button id="session-pause" type="button"></button></div><button id="edit-routine" class="link-button">${copy('editRoutineTitle')}</button></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
+    <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong><button id="session-toggle" type="button"></button></div><button id="edit-routine" class="link-button">${copy('editRoutineTitle')}</button></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title');
   if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
@@ -1262,7 +1272,7 @@ async function renderWorkout(user: User): Promise<void> {
   }
   renderDayButtons(user, workouts);
   renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions ?? []);
-  const pauseButton = document.querySelector<HTMLButtonElement>('#session-pause');
+  const toggleButton = document.querySelector<HTMLButtonElement>('#session-toggle');
   const updateClock = () => {
     const elapsed = Math.max(0, Math.floor(sessionElapsedMs() / 1000));
     const target = document.querySelector('#session-clock');
@@ -1274,12 +1284,17 @@ async function renderWorkout(user: User): Promise<void> {
       ]
         .map((value) => String(value).padStart(2, '0'))
         .join(':');
-    if (pauseButton) pauseButton.textContent = copy(workoutPausedAt !== null ? 'resume' : 'pause');
+    if (toggleButton)
+      toggleButton.textContent = copy(
+        !workoutStartedAt ? 'startWorkout' : workoutPausedAt !== null ? 'resume' : 'pause',
+      );
   };
   updateClock();
   sessionClock = window.setInterval(updateClock, 1000);
-  pauseButton?.addEventListener('click', () => {
-    if (workoutPausedAt !== null) {
+  toggleButton?.addEventListener('click', () => {
+    if (!workoutStartedAt) {
+      startWorkoutSession();
+    } else if (workoutPausedAt !== null) {
       workoutPausedMs += Date.now() - workoutPausedAt;
       workoutPausedAt = null;
     } else {
@@ -1300,6 +1315,38 @@ async function renderWorkout(user: User): Promise<void> {
     currentView = 'routine';
     void renderRoutine(user);
   });
+}
+
+function renderWorkoutEmptyState(user: User, workouts: Workouts): void {
+  const weekEmpty = dayKeys.every((day) => !workouts[day]);
+  const dayLabel = selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1);
+  shell(
+    `<section class="workout-view"><button id="workout-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
+    ${
+      weekEmpty
+        ? `<div class="empty-state onboard-card"><p class="onboard-title">👋 ${copy('welcomeTitle')}</p><p class="onboard-sub">${copy('welcomeSub')}</p><div class="onboard-actions"><button id="onboard-autogen" class="primary">${copy('autoGenerate')}</button><button id="onboard-template">${copy('templates')}</button><button id="onboard-manual">${copy('buildManually')}</button></div></div>`
+        : `<div class="empty-state"><p>${copy('emptyRoutineForDay').replace('{day}', dayLabel)}</p><button id="go-create-routine" class="primary">${copy('createRoutineForDay')}</button></div>`
+    }</section>`,
+  );
+  renderDayButtons(user, workouts, () => void renderWorkout(user));
+  document.querySelector('#workout-back')?.addEventListener('click', () => {
+    currentView = 'dashboard';
+    renderDashboard(user);
+  });
+  const goRoutine = () => {
+    currentView = 'routine';
+    void renderRoutine(user);
+  };
+  document.querySelector('#onboard-autogen')?.addEventListener('click', () => {
+    currentView = 'routine';
+    renderWorkoutGenerator(user, workouts);
+  });
+  document.querySelector('#onboard-template')?.addEventListener('click', () => {
+    currentView = 'routine';
+    renderTemplatePicker(user, workouts);
+  });
+  document.querySelector('#onboard-manual')?.addEventListener('click', goRoutine);
+  document.querySelector('#go-create-routine')?.addEventListener('click', goRoutine);
 }
 
 async function renderRoutine(user: User): Promise<void> {
@@ -1729,10 +1776,12 @@ function renderExerciseEntries(
 ): void {
   const list = document.querySelector('#exercise-list');
   if (!list) return;
-  const persistDraft = () =>
-    void saveWorkoutDraft(user, selectedDay, workoutStartedAt, workoutEntries).catch(
+  const persistDraft = () => {
+    startWorkoutSession();
+    void saveWorkoutDraft(user, selectedDay, workoutStartedAt as string, workoutEntries).catch(
       (error: unknown) => reportError(error, 'workout/draft'),
     );
+  };
   if (!workoutEntries.length) {
     const empty = document.createElement('p');
     empty.className = 'empty-state';
@@ -2218,7 +2267,7 @@ async function finishWorkout(user: User, workouts: Workouts): Promise<void> {
   const status = document.querySelector('#workout-status');
   if (status) status.textContent = navigator.onLine ? copy('workoutSaved') : copy('syncPending');
   clearWorkoutTimers();
-  workoutStartedAt = endedAt.toISOString();
+  workoutStartedAt = null;
   resetWorkoutClock();
   showCelebration(
     trainingStreak(nextSessions),

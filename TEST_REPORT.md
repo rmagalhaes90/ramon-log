@@ -1,5 +1,21 @@
 # Relatório de testes
 
+## Rodada 2026-08-05 — cronômetro sob demanda e onboarding de rotina vazia alpha.41
+
+Feedback direto do usuário logo após testar o gerador (alpha.40): "quando vou em Train ele já começa a contar o tempo. Quero ter escolha... e quando for um novo usuário? Quero que ele use e aprenda e não clique e gere tempo quando não tem nada configurado. Isso está com cara de app?"
+
+Confirmado no código: `renderDashboard`'s `openWorkout` fazia `workoutStartedAt = new Date().toISOString()` **antes mesmo de renderizar a tela de Treino** — ou seja, o cronômetro sempre começava a contar no instante do clique em "Treinar", mesmo sem nenhuma interação real. O app legado (`main`) nunca faz isso: `startWorkoutTimer()` só é chamado por um clique explícito no botão "▶ Iniciar treino" (`stButton`/`toggleWorkoutTimer`) ou, de forma lazy, na primeira série marcada como concluída (`if(setsDone[k] && !s.startedAt) await startWorkoutTimer()`); e `renderDay()` no legado esconde o cronômetro inteiro e mostra uma tela de onboarding quando não há rotina configurada.
+
+Port fiel do padrão do legado:
+
+- `workoutStartedAt` deixou de ser sempre uma string (setada no load do módulo) e virou `string | null`, começando `null`. `sessionElapsedMs` trata `null` como 0. Novo `startWorkoutSession()` só seta o valor se ainda não tiver começado.
+- O botão único do cabeçalho do Treino (`#session-toggle`) agora tem três estados: "▶ Iniciar treino" (não começou) → "Pausar" (rodando) → "Retomar" (pausado) — substituindo o botão de pause que sempre existia.
+- `persistDraft()` (disparado ao editar carga/reps/RIR/RPE ou marcar uma série feita) chama `startWorkoutSession()` antes de salvar — ou seja, qualquer interação real com o treino inicia o cronômetro (não apenas marcar série, um pouco mais generoso que o legado, mas mantém a regra central: nunca abrir a tela já contando).
+- `renderWorkout` agora verifica `workouts[selectedDay]` antes de montar a tela de execução; se não existir, chama `renderWorkoutEmptyState`, que replica exatamente a lógica do legado (`isWeekEntirelyEmpty`): semana inteira vazia → cartão de boas-vindas com "🎲 Gerar treino automático" / "📋 Usar template pronto" / "✏️ Criar manualmente"; só aquele dia vazio → convite pontual "+ Criar rotina para {dia}". Nenhum dos dois casos mostra o cronômetro ou a lista de exercícios.
+- Depois de finalizar um treino (`finishWorkout`), `workoutStartedAt` volta para `null` (antes ficava setado para o horário de término, o que deixava a tela parecendo "quase rodando de novo" ao reabrir o mesmo dia).
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **31 arquivos/78 testes Vitest** e `build`, todos com código 0. Inspeção manual do shell sem login confirmou carregamento limpo, sem erros de console; o fluxo autenticado (abrir Treino sem rotina, cronômetro sob demanda) não pôde ser exercitado nesta sessão por exigir emuladores do Firebase (Java não está no PATH herdado pelo processo do preview) — segue o padrão já estabelecido de validar interativamente após o deploy, com o usuário testando no site publicado. Versão sincronizada para `4.0.0-alpha.41`.
+
 ## Rodada 2026-08-05 — gerador automático de treino alpha.40
 
 Segundo item da lista de prioridade combinada com o usuário ("Seguir a ordem de impacto que você listou"), depois da correção de unidades. O baseline (`main`) tem um gerador que monta uma rotina do zero a partir de grupo muscular + intensidade, distribuindo exercícios entre os músculos primários pra evitar repetição — recurso que o v4 não tinha (só templates fixos de 3 dias/upper-lower/PPL).
