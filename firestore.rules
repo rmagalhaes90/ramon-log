@@ -6,9 +6,38 @@ service cloud.firestore {
     function isSuperAdmin() { return signedIn() && request.auth.token.email == 'rmagalhaes90@gmail.com'; }
     function isGrantedAdmin() { return signedIn() && request.auth.token.admin == true; }
     function isAdmin() { return isSuperAdmin() || isGrantedAdmin(); }
+    function isCoach() { return signedIn() && request.auth.token.coach == true; }
+    function isLinkedCoach(studentUid) {
+      return isCoach() && exists(/databases/$(database)/documents/coaches/$(request.auth.uid)/students/$(studentUid));
+    }
 
     match /users/{uid}/data/{document=**} {
       allow read, create, update, delete: if owns(uid);
+    }
+
+    // Narrow, explicit coach access to a linked student's data: write access
+    // to build their routine, read-only access to their training progress.
+    // Never covers nutrition, supplements, photos, or settings.
+    match /users/{uid}/data/{docId} {
+      allow read: if docId in [
+        'bodyWeights', 'bodyMeasurements', 'sessionLog', 'readinessLog',
+        'exerciseHistory', 'exerciseRecords', 'progressionDecisions', 'profile'
+      ] && isLinkedCoach(uid);
+      allow read, create, update, delete: if docId == 'workouts' && isLinkedCoach(uid);
+    }
+
+    match /coaches/{coachUid}/students/{studentUid} {
+      allow read: if (isCoach() && request.auth.uid == coachUid) || isAdmin();
+      allow write: if false;
+    }
+
+    match /coachOf/{studentUid} {
+      allow get: if owns(studentUid) || isAdmin();
+      allow write: if false;
+    }
+
+    match /coachInvites/{code} {
+      allow read, write: if false;
     }
 
     match /sharedUsers/{uid} {
@@ -26,7 +55,7 @@ service cloud.firestore {
 
     match /shared/exerciseDatabase {
       allow read: if signedIn();
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if isAdmin() || isCoach();
     }
 
     // Billing state is server-owned. Clients receive a normalized feature set

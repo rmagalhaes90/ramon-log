@@ -24,6 +24,7 @@ export interface AuthState {
   status: AuthStatus;
   user: User | null;
   isAdmin: boolean;
+  isCoach: boolean;
 }
 export type AuthListener = (state: AuthState) => void;
 
@@ -88,7 +89,9 @@ function requiresVerification(user: User): boolean {
   );
 }
 
-async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAdmin: boolean }> {
+async function ensureSharedProfile(
+  user: User,
+): Promise<{ blocked: boolean; isAdmin: boolean; isCoach: boolean }> {
   const reference = doc(services.firestore, 'sharedUsers', user.uid);
   const snapshot = await getDoc(reference);
   if (!snapshot.exists()) {
@@ -101,6 +104,7 @@ async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAd
     return {
       blocked: false,
       isAdmin: token.claims.admin === true,
+      isCoach: token.claims.coach === true,
     };
   }
   const data = snapshot.data();
@@ -108,6 +112,7 @@ async function ensureSharedProfile(user: User): Promise<{ blocked: boolean; isAd
   return {
     blocked: data.blocked === true,
     isAdmin: token.claims.admin === true,
+    isCoach: token.claims.coach === true,
   };
 }
 
@@ -115,7 +120,7 @@ async function retryEnsureSharedProfile(
   user: User,
   deadline: number,
   delayMs = 1000,
-): Promise<{ blocked: boolean; isAdmin: boolean }> {
+): Promise<{ blocked: boolean; isAdmin: boolean; isCoach: boolean }> {
   try {
     return await ensureSharedProfile(user);
   } catch (error) {
@@ -127,16 +132,16 @@ async function retryEnsureSharedProfile(
 }
 
 export function observeAuth(listener: AuthListener): () => void {
-  listener({ status: 'loading', user: null, isAdmin: false });
+  listener({ status: 'loading', user: null, isAdmin: false, isCoach: false });
   let generation = 0;
   return onAuthStateChanged(services.auth, (user) => {
     const current = ++generation;
     if (!user) {
-      listener({ status: 'signed-out', user: null, isAdmin: false });
+      listener({ status: 'signed-out', user: null, isAdmin: false, isCoach: false });
       return;
     }
     if (requiresVerification(user)) {
-      listener({ status: 'unverified', user, isAdmin: false });
+      listener({ status: 'unverified', user, isAdmin: false, isCoach: false });
       return;
     }
     // Firestore can briefly report itself offline right after a fresh
@@ -146,12 +151,13 @@ export function observeAuth(listener: AuthListener): () => void {
     // minute absorbs that transient state without waiting indefinitely
     // on a real outage.
     void retryEnsureSharedProfile(user, Date.now() + 60000)
-      .then(({ blocked, isAdmin }) => {
+      .then(({ blocked, isAdmin, isCoach }) => {
         if (current === generation)
-          listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin });
+          listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin, isCoach });
       })
       .catch(() => {
-        if (current === generation) listener({ status: 'signed-out', user: null, isAdmin: false });
+        if (current === generation)
+          listener({ status: 'signed-out', user: null, isAdmin: false, isCoach: false });
       });
   });
 }

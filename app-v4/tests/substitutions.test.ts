@@ -15,6 +15,7 @@ const exercise = (
     reps: '10',
     rest: 60,
     videoUrl: '',
+    videoUrlEn: '',
     notes: '',
     titleEn: '',
   }) as Exercise;

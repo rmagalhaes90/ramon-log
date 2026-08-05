@@ -7,6 +7,7 @@ const sharedUserSchema = z.object({
   email: z.string().email().or(z.literal('')),
   blocked: z.boolean().default(false),
   isAdmin: z.boolean().default(false),
+  isCoach: z.boolean().default(false),
 });
 export interface SharedUser extends z.infer<typeof sharedUserSchema> {
   uid: string;
@@ -32,4 +33,9 @@ export async function setUserAdmin(uid: string, isAdmin: boolean): Promise<void>
   const services = getFirebaseServices();
   if (!services) throw new Error('firebase/unavailable');
   await httpsCallable(services.functions, 'setAdminRole')({ uid, isAdmin });
+}
+export async function setUserCoach(uid: string, isCoach: boolean): Promise<void> {
+  const services = getFirebaseServices();
+  if (!services) throw new Error('firebase/unavailable');
+  await httpsCallable(services.functions, 'setCoachRole')({ uid, isCoach });
 }

@@ -1,6 +1,11 @@
 import './styles.css';
 import type { User } from 'firebase/auth';
-import { installGlobalErrorHandlers, onError, reportError } from './core/errors';
+import {
+  installGlobalErrorHandlers,
+  onError,
+  reportBackgroundError,
+  reportError,
+} from './core/errors';
 import { createI18n, type Locale, type MessageKey } from './core/i18n';
 import type {
   Exercise,
@@ -9,6 +14,7 @@ import type {
   ProgressionDecision,
   Workouts,
 } from './domain/schemas';
+import { exerciseSchema } from './domain/schemas';
 import {
   authErrorKey,
   completeEmailAction,
@@ -26,8 +32,13 @@ import {
   verifyResetActionCode,
   type AuthState,
 } from './features/auth';
-import { listSharedUsers, setUserAdmin, setUserBlocked } from './features/admin';
+import { listSharedUsers, setUserAdmin, setUserBlocked, setUserCoach } from './features/admin';
+import { createInvite, listCoachStudents, type CoachStudent } from './features/coach';
 import { exerciseCatalog, searchExercises, supplementCatalog } from './features/catalog';
+import {
+  loadSharedExerciseCatalog,
+  saveSharedExerciseCatalog,
+} from './features/catalog/sharedCatalog';
 import { dosesTakenToday, normalizeTimes } from './features/supplements/model';
 import { flushPhotoUploads, photoQueueCount } from './features/photos/offline';
 import { renderPhotosView } from './features/photos/view';
@@ -103,7 +114,7 @@ if (!root) throw new Error('Missing #app root');
 const appRoot = root;
 const emailAction = parseEmailAction(location.search);
 
-let authState: AuthState = { status: 'loading', user: null, isAdmin: false };
+let authState: AuthState = { status: 'loading', user: null, isAdmin: false, isCoach: false };
 let authMode: 'login' | 'signup' = 'login';
 let updateRegistration: ServiceWorkerRegistration | null = null;
 let currentView:
@@ -115,7 +126,8 @@ let currentView:
   | 'nutrition'
   | 'supplements'
   | 'settings'
-  | 'admin' = 'dashboard';
+  | 'admin'
+  | 'coach' = 'dashboard';
 let selectedDay: DayKey = todayDayKey();
 let workoutEntries: ExerciseEntry[] = [];
 let workoutStartedAt: string | null = null;
@@ -128,6 +140,12 @@ let unitsUid = '';
 let unitSystem: UnitSystem = 'metric';
 let workoutPausedAt: number | null = null;
 let workoutPausedMs = 0;
+let sharedCatalogLoaded = false;
+let routineBackOverride: (() => void) | null = null;
+
+function asExternalUser(uid: string): User {
+  return { uid } as User;
+}
 
 function resetWorkoutClock(): void {
   workoutPausedAt = null;
@@ -447,6 +465,12 @@ async function renderReady(user: User): Promise<void> {
     unitSystem = savedUnits === 'imperial' ? 'imperial' : 'metric';
     unitsUid = user.uid;
   }
+  if (!sharedCatalogLoaded) {
+    sharedCatalogLoaded = true;
+    void loadSharedExerciseCatalog().catch((error: unknown) =>
+      reportBackgroundError(error, 'catalog/shared-load'),
+    );
+  }
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'routine') await renderRoutine(user);
   else if (currentView === 'progress') await renderProgress(user);
@@ -455,13 +479,14 @@ async function renderReady(user: User): Promise<void> {
   else if (currentView === 'supplements') await renderSupplements(user);
   else if (currentView === 'settings') await renderSettings(user);
   else if (currentView === 'admin') await renderAdmin(user);
+  else if (currentView === 'coach') renderCoachHub(user);
   else renderDashboard(user);
 }
 
 function renderDashboard(user: User): void {
   shell(`<section class="hero"><p class="eyebrow">${copy('foundation')}</p><h1>${copy('tagline')}</h1>
     <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><button id="open-sync" class="status-link">${copy('queue')}: <b id="queue-count">0</b></button></div>
-    <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin ? `<button id="open-admin" class="secondary">${copy('admin')}</button>` : ''}<button id="logout" class="link-button">${copy('logout')}</button></section>
+    <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin ? `<button id="open-admin" class="secondary">${copy('admin')}</button>` : ''}${authState.isCoach ? `<button id="open-coach" class="secondary">${copy('coach')}</button>` : ''}<button id="logout" class="link-button">${copy('logout')}</button></section>
     <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>${copy('trainModule')}</p><button id="open-workout-card">${copy('train')}</button></article>
     <article><span>02</span><h2>RECOVER</h2><p>${copy('recoverModule')}</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>${copy('fuelModule')}</p><button id="open-nutrition">${copy('nutrition')}</button></article>
     <article><span>04</span><h2>SYNC</h2><p>${copy('syncModule')}</p><button id="open-settings">${copy('settings')}</button></article></section>`);
@@ -497,6 +522,10 @@ function renderDashboard(user: User): void {
     currentView = 'admin';
     void renderAdmin(user);
   });
+  document.querySelector('#open-coach')?.addEventListener('click', () => {
+    currentView = 'coach';
+    renderCoachHub(user);
+  });
   const refreshQueueCount = () =>
     Promise.all([queueList(), photoQueueCount(user)])
       .then(([items, photos]) => {
@@ -515,9 +544,12 @@ async function renderAdmin(user: User): Promise<void> {
   const users = await listSharedUsers();
   const superAdmin = user.email?.toLowerCase() === 'rmagalhaes90@gmail.com';
   shell(
-    `<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">ADMIN</p><h1>${copy('users')}</h1><div id="admin-users" class="history-list"></div></section>`,
+    `<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">ADMIN</p><h1>${copy('users')}</h1><button id="admin-manage-exercises" class="secondary">${copy('manageExercises')}</button><div id="admin-users" class="history-list"></div></section>`,
   );
   bindBack(user);
+  document
+    .querySelector('#admin-manage-exercises')
+    ?.addEventListener('click', () => renderExerciseManager(user));
   const list = document.querySelector('#admin-users');
   users.forEach((entry) => {
     const row = document.createElement('article');
@@ -525,7 +557,9 @@ async function renderAdmin(user: User): Promise<void> {
     const email = document.createElement('strong');
     email.textContent = entry.email || entry.uid;
     const role = document.createElement('span');
-    role.textContent = entry.isAdmin ? 'admin' : '';
+    role.textContent = [entry.isAdmin ? 'admin' : '', entry.isCoach ? 'coach' : '']
+      .filter(Boolean)
+      .join(' · ');
     identity.append(email, role);
     const actions = document.createElement('div');
     const block = document.createElement('button');
@@ -550,9 +584,379 @@ async function renderAdmin(user: User): Promise<void> {
       );
       actions.append(admin);
     }
+    if (entry.uid !== user.uid) {
+      const coach = document.createElement('button');
+      coach.textContent = copy(entry.isCoach ? 'revokeCoach' : 'grantCoach');
+      coach.addEventListener(
+        'click',
+        () =>
+          void setUserCoach(entry.uid, !entry.isCoach)
+            .then(() => renderAdmin(user))
+            .catch((error: unknown) => reportError(error, 'admin/coach')),
+      );
+      actions.append(coach);
+    }
     row.append(identity, actions);
     list?.append(row);
   });
+}
+
+function exerciseManagerBack(user: User): void {
+  if (authState.isAdmin) {
+    currentView = 'admin';
+    void renderAdmin(user);
+  } else {
+    currentView = 'dashboard';
+    renderDashboard(user);
+  }
+}
+
+function parseMuscleWeights(text: string): Record<string, number> {
+  const muscles: Record<string, number> = {};
+  text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .forEach((line) => {
+      const [key, value] = line.split(':').map((part) => part.trim());
+      if (key && value && Number.isFinite(Number(value))) muscles[key] = Number(value);
+    });
+  return muscles;
+}
+
+function formatMuscleWeights(muscles: Record<string, number>): string {
+  return Object.entries(muscles)
+    .map(([key, value]) => `${key}:${value}`)
+    .join('\n');
+}
+
+function closeExerciseEditor(): void {
+  document.querySelector('.exercise-editor-modal')?.remove();
+}
+
+function openExerciseEditor(
+  existing: Exercise | null,
+  index: number | null,
+  onSaved: () => void,
+): void {
+  closeExerciseEditor();
+  const overlay = document.createElement('div');
+  overlay.className = 'exercise-editor-modal';
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeExerciseEditor();
+  });
+  const card = document.createElement('form');
+  card.className = 'exercise-editor-card';
+  const title = document.createElement('h2');
+  title.textContent = existing ? copy('editExercise') : copy('newExercise');
+
+  const field = (labelKey: MessageKey, input: HTMLElement) => {
+    const label = document.createElement('label');
+    const span = document.createElement('span');
+    span.textContent = copy(labelKey);
+    label.append(span, input);
+    return label;
+  };
+
+  const name = document.createElement('input');
+  name.type = 'text';
+  name.required = true;
+  name.maxLength = 120;
+  name.value = existing?.name ?? '';
+
+  const equipment = document.createElement('select');
+  (['', 'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'] as const).forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value
+      ? copy(`equip${value[0]?.toUpperCase()}${value.slice(1)}` as MessageKey)
+      : '—';
+    if (existing?.equipment === value) option.selected = true;
+    equipment.append(option);
+  });
+
+  const sets = document.createElement('input');
+  sets.type = 'number';
+  sets.min = '1';
+  sets.max = '20';
+  sets.value = String(existing?.sets ?? 4);
+
+  const reps = document.createElement('input');
+  reps.type = 'text';
+  reps.maxLength = 20;
+  reps.value = existing?.reps ?? '10';
+
+  const rest = document.createElement('input');
+  rest.type = 'number';
+  rest.min = '0';
+  rest.max = '1800';
+  rest.value = String(existing?.rest ?? 90);
+
+  const muscles = document.createElement('textarea');
+  muscles.rows = 4;
+  muscles.value = formatMuscleWeights(existing?.muscles ?? {});
+
+  const videoUrl = document.createElement('input');
+  videoUrl.type = 'url';
+  videoUrl.maxLength = 2048;
+  videoUrl.value = existing?.videoUrl ?? '';
+
+  const videoUrlEn = document.createElement('input');
+  videoUrlEn.type = 'url';
+  videoUrlEn.maxLength = 2048;
+  videoUrlEn.value = existing?.videoUrlEn ?? '';
+
+  const notes = document.createElement('textarea');
+  notes.rows = 3;
+  notes.maxLength = 1000;
+  notes.value = existing?.notes ?? '';
+
+  const error = document.createElement('p');
+  error.className = 'form-error';
+  error.hidden = true;
+
+  const actions = document.createElement('div');
+  actions.className = 'exercise-editor-actions';
+  const cancel = document.createElement('button');
+  cancel.type = 'button';
+  cancel.textContent = copy('cancel');
+  cancel.addEventListener('click', () => closeExerciseEditor());
+  const submit = document.createElement('button');
+  submit.type = 'submit';
+  submit.className = 'primary';
+  submit.textContent = copy('save');
+  actions.append(cancel, submit);
+
+  card.append(
+    title,
+    field('exerciseName', name),
+    field('equipmentLabel', equipment),
+    field('sets', sets),
+    field('reps', reps),
+    field('rest', rest),
+    field('muscleWeights', muscles),
+    field('videoUrlPtLabel', videoUrl),
+    field('videoUrlEnLabel', videoUrlEn),
+    field('notes', notes),
+    error,
+    actions,
+  );
+  overlay.append(card);
+  document.body.append(overlay);
+
+  card.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const result = exerciseSchema.safeParse({
+      name: name.value,
+      sets: Number(sets.value),
+      reps: reps.value,
+      rest: Number(rest.value),
+      equipment: equipment.value,
+      muscles: parseMuscleWeights(muscles.value),
+      videoUrl: videoUrl.value,
+      videoUrlEn: videoUrlEn.value,
+      notes: notes.value,
+    });
+    if (!result.success) {
+      error.textContent = result.error.issues[0]?.message ?? 'Invalid exercise';
+      error.hidden = false;
+      return;
+    }
+    const next = [...exerciseCatalog];
+    if (index === null) next.push(result.data);
+    else next[index] = result.data;
+    void saveSharedExerciseCatalog(next)
+      .then(() => {
+        closeExerciseEditor();
+        onSaved();
+      })
+      .catch((catchError: unknown) => {
+        error.textContent = String(catchError);
+        error.hidden = false;
+        reportError(catchError, 'catalog/save');
+      });
+  });
+}
+
+function renderExerciseManager(user: User): void {
+  shell(
+    `<section class="feature-view"><button id="mgr-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">${exerciseCatalog.length}</p><h1>${copy('manageExercises')}</h1><input id="mgr-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><button id="mgr-add" class="secondary">+ ${copy('newExercise')}</button><div id="mgr-list" class="catalog-list"></div><p id="mgr-status" class="hint" role="status"></p></section>`,
+  );
+  document.querySelector('#mgr-back')?.addEventListener('click', () => exerciseManagerBack(user));
+  const draw = (query = '') => {
+    const list = document.querySelector('#mgr-list');
+    if (!list) return;
+    list.replaceChildren();
+    const normalized = query.trim().toLocaleLowerCase();
+    exerciseCatalog
+      .map((exercise, realIndex) => ({ exercise, realIndex }))
+      .filter(
+        ({ exercise }) => !normalized || exercise.name.toLocaleLowerCase().includes(normalized),
+      )
+      .forEach(({ exercise, realIndex }) => {
+        const row = document.createElement('article');
+        const body = document.createElement('div');
+        const name = document.createElement('strong');
+        name.textContent = exercise.name;
+        const meta = document.createElement('span');
+        meta.textContent = `${exercise.equipment || '—'} · ${exercise.sets} × ${exercise.reps}`;
+        body.append(name, meta);
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.textContent = copy('edit');
+        edit.addEventListener('click', () =>
+          openExerciseEditor(exercise, realIndex, () => {
+            const status = document.querySelector('#mgr-status');
+            if (status) status.textContent = copy('savedExercise');
+            draw(query);
+          }),
+        );
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.textContent = copy('remove');
+        remove.addEventListener('click', () => {
+          if (!confirm(copy('deleteExerciseConfirm'))) return;
+          const next = exerciseCatalog.filter((_, i) => i !== realIndex);
+          void saveSharedExerciseCatalog(next)
+            .then(() => draw(query))
+            .catch((error: unknown) => reportError(error, 'catalog/delete'));
+        });
+        row.append(body, edit, remove);
+        list.append(row);
+      });
+  };
+  document.querySelector<HTMLInputElement>('#mgr-search')?.addEventListener('input', (event) => {
+    draw((event.target as HTMLInputElement).value);
+  });
+  document.querySelector('#mgr-add')?.addEventListener('click', () =>
+    openExerciseEditor(null, null, () => {
+      const status = document.querySelector('#mgr-status');
+      if (status) status.textContent = copy('savedExercise');
+      draw();
+    }),
+  );
+  draw();
+}
+
+function renderCoachHub(user: User): void {
+  shell(
+    `<section class="feature-view"><button id="coach-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">COACH</p><h1>${copy('coachHub')}</h1><button id="coach-invite" class="secondary">${copy('generateInviteCode')}</button><p id="coach-invite-code" class="hint" role="status"></p><button id="coach-manage-exercises">${copy('manageExercises')}</button><div id="coach-students" class="history-list"></div></section>`,
+  );
+  document.querySelector('#coach-back')?.addEventListener('click', () => {
+    currentView = 'dashboard';
+    renderDashboard(user);
+  });
+  document
+    .querySelector('#coach-manage-exercises')
+    ?.addEventListener('click', () => renderExerciseManager(user));
+  document.querySelector('#coach-invite')?.addEventListener('click', () => {
+    void createInvite()
+      .then(({ code }) => {
+        const label = document.querySelector('#coach-invite-code');
+        if (label)
+          label.textContent = `${copy('inviteCodeLabel')}: ${code} — ${copy('inviteExpiresNote')}`;
+      })
+      .catch((error: unknown) => reportError(error, 'coach/invite'));
+  });
+  const list = document.querySelector('#coach-students');
+  void listCoachStudents(user.uid)
+    .then((students) => {
+      if (!list) return;
+      if (!students.length) {
+        const empty = document.createElement('p');
+        empty.className = 'empty-state';
+        empty.textContent = copy('noStudentsYet');
+        list.append(empty);
+        return;
+      }
+      students.forEach((student) => {
+        const row = document.createElement('article');
+        const email = document.createElement('strong');
+        email.textContent = student.email || student.uid;
+        const actions = document.createElement('div');
+        const buildRoutine = document.createElement('button');
+        buildRoutine.textContent = copy('buildStudentRoutine');
+        buildRoutine.addEventListener('click', () => {
+          selectedDay = todayDayKey();
+          routineBackOverride = () => renderCoachHub(user);
+          void renderRoutine(asExternalUser(student.uid));
+        });
+        const viewProgress = document.createElement('button');
+        viewProgress.textContent = copy('viewStudentProgress');
+        viewProgress.addEventListener('click', () => void renderStudentProgress(user, student));
+        actions.append(buildRoutine, viewProgress);
+        row.append(email, actions);
+        list.append(row);
+      });
+    })
+    .catch((error: unknown) => reportError(error, 'coach/students'));
+}
+
+async function renderStudentProgress(coachUser: User, student: CoachStudent): Promise<void> {
+  const studentUser = asExternalUser(student.uid);
+  const [weights, sessions, records] = await Promise.all([
+    loadUserData(studentUser, 'bodyWeights').then((value) => value ?? []),
+    loadUserData(studentUser, 'sessionLog').then((value) => value ?? []),
+    loadUserData(studentUser, 'exerciseRecords').then((value) => value ?? {}),
+  ]);
+  shell(
+    `<section class="feature-view"><button id="student-progress-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">COACH · ${student.email || student.uid}</p><h1>${copy('progress')}</h1><div id="student-progress-body"></div></section>`,
+  );
+  document
+    .querySelector('#student-progress-back')
+    ?.addEventListener('click', () => renderCoachHub(coachUser));
+  const body = document.querySelector('#student-progress-body');
+  if (!body) return;
+
+  const weightCard = document.createElement('article');
+  const weightTitle = document.createElement('h2');
+  weightTitle.textContent = copy('bodyWeight');
+  const weightValue = document.createElement('p');
+  const latestWeight = weights.at(-1);
+  weightValue.textContent = latestWeight
+    ? `${latestWeight.kg} kg · ${latestWeight.d}`
+    : copy('noData');
+  weightCard.append(weightTitle, weightValue);
+  body.append(weightCard);
+
+  const sessionsCard = document.createElement('article');
+  const sessionsTitle = document.createElement('h2');
+  sessionsTitle.textContent = copy('sessions');
+  sessionsCard.append(sessionsTitle);
+  const recentSessions = sessions.slice(-5).reverse();
+  if (!recentSessions.length) {
+    const empty = document.createElement('p');
+    empty.textContent = copy('noData');
+    sessionsCard.append(empty);
+  } else {
+    recentSessions.forEach((session) => {
+      const row = document.createElement('p');
+      const duration = session.durationSec ? `${Math.round(session.durationSec / 60)} min` : '—';
+      row.textContent = `${session.date} · ${session.title} · ${duration} · ${Math.round(session.volume)} kg`;
+      sessionsCard.append(row);
+    });
+  }
+  body.append(sessionsCard);
+
+  const recordsCard = document.createElement('article');
+  const recordsTitle = document.createElement('h2');
+  recordsTitle.textContent = copy('records');
+  recordsCard.append(recordsTitle);
+  const topRecords = Object.entries(records)
+    .sort((a, b) => b[1].maxE1rm - a[1].maxE1rm)
+    .slice(0, 8);
+  if (!topRecords.length) {
+    const empty = document.createElement('p');
+    empty.textContent = copy('noData');
+    recordsCard.append(empty);
+  } else {
+    topRecords.forEach(([name, record]) => {
+      const row = document.createElement('p');
+      row.textContent = `${name} · ${record.maxWeight} kg × ${record.maxWeightReps} · e1RM ${Math.round(record.maxE1rm)} kg`;
+      recordsCard.append(row);
+    });
+  }
+  body.append(recordsCard);
 }
 
 async function renderSettings(user: User): Promise<void> {
@@ -1359,6 +1763,12 @@ async function renderRoutine(user: User): Promise<void> {
   renderDayButtons(user, workouts, () => void renderRoutine(user));
   renderRoutineExercises(user, workouts);
   document.querySelector('#routine-back')?.addEventListener('click', () => {
+    if (routineBackOverride) {
+      const back = routineBackOverride;
+      routineBackOverride = null;
+      back();
+      return;
+    }
     currentView = 'workout';
     void renderWorkout(user);
   });
@@ -1940,14 +2350,13 @@ function renderExerciseEntries(
         card.append(decisionActions);
       }
     }
-    if (entry.exercise.videoUrl) {
+    const videoUrl = localizedVideoUrl(entry.exercise);
+    if (videoUrl) {
       const video = document.createElement('button');
       video.type = 'button';
       video.className = 'exercise-video';
       video.textContent = copy('watchVideo');
-      video.addEventListener('click', () =>
-        openVideoModal(entry.exercise.videoUrl, entry.exercise.name),
-      );
+      video.addEventListener('click', () => openVideoModal(videoUrl, entry.exercise.name));
       card.append(video);
     }
     const tools = document.createElement('div');
@@ -2121,6 +2530,11 @@ function renderExerciseEntries(
     });
     list.append(card);
   });
+}
+
+function localizedVideoUrl(exercise: Exercise): string {
+  if (i18n.locale === 'en') return exercise.videoUrlEn || exercise.videoUrl;
+  return exercise.videoUrl || exercise.videoUrlEn;
 }
 
 function extractYouTubeId(url: string): string | null {

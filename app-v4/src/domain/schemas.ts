@@ -39,6 +39,7 @@ export const exerciseSchema = z.object({
   equipment: z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', '']).default(''),
   muscles: z.record(z.string().max(32), finite(0, 1)).default({}),
   videoUrl: videoUrlSchema,
+  videoUrlEn: videoUrlSchema,
   notes: boundedText(1000),
 });
 export type Exercise = z.infer<typeof exerciseSchema>;

@@ -21,6 +21,7 @@ import { formatBytes, requestPersistentStorage, storageHealth } from '../offline
 import { resetFeatureGroup, type ResetGroup } from './reset';
 import { loadEntitlements } from '../subscriptions';
 import { flushPhotoUploads, photoQueueCount } from '../photos/offline';
+import { leaveCoachRelationship, myCoach, redeemInvite } from '../coach';
 
 interface SettingsViewOptions {
   copy: (key: MessageKey) => string;
@@ -156,6 +157,58 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   });
   unitsCard.append(unitsTitle, unitsChoice);
   document.querySelector('.notification-card')?.after(unitsCard);
+  const coachCard = document.createElement('article');
+  coachCard.className = 'coach-link-card';
+  const coachTitle = document.createElement('h2');
+  coachTitle.textContent = copy('redeemCoachCode');
+  const coachStatus = document.createElement('p');
+  coachStatus.setAttribute('role', 'status');
+  coachCard.append(coachTitle, coachStatus);
+  void myCoach(user.uid)
+    .then((link) => {
+      if (link) {
+        coachStatus.textContent = `${copy('linkedToCoach')}: ${link.coachEmail || link.coachUid}`;
+        const unlink = document.createElement('button');
+        unlink.type = 'button';
+        unlink.textContent = copy('unlinkCoach');
+        unlink.addEventListener('click', () => {
+          unlink.disabled = true;
+          void leaveCoachRelationship()
+            .then(() => renderSettingsView(user, options))
+            .catch((error: unknown) => {
+              unlink.disabled = false;
+              reportError(error, 'coach/leave');
+            });
+        });
+        coachCard.append(unlink);
+        return;
+      }
+      const form = document.createElement('form');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.maxLength = 6;
+      input.placeholder = copy('coachCodePlaceholder');
+      input.autocomplete = 'off';
+      const submit = document.createElement('button');
+      submit.type = 'submit';
+      submit.textContent = copy('linkToCoach');
+      form.append(input, submit);
+      coachCard.append(form);
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!input.value.trim()) return;
+        submit.disabled = true;
+        void redeemInvite(input.value.trim())
+          .then(() => renderSettingsView(user, options))
+          .catch((error: unknown) => {
+            submit.disabled = false;
+            coachStatus.textContent = copy('coachLinkError');
+            reportError(error, 'coach/redeem');
+          });
+      });
+    })
+    .catch((error: unknown) => reportError(error, 'coach/status'));
+  unitsCard.after(coachCard);
   const planCard = document.createElement('article');
   planCard.className = 'subscription-card';
   const planTitle = document.createElement('h2');

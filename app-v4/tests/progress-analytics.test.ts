@@ -29,6 +29,7 @@ describe('premium progress analytics', () => {
       equipment: 'barbell',
       muscles: { chest: 1, triceps: 0.5 },
       videoUrl: '',
+      videoUrlEn: '',
       notes: '',
     } satisfies Exercise;
     expect(

@@ -4,7 +4,7 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { collection, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
 
 const projectId = 'demo-kyro-v4';
@@ -86,7 +86,41 @@ try {
     ),
   );
 
-  console.log('Firestore/Storage rules: ownership, admin and upload limits passed');
+  const coach = testEnvironment.authenticatedContext('coachUser', {
+    email: 'coach@example.test',
+    coach: true,
+  });
+  const student1 = testEnvironment.authenticatedContext('student1', {
+    email: 'student1@example.test',
+  });
+
+  await assertFails(setDoc(doc(coach.firestore(), 'users/student1/data/workouts'), { value: {} }));
+  await assertFails(getDoc(doc(coach.firestore(), 'users/student1/data/bodyWeights')));
+
+  await testEnvironment.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), 'coaches/coachUser/students/student1'), {
+      linkedAt: '2026-08-05T00:00:00.000Z',
+    });
+  });
+
+  await assertSucceeds(
+    setDoc(doc(coach.firestore(), 'users/student1/data/workouts'), { value: {} }),
+  );
+  await assertSucceeds(getDoc(doc(coach.firestore(), 'users/student1/data/bodyWeights')));
+  await assertFails(getDoc(doc(coach.firestore(), 'users/student1/data/photoIndex')));
+  await assertFails(
+    setDoc(doc(coach.firestore(), 'users/student1/data/nutritionLog'), { value: {} }),
+  );
+  await assertFails(
+    setDoc(doc(coach.firestore(), 'coaches/coachUser/students/student2'), { linkedAt: 'x' }),
+  );
+  await assertFails(getDoc(doc(coach.firestore(), 'coachOf/student1')));
+  await assertSucceeds(getDoc(doc(student1.firestore(), 'coachOf/student1')));
+  await assertSucceeds(
+    setDoc(doc(coach.firestore(), 'shared/exerciseDatabase'), { exercises: [] }),
+  );
+
+  console.log('Firestore/Storage rules: ownership, admin, coach scoping and upload limits passed');
 } finally {
   await testEnvironment.cleanup();
 }

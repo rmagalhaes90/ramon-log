@@ -19,6 +19,20 @@ function requireAdmin(request) {
   return auth;
 }
 
+function requireCoach(request) {
+  const auth = requireUser(request);
+  if (auth.token.coach !== true) throw new HttpsError('permission-denied', 'Coach required');
+  return auth;
+}
+
+const INVITE_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function generateInviteCode() {
+  let code = '';
+  for (let i = 0; i < 6; i += 1)
+    code += INVITE_CODE_ALPHABET[Math.floor(Math.random() * INVITE_CODE_ALPHABET.length)];
+  return code;
+}
+
 export const setAdminRole = onCall({ invoker: 'public' }, async (request) => {
   const actor = requireAdmin(request);
   const { uid, isAdmin } = request.data ?? {};
@@ -37,6 +51,75 @@ export const setAdminRole = onCall({ invoker: 'public' }, async (request) => {
     at: FieldValue.serverTimestamp(),
   });
   return { uid, isAdmin };
+});
+
+export const setCoachRole = onCall({ invoker: 'public' }, async (request) => {
+  const actor = requireAdmin(request);
+  const { uid, isCoach } = request.data ?? {};
+  if (typeof uid !== 'string' || !uid || typeof isCoach !== 'boolean')
+    throw new HttpsError('invalid-argument', 'Invalid role request');
+  const user = await getAuth().getUser(uid);
+  await getAuth().setCustomUserClaims(uid, { ...user.customClaims, coach: isCoach });
+  await getFirestore().doc(`sharedUsers/${uid}`).set({ isCoach }, { merge: true });
+  await getFirestore().collection('adminAudit').add({
+    action: 'coachRole',
+    actorUid: actor.uid,
+    targetUid: uid,
+    value: isCoach,
+    at: FieldValue.serverTimestamp(),
+  });
+  return { uid, isCoach };
+});
+
+export const createCoachInvite = onCall({ invoker: 'public' }, async (request) => {
+  const actor = requireCoach(request);
+  const code = generateInviteCode();
+  const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  await getFirestore()
+    .doc(`coachInvites/${code}`)
+    .set({ coachUid: actor.uid, createdAt: FieldValue.serverTimestamp(), expiresAt });
+  return { code, expiresAt };
+});
+
+export const redeemCoachInvite = onCall({ invoker: 'public' }, async (request) => {
+  const { uid } = requireUser(request);
+  const { code } = request.data ?? {};
+  if (typeof code !== 'string' || !code) throw new HttpsError('invalid-argument', 'Invalid code');
+  const inviteRef = getFirestore().doc(`coachInvites/${code.toUpperCase()}`);
+  const invite = await inviteRef.get();
+  if (!invite.exists) throw new HttpsError('not-found', 'Invite code not found');
+  const { coachUid, expiresAt } = invite.data();
+  if (typeof expiresAt === 'number' && Date.now() > expiresAt) {
+    await inviteRef.delete();
+    throw new HttpsError('failed-precondition', 'Invite code expired');
+  }
+  if (coachUid === uid) throw new HttpsError('failed-precondition', 'Cannot link to yourself');
+  const linkedAt = FieldValue.serverTimestamp();
+  const student = await getAuth().getUser(uid);
+  const coachUser = await getAuth().getUser(coachUid);
+  await Promise.all([
+    getFirestore()
+      .doc(`coaches/${coachUid}/students/${uid}`)
+      .set({ linkedAt, email: student.email ?? '' }),
+    getFirestore()
+      .doc(`coachOf/${uid}`)
+      .set({ coachUid, linkedAt, coachEmail: coachUser.email ?? '' }),
+    inviteRef.delete(),
+  ]);
+  return { coachUid };
+});
+
+export const leaveCoach = onCall({ invoker: 'public' }, async (request) => {
+  const { uid } = requireUser(request);
+  const linkRef = getFirestore().doc(`coachOf/${uid}`);
+  const link = await linkRef.get();
+  if (!link.exists) return { left: false };
+  const { coachUid } = link.data();
+  await Promise.all([
+    linkRef.delete(),
+    getFirestore().doc(`coaches/${coachUid}/students/${uid}`).delete(),
+  ]);
+  return { left: true };
 });
 
 export const setUserBlocked = onCall({ invoker: 'public' }, async (request) => {

@@ -44,6 +44,12 @@ assert.equal((await getAuth().getUser(target.localId)).customClaims?.admin, true
 await call('setUserBlocked', bootstrap.idToken, { uid: target.localId, blocked: true });
 assert.equal((await getAuth().getUser(target.localId)).disabled, true);
 
+const coachTarget = await signUp(`coach-${Date.now()}@example.test`);
+await call('setCoachRole', bootstrap.idToken, { uid: coachTarget.localId, isCoach: true });
+assert.equal((await getAuth().getUser(coachTarget.localId)).customClaims?.coach, true);
+await call('setCoachRole', bootstrap.idToken, { uid: coachTarget.localId, isCoach: false });
+assert.equal((await getAuth().getUser(coachTarget.localId)).customClaims?.coach, false);
+
 const entitlements = await call('getEntitlements', bootstrap.idToken);
 assert.deepEqual(entitlements, { plan: 'free', status: 'inactive', features: ['history'] });
 

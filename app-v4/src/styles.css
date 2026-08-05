@@ -724,6 +724,62 @@ h2 {
   border: 0;
   border-radius: 0.7rem;
 }
+.exercise-editor-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(6, 7, 8, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+.exercise-editor-card {
+  width: min(32rem, 100%);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.8rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.exercise-editor-card label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+.exercise-editor-card input,
+.exercise-editor-card select,
+.exercise-editor-card textarea {
+  background: #0f1012;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: #eef0f2;
+  padding: 0.6rem;
+  font: inherit;
+}
+.exercise-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+.coach-link-card form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.coach-link-card input {
+  flex: 1;
+  background: #0f1012;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: #eef0f2;
+  padding: 0.6rem;
+}
 .weekly-report > button {
   margin-top: 0.6rem;
   border: 1px solid var(--line);

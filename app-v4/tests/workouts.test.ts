@@ -26,6 +26,7 @@ describe('workouts', () => {
           equipment: 'barbell' as const,
           muscles: { chest: 1 },
           videoUrl: '',
+          videoUrlEn: '',
           notes: '',
         },
       ],
