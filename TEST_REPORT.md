@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-06 — mesmo bug de perda de dados em mais dois lugares alpha.48
+
+Usuário reportou "ainda limpando as séries quando troco de exercício" mesmo após a correção da alpha.46 — a princípio parecia que o fix não tinha chegado (deploy travado pela instabilidade do GitHub), mas uma varredura por todos os usos de `clearWorkoutDraft(user, selectedDay)` em `main.ts` encontrou **duas outras ações na tela de Treino ativo** com exatamente o mesmo defeito da substituição de exercício: reordenar (arrastar-e-soltar e as setas ↑↓) e remover um exercício. As três ações salvavam a rotina atualizada e então chamavam `clearWorkoutDraft` + `renderWorkout`, apagando carga/reps/marcação de concluído de **todos** os exercícios da sessão, não só do afetado.
+
+Corrigido com o mesmo padrão da alpha.46: reordenar agora aplica o mesmo `splice` usado em `reorderExercise`/`moveExercise` diretamente em `workoutEntries` (o array em memória da sessão), e remover tira só a entrada correspondente — ambos persistidos via `saveWorkoutDraft` em vez de `clearWorkoutDraft`. Verificado que os outros quatro lugares que ainda chamam `clearWorkoutDraft` são intencionais (edições feitas na tela de Rotina, fora de um treino ativo, onde não existe uma sessão em andamento pra preservar).
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente) e **31 arquivos/78 testes Vitest**, todos com código 0. Versão sincronizada para `4.0.0-alpha.48`.
+
 ## Rodada 2026-08-06 — login com Apple alpha.47
 
 Pedido direto: "adicione apple account pra logar também, como alternativa". Implementado `loginWithApple()` em `features/auth/index.ts` usando `OAuthProvider('apple.com')` (escopos `email`/`name`), espelhando exatamente `loginWithGoogle()`. Botão "Continuar com Apple" adicionado na tela de login, verificado visualmente no dev server sem erros de console.

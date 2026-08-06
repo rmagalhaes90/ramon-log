@@ -2224,12 +2224,22 @@ function renderExerciseEntries(
       card.classList.remove('drag-over');
       const fromIndex = Number(event.dataTransfer?.getData('text/plain'));
       if (!Number.isInteger(fromIndex) || fromIndex === exerciseIndex) return;
+      const current = workouts[selectedDay];
+      const exerciseCount = current?.exercises.length ?? 0;
+      if (fromIndex >= 0 && fromIndex < exerciseCount && exerciseIndex < exerciseCount) {
+        const [item] = workoutEntries.splice(fromIndex, 1);
+        if (item) workoutEntries.splice(exerciseIndex, 0, item);
+      }
       void saveUserData(
         user,
         'workouts',
         reorderExercise(workouts, selectedDay, fromIndex, exerciseIndex),
       )
-        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() =>
+          workoutStartedAt
+            ? saveWorkoutDraft(user, selectedDay, workoutStartedAt, workoutEntries)
+            : Promise.resolve(),
+        )
         .then(() => renderWorkout(user))
         .catch((error: unknown) => reportError(error, 'workout/reorder'));
     });
@@ -2238,15 +2248,32 @@ function renderExerciseEntries(
     const heading = document.createElement('h2');
     heading.textContent = entry.exercise.name;
     const actions = document.createElement('div');
-    const reorder = (direction: -1 | 1) =>
+    const reorder = (direction: -1 | 1) => {
+      const current = workouts[selectedDay];
+      const exerciseCount = current?.exercises.length ?? 0;
+      const toIndex = exerciseIndex + direction;
+      if (
+        exerciseIndex >= 0 &&
+        exerciseIndex < exerciseCount &&
+        toIndex >= 0 &&
+        toIndex < exerciseCount
+      ) {
+        const [item] = workoutEntries.splice(exerciseIndex, 1);
+        if (item) workoutEntries.splice(toIndex, 0, item);
+      }
       void saveUserData(
         user,
         'workouts',
         moveExercise(workouts, selectedDay, exerciseIndex, direction),
       )
-        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() =>
+          workoutStartedAt
+            ? saveWorkoutDraft(user, selectedDay, workoutStartedAt, workoutEntries)
+            : Promise.resolve(),
+        )
         .then(() => renderWorkout(user))
         .catch((error: unknown) => reportError(error, 'workout/reorder'));
+    };
     const up = document.createElement('button');
     up.textContent = '↑';
     up.ariaLabel = copy('moveUp');
@@ -2263,11 +2290,16 @@ function renderExerciseEntries(
       const current = workouts[selectedDay];
       if (!current) return;
       const nextExercises = current.exercises.filter((_, index) => index !== exerciseIndex);
+      workoutEntries.splice(exerciseIndex, 1);
       void saveUserData(user, 'workouts', {
         ...workouts,
         [selectedDay]: { ...current, exercises: nextExercises },
       })
-        .then(() => clearWorkoutDraft(user, selectedDay))
+        .then(() =>
+          workoutStartedAt
+            ? saveWorkoutDraft(user, selectedDay, workoutStartedAt, workoutEntries)
+            : Promise.resolve(),
+        )
         .then(() => renderWorkout(user))
         .catch((error: unknown) => reportError(error, 'workout/remove'));
     });
