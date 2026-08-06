@@ -1,6 +1,11 @@
 import type { User } from 'firebase/auth';
 import type { Locale, MessageKey } from '../../core/i18n';
-import type { UnitSystem } from '../../core/units';
+import {
+  displayLength,
+  lengthUnitLabel,
+  parseLengthInput,
+  type UnitSystem,
+} from '../../core/units';
 import { reportError } from '../../core/errors';
 import { deleteOwnAccount } from '../account/delete-account';
 import { bindDataPortability } from '../backup/ui';
@@ -157,6 +162,78 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   });
   unitsCard.append(unitsTitle, unitsChoice);
   document.querySelector('.notification-card')?.after(unitsCard);
+  const profileCard = document.createElement('article');
+  profileCard.className = 'profile-card';
+  const profileTitle = document.createElement('h2');
+  profileTitle.textContent = copy('profileTitle');
+  const profileForm = document.createElement('form');
+  const ageLabel = document.createElement('label');
+  const ageSpan = document.createElement('span');
+  ageSpan.textContent = copy('age');
+  const ageInput = document.createElement('input');
+  ageInput.type = 'number';
+  ageInput.min = '10';
+  ageInput.max = '120';
+  ageLabel.append(ageSpan, ageInput);
+  const sexLabel = document.createElement('label');
+  const sexSpan = document.createElement('span');
+  sexSpan.textContent = copy('sex');
+  const sexSelect = document.createElement('select');
+  (['M', 'F'] as const).forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = copy(value === 'M' ? 'male' : 'female');
+    sexSelect.append(option);
+  });
+  sexLabel.append(sexSpan, sexSelect);
+  const heightLabel = document.createElement('label');
+  const heightSpan = document.createElement('span');
+  heightSpan.textContent = `${copy('height')} (${lengthUnitLabel(options.unitSystem)})`;
+  const heightInput = document.createElement('input');
+  heightInput.type = 'number';
+  heightInput.step = '0.1';
+  heightLabel.append(heightSpan, heightInput);
+  const goalLabel = document.createElement('label');
+  const goalSpan = document.createElement('span');
+  goalSpan.textContent = copy('goal');
+  const goalSelect = document.createElement('select');
+  (['general', 'hypertrophy', 'fatLoss', 'strength', 'endurance'] as const).forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = copy(`goal${value[0]?.toUpperCase()}${value.slice(1)}` as MessageKey);
+    goalSelect.append(option);
+  });
+  goalLabel.append(goalSpan, goalSelect);
+  const profileSave = document.createElement('button');
+  profileSave.type = 'submit';
+  profileSave.textContent = copy('save');
+  const profileStatus = document.createElement('p');
+  profileStatus.setAttribute('role', 'status');
+  profileForm.append(ageLabel, sexLabel, heightLabel, goalLabel, profileSave);
+  profileCard.append(profileTitle, profileForm, profileStatus);
+  unitsCard.after(profileCard);
+  void loadUserData(user, 'profile').then((profile) => {
+    ageInput.value = profile?.age ? String(profile.age) : '';
+    sexSelect.value = profile?.sex ?? 'M';
+    heightInput.value = profile?.height
+      ? String(displayLength(profile.height, options.unitSystem))
+      : '';
+    goalSelect.value = profile?.goal ?? 'general';
+  });
+  profileForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const heightValue = heightInput.value ? Number(heightInput.value) : null;
+    void saveUserData(user, 'profile', {
+      age: ageInput.value ? Number(ageInput.value) : null,
+      sex: sexSelect.value as 'M' | 'F',
+      height: heightValue === null ? null : parseLengthInput(heightValue, options.unitSystem),
+      goal: goalSelect.value as 'general' | 'hypertrophy' | 'fatLoss' | 'strength' | 'endurance',
+    })
+      .then(() => {
+        profileStatus.textContent = copy('profileSaved');
+      })
+      .catch((error: unknown) => reportError(error, 'settings/profile'));
+  });
   const coachCard = document.createElement('article');
   coachCard.className = 'coach-link-card';
   const coachTitle = document.createElement('h2');

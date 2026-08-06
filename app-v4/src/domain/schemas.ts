@@ -208,7 +208,11 @@ export const favoriteMealsSchema = z.array(favoriteMealSchema).max(100);
 export const profileSchema = z.object({
   height: finite(50, 250).nullable().default(null),
   sex: z.enum(['M', 'F']).default('M'),
+  age: finite(10, 120).nullable().default(null),
+  goal: z.enum(['hypertrophy', 'fatLoss', 'strength', 'endurance', 'general']).default('general'),
 });
+export type Profile = z.infer<typeof profileSchema>;
+export type Goal = Profile['goal'];
 
 export const photoSchema = z.object({ id: safeIdSchema, d: dateKeySchema });
 export const photoIndexSchema = z.array(photoSchema).max(5000);

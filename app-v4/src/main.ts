@@ -11,6 +11,7 @@ import type {
   Exercise,
   FavoriteMeal,
   NutritionDay,
+  Profile,
   ProgressionDecision,
   Workouts,
 } from './domain/schemas';
@@ -1965,6 +1966,7 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
     'machine',
     'cable',
     'bodyweight',
+    'cardio',
   ];
   const equipmentLabels: Record<string, MessageKey> = {
     barbell: 'equipBarbell',
@@ -1972,6 +1974,7 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
     machine: 'equipMachine',
     cable: 'equipCable',
     bodyweight: 'equipBodyweight',
+    cardio: 'equipCardio',
   };
   const intensityKeys: IntensityKey[] = ['light', 'medium', 'heavy'];
   const intensityLabels: Record<IntensityKey, { title: MessageKey; desc: MessageKey }> = {
@@ -2113,6 +2116,18 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
     }
   };
   renderBody();
+  void loadUserData(user, 'profile').then((profile) => {
+    if (selectedIntensity || !profile) return;
+    const suggested: Record<Profile['goal'], IntensityKey> = {
+      hypertrophy: 'medium',
+      fatLoss: 'medium',
+      strength: 'heavy',
+      endurance: 'light',
+      general: 'medium',
+    };
+    selectedIntensity = suggested[profile.goal];
+    renderBody();
+  });
 }
 
 function renderExerciseCatalog(user: User, workouts: Workouts): void {

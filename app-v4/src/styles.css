@@ -809,6 +809,29 @@ h2 {
   justify-content: flex-end;
   gap: 0.6rem;
 }
+.profile-card form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+.profile-card label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+.profile-card input,
+.profile-card select {
+  background: #0f1012;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: #eef0f2;
+  padding: 0.6rem;
+}
+.profile-card button {
+  grid-column: 1 / -1;
+}
 .coach-link-card form {
   display: flex;
   gap: 0.5rem;
