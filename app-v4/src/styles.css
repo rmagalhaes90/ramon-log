@@ -505,13 +505,47 @@ h2 {
   text-overflow: ellipsis;
   text-transform: uppercase;
 }
+.exercise-alternatives-accordion {
+  margin: 0.5rem 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+.exercise-alternatives-accordion summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.8rem;
+  color: var(--volt);
+  user-select: none;
+}
+.exercise-alternatives-accordion summary::-webkit-details-marker {
+  display: none;
+}
+.exercise-alternatives-accordion summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-right: 0.4rem;
+  transition: transform 0.15s ease;
+}
+.exercise-alternatives-accordion[open] summary::before {
+  transform: rotate(90deg);
+}
 .exercise-alternatives {
   display: grid;
-  gap: 0.45rem;
-  margin: 0.5rem 0 1rem;
+  gap: 0.4rem;
+  padding: 0 0.6rem 0.6rem;
+  max-height: 14rem;
+  overflow-y: auto;
 }
 .exercise-alternatives button {
   text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  background: #0f1012;
+  color: #eef0f2;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.8rem;
 }
 .empty-state {
   padding: 3rem 1rem;

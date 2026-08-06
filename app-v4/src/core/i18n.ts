@@ -190,6 +190,7 @@ const messages = {
     schedule: 'Horário',
     taken: 'Tomado',
     addSupplement: 'Adicionar suplemento',
+    searchSupplement: 'Buscar suplemento',
     noSupplements: 'Nenhum suplemento configurado.',
     progressPhotos: 'Fotos de progresso',
     progressPhoto: 'Foto de progresso',
@@ -243,6 +244,7 @@ const messages = {
     equipMachine: 'Máquina',
     equipCable: 'Cabo/Polia',
     equipBodyweight: 'Peso do corpo',
+    equipCardio: 'Cardio',
     saveMeasurements: 'Salvar medidas',
     yourData: 'Seus dados',
     backupBody: 'Exporte um backup validado ou restaure dados de outro backup KYRO v4.',
@@ -282,6 +284,15 @@ const messages = {
     upperLowerDescription: 'Alternância de membros superiores e inferiores.',
     ppl: 'Push / Pull / Legs 6x',
     pplDescription: 'Divisão avançada em seis dias.',
+    pplUpperLower: 'PPL + Upper/Lower 5x',
+    pplUpperLowerDescription:
+      'Push, Pull, Legs, Upper, Lower — cinco dias, segunda a sexta, cada grupo trabalhado com boa frequência semanal.',
+    broSplit: 'Bro Split 5x',
+    broSplitDescription:
+      'Um grupo muscular por dia (peito, costas, pernas, ombros, braços) — segunda a sexta, foco e volume alto por grupo.',
+    fullBody5x: 'Full Body 5x',
+    fullBody5xDescription:
+      'Corpo inteiro cinco vezes por semana, com exercícios variados a cada dia — boa frequência para quem tem rotina.',
     applyTemplate: 'Aplicar plano',
     templateConfirm:
       'Aplicar este plano aos dias correspondentes? Rotinas desses dias serão substituídas.',
@@ -548,6 +559,7 @@ const messages = {
     schedule: 'Schedule',
     taken: 'Taken',
     addSupplement: 'Add supplement',
+    searchSupplement: 'Search supplement',
     noSupplements: 'No supplements configured.',
     progressPhotos: 'Progress photos',
     progressPhoto: 'Progress photo',
@@ -601,6 +613,7 @@ const messages = {
     equipMachine: 'Machine',
     equipCable: 'Cable',
     equipBodyweight: 'Bodyweight',
+    equipCardio: 'Cardio',
     saveMeasurements: 'Save measurements',
     yourData: 'Your data',
     backupBody: 'Export a validated backup or restore data from another KYRO v4 backup.',
@@ -639,6 +652,15 @@ const messages = {
     upperLowerDescription: 'Alternating upper and lower body sessions.',
     ppl: 'Push / Pull / Legs 6x',
     pplDescription: 'Advanced six-day split.',
+    pplUpperLower: 'PPL + Upper/Lower 5x',
+    pplUpperLowerDescription:
+      'Push, Pull, Legs, Upper, Lower — five days, Monday to Friday, each muscle group trained with solid weekly frequency.',
+    broSplit: 'Bro Split 5x',
+    broSplitDescription:
+      'One muscle group per day (chest, back, legs, shoulders, arms) — Monday to Friday, focus and high volume per group.',
+    fullBody5x: 'Full Body 5x',
+    fullBody5xDescription:
+      'Full body five times a week, with varied exercises each day — good frequency for a consistent routine.',
     applyTemplate: 'Apply plan',
     templateConfirm:
       'Apply this plan to its scheduled days? Existing routines on those days will be replaced.',

@@ -17,6 +17,26 @@ describe('templates reports and CSV', () => {
     expect(moved.segunda?.exercises[1]?.name).toBe(plan.segunda?.exercises[0]?.name);
     expect(pickExercises(['chest'], 3)).toHaveLength(3);
   });
+  it('varies exercises across repeated days of the same template', () => {
+    const fullbody = createTemplate('fullbody');
+    const a = fullbody.segunda?.exercises.map((item) => item.name).join(',');
+    const b = fullbody.quarta?.exercises.map((item) => item.name).join(',');
+    const c = fullbody.sexta?.exercises.map((item) => item.name).join(',');
+    expect(a).not.toBe(b);
+    expect(b).not.toBe(c);
+    const ppl = createTemplate('ppl');
+    expect(ppl.segunda?.exercises.map((item) => item.name).join(',')).not.toBe(
+      ppl.quinta?.exercises.map((item) => item.name).join(','),
+    );
+  });
+  it('builds the new five-day templates with sensible day counts', () => {
+    expect(Object.keys(createTemplate('pplUpperLower'))).toHaveLength(5);
+    expect(Object.keys(createTemplate('broSplit'))).toHaveLength(5);
+    expect(Object.keys(createTemplate('fullBody5x'))).toHaveLength(5);
+    const broSplit = createTemplate('broSplit');
+    expect(broSplit.segunda?.exercises.length).toBeGreaterThan(0);
+    expect(broSplit.terca?.exercises.length).toBeGreaterThan(0);
+  });
   it('drags exercises to an arbitrary position without mutating the source', () => {
     const plan = createTemplate('ppl');
     const originalFirst = plan.segunda?.exercises[0]?.name;

@@ -3,7 +3,7 @@ import { exerciseCatalog, searchExercises, supplementCatalog } from '../src/feat
 
 describe('legacy catalogs', () => {
   it('extracts and validates the complete baselines', () => {
-    expect(exerciseCatalog).toHaveLength(170);
+    expect(exerciseCatalog).toHaveLength(180);
     expect(supplementCatalog).toHaveLength(50);
   });
   it('searches exercises without mutating the catalog', () => {

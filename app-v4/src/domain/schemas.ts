@@ -36,7 +36,9 @@ export const exerciseSchema = z.object({
   sets: z.coerce.number().int().min(1).max(20).default(4),
   reps: boundedText(20).pipe(z.string().min(1)).default('10'),
   rest: z.coerce.number().int().min(0).max(1800).default(90),
-  equipment: z.enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', '']).default(''),
+  equipment: z
+    .enum(['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'cardio', ''])
+    .default(''),
   muscles: z.record(z.string().max(32), finite(0, 1)).default({}),
   videoUrl: videoUrlSchema,
   videoUrlEn: videoUrlSchema,

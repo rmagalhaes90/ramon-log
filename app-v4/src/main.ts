@@ -669,15 +669,17 @@ function openExerciseEditor(
   name.value = existing?.name ?? '';
 
   const equipment = document.createElement('select');
-  (['', 'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight'] as const).forEach((value) => {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = value
-      ? copy(`equip${value[0]?.toUpperCase()}${value.slice(1)}` as MessageKey)
-      : '—';
-    if (existing?.equipment === value) option.selected = true;
-    equipment.append(option);
-  });
+  (['', 'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'cardio'] as const).forEach(
+    (value) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value
+        ? copy(`equip${value[0]?.toUpperCase()}${value.slice(1)}` as MessageKey)
+        : '—';
+      if (existing?.equipment === value) option.selected = true;
+      equipment.append(option);
+    },
+  );
 
   const sets = document.createElement('input');
   sets.type = 'number';
@@ -1507,7 +1509,7 @@ async function renderSupplements(user: User): Promise<void> {
   const dayLog = fullLog[today] ?? {};
   const progress = dosesTakenToday(supplements, dayLog);
   shell(
-    `<section class="feature-view"><button id="supp-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">${progress.taken}/${progress.total} ${copy('taken')}</p><h1>${copy('supplements')}</h1><div id="my-supplements" class="supplement-list"></div><h2>${copy('addSupplement')}</h2><input id="supp-search" class="catalog-search" placeholder="${copy('search')}"><div id="supp-catalog" class="catalog-list"></div></section>`,
+    `<section class="feature-view"><button id="supp-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">${progress.taken}/${progress.total} ${copy('taken')}</p><h1>${copy('supplements')}</h1><div id="my-supplements" class="supplement-list"></div><h2>${copy('addSupplement')}</h2><input id="supp-search" class="catalog-search" placeholder="${copy('searchSupplement')}"><div id="supp-catalog" class="catalog-list"></div></section>`,
   );
   document.querySelector('#supp-back')?.addEventListener('click', () => {
     currentView = 'nutrition';
@@ -1906,7 +1908,9 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
     .querySelector('#template-back')
     ?.addEventListener('click', () => void renderRoutine(user));
   const list = document.querySelector('#template-list');
-  (['fullbody', 'upperLower', 'ppl'] as TemplateKey[]).forEach((key) => {
+  (
+    ['fullbody', 'upperLower', 'ppl', 'pplUpperLower', 'broSplit', 'fullBody5x'] as TemplateKey[]
+  ).forEach((key) => {
     const card = document.createElement('article');
     const title = document.createElement('h2');
     title.textContent = copy(key);
@@ -2113,7 +2117,7 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
 
 function renderExerciseCatalog(user: User, workouts: Workouts): void {
   shell(
-    `<section class="feature-view"><button id="catalog-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">CATALOG · 170</p><h1>${copy('addExercise')}</h1><input id="catalog-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><div id="catalog-list" class="catalog-list"></div></section>`,
+    `<section class="feature-view"><button id="catalog-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">CATALOG · ${exerciseCatalog.length}</p><h1>${copy('addExercise')}</h1><input id="catalog-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><div id="catalog-list" class="catalog-list"></div></section>`,
   );
   const draw = (query = '') => {
     const list = document.querySelector('#catalog-list');
@@ -2419,12 +2423,12 @@ function renderExerciseEntries(
     card.append(tools);
     const alternatives = rankExerciseAlternatives(entry.exercise, exerciseCatalog);
     if (alternatives.length) {
-      const alternativesButton = document.createElement('button');
-      alternativesButton.className = 'link-button';
-      alternativesButton.textContent = copy('findAlternative');
+      const details = document.createElement('details');
+      details.className = 'exercise-alternatives-accordion';
+      const summary = document.createElement('summary');
+      summary.textContent = copy('findAlternative');
       const alternativesList = document.createElement('div');
       alternativesList.className = 'exercise-alternatives';
-      alternativesList.hidden = true;
       alternatives.forEach(({ exercise, sharedMuscles }) => {
         const option = document.createElement('button');
         option.type = 'button';
@@ -2480,10 +2484,8 @@ function renderExerciseEntries(
         });
         alternativesList.append(option);
       });
-      alternativesButton.addEventListener('click', () => {
-        alternativesList.hidden = !alternativesList.hidden;
-      });
-      card.append(alternativesButton, alternativesList);
+      details.append(summary, alternativesList);
+      card.append(details);
     }
     const setHeader = document.createElement('div');
     setHeader.className = 'set-row set-header';
