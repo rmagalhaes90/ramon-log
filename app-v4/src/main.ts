@@ -2415,11 +2415,31 @@ function renderExerciseEntries(
                 }
               : item,
           );
+          const updatedExercise =
+            exerciseIndex < current.exercises.length
+              ? exercises[exerciseIndex]
+              : abs[abdominalIndex];
+          if (updatedExercise) {
+            workoutEntries[exerciseIndex] = {
+              exercise: updatedExercise,
+              sets: Array.from({ length: updatedExercise.sets }, () => ({
+                kg: 0,
+                reps: 0,
+                done: false,
+                rir: undefined,
+                rpe: undefined,
+              })),
+            };
+          }
           void saveUserData(user, 'workouts', {
             ...workouts,
             [selectedDay]: { ...current, exercises, abs },
           })
-            .then(() => clearWorkoutDraft(user, selectedDay))
+            .then(() =>
+              workoutStartedAt
+                ? saveWorkoutDraft(user, selectedDay, workoutStartedAt, workoutEntries)
+                : Promise.resolve(),
+            )
             .then(() => renderWorkout(user))
             .catch((error: unknown) => reportError(error, 'workout/substitution'));
         });

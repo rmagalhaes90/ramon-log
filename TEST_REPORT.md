@@ -1,5 +1,15 @@
 # Relatório de testes
 
+## Rodada 2026-08-06 — perda de cargas ao trocar exercício alpha.46
+
+Bug de perda de dados real reportado em uso: "quando estou no treino e troco de exercício ele apaga toda a lista de cargas que já coloquei durante o treinamento".
+
+Causa raiz em `main.ts`, handler do botão "Buscar alternativa" dentro de `renderExerciseEntries`: ao confirmar a troca, o código salvava a rotina atualizada e então chamava `clearWorkoutDraft(user, selectedDay)` seguido de `renderWorkout(user)` — ou seja, apagava o rascunho da sessão **inteira** e recarregava a tela do zero. Como não havia mais rascunho, `renderWorkout` recriava todas as entradas via `createEntries`, zerando carga/reps/marcação de concluído de **todos os exercícios da sessão**, não só do que foi trocado.
+
+Corrigido para não depender de um reload completo: o exercício substituído é atualizado diretamente em `workoutEntries[exerciseIndex]` (com séries zeradas, já que são de um exercício diferente), e o rascunho é salvo com `saveWorkoutDraft` preservando as entradas de todos os outros exercícios — só reabre a tela para refletir a mudança, sem perder nada que já estava em andamento.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente) e **31 arquivos/78 testes Vitest**, todos com código 0. Não foi possível reproduzir o fluxo completo (login → treino ativo → trocar exercício) num navegador nesta sessão por exigir conta autenticada; correção revisada por código e coberta pelos testes existentes de `workout-draft`. Versão sincronizada para `4.0.0-alpha.46`.
+
 ## Rodada 2026-08-05 — bootstrap admin não aparecia no cliente alpha.45
 
 Depois da alpha.44, o usuário confirmou estar logado com `rmagalhaes90@gmail.com` (visível no novo indicador "Conectado como") e mesmo assim o botão "Admin" não aparecia. Investigação:
