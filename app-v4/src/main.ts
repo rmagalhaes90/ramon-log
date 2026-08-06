@@ -20,6 +20,7 @@ import {
   completeEmailAction,
   completePasswordReset,
   createAccount,
+  loginWithApple,
   loginWithGoogle,
   loginWithPassword,
   logout,
@@ -293,6 +294,7 @@ function renderAuth(): void {
       <button class="primary" type="submit">${authMode === 'login' ? copy('login') : copy('signup')}</button></form>
     ${authMode === 'login' ? `<button class="link-button" id="forgot">${copy('forgot')}</button>` : ''}
     <div class="divider"><span>or</span></div><button id="google" class="secondary">${copy('google')}</button>
+    <button id="apple" class="secondary">${copy('apple')}</button>
     <a class="baseline-link" href="../index.html">${copy('baseline')}</a></section>`);
   document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) =>
     button.addEventListener('click', () => {
@@ -304,6 +306,7 @@ function renderAuth(): void {
     .querySelector('#auth-form')
     ?.addEventListener('submit', (event) => void submitAuth(event));
   document.querySelector('#google')?.addEventListener('click', () => void runAuth(loginWithGoogle));
+  document.querySelector('#apple')?.addEventListener('click', () => void runAuth(loginWithApple));
   document.querySelector('#forgot')?.addEventListener('click', () => void resetPassword());
 }
 

@@ -3,6 +3,7 @@ import {
   checkActionCode,
   confirmPasswordReset,
   GoogleAuthProvider,
+  OAuthProvider,
   getIdTokenResult,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -199,6 +200,13 @@ export async function createAccount(email: string, password: string): Promise<vo
 export async function loginWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
+  await signInWithPopup(services.auth, provider);
+}
+
+export async function loginWithApple(): Promise<void> {
+  const provider = new OAuthProvider('apple.com');
+  provider.addScope('email');
+  provider.addScope('name');
   await signInWithPopup(services.auth, provider);
 }
 

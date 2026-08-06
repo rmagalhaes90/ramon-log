@@ -1,5 +1,17 @@
 # Relatório de testes
 
+## Rodada 2026-08-06 — login com Apple alpha.47
+
+Pedido direto: "adicione apple account pra logar também, como alternativa". Implementado `loginWithApple()` em `features/auth/index.ts` usando `OAuthProvider('apple.com')` (escopos `email`/`name`), espelhando exatamente `loginWithGoogle()`. Botão "Continuar com Apple" adicionado na tela de login, verificado visualmente no dev server sem erros de console.
+
+**Importante, não é só código**: login com Apple só funciona depois de duas configurações externas que exigem acesso a contas do usuário e não podem ser feitas por aqui:
+1. No Apple Developer Portal: criar um Services ID, gerar uma chave privada "Sign in with Apple", anotar Team ID e Key ID.
+2. No Console do Firebase (Authentication → Sign-in method): habilitar o provedor Apple com esses dados, e registrar a URL de retorno OAuth do Firebase no Services ID da Apple.
+
+Sem isso, o botão aparece mas o login falha com erro do provedor não configurado — o código está pronto, falta a configuração manual do lado do usuário.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente) e **31 arquivos/78 testes Vitest**, todos com código 0. Versão sincronizada para `4.0.0-alpha.47`.
+
 ## Rodada 2026-08-06 — perda de cargas ao trocar exercício alpha.46
 
 Bug de perda de dados real reportado em uso: "quando estou no treino e troco de exercício ele apaga toda a lista de cargas que já coloquei durante o treinamento".
