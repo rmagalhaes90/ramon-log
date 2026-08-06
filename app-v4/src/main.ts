@@ -104,11 +104,13 @@ import {
   weightUnitLabel,
   type UnitSystem,
 } from './core/units';
+import { applyTheme, loadTheme } from './core/theme';
 import { cacheGet, cacheSet, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
 
 installGlobalErrorHandlers();
+applyTheme(loadTheme());
 const i18n = createI18n();
 i18n.setLocale(i18n.locale);
 const root = document.querySelector<HTMLDivElement>('#app');

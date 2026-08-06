@@ -3,12 +3,27 @@
 :root {
   color-scheme: dark;
   font-family: 'Space Grotesk', sans-serif;
-  background: #0b0c0e;
-  color: #eef0f2;
   --volt: #d7ff3d;
   --panel: #17191d;
   --line: #2a2d33;
   --dim: #8b9096;
+  --text: #eef0f2;
+  --bg: #0b0c0e;
+  --surface: #0f1012;
+  --bg-gradient: radial-gradient(circle at 75% 0%, #26310b 0, #0b0c0e 32rem);
+  background: var(--bg);
+  color: var(--text);
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+  --volt: #6b8f00;
+  --panel: #ffffff;
+  --line: #dde0e5;
+  --dim: #5a6068;
+  --text: #14161a;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --bg-gradient: radial-gradient(circle at 75% 0%, #eef7d1 0, #f4f5f7 32rem);
 }
 * {
   box-sizing: border-box;
@@ -16,7 +31,7 @@
 body {
   margin: 0;
   min-height: 100dvh;
-  background: radial-gradient(circle at 75% 0%, #26310b 0, #0b0c0e 32rem);
+  background: var(--bg-gradient);
 }
 button,
 a {
@@ -30,7 +45,7 @@ a {
     max(1.25rem, env(safe-area-inset-left));
 }
 .brand {
-  color: #eef0f2;
+  color: var(--text);
   font: 2.25rem 'Bebas Neue';
   letter-spacing: 0.06em;
   text-decoration: none;
@@ -51,7 +66,7 @@ a {
   padding: 0.45rem 0.6rem;
 }
 .locale button[aria-pressed='true'] {
-  color: #0b0c0e;
+  color: var(--bg);
   background: var(--volt);
 }
 main {
@@ -110,7 +125,7 @@ h2 {
 .primary {
   display: inline-block;
   background: var(--volt);
-  color: #0b0c0e;
+  color: var(--bg);
   font-weight: 700;
   text-decoration: none;
   padding: 1rem 1.25rem;
@@ -218,7 +233,7 @@ h2 {
   cursor: pointer;
 }
 .intensity-grid button strong {
-  color: #eef0f2;
+  color: var(--text);
 }
 .intensity-grid button small {
   color: var(--dim);
@@ -245,8 +260,8 @@ h2 {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 0.7rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.9rem;
   font-size: 1rem;
 }
@@ -267,7 +282,7 @@ h2 {
 }
 .secondary {
   margin-top: 0.8rem;
-  color: #eef0f2;
+  color: var(--text);
 }
 .link-button {
   border: 0;
@@ -335,7 +350,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 0.7rem;
   padding: 1rem;
-  color: #eef0f2 !important;
+  color: var(--text) !important;
 }
 .choice input {
   accent-color: var(--volt);
@@ -405,7 +420,7 @@ h2 {
 }
 .days button[aria-pressed='true'] {
   background: var(--volt);
-  color: #0b0c0e;
+  color: var(--bg);
   border-color: var(--volt);
 }
 .days button.empty:not([aria-pressed='true']) {
@@ -445,8 +460,8 @@ h2 {
   width: 3.2rem;
   border: 1px solid var(--line);
   border-radius: 0.4rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.2rem 0.35rem;
   font-size: 0.75rem;
   text-align: center;
@@ -481,8 +496,8 @@ h2 {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.7rem;
 }
 .set-row input[type='checkbox'] {
@@ -542,8 +557,8 @@ h2 {
   text-align: left;
   border: 1px solid var(--line);
   border-radius: 0.45rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.5rem 0.6rem;
   font-size: 0.8rem;
 }
@@ -560,7 +575,7 @@ h2 {
   gap: 0.5rem;
 }
 .onboard-title {
-  color: #eef0f2;
+  color: var(--text);
   font-size: 1.1rem;
   font-weight: 700;
 }
@@ -619,7 +634,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 0.7rem;
   background: var(--panel);
-  color: #eef0f2;
+  color: var(--text);
   padding: 1rem;
   margin: 1rem 0;
 }
@@ -670,14 +685,14 @@ h2 {
 .exercise-tools button {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
+  background: var(--surface);
   color: var(--volt);
 }
 .exercise-tools textarea {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.5rem;
   min-height: 2.5rem;
 }
@@ -696,7 +711,7 @@ h2 {
   margin: 0 auto;
   z-index: 60;
   background: var(--volt);
-  color: #0b0c0e;
+  color: var(--bg);
   border-radius: 0.7rem;
   padding: 0.8rem;
   font-weight: 800;
@@ -709,7 +724,7 @@ h2 {
   display: none;
 }
 .rest-timer button {
-  background: #0b0c0e;
+  background: var(--bg);
   color: var(--volt);
   border: 0;
   border-radius: 0.5rem;
@@ -743,7 +758,7 @@ h2 {
   width: min(48rem, 100%);
 }
 .video-modal-frame h2 {
-  color: #eef0f2;
+  color: var(--text);
   font-size: 1rem;
   margin: 0 0 0.6rem;
   padding-right: 2.5rem;
@@ -753,7 +768,7 @@ h2 {
   top: -0.2rem;
   right: 0;
   background: var(--panel);
-  color: #eef0f2;
+  color: var(--text);
   border: 1px solid var(--line);
   border-radius: 999px;
   width: 2.2rem;
@@ -797,10 +812,10 @@ h2 {
 .exercise-editor-card input,
 .exercise-editor-card select,
 .exercise-editor-card textarea {
-  background: #0f1012;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  color: #eef0f2;
+  color: var(--text);
   padding: 0.6rem;
   font: inherit;
 }
@@ -823,10 +838,10 @@ h2 {
 }
 .profile-card input,
 .profile-card select {
-  background: #0f1012;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  color: #eef0f2;
+  color: var(--text);
   padding: 0.6rem;
 }
 .profile-card button {
@@ -839,10 +854,10 @@ h2 {
 }
 .coach-link-card input {
   flex: 1;
-  background: #0f1012;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  color: #eef0f2;
+  color: var(--text);
   padding: 0.6rem;
 }
 .weekly-report > button {
@@ -857,7 +872,7 @@ h2 {
 .metric-grid button {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
+  background: var(--surface);
   color: var(--volt);
   padding: 0.55rem 0.7rem;
 }
@@ -913,8 +928,8 @@ h2 {
 .meal-form input {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.7rem;
 }
 .compact-form .primary,
@@ -997,8 +1012,8 @@ h2 {
 .danger-zone input {
   border: 1px solid #ff4d5e66;
   border-radius: 0.5rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.8rem;
 }
 .danger-button {
@@ -1050,8 +1065,8 @@ h2 {
 .supplement-schedule input {
   border: 1px solid var(--line);
   border-radius: 0.45rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.5rem;
 }
 .supplement-schedule button {
@@ -1074,7 +1089,7 @@ h2 {
   color: var(--dim);
 }
 .photo-upload input {
-  color: #eef0f2;
+  color: var(--text);
 }
 .photo-upload progress {
   width: 100%;
@@ -1180,8 +1195,8 @@ h2 {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.65rem;
 }
 .measurements-form .primary {
@@ -1206,7 +1221,7 @@ h2 {
 .import-button {
   border: 1px solid var(--line);
   border-radius: 0.6rem;
-  background: #0f1012;
+  background: var(--surface);
   color: var(--volt);
   padding: 0.8rem;
   cursor: pointer;
@@ -1231,7 +1246,7 @@ h2 {
 .notification-card button {
   border: 1px solid var(--line);
   border-radius: 0.6rem;
-  background: #0f1012;
+  background: var(--surface);
   color: var(--volt);
   padding: 0.8rem;
 }
@@ -1251,7 +1266,7 @@ h2 {
 .storage-card button {
   border: 1px solid var(--line);
   border-radius: 0.6rem;
-  background: #0f1012;
+  background: var(--surface);
   color: var(--volt);
   padding: 0.8rem;
 }
@@ -1276,7 +1291,7 @@ h2 {
 .reset-card button {
   border: 1px solid #ff4d5e66;
   border-radius: 0.6rem;
-  background: #0f1012;
+  background: var(--surface);
   color: #ffabb3;
   padding: 0.8rem;
 }
@@ -1306,7 +1321,7 @@ h2 {
   border: 0;
   border-radius: 0.6rem;
   background: var(--volt);
-  color: #0b0c0e;
+  color: var(--bg);
   padding: 0.8rem;
   font-weight: 700;
 }
@@ -1373,15 +1388,15 @@ h2 {
 .barcode-form input {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #0f1012;
-  color: #eef0f2;
+  background: var(--surface);
+  color: var(--text);
   padding: 0.7rem;
 }
 .barcode-form button {
   border: 0;
   border-radius: 0.5rem;
   background: var(--volt);
-  color: #0b0c0e;
+  color: var(--bg);
   padding: 0.75rem;
   font-weight: 700;
 }
@@ -1412,8 +1427,8 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: #eef0f2;
-  color: #0b0c0e;
+  background: var(--text);
+  color: var(--bg);
   padding: 1rem;
   border-radius: 0.8rem;
   box-shadow: 0 1rem 3rem #0008;
@@ -1424,7 +1439,7 @@ h2 {
 .toast button {
   border: 0;
   border-radius: 0.5rem;
-  background: #0b0c0e;
+  background: var(--bg);
   color: var(--volt);
   padding: 0.6rem;
 }
@@ -1659,11 +1674,11 @@ h2 {
 }
 .cel-actions button:first-child {
   background: var(--volt);
-  color: #0b0c0e;
+  color: var(--bg);
 }
 .cel-actions button:last-child {
   background: var(--panel);
-  color: #eef0f2;
+  color: var(--text);
   border: 1px solid var(--line);
 }
 .confetti-burst {

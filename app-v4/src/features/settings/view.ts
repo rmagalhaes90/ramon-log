@@ -27,6 +27,7 @@ import { resetFeatureGroup, type ResetGroup } from './reset';
 import { loadEntitlements } from '../subscriptions';
 import { flushPhotoUploads, photoQueueCount } from '../photos/offline';
 import { leaveCoachRelationship, myCoach, redeemInvite } from '../coach';
+import { loadTheme, saveTheme, type Theme } from '../../core/theme';
 
 interface SettingsViewOptions {
   copy: (key: MessageKey) => string;
@@ -162,6 +163,25 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   });
   unitsCard.append(unitsTitle, unitsChoice);
   document.querySelector('.notification-card')?.after(unitsCard);
+  const themeCard = document.createElement('article');
+  themeCard.className = 'units-card';
+  const themeTitle = document.createElement('h2');
+  themeTitle.textContent = copy('themeLabel');
+  const themeChoice = document.createElement('div');
+  (['dark', 'light'] as Theme[]).forEach((value) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = copy(value === 'dark' ? 'themeDark' : 'themeLight');
+    button.ariaPressed = String(value === loadTheme());
+    button.addEventListener('click', () => {
+      if (value === loadTheme()) return;
+      saveTheme(value);
+      void renderSettingsView(user, options);
+    });
+    themeChoice.append(button);
+  });
+  themeCard.append(themeTitle, themeChoice);
+  unitsCard.after(themeCard);
   const profileCard = document.createElement('article');
   profileCard.className = 'profile-card';
   const profileTitle = document.createElement('h2');
@@ -211,7 +231,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   profileStatus.setAttribute('role', 'status');
   profileForm.append(ageLabel, sexLabel, heightLabel, goalLabel, profileSave);
   profileCard.append(profileTitle, profileForm, profileStatus);
-  unitsCard.after(profileCard);
+  themeCard.after(profileCard);
   void loadUserData(user, 'profile').then((profile) => {
     ageInput.value = profile?.age ? String(profile.age) : '';
     sexSelect.value = profile?.sex ?? 'M';
