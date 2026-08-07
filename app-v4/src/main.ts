@@ -889,7 +889,7 @@ function openExerciseEditor(
         });
       })
       .catch((error: unknown) => {
-        mediaStatus.textContent = copy('noMediaResults');
+        mediaStatus.textContent = copy('mediaSearchFailed');
         reportError(error, 'catalog/media-search');
       });
   });
