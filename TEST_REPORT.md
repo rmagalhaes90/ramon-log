@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — busca de exemplo retornando "nenhum resultado" alpha.55
+
+Usuário reportou, logo após a alpha.54 ir ao ar, que a busca "Buscar exemplo" no Gerenciador de exercícios não achava nada pra nenhuma consulta. Diagnóstico via `firebase functions:log --only searchExerciseMedia`: `TypeError: Cannot convert argument to a ByteString because the character at index 0 has a value of 65279 which is greater than 255` — código de caractere 65279 é U+FEFF, o BOM (Byte Order Mark) do UTF-8. A causa: o segredo `RAPIDAPI_KEY` foi configurado originalmente com `"chave" | firebase functions:secrets:set ... --data-file -` no PowerShell, que adiciona um BOM ao codificar a string pro pipe — esse caractere ficou gravado como parte do valor do segredo, e o `fetch()` do Node rejeita cabeçalhos HTTP com esse byte inicial. Toda chamada à RapidAPI falhava antes mesmo de sair, e o catch do cliente mostrava o mesmo texto de "nenhum resultado" tanto pra busca vazia de verdade quanto pra qualquer erro — escondendo o problema real.
+
+Corrigido em duas partes: (1) segredo recriado a partir de um arquivo temporário escrito via Bash (`printf` puro, sem BOM, verificado byte a byte com `xxd`) e as duas funções (`searchExerciseMedia`, `getExerciseMedia`) republicadas pra usar a nova versão; (2) cliente agora diferencia "nenhum resultado" de erro real, mostrando `mediaSearchFailed` só quando a busca de fato falha.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/91 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.55`.
+
 ## Rodada 2026-08-07 — exemplos em GIF via RapidAPI alpha.54
 
 Usuário forneceu uma chave de uma API paga (RapidAPI, "ExerciseDB with GIFs and images") pra trazer exemplos visuais reais dos exercícios, fechando a lacuna já identificada na alpha.28 (nenhum repositório gratuito de vídeos de exemplo existe). A chave não pode ir pro frontend (bundle público) nem pro repositório — implementado como proxy: duas Cloud Functions novas, `searchExerciseMedia` (admin/coach) e `getExerciseMedia` (qualquer usuário logado, com cache em `sharedExerciseMedia` no Firestore pra não regastar a cota em exercícios populares), seguram a chave via Firebase Functions secret (`RAPIDAPI_KEY`).
