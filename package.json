@@ -1,7 +1,7 @@
 {
   "name": "kyro-v4",
   "private": true,
-  "version": "4.0.0-alpha.48",
+  "version": "4.0.0-alpha.49",
   "type": "module",
   "scripts": {
     "dev": "vite --config vite.config.ts",
@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@kyro/domain": "workspace:*",
+    "@zxing/browser": "^0.2.1",
+    "@zxing/library": "^0.23.0",
     "firebase": "^12.2.1",
     "idb": "^8.0.3",
     "zod": "^4.0.15"

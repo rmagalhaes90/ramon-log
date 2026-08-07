@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — lote "wow factor" (10 itens) alpha.49
+
+Lote grande pedido pelo usuário de uma vez ("faça todos, não precisa seguir ordem específica"), implementado item a item: acordeon de alternativas de exercício, catálogo de cardio, três templates novos com correção de repetição determinística entre dias, perfil (idade/sexo/altura/objetivo) em Configurações, sugestão de intensidade pelo objetivo no gerador, tema claro/escuro, vídeo próprio do coach por exercício, leitor de código de barras via ZXing, pesquisa de repositório de vídeos livre, e páginas legais (Termos/EULA/Privacidade/Direitos autorais) dentro do app. Os itens de #20 a #26 já tinham sido commitados em lotes anteriores nesta mesma sessão; esta rodada fecha #27 (barcode) e #29 (legal) e sincroniza a versão para todo o conjunto.
+
+Ao trocar `BarcodeDetector` nativo (sem suporte no Safari/Firefox) pela biblioteca ZXing, o bundle principal cresceu de ~276 kB para 737 kB minificado (196 kB gzip), disparando o aviso de chunk grande do Rollup — a biblioteca inteira era importada estaticamente em `main.ts` mesmo para quem nunca abre a câmera de código de barras. Corrigido dividindo `features/nutrition/camera.ts` em duas partes: a checagem de suporte (`barcodeCameraSupported`, sem dependência do ZXing) continua estática, e o scanner de fato (`camera-scanner.ts`, com o ZXing) passa a ser importado dinamicamente só dentro de `startBarcodeCamera`, no momento em que a câmera é aberta. Resultado: bundle principal caiu para 285 kB (80 kB gzip) e o ZXing vira um chunk `camera-scanner-*.js` de 455 kB carregado sob demanda — aviso de chunk grande desapareceu.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente) e **32 arquivos/83 testes Vitest**, todos com código 0. `build` sem avisos de tamanho de chunk. Versão sincronizada para `4.0.0-alpha.49`.
+
 ## Rodada 2026-08-06 — mesmo bug de perda de dados em mais dois lugares alpha.48
 
 Usuário reportou "ainda limpando as séries quando troco de exercício" mesmo após a correção da alpha.46 — a princípio parecia que o fix não tinha chegado (deploy travado pela instabilidade do GitHub), mas uma varredura por todos os usos de `clearWorkoutDraft(user, selectedDay)` em `main.ts` encontrou **duas outras ações na tela de Treino ativo** com exatamente o mesmo defeito da substituição de exercício: reordenar (arrastar-e-soltar e as setas ↑↓) e remover um exercício. As três ações salvavam a rotina atualizada e então chamavam `clearWorkoutDraft` + `renderWorkout`, apagando carga/reps/marcação de concluído de **todos** os exercícios da sessão, não só do afetado.

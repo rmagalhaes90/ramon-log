@@ -37,6 +37,7 @@ interface SettingsViewOptions {
   onRestNotificationsChange: (enabled: boolean) => void;
   unitSystem: UnitSystem;
   onUnitSystemChange: (units: UnitSystem) => void;
+  onOpenLegal: () => void;
 }
 const formText = (data: FormData, key: string) => {
   const value = data.get(key);
@@ -232,6 +233,16 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   profileForm.append(ageLabel, sexLabel, heightLabel, goalLabel, profileSave);
   profileCard.append(profileTitle, profileForm, profileStatus);
   themeCard.after(profileCard);
+  const legalCard = document.createElement('article');
+  legalCard.className = 'units-card';
+  const legalTitle = document.createElement('h2');
+  legalTitle.textContent = copy('legalTitle');
+  const legalButton = document.createElement('button');
+  legalButton.type = 'button';
+  legalButton.textContent = copy('legalTitle');
+  legalButton.addEventListener('click', () => options.onOpenLegal());
+  legalCard.append(legalTitle, legalButton);
+  profileCard.after(legalCard);
   void loadUserData(user, 'profile').then((profile) => {
     ageInput.value = profile?.age ? String(profile.age) : '';
     sexSelect.value = profile?.sex ?? 'M';

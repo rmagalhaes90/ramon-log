@@ -135,6 +135,21 @@ const messages = {
     settings: 'Ajustes',
     deleteAccount: 'Excluir conta e todos os dados',
     deleteWarning: 'Esta ação é permanente. Digite EXCLUIR para confirmar.',
+    legalTitle: 'Legal',
+    legalDraftNotice:
+      'Estes são rascunhos operacionais, não aconselhamento jurídico. Precisam de revisão por um advogado antes de valerem como documentos oficiais.',
+    legalTerms: 'Termos de uso',
+    legalTermsBody:
+      'O KYRO oferece registro e recomendações informativas de treino; não presta diagnóstico, tratamento ou prescrição médica. O usuário permanece responsável por interromper atividades inseguras e buscar profissional qualificado.\n\nOs termos finais devem definir elegibilidade, conta, uso aceitável, propriedade intelectual, disponibilidade, assinatura/cancelamento, limitação de responsabilidade, lei aplicável e contato.',
+    legalEula: 'Licença de uso (EULA)',
+    legalEulaBody:
+      'O KYRO concede uma licença limitada, pessoal, não exclusiva, revogável e intransferível para usar o aplicativo exclusivamente para fins pessoais de acompanhamento de treino, nutrição e progresso físico.\n\nÉ vedado fazer engenharia reversa, redistribuir, sublicenciar ou revender o software, ou remover avisos de direitos autorais e marca. Todo o código, design e marca "KYRO" permanecem propriedade do titular do projeto ou de seus licenciantes.',
+    legalPrivacy: 'Política de privacidade',
+    legalPrivacyBody:
+      'O KYRO processa conta, treinos, nutrição, medidas, readiness e fotos privadas para prestar o serviço. Fotos não são públicas nem usadas para treinar modelos sem consentimento explícito. Dados ficam no dispositivo e no Firebase configurado pelo controlador.\n\nVocê pode acessar, corrigir, exportar e excluir seus dados diretamente no aplicativo (Configurações → Seus dados / Excluir conta), a qualquer momento.',
+    legalCopyright: 'Direitos autorais',
+    legalCopyrightBody:
+      'O código, design, marca "KYRO" e textos originais são protegidos por direitos autorais. Links de vídeo de demonstração de exercícios apontam para conteúdo hospedado por terceiros no YouTube — o KYRO não hospeda nem reivindica direitos sobre esses vídeos. Vídeos adicionados por um coach para seus alunos são de responsabilidade exclusiva de quem os adicionou.\n\nFotos, medidas, treinos e demais conteúdos inseridos por você permanecem de sua propriedade.',
     confirmation: 'Confirmação',
     deleting: 'Excluindo com segurança…',
     deleteFailed: 'Não foi possível concluir a exclusão. Nenhum passo restante será ocultado.',
@@ -523,6 +538,21 @@ const messages = {
     settings: 'Settings',
     deleteAccount: 'Delete account and all data',
     deleteWarning: 'This is permanent. Type DELETE to confirm.',
+    legalTitle: 'Legal',
+    legalDraftNotice:
+      'These are operational drafts, not legal advice. They need review by a lawyer before being treated as official documents.',
+    legalTerms: 'Terms of use',
+    legalTermsBody:
+      'KYRO provides logging and informational training recommendations; it does not provide medical diagnosis, treatment, or prescription. You remain responsible for stopping unsafe activity and consulting a qualified professional.\n\nFinal terms must define eligibility, account, acceptable use, intellectual property, availability, subscription/cancellation, liability limitation, governing law, and contact.',
+    legalEula: 'End-user license (EULA)',
+    legalEulaBody:
+      'KYRO grants a limited, personal, non-exclusive, revocable, non-transferable license to use the app solely for personal training, nutrition, and progress tracking purposes.\n\nReverse engineering, redistributing, sublicensing, or reselling the software, or removing copyright/brand notices, is prohibited. All code, design, and the "KYRO" brand remain the property of the project owner or its licensors.',
+    legalPrivacy: 'Privacy policy',
+    legalPrivacyBody:
+      'KYRO processes account, workout, nutrition, measurement, readiness, and private photo data to provide the service. Photos are never public or used to train models without explicit consent. Data stays on-device and in the Firebase project configured by the controller.\n\nYou can access, correct, export, and delete your data directly in the app (Settings -> Your data / Delete account) at any time.',
+    legalCopyright: 'Copyright',
+    legalCopyrightBody:
+      'The code, design, "KYRO" brand, and original text are copyright protected. Exercise demonstration video links point to third-party content hosted on YouTube — KYRO does not host or claim rights over those videos. Videos added by a coach for their own students are that coach\'s sole responsibility.\n\nPhotos, measurements, workouts, and other content you enter remain your property.',
     confirmation: 'Confirmation',
     deleting: 'Deleting securely…',
     deleteFailed: 'Deletion could not be completed. No remaining step will be hidden.',

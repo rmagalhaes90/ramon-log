@@ -307,6 +307,7 @@ function renderAuth(): void {
     ${authMode === 'login' ? `<button class="link-button" id="forgot">${copy('forgot')}</button>` : ''}
     <div class="divider"><span>or</span></div><button id="google" class="secondary">${copy('google')}</button>
     <button id="apple" class="secondary">${copy('apple')}</button>
+    <button class="link-button" id="open-legal">${copy('legalTitle')}</button>
     <a class="baseline-link" href="../index.html">${copy('baseline')}</a></section>`);
   document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) =>
     button.addEventListener('click', () => {
@@ -320,6 +321,38 @@ function renderAuth(): void {
   document.querySelector('#google')?.addEventListener('click', () => void runAuth(loginWithGoogle));
   document.querySelector('#apple')?.addEventListener('click', () => void runAuth(loginWithApple));
   document.querySelector('#forgot')?.addEventListener('click', () => void resetPassword());
+  document.querySelector('#open-legal')?.addEventListener('click', () => renderLegal(renderAuth));
+}
+
+function renderLegal(onBack: () => void): void {
+  const docs: { titleKey: MessageKey; bodyKey: MessageKey }[] = [
+    { titleKey: 'legalTerms', bodyKey: 'legalTermsBody' },
+    { titleKey: 'legalEula', bodyKey: 'legalEulaBody' },
+    { titleKey: 'legalPrivacy', bodyKey: 'legalPrivacyBody' },
+    { titleKey: 'legalCopyright', bodyKey: 'legalCopyrightBody' },
+  ];
+  shell(
+    `<section class="feature-view"><button id="legal-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">KYRO</p><h1>${copy('legalTitle')}</h1><p class="hint">${copy('legalDraftNotice')}</p><div id="legal-docs"></div></section>`,
+  );
+  document.querySelector('#legal-back')?.addEventListener('click', onBack);
+  const container = document.querySelector('#legal-docs');
+  docs.forEach(({ titleKey, bodyKey }) => {
+    const details = document.createElement('details');
+    details.className = 'exercise-alternatives-accordion legal-doc';
+    const summary = document.createElement('summary');
+    summary.textContent = copy(titleKey);
+    const body = document.createElement('div');
+    body.className = 'legal-body';
+    copy(bodyKey)
+      .split('\n\n')
+      .forEach((paragraph) => {
+        const p = document.createElement('p');
+        p.textContent = paragraph;
+        body.append(p);
+      });
+    details.append(summary, body);
+    container?.append(details);
+  });
 }
 
 async function runAuth(action: () => Promise<void>): Promise<void> {
@@ -1061,6 +1094,7 @@ async function renderSettings(user: User): Promise<void> {
       unitSystem = units;
       void cacheSet(`units:${user.uid}`, units);
     },
+    onOpenLegal: () => renderLegal(() => void renderSettings(user)),
   });
 }
 
