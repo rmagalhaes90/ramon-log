@@ -462,10 +462,26 @@ async function needsTour(user: User): Promise<boolean> {
 function renderTour(user: User): void {
   const steps: { eyebrow: string; title: string; body: string }[] = [
     { eyebrow: 'KYRO', title: copy('welcome'), body: copy('tourIntro') },
-    { eyebrow: '01 · TRAIN', title: copy('train'), body: copy('trainModule') },
-    { eyebrow: '02 · RECOVER', title: copy('progress'), body: copy('recoverModule') },
-    { eyebrow: '03 · FUEL', title: copy('nutrition'), body: copy('fuelModule') },
-    { eyebrow: '04 · SYNC', title: copy('settings'), body: copy('syncModule') },
+    {
+      eyebrow: `01 · ${copy('moduleTrainLabel')}`,
+      title: copy('train'),
+      body: copy('trainModule'),
+    },
+    {
+      eyebrow: `02 · ${copy('moduleRecoverLabel')}`,
+      title: copy('progress'),
+      body: copy('recoverModule'),
+    },
+    {
+      eyebrow: `03 · ${copy('moduleFuelLabel')}`,
+      title: copy('nutrition'),
+      body: copy('fuelModule'),
+    },
+    {
+      eyebrow: `04 · ${copy('moduleSyncLabel')}`,
+      title: copy('settings'),
+      body: copy('syncModule'),
+    },
   ];
   let stepIndex = 0;
   const finishTour = () =>
@@ -547,9 +563,9 @@ function renderDashboard(user: User): void {
     <p class="account-email">${copy('loggedInAs')}: <strong>${user.email ?? user.uid}</strong></p>
     <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><button id="open-sync" class="status-link">${copy('queue')}: <b id="queue-count">0</b></button></div>
     <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin ? `<button id="open-admin" class="secondary">${copy('admin')}</button>` : ''}${authState.isCoach ? `<button id="open-coach" class="secondary">${copy('coach')}</button>` : ''}<button id="logout" class="link-button">${copy('logout')}</button></section>
-    <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>TRAIN</h2><p>${copy('trainModule')}</p><button id="open-workout-card">${copy('train')}</button></article>
-    <article><span>02</span><h2>RECOVER</h2><p>${copy('recoverModule')}</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>FUEL</h2><p>${copy('fuelModule')}</p><button id="open-nutrition">${copy('nutrition')}</button></article>
-    <article><span>04</span><h2>SYNC</h2><p>${copy('syncModule')}</p><button id="open-settings">${copy('settings')}</button></article></section>`);
+    <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>${copy('moduleTrainLabel')}</h2><p>${copy('trainModule')}</p><button id="open-workout-card">${copy('train')}</button></article>
+    <article><span>02</span><h2>${copy('moduleRecoverLabel')}</h2><p>${copy('recoverModule')}</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>${copy('moduleFuelLabel')}</h2><p>${copy('fuelModule')}</p><button id="open-nutrition">${copy('nutrition')}</button></article>
+    <article><span>04</span><h2>${copy('moduleSyncLabel')}</h2><p>${copy('syncModule')}</p><button id="open-settings">${copy('settings')}</button></article></section>`);
   document
     .querySelector('#logout')
     ?.addEventListener(
@@ -1159,7 +1175,7 @@ async function renderProgress(user: User): Promise<void> {
   const lengthBound = (cm: number) => displayLength(cm, unitSystem, 0);
   const measurementField = (key: MeasurementKey, min: number, max: number) =>
     `<label>${copy(key)} (${lengthUnit})<input name="${key}" type="number" min="${lengthBound(min)}" max="${lengthBound(max)}" step="0.1"></label>`;
-  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">02 · RECOVER</p><h1>${copy('progress')}</h1>
+  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">02 · ${copy('moduleRecoverLabel')}</p><h1>${copy('progress')}</h1>
     <div class="metric-grid"><article><span>${copy('weight')}</span><strong id="latest-weight">—</strong><small id="weight-delta"></small></article><article><span>${copy('readiness')}</span><strong id="readiness-score">—</strong><small id="readiness-class"></small></article><article><span>${copy('history')}</span><strong>${sessions.length}</strong></article></div>
     <div id="weight-chart" class="progress-chart" aria-label="${copy('weightChart')}"></div><form id="weight-form" class="compact-form"><label>${copy('weight')} (${weightUnit})<input id="weight-input" type="number" min="${weightBound(1)}" max="${weightBound(1000)}" step="0.1" required></label><button class="primary">${copy('add')}</button></form><section><h2>${copy('measurementTrends')}</h2><div id="measurement-charts" class="measurement-charts"></div></section>
     <form id="measurements-form" class="measurements-form">${measurementField('waist', 20, 300)}${measurementField('chest', 20, 300)}${measurementField('arm', 10, 150)}${measurementField('hip', 20, 300)}${measurementField('thigh', 10, 200)}<button class="primary">${copy('saveMeasurements')}</button></form>
@@ -1397,7 +1413,7 @@ async function renderNutrition(user: User): Promise<void> {
     .filter((value): value is NutritionDay => Boolean(value))
     .at(-1);
   const day = log[today] ?? emptyNutritionDay(previous);
-  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">03 · FUEL</p><h1>${copy('nutrition')}</h1>
+  shell(`<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">03 · ${copy('moduleFuelLabel')}</p><h1>${copy('nutrition')}</h1>
     <div class="metric-grid nutrition-metrics"><article><span>${copy('calories')}</span><strong>${Math.round(day.kcal)}</strong><small>${Math.round(percentage(day.kcal, day.kcalGoal))}%</small></article><article><span>${copy('protein')}</span><strong>${Math.round(day.protein)}g</strong><small>${Math.round(percentage(day.protein, day.proteinGoal))}%</small></article><article><span>${copy('fiber')}</span><strong>${Math.round(day.fiber)}g</strong><small>${Math.round(percentage(day.fiber, day.fiberGoal))}%</small></article><article><span>${copy('water')}</span><strong>${day.water.toFixed(2)}L</strong><button id="add-water">+ 250ml</button></article></div><button id="open-supplements" class="secondary">${copy('supplements')}</button><form id="barcode-form" class="barcode-form"><label>${copy('barcode')}<input name="barcode" inputmode="numeric" pattern="[0-9]{8,14}" maxlength="14" required></label><button type="submit">${copy('lookup')}</button><button type="button" id="scan-barcode" ${barcodeCameraSupported() ? '' : 'disabled'}>${copy('scanBarcode')}</button><video id="barcode-video" hidden muted></video><span id="barcode-status" role="status"></span></form>
     <form id="meal-form" class="meal-form"><label>${copy('mealName')}<input name="name" maxlength="120" required></label><label>${copy('calories')}<input name="kcal" type="number" min="0" max="10000" required></label><label>${copy('protein')}<input name="protein" type="number" min="0" max="1000" step="0.1"></label><label>${copy('carbs')}<input name="carb" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fat')}<input name="fat" type="number" min="0" max="1000" step="0.1"></label><label>${copy('fiber')}<input name="fiber" type="number" min="0" max="1000" step="0.1"></label><button class="primary">${copy('add')} ${copy('meal')}</button></form>
     <section class="nutrition-copy"><h2>${copy('copyMeals')}</h2><label>${copy('targetDate')}<input id="nutrition-target-date" type="date" value="${today}"></label><button id="duplicate-day">${copy('duplicateDay')}</button><p id="nutrition-copy-status" role="status"></p></section><section><h2>${copy('favoriteMeals')}</h2><div id="favorite-meals" class="history-list"></div></section><div id="meal-list" class="history-list"></div></section>`);
