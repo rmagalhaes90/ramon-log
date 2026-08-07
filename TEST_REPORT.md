@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — filtro de grupo muscular/equipamento ao adicionar exercício alpha.50
+
+Usuário reportou que a tela de adicionar exercício durante a montagem da rotina só tinha busca por texto, sem filtro por área do corpo/aparelho, e pediu que o filtro fizesse sentido para o dia (ex.: dia "Peito" já mostrar exercícios de peito). Reaproveitados os mesmos chips de grupo muscular (`muscleGroupKeys`/`muscleGroupLabels`, antes só declarados dentro de `renderWorkoutGenerator`, agora hoisted para módulo) e equipamento já usados no gerador automático. Nova função `guessDayMuscleGroups` prioriza os músculos dos exercícios já cadastrados no dia (somando `exercise.muscles` e comparando contra `MUSCLE_GROUPS`); se o dia estiver vazio, cai para um match de palavra-chave no título (peito/chest, costas/back, perna/legs, ombro/shoulder, braço/arms, abdômen/abs, push, pull, corpo inteiro/full body).
+
+Verificado manualmente no navegador (dev server + emulador de Auth/Firestore, exigiu instalar um JDK local para o emulador do Firestore funcionar): dia renomeado para "Peito" sem exercícios pré-seleciona o chip "Chest" pelo título; depois de adicionar "Leg Press" ao mesmo dia (ainda chamado "Peito"), reabrir o seletor pré-seleciona "Legs" — confirmando que o palpite por músculo real tem prioridade sobre o título desatualizado. Multi-seleção de grupos e combinação com filtro de equipamento (ex.: Legs + Machine) testados e filtrando corretamente.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/87 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.50`.
+
 ## Rodada 2026-08-07 — onboarding interativo (spotlight) alpha.49
 
 Fecha o último item pendente do lote "wow factor": um walkthrough interativo, não apenas o tour estático de slides já existente (alpha.35). Novo `core/spotlight.ts` com `shouldShowRoutineSpotlight` (regra pura: mostra só se o tour já terminou, o usuário ainda não tem nenhuma rotina e nunca dispensou o aviso antes — testada isoladamente sem DOM) e `showSpotlight` (overlay com recorte via `box-shadow` ao redor do elemento alvo + tooltip, sem bloquear o clique no próprio elemento destacado). Aplicado no dashboard, destacando o card "Treinar" para convidar a criar a primeira rotina.
