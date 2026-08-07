@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocsFromServer } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { z } from 'zod';
 import { getFirebaseServices } from '../../services/firebase';
@@ -16,7 +16,7 @@ export interface SharedUser extends z.infer<typeof sharedUserSchema> {
 export async function listSharedUsers(): Promise<SharedUser[]> {
   const services = getFirebaseServices();
   if (!services) throw new Error('firebase/unavailable');
-  const snapshot = await getDocs(collection(services.firestore, 'sharedUsers'));
+  const snapshot = await getDocsFromServer(collection(services.firestore, 'sharedUsers'));
   return snapshot.docs
     .map((item) => {
       const result = sharedUserSchema.safeParse(item.data());

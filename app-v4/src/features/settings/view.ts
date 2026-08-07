@@ -38,6 +38,8 @@ interface SettingsViewOptions {
   unitSystem: UnitSystem;
   onUnitSystemChange: (units: UnitSystem) => void;
   onOpenLegal: () => void;
+  showRirRpe: boolean;
+  onShowRirRpeChange: (show: boolean) => void;
 }
 const formText = (data: FormData, key: string) => {
   const value = data.get(key);
@@ -233,6 +235,25 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   profileForm.append(ageLabel, sexLabel, heightLabel, goalLabel, profileSave);
   profileCard.append(profileTitle, profileForm, profileStatus);
   themeCard.after(profileCard);
+  const advancedFieldsCard = document.createElement('article');
+  advancedFieldsCard.className = 'units-card';
+  const advancedFieldsTitle = document.createElement('h2');
+  advancedFieldsTitle.textContent = copy('showRirRpeLabel');
+  const advancedFieldsChoice = document.createElement('div');
+  ([false, true] as const).forEach((value) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = copy(value ? 'showRirRpeOn' : 'showRirRpeOff');
+    button.ariaPressed = String(value === options.showRirRpe);
+    button.addEventListener('click', () => {
+      if (value === options.showRirRpe) return;
+      options.onShowRirRpeChange(value);
+      void renderSettingsView(user, options);
+    });
+    advancedFieldsChoice.append(button);
+  });
+  advancedFieldsCard.append(advancedFieldsTitle, advancedFieldsChoice);
+  profileCard.after(advancedFieldsCard);
   const legalCard = document.createElement('article');
   legalCard.className = 'units-card';
   const legalTitle = document.createElement('h2');

@@ -33,6 +33,28 @@ function requireAdminOrCoach(request) {
   return auth;
 }
 
+// Looks up the target Auth user for an admin action. If the account was
+// deleted directly (e.g. from the Firebase console) but its sharedUsers
+// doc was left behind, this self-heals by removing the stale doc instead
+// of surfacing a raw auth/user-not-found error to the caller.
+async function getAuthUserOrCleanStale(uid) {
+  try {
+    return await getAuth().getUser(uid);
+  } catch (error) {
+    if (error?.code === 'auth/user-not-found') {
+      await getFirestore()
+        .doc(`sharedUsers/${uid}`)
+        .delete()
+        .catch(() => undefined);
+      throw new HttpsError(
+        'not-found',
+        'This user no longer exists and was removed from the list.',
+      );
+    }
+    throw error;
+  }
+}
+
 const INVITE_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function generateInviteCode() {
   let code = '';
@@ -46,7 +68,7 @@ export const setAdminRole = onCall({ invoker: 'public' }, async (request) => {
   const { uid, isAdmin } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof isAdmin !== 'boolean')
     throw new HttpsError('invalid-argument', 'Invalid role request');
-  const user = await getAuth().getUser(uid);
+  const user = await getAuthUserOrCleanStale(uid);
   if (!isAdmin && user.email?.toLowerCase() === bootstrapEmail)
     throw new HttpsError('failed-precondition', 'Bootstrap admin cannot be revoked');
   await getAuth().setCustomUserClaims(uid, { ...user.customClaims, admin: isAdmin });
@@ -66,7 +88,7 @@ export const setCoachRole = onCall({ invoker: 'public' }, async (request) => {
   const { uid, isCoach } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof isCoach !== 'boolean')
     throw new HttpsError('invalid-argument', 'Invalid role request');
-  const user = await getAuth().getUser(uid);
+  const user = await getAuthUserOrCleanStale(uid);
   await getAuth().setCustomUserClaims(uid, { ...user.customClaims, coach: isCoach });
   await getFirestore().doc(`sharedUsers/${uid}`).set({ isCoach }, { merge: true });
   await getFirestore().collection('adminAudit').add({
@@ -135,6 +157,7 @@ export const setUserBlocked = onCall({ invoker: 'public' }, async (request) => {
   const { uid, blocked } = request.data ?? {};
   if (typeof uid !== 'string' || !uid || typeof blocked !== 'boolean')
     throw new HttpsError('invalid-argument', 'Invalid block request');
+  await getAuthUserOrCleanStale(uid);
   await getAuth().updateUser(uid, { disabled: blocked });
   await getFirestore().doc(`sharedUsers/${uid}`).set({ blocked }, { merge: true });
   await getFirestore().collection('adminAudit').add({

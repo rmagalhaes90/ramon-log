@@ -478,11 +478,19 @@ h2 {
   padding: 0.45rem 0;
   border-top: 1px solid var(--line);
 }
+.set-row.compact,
+.set-header.compact {
+  grid-template-columns: 2rem repeat(2, minmax(3.4rem, 1fr)) 2.5rem;
+}
 @media (max-width: 520px) {
   .set-row,
   .set-header {
     grid-template-columns: 1.5rem repeat(4, minmax(0, 1fr)) 2rem;
     gap: 0.25rem;
+  }
+  .set-row.compact,
+  .set-header.compact {
+    grid-template-columns: 1.5rem repeat(2, minmax(0, 1fr)) 2rem;
   }
   .set-row input[type='number'] {
     padding: 0.55rem 0.35rem;
@@ -549,6 +557,42 @@ h2 {
   font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
+}
+.exercise-top-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.6rem;
+}
+.exercise-top-wrap .exercise-top {
+  position: relative;
+  background: var(--panel);
+  touch-action: pan-y;
+  transition: transform 0.18s ease;
+  will-change: transform;
+}
+.exercise-top-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 4.75rem;
+  border: none;
+  background: #ff5252;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.repeat-set-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--dim);
+  padding: 0.3rem 0;
+}
+.repeat-set-toggle input {
+  accent-color: var(--volt);
 }
 .add-set-button {
   width: 100%;
@@ -754,12 +798,12 @@ h2 {
   background: var(--surface);
   flex-shrink: 0;
 }
-.exercise-example-gif {
+.example-modal-image {
   display: block;
   width: 100%;
-  max-width: 20rem;
+  max-height: 80vh;
+  object-fit: contain;
   border-radius: 0.7rem;
-  margin: 0.5rem 0;
   background: var(--surface);
 }
 .exercise-media-picker {
@@ -1851,5 +1895,36 @@ h2 {
   to {
     transform: translateY(110vh) rotate(540deg);
     opacity: 0.3;
+  }
+}
+.pr-badge {
+  position: fixed;
+  top: calc(1.5rem + env(safe-area-inset-top));
+  left: 50%;
+  z-index: 130;
+  background: var(--volt);
+  color: var(--bg);
+  font-weight: 800;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.35);
+  animation: pr-badge-pop 2.6s ease forwards;
+}
+@keyframes pr-badge-pop {
+  0% {
+    transform: translate(-50%, -1rem);
+    opacity: 0;
+  }
+  12% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  85% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -0.5rem);
+    opacity: 0;
   }
 }

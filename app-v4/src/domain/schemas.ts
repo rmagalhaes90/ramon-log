@@ -87,6 +87,8 @@ export const exerciseRecordSchema = z.object({
   maxE1rmDate: dateKeySchema.nullable(),
 });
 export const exerciseRecordsSchema = z.record(z.string().max(120), exerciseRecordSchema);
+export type ExerciseRecord = z.infer<typeof exerciseRecordSchema>;
+export type ExerciseRecords = z.infer<typeof exerciseRecordsSchema>;
 export const progressionDecisionSchema = z.object({
   id: safeIdSchema,
   exercise: z.string().trim().min(1).max(120),

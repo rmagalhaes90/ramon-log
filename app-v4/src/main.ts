@@ -9,6 +9,7 @@ import {
 import { createI18n, messageFor, type Locale, type MessageKey } from './core/i18n';
 import type {
   Exercise,
+  ExerciseRecords,
   FavoriteMeal,
   NutritionDay,
   Profile,
@@ -45,6 +46,7 @@ import {
 } from './features/coach';
 import { exerciseCatalog, searchExercises, supplementCatalog } from './features/catalog';
 import { getExerciseMedia, searchExerciseMedia } from './features/catalog/media';
+import { translateExerciseNameToEnglish } from './features/catalog/translateExerciseName';
 import {
   loadSharedExerciseCatalog,
   saveSharedExerciseCatalog,
@@ -64,6 +66,7 @@ import {
   createEntries,
   dateKey,
   dayKeys,
+  estimatedOneRepMax,
   todayDayKey,
   workoutVolume,
   type DayKey,
@@ -152,6 +155,8 @@ let restNotificationsEnabled = false;
 let activeCameraStop: (() => void) | undefined;
 let unitsUid = '';
 let unitSystem: UnitSystem = 'metric';
+let advancedFieldsUid = '';
+let showRirRpe = false;
 let workoutPausedAt: number | null = null;
 let workoutPausedMs = 0;
 let sharedCatalogLoaded = false;
@@ -532,6 +537,10 @@ async function renderReady(user: User): Promise<void> {
     unitSystem = savedUnits === 'imperial' ? 'imperial' : 'metric';
     unitsUid = user.uid;
   }
+  if (advancedFieldsUid !== user.uid) {
+    showRirRpe = (await cacheGet<boolean>(`showRirRpe:${user.uid}`)) === true;
+    advancedFieldsUid = user.uid;
+  }
   if (!sharedCatalogLoaded) {
     sharedCatalogLoaded = true;
     void loadSharedExerciseCatalog().catch((error: unknown) =>
@@ -656,6 +665,23 @@ async function renderAdmin(user: User): Promise<void> {
     .querySelector('#admin-manage-exercises')
     ?.addEventListener('click', () => renderExerciseManager(user));
   const list = document.querySelector('#admin-users');
+  const runAdminAction = (promise: Promise<unknown>, code: string) =>
+    void promise
+      .then(() => renderAdmin(user))
+      .catch((error: unknown) => {
+        const isStaleUser =
+          error !== null &&
+          typeof error === 'object' &&
+          'code' in error &&
+          (error as { code?: unknown }).code === 'functions/not-found';
+        if (isStaleUser) {
+          // Target account no longer exists in Auth; the function already
+          // deleted its stale sharedUsers doc, so just refresh the list.
+          void renderAdmin(user);
+          return;
+        }
+        reportError(error, code);
+      });
   users.forEach((entry) => {
     const row = document.createElement('article');
     const identity = document.createElement('div');
@@ -669,35 +695,23 @@ async function renderAdmin(user: User): Promise<void> {
     const actions = document.createElement('div');
     const block = document.createElement('button');
     block.textContent = copy(entry.blocked ? 'unblock' : 'block');
-    block.addEventListener(
-      'click',
-      () =>
-        void setUserBlocked(entry.uid, !entry.blocked)
-          .then(() => renderAdmin(user))
-          .catch((error: unknown) => reportError(error, 'admin/block')),
+    block.addEventListener('click', () =>
+      runAdminAction(setUserBlocked(entry.uid, !entry.blocked), 'admin/block'),
     );
     actions.append(block);
     if (superAdmin && entry.uid !== user.uid) {
       const admin = document.createElement('button');
       admin.textContent = copy(entry.isAdmin ? 'revokeAdmin' : 'grantAdmin');
-      admin.addEventListener(
-        'click',
-        () =>
-          void setUserAdmin(entry.uid, !entry.isAdmin)
-            .then(() => renderAdmin(user))
-            .catch((error: unknown) => reportError(error, 'admin/role')),
+      admin.addEventListener('click', () =>
+        runAdminAction(setUserAdmin(entry.uid, !entry.isAdmin), 'admin/role'),
       );
       actions.append(admin);
     }
     if (entry.uid !== user.uid) {
       const coach = document.createElement('button');
       coach.textContent = copy(entry.isCoach ? 'revokeCoach' : 'grantCoach');
-      coach.addEventListener(
-        'click',
-        () =>
-          void setUserCoach(entry.uid, !entry.isCoach)
-            .then(() => renderAdmin(user))
-            .catch((error: unknown) => reportError(error, 'admin/coach')),
+      coach.addEventListener('click', () =>
+        runAdminAction(setUserCoach(entry.uid, !entry.isCoach), 'admin/coach'),
       );
       actions.append(coach);
     }
@@ -979,7 +993,7 @@ function openExerciseEditor(
 
 function renderExerciseManager(user: User): void {
   shell(
-    `<section class="feature-view"><button id="mgr-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">${exerciseCatalog.length}</p><h1>${copy('manageExercises')}</h1><input id="mgr-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><button id="mgr-add" class="secondary">+ ${copy('newExercise')}</button><div id="mgr-list" class="catalog-list"></div><p id="mgr-status" class="hint" role="status"></p></section>`,
+    `<section class="feature-view"><button id="mgr-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">${exerciseCatalog.length}</p><h1>${copy('manageExercises')}</h1><input id="mgr-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><button id="mgr-add" class="secondary">+ ${copy('newExercise')}</button><button id="mgr-bulk-link" class="secondary">${copy('bulkLinkExamples')}</button><div id="mgr-list" class="catalog-list"></div><p id="mgr-status" class="hint" role="status"></p></section>`,
   );
   document.querySelector('#mgr-back')?.addEventListener('click', () => exerciseManagerBack(user));
   const draw = (query = '') => {
@@ -1046,6 +1060,50 @@ function renderExerciseManager(user: User): void {
       draw();
     }),
   );
+  document.querySelector<HTMLButtonElement>('#mgr-bulk-link')?.addEventListener('click', () => {
+    const unlinked = exerciseCatalog.filter((exercise) => !exercise.exerciseDbId);
+    const status = document.querySelector('#mgr-status');
+    if (!unlinked.length) {
+      if (status) status.textContent = copy('bulkLinkNoneLeft');
+      return;
+    }
+    if (!confirm(copy('bulkLinkConfirm').replace('{count}', String(unlinked.length)))) return;
+    const bulkButton = document.querySelector<HTMLButtonElement>('#mgr-bulk-link');
+    if (bulkButton) bulkButton.disabled = true;
+    void (async () => {
+      const next = [...exerciseCatalog];
+      let linked = 0;
+      for (let i = 0; i < next.length; i += 1) {
+        const exercise = next[i];
+        if (!exercise || exercise.exerciseDbId) continue;
+        if (status) status.textContent = `${copy('bulkLinking')} ${i + 1}/${next.length}`;
+        try {
+          const query = translateExerciseNameToEnglish(exercise.name);
+          const results = await searchExerciseMedia(query);
+          const bestMatch =
+            (exercise.equipment &&
+              results.find((result) =>
+                result.name.toLocaleLowerCase().includes(exercise.equipment),
+              )) ||
+            results[0];
+          if (bestMatch) {
+            next[i] = { ...exercise, exerciseDbId: bestMatch.exerciseId };
+            linked += 1;
+          }
+        } catch (error) {
+          reportBackgroundError(error, 'catalog/bulk-link');
+        }
+        if ((i + 1) % 20 === 0) await saveSharedExerciseCatalog(next).catch(() => undefined);
+        await new Promise((resolve) => window.setTimeout(resolve, 200));
+      }
+      await saveSharedExerciseCatalog(next).catch((error: unknown) =>
+        reportError(error, 'catalog/bulk-link-save'),
+      );
+      if (bulkButton) bulkButton.disabled = false;
+      if (status) status.textContent = `${copy('bulkLinkDone')} (${linked}/${unlinked.length})`;
+      draw();
+    })();
+  });
   draw();
 }
 
@@ -1246,6 +1304,11 @@ async function renderSettings(user: User): Promise<void> {
       void cacheSet(`units:${user.uid}`, units);
     },
     onOpenLegal: () => renderLegal(() => void renderSettings(user)),
+    showRirRpe,
+    onShowRirRpeChange: (show) => {
+      showRirRpe = show;
+      void cacheSet(`showRirRpe:${user.uid}`, show);
+    },
   });
 }
 
@@ -1916,12 +1979,14 @@ async function renderSupplements(user: User): Promise<void> {
 
 async function renderWorkout(user: User): Promise<void> {
   clearWorkoutTimers();
-  const [workoutsValue, draft, exerciseHistory, progressionDecisions] = await Promise.all([
-    loadUserData(user, 'workouts'),
-    loadWorkoutDraft(user, selectedDay),
-    loadUserData(user, 'exerciseHistory').catch(() => null),
-    loadUserData(user, 'progressionDecisions').catch(() => null),
-  ]);
+  const [workoutsValue, draft, exerciseHistory, progressionDecisions, exerciseRecords] =
+    await Promise.all([
+      loadUserData(user, 'workouts'),
+      loadWorkoutDraft(user, selectedDay),
+      loadUserData(user, 'exerciseHistory').catch(() => null),
+      loadUserData(user, 'progressionDecisions').catch(() => null),
+      loadUserData(user, 'exerciseRecords').catch(() => null),
+    ]);
   const workouts = workoutsValue ?? {};
   if (!workouts[selectedDay]) {
     renderWorkoutEmptyState(user, workouts);
@@ -1945,7 +2010,13 @@ async function renderWorkout(user: User): Promise<void> {
     if (status) status.textContent = copy('sessionResumed');
   }
   renderDayButtons(user, workouts);
-  renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions ?? []);
+  renderExerciseEntries(
+    user,
+    workouts,
+    exerciseHistory ?? {},
+    progressionDecisions ?? [],
+    exerciseRecords ?? {},
+  );
   const toggleButton = document.querySelector<HTMLButtonElement>('#session-toggle');
   const updateClock = () => {
     const elapsed = Math.max(0, Math.floor(sessionElapsedMs() / 1000));
@@ -2087,11 +2158,15 @@ function renderRoutineExercises(user: User, workouts: Workouts): void {
   exercises.forEach((exercise, exerciseIndex) => {
     const card = document.createElement('article');
     card.className = 'exercise-card';
+    const topWrap = document.createElement('div');
+    topWrap.className = 'exercise-top-wrap';
     const top = document.createElement('div');
     top.className = 'exercise-top';
     const heading = document.createElement('h2');
     heading.textContent = exercise.name;
     const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'exercise-top-delete';
     remove.textContent = copy('remove');
     remove.addEventListener('click', () => {
       const current = workouts[selectedDay];
@@ -2107,8 +2182,10 @@ function renderRoutineExercises(user: User, workouts: Workouts): void {
         .then(() => renderRoutine(user))
         .catch((error: unknown) => reportError(error, 'workout/remove'));
     });
-    top.append(heading, remove);
-    card.append(top);
+    top.append(heading);
+    topWrap.append(top, remove);
+    card.append(topWrap);
+    attachSwipeToDelete(top, '.exercise-top.swiped');
     const meta = document.createElement('div');
     meta.className = 'exercise-meta';
     const updateTarget = (patch: Partial<Pick<Exercise, 'sets' | 'reps' | 'rest'>>) => {
@@ -2571,11 +2648,63 @@ function renderDayButtons(
   });
 }
 
+/** Wires up a swipe-left-to-reveal-delete gesture on `row` via Pointer Events (works with touch and mouse, unlike the exercise-card's HTML5 drag-and-drop reorder). `closeSelector` scopes which other open rows get closed when this one starts swiping. */
+function attachSwipeToDelete(row: HTMLElement, closeSelector: string, revealWidth = 76): void {
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragBaseX = 0;
+  let tracking = false;
+  let horizontalDrag = false;
+  row.addEventListener('pointerdown', (event) => {
+    dragStartX = event.clientX;
+    dragStartY = event.clientY;
+    dragBaseX = row.classList.contains('swiped') ? -revealWidth : 0;
+    tracking = true;
+    horizontalDrag = false;
+  });
+  row.addEventListener('pointermove', (event) => {
+    if (!tracking) return;
+    const dx = event.clientX - dragStartX;
+    const dy = event.clientY - dragStartY;
+    if (!horizontalDrag) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        tracking = false;
+        return;
+      }
+      horizontalDrag = true;
+      row.setPointerCapture(event.pointerId);
+      document.querySelectorAll(closeSelector).forEach((openRow) => {
+        if (openRow !== row) {
+          openRow.classList.remove('swiped');
+          (openRow as HTMLElement).style.transform = '';
+        }
+      });
+    }
+    const next = Math.min(0, Math.max(-revealWidth, dragBaseX + dx));
+    row.style.transform = `translateX(${next}px)`;
+    event.preventDefault();
+  });
+  const endSwipeDrag = (event: PointerEvent) => {
+    if (!tracking) return;
+    tracking = false;
+    if (!horizontalDrag) return;
+    const dx = event.clientX - dragStartX;
+    const finalX = Math.min(0, Math.max(-revealWidth, dragBaseX + dx));
+    const open = finalX < -revealWidth / 2;
+    row.classList.toggle('swiped', open);
+    row.style.transform = open ? `translateX(-${revealWidth}px)` : '';
+  };
+  row.addEventListener('pointerup', endSwipeDrag);
+  row.addEventListener('pointercancel', endSwipeDrag);
+}
+
 function renderExerciseEntries(
   user: User,
   workouts: Workouts,
   exerciseHistory: Record<string, PerformanceEntry[]>,
   progressionDecisions: ProgressionDecision[],
+  exerciseRecords: ExerciseRecords,
 ): void {
   const list = document.querySelector('#exercise-list');
   if (!list) return;
@@ -2632,8 +2761,12 @@ function renderExerciseEntries(
         .then(() => renderWorkout(user))
         .catch((error: unknown) => reportError(error, 'workout/reorder'));
     });
+    const topWrap = document.createElement('div');
+    topWrap.className = 'exercise-top-wrap';
+    topWrap.draggable = false;
     const top = document.createElement('div');
     top.className = 'exercise-top';
+    top.draggable = false;
     const heading = document.createElement('h2');
     heading.textContent = entry.exercise.name;
     const actions = document.createElement('div');
@@ -2673,9 +2806,11 @@ function renderExerciseEntries(
     down.ariaLabel = copy('moveDown');
     down.disabled = exerciseIndex === workoutEntries.length - 1;
     down.addEventListener('click', () => reorder(1));
-    const remove = document.createElement('button');
-    remove.textContent = copy('remove');
-    remove.addEventListener('click', () => {
+    const removeExercise = document.createElement('button');
+    removeExercise.type = 'button';
+    removeExercise.className = 'exercise-top-delete';
+    removeExercise.textContent = copy('remove');
+    removeExercise.addEventListener('click', () => {
       const current = workouts[selectedDay];
       if (!current) return;
       const nextExercises = current.exercises.filter((_, index) => index !== exerciseIndex);
@@ -2692,9 +2827,11 @@ function renderExerciseEntries(
         .then(() => renderWorkout(user))
         .catch((error: unknown) => reportError(error, 'workout/remove'));
     });
-    actions.append(up, down, remove);
+    actions.append(up, down);
     top.append(heading, actions);
-    card.append(top);
+    topWrap.append(top, removeExercise);
+    card.append(topWrap);
+    attachSwipeToDelete(top, '.exercise-top.swiped');
     const meta = document.createElement('p');
     meta.className = 'exercise-meta';
     meta.textContent = `${entry.exercise.sets} × ${entry.exercise.reps} · ${copy('rest')} ${entry.exercise.rest}s`;
@@ -2785,17 +2922,20 @@ function renderExerciseEntries(
       card.append(video);
     }
     if (entry.exercise.exerciseDbId) {
-      const exampleImage = document.createElement('img');
-      exampleImage.className = 'exercise-example-gif';
-      exampleImage.loading = 'lazy';
-      exampleImage.alt = entry.exercise.name;
-      void getExerciseMedia(entry.exercise.exerciseDbId)
-        .then((media) => {
-          const src = media.gifUrl || media.imageUrl;
-          if (src) exampleImage.src = src;
-        })
-        .catch((error: unknown) => reportError(error, 'workout/example-media'));
-      card.append(exampleImage);
+      const exerciseDbId = entry.exercise.exerciseDbId;
+      const exampleButton = document.createElement('button');
+      exampleButton.type = 'button';
+      exampleButton.className = 'exercise-video';
+      exampleButton.textContent = copy('watchExample');
+      exampleButton.addEventListener('click', () => {
+        void getExerciseMedia(exerciseDbId)
+          .then((media) => {
+            const src = media.gifUrl || media.imageUrl;
+            if (src) openExampleModal(src, entry.exercise.name);
+          })
+          .catch((error: unknown) => reportError(error, 'workout/example-media'));
+      });
+      card.append(exampleButton);
     }
     const tools = document.createElement('div');
     tools.className = 'exercise-tools';
@@ -2886,13 +3026,38 @@ function renderExerciseEntries(
       card.append(details);
     }
     const setHeader = document.createElement('div');
-    setHeader.className = 'set-row set-header';
-    ['', copy('load'), copy('reps'), copy('rir'), copy('rpe'), '✓'].forEach((label) => {
+    setHeader.className = showRirRpe ? 'set-row set-header' : 'set-row set-header compact';
+    const headerLabels = showRirRpe
+      ? ['', copy('load'), copy('reps'), copy('rir'), copy('rpe'), '✓']
+      : ['', copy('load'), copy('reps'), '✓'];
+    headerLabels.forEach((label) => {
       const cell = document.createElement('span');
       cell.textContent = label;
       setHeader.append(cell);
     });
     card.append(setHeader);
+    if (entry.sets.length > 1) {
+      const repeatLabel = document.createElement('label');
+      repeatLabel.className = 'repeat-set-toggle';
+      const repeatCheckbox = document.createElement('input');
+      repeatCheckbox.type = 'checkbox';
+      const repeatText = document.createElement('span');
+      repeatText.textContent = copy('repeatFirstSet');
+      repeatLabel.append(repeatCheckbox, repeatText);
+      repeatCheckbox.addEventListener('change', () => {
+        if (!repeatCheckbox.checked) return;
+        const first = entry.sets[0];
+        if (!first) return;
+        entry.sets.forEach((set, index) => {
+          if (index === 0) return;
+          set.kg = first.kg;
+          set.reps = first.reps;
+        });
+        persistDraft();
+        void renderWorkout(user);
+      });
+      card.append(repeatLabel);
+    }
     const persistSetCountChange = () => {
       const current = workouts[selectedDay];
       if (!current) return;
@@ -2922,7 +3087,7 @@ function renderExerciseEntries(
       wrap.className = 'set-row-wrap';
       wrap.draggable = false;
       const row = document.createElement('div');
-      row.className = 'set-row';
+      row.className = showRirRpe ? 'set-row' : 'set-row compact';
       row.draggable = false;
       const number = document.createElement('span');
       number.textContent = String(setIndex + 1);
@@ -3007,8 +3172,14 @@ function renderExerciseEntries(
         set.done = done.checked;
         row.classList.toggle('done', done.checked);
         persistDraft();
+        if (set.done && set.kg > 0 && set.reps > 0) {
+          const record = exerciseRecords[entry.exercise.name];
+          const e1rm = estimatedOneRepMax(set.kg, set.reps);
+          const isNewRecord = !record || set.kg > record.maxWeight || e1rm > record.maxE1rm;
+          if (isNewRecord) celebratePersonalRecord();
+        }
       });
-      row.append(number, kg, reps, rir, rpe, done);
+      row.append(number, kg, reps, ...(showRirRpe ? [rir, rpe] : []), done);
       const deleteButton = document.createElement('button');
       deleteButton.type = 'button';
       deleteButton.className = 'set-row-delete';
@@ -3021,55 +3192,7 @@ function renderExerciseEntries(
       wrap.append(row, deleteButton);
       card.append(wrap);
       card.append(guidance);
-
-      const revealWidth = 76;
-      let dragStartX = 0;
-      let dragStartY = 0;
-      let dragBaseX = 0;
-      let tracking = false;
-      let horizontalDrag = false;
-      row.addEventListener('pointerdown', (event) => {
-        dragStartX = event.clientX;
-        dragStartY = event.clientY;
-        dragBaseX = row.classList.contains('swiped') ? -revealWidth : 0;
-        tracking = true;
-        horizontalDrag = false;
-      });
-      row.addEventListener('pointermove', (event) => {
-        if (!tracking) return;
-        const dx = event.clientX - dragStartX;
-        const dy = event.clientY - dragStartY;
-        if (!horizontalDrag) {
-          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-          if (Math.abs(dy) > Math.abs(dx)) {
-            tracking = false;
-            return;
-          }
-          horizontalDrag = true;
-          row.setPointerCapture(event.pointerId);
-          document.querySelectorAll('.set-row.swiped').forEach((openRow) => {
-            if (openRow !== row) {
-              openRow.classList.remove('swiped');
-              (openRow as HTMLElement).style.transform = '';
-            }
-          });
-        }
-        const next = Math.min(0, Math.max(-revealWidth, dragBaseX + dx));
-        row.style.transform = `translateX(${next}px)`;
-        event.preventDefault();
-      });
-      const endSwipeDrag = (event: PointerEvent) => {
-        if (!tracking) return;
-        tracking = false;
-        if (!horizontalDrag) return;
-        const dx = event.clientX - dragStartX;
-        const finalX = Math.min(0, Math.max(-revealWidth, dragBaseX + dx));
-        const open = finalX < -revealWidth / 2;
-        row.classList.toggle('swiped', open);
-        row.style.transform = open ? `translateX(-${revealWidth}px)` : '';
-      };
-      row.addEventListener('pointerup', endSwipeDrag);
-      row.addEventListener('pointercancel', endSwipeDrag);
+      attachSwipeToDelete(row, '.set-row.swiped');
     });
     const addSetButton = document.createElement('button');
     addSetButton.type = 'button';
@@ -3140,6 +3263,31 @@ function openVideoModal(url: string, title: string): void {
   iframe.loading = 'lazy';
   iframe.referrerPolicy = 'strict-origin-when-cross-origin';
   frame.append(heading, close, iframe);
+  overlay.append(frame);
+  document.body.append(overlay);
+}
+
+function openExampleModal(src: string, title: string): void {
+  closeVideoModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'video-modal';
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeVideoModal();
+  });
+  const frame = document.createElement('div');
+  frame.className = 'video-modal-frame';
+  const heading = document.createElement('h2');
+  heading.textContent = title;
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = '✕';
+  close.ariaLabel = copy('close');
+  close.addEventListener('click', closeVideoModal);
+  const image = document.createElement('img');
+  image.src = src;
+  image.alt = title;
+  image.className = 'example-modal-image';
+  frame.append(heading, close, image);
   overlay.append(frame);
   document.body.append(overlay);
 }
@@ -3265,6 +3413,15 @@ function spawnConfetti(): void {
   }
   document.body.append(container);
   window.setTimeout(() => container.remove(), 3000);
+}
+
+function celebratePersonalRecord(): void {
+  spawnConfetti();
+  const badge = document.createElement('div');
+  badge.className = 'pr-badge';
+  badge.textContent = `🏆 ${copy('newPersonalRecord')}`;
+  document.body.append(badge);
+  window.setTimeout(() => badge.remove(), 2600);
 }
 
 function showCelebration(streak: number, shareText: string): void {
