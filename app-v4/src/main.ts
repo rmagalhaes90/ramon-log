@@ -44,6 +44,7 @@ import {
   type CoachStudent,
 } from './features/coach';
 import { exerciseCatalog, searchExercises, supplementCatalog } from './features/catalog';
+import { getExerciseMedia, searchExerciseMedia } from './features/catalog/media';
 import {
   loadSharedExerciseCatalog,
   saveSharedExerciseCatalog,
@@ -812,6 +813,96 @@ function openExerciseEditor(
   videoUrlEn.maxLength = 2048;
   videoUrlEn.value = existing?.videoUrlEn ?? '';
 
+  let linkedExerciseDbId = existing?.exerciseDbId ?? '';
+  const mediaSection = document.createElement('div');
+  mediaSection.className = 'exercise-media-picker';
+  const mediaLabel = document.createElement('span');
+  mediaLabel.textContent = copy('exampleMediaLabel');
+  const mediaPreview = document.createElement('img');
+  mediaPreview.className = 'exercise-media-preview';
+  mediaPreview.hidden = true;
+  const mediaStatus = document.createElement('p');
+  mediaStatus.className = 'hint';
+  const removeLink = document.createElement('button');
+  removeLink.type = 'button';
+  removeLink.className = 'link-button';
+  removeLink.textContent = copy('removeExampleLink');
+  removeLink.hidden = true;
+  removeLink.addEventListener('click', () => {
+    linkedExerciseDbId = '';
+    mediaPreview.hidden = true;
+    removeLink.hidden = true;
+    mediaStatus.textContent = '';
+  });
+  const refreshMediaPreview = () => {
+    if (!linkedExerciseDbId) return;
+    mediaStatus.textContent = copy('exampleLinked');
+    void getExerciseMedia(linkedExerciseDbId)
+      .then((media) => {
+        const src = media.gifUrl || media.imageUrl;
+        if (src) {
+          mediaPreview.src = src;
+          mediaPreview.hidden = false;
+        }
+        removeLink.hidden = false;
+      })
+      .catch(() => {
+        mediaStatus.textContent = '';
+      });
+  };
+  refreshMediaPreview();
+  const mediaSearchRow = document.createElement('div');
+  mediaSearchRow.className = 'exercise-media-search';
+  const mediaSearchInput = document.createElement('input');
+  mediaSearchInput.type = 'text';
+  mediaSearchInput.placeholder = copy('exampleSearchPlaceholder');
+  const mediaSearchButton = document.createElement('button');
+  mediaSearchButton.type = 'button';
+  mediaSearchButton.textContent = copy('searchExampleMedia');
+  const mediaResults = document.createElement('div');
+  mediaResults.className = 'exercise-media-results';
+  mediaSearchButton.addEventListener('click', () => {
+    const query = mediaSearchInput.value.trim();
+    if (!query) return;
+    mediaResults.replaceChildren();
+    mediaStatus.textContent = '';
+    void searchExerciseMedia(query)
+      .then((results) => {
+        if (!results.length) mediaStatus.textContent = copy('noMediaResults');
+        results.forEach((result) => {
+          const resultButton = document.createElement('button');
+          resultButton.type = 'button';
+          resultButton.className = 'exercise-media-result';
+          const thumb = document.createElement('img');
+          thumb.src = result.imageUrl;
+          thumb.loading = 'lazy';
+          thumb.alt = result.name;
+          const label = document.createElement('span');
+          label.textContent = result.name;
+          resultButton.append(thumb, label);
+          resultButton.addEventListener('click', () => {
+            linkedExerciseDbId = result.exerciseId;
+            mediaResults.replaceChildren();
+            refreshMediaPreview();
+          });
+          mediaResults.append(resultButton);
+        });
+      })
+      .catch((error: unknown) => {
+        mediaStatus.textContent = copy('noMediaResults');
+        reportError(error, 'catalog/media-search');
+      });
+  });
+  mediaSearchRow.append(mediaSearchInput, mediaSearchButton);
+  mediaSection.append(
+    mediaLabel,
+    mediaPreview,
+    mediaStatus,
+    removeLink,
+    mediaSearchRow,
+    mediaResults,
+  );
+
   const notes = document.createElement('textarea');
   notes.rows = 3;
   notes.maxLength = 1000;
@@ -843,6 +934,7 @@ function openExerciseEditor(
     field('muscleWeights', muscles),
     field('videoUrlPtLabel', videoUrl),
     field('videoUrlEnLabel', videoUrlEn),
+    mediaSection,
     field('notes', notes),
     error,
     actions,
@@ -861,6 +953,7 @@ function openExerciseEditor(
       muscles: parseMuscleWeights(muscles.value),
       videoUrl: videoUrl.value,
       videoUrlEn: videoUrlEn.value,
+      exerciseDbId: linkedExerciseDbId,
       notes: notes.value,
     });
     if (!result.success) {
@@ -901,6 +994,18 @@ function renderExerciseManager(user: User): void {
       )
       .forEach(({ exercise, realIndex }) => {
         const row = document.createElement('article');
+        if (exercise.exerciseDbId) {
+          const thumb = document.createElement('img');
+          thumb.className = 'exercise-thumb';
+          thumb.loading = 'lazy';
+          thumb.alt = exercise.name;
+          void getExerciseMedia(exercise.exerciseDbId)
+            .then((media) => {
+              if (media.imageUrl) thumb.src = media.imageUrl;
+            })
+            .catch(() => undefined);
+          row.append(thumb);
+        }
         const body = document.createElement('div');
         const name = document.createElement('strong');
         name.textContent = exercise.name;
@@ -2394,6 +2499,18 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
       .slice(0, 100)
       .forEach((exercise) => {
         const row = document.createElement('article');
+        if (exercise.exerciseDbId) {
+          const thumb = document.createElement('img');
+          thumb.className = 'exercise-thumb';
+          thumb.loading = 'lazy';
+          thumb.alt = exercise.name;
+          void getExerciseMedia(exercise.exerciseDbId)
+            .then((media) => {
+              if (media.imageUrl) thumb.src = media.imageUrl;
+            })
+            .catch(() => undefined);
+          row.append(thumb);
+        }
         const body = document.createElement('div');
         const name = document.createElement('strong');
         name.textContent = exercise.name;
@@ -2666,6 +2783,19 @@ function renderExerciseEntries(
       video.textContent = copy('watchVideo');
       video.addEventListener('click', () => openVideoModal(videoUrl, entry.exercise.name));
       card.append(video);
+    }
+    if (entry.exercise.exerciseDbId) {
+      const exampleImage = document.createElement('img');
+      exampleImage.className = 'exercise-example-gif';
+      exampleImage.loading = 'lazy';
+      exampleImage.alt = entry.exercise.name;
+      void getExerciseMedia(entry.exercise.exerciseDbId)
+        .then((media) => {
+          const src = media.gifUrl || media.imageUrl;
+          if (src) exampleImage.src = src;
+        })
+        .catch((error: unknown) => reportError(error, 'workout/example-media'));
+      card.append(exampleImage);
     }
     const tools = document.createElement('div');
     tools.className = 'exercise-tools';

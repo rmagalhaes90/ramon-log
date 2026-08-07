@@ -73,6 +73,16 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Server-side cache of exercise GIF/image lookups from the third-party
+    // media provider, populated only by the getExerciseMedia callable
+    // function (which holds the API key) so repeat views of the same
+    // exercise don't re-bill the quota. Readable by any signed-in user;
+    // never written directly by clients.
+    match /sharedExerciseMedia/{exerciseId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
     match /adminAudit/{entry} {
       allow read: if isAdmin();
       allow write: if false;

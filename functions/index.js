@@ -3,6 +3,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { defineSecret } from 'firebase-functions/params';
 
 initializeApp();
 const bootstrapEmail = 'rmagalhaes90@gmail.com';
@@ -22,6 +23,13 @@ function requireAdmin(request) {
 function requireCoach(request) {
   const auth = requireUser(request);
   if (auth.token.coach !== true) throw new HttpsError('permission-denied', 'Coach required');
+  return auth;
+}
+
+function requireAdminOrCoach(request) {
+  const auth = requireUser(request);
+  if (auth.token.admin !== true && auth.token.coach !== true && auth.token.email !== bootstrapEmail)
+    throw new HttpsError('permission-denied', 'Admin or coach required');
   return auth;
 }
 
@@ -171,3 +179,78 @@ export const getEntitlements = onCall({ invoker: 'public' }, async (request) => 
         : ['history'];
   return { plan, status: active ? data.status : 'inactive', features };
 });
+
+const rapidApiKey = defineSecret('RAPIDAPI_KEY');
+const EXERCISE_MEDIA_HOST = 'edb-with-gifs-and-images-by-ascendapi.p.rapidapi.com';
+
+async function exerciseMediaRequest(path) {
+  const response = await fetch(`https://${EXERCISE_MEDIA_HOST}${path}`, {
+    headers: {
+      'x-rapidapi-host': EXERCISE_MEDIA_HOST,
+      'x-rapidapi-key': rapidApiKey.value(),
+    },
+  });
+  if (!response.ok) throw new HttpsError('unavailable', 'Exercise media provider request failed');
+  return response.json();
+}
+
+// Coaches/admins search this to find the right reference GIF/image for a
+// catalog exercise once, in the Exercise Manager; the RapidAPI key never
+// reaches the client, only the resulting exerciseId is stored on the
+// exercise (see exerciseDbId in domain/schemas.ts).
+export const searchExerciseMedia = onCall(
+  { invoker: 'public', secrets: [rapidApiKey] },
+  async (request) => {
+    requireAdminOrCoach(request);
+    const query =
+      typeof request.data?.query === 'string' ? request.data.query.trim().slice(0, 100) : '';
+    if (!query) throw new HttpsError('invalid-argument', 'Search query required');
+    const body = await exerciseMediaRequest(
+      `/api/v1/exercises/search?search=${encodeURIComponent(query)}`,
+    );
+    const results = Array.isArray(body?.data) ? body.data : [];
+    return {
+      results: results.slice(0, 20).map((item) => ({
+        exerciseId: String(item.exerciseId ?? ''),
+        name: String(item.name ?? ''),
+        imageUrl: String(item.imageUrl ?? ''),
+      })),
+    };
+  },
+);
+
+// Any signed-in user can resolve an already-linked exerciseId to its GIF,
+// since students see it while training. Cached in Firestore so repeat
+// views of the same popular exercise don't re-bill the RapidAPI quota.
+export const getExerciseMedia = onCall(
+  { invoker: 'public', secrets: [rapidApiKey] },
+  async (request) => {
+    requireUser(request);
+    const exerciseId =
+      typeof request.data?.exerciseId === 'string'
+        ? request.data.exerciseId.trim().slice(0, 60)
+        : '';
+    if (!exerciseId) throw new HttpsError('invalid-argument', 'exerciseId required');
+    const cacheRef = getFirestore().doc(`sharedExerciseMedia/${exerciseId}`);
+    const cached = await cacheRef.get();
+    if (cached.exists) {
+      const cachedData = cached.data();
+      return {
+        exerciseId: cachedData.exerciseId,
+        name: cachedData.name,
+        gifUrl: cachedData.gifUrl,
+        imageUrl: cachedData.imageUrl,
+      };
+    }
+    const body = await exerciseMediaRequest(`/api/v1/exercises/${encodeURIComponent(exerciseId)}`);
+    const data = body?.data ?? {};
+    const media = {
+      exerciseId,
+      name: String(data.name ?? ''),
+      gifUrl: String(data.gifUrls?.['480p'] ?? Object.values(data.gifUrls ?? {})[0] ?? ''),
+      imageUrl: String(data.imageUrls?.['480p'] ?? Object.values(data.imageUrls ?? {})[0] ?? ''),
+    };
+    await cacheRef.set({ ...media, cachedAt: FieldValue.serverTimestamp() });
+    return media;
+  },
+);

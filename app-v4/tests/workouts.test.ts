@@ -27,6 +27,7 @@ describe('workouts', () => {
           muscles: { chest: 1 },
           videoUrl: '',
           videoUrlEn: '',
+          exerciseDbId: '',
           notes: '',
         },
       ],

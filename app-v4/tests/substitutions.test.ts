@@ -6,19 +6,18 @@ const exercise = (
   name: string,
   equipment: Exercise['equipment'],
   muscles: Record<string, number>,
-) =>
-  ({
-    name,
-    equipment,
-    muscles,
-    sets: 3,
-    reps: '10',
-    rest: 60,
-    videoUrl: '',
-    videoUrlEn: '',
-    notes: '',
-    titleEn: '',
-  }) as Exercise;
+) => ({
+  name,
+  equipment,
+  muscles,
+  sets: 3,
+  reps: '10',
+  rest: 60,
+  videoUrl: '',
+  videoUrlEn: '',
+  exerciseDbId: '',
+  notes: '',
+});
 
 describe('occupied gym substitutions', () => {
   it('prioritizes muscle overlap and offers alternate equipment', () => {

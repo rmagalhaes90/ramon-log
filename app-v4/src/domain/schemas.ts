@@ -42,6 +42,7 @@ export const exerciseSchema = z.object({
   muscles: z.record(z.string().max(32), finite(0, 1)).default({}),
   videoUrl: videoUrlSchema,
   videoUrlEn: videoUrlSchema,
+  exerciseDbId: boundedText(60),
   notes: boundedText(1000),
 });
 export type Exercise = z.infer<typeof exerciseSchema>;

@@ -131,6 +131,22 @@ try {
     setDoc(doc(coach.firestore(), 'coachVideos/otherCoach'), { videos: { Supino: 'z' } }),
   );
 
+  await testEnvironment.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), 'sharedExerciseMedia/edb_test'), {
+      exerciseId: 'edb_test',
+      name: 'bench press',
+      gifUrl: 'https://example.test/a.gif',
+      imageUrl: 'https://example.test/a.png',
+    });
+  });
+  await assertSucceeds(getDoc(doc(student1.firestore(), 'sharedExerciseMedia/edb_test')));
+  await assertFails(
+    setDoc(doc(student1.firestore(), 'sharedExerciseMedia/edb_test'), { name: 'hacked' }),
+  );
+  await assertFails(
+    setDoc(doc(coach.firestore(), 'sharedExerciseMedia/edb_other'), { name: 'hacked' }),
+  );
+
   console.log('Firestore/Storage rules: ownership, admin, coach scoping and upload limits passed');
 } finally {
   await testEnvironment.cleanup();

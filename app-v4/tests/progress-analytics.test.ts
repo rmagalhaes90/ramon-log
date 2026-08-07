@@ -30,6 +30,7 @@ describe('premium progress analytics', () => {
       muscles: { chest: 1, triceps: 0.5 },
       videoUrl: '',
       videoUrlEn: '',
+      exerciseDbId: '',
       notes: '',
     } satisfies Exercise;
     expect(

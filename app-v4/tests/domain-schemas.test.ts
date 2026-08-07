@@ -12,6 +12,18 @@ describe('domain schemas', () => {
     const exercise = exerciseSchema.parse({ name: 'Supino', sets: 4, reps: '8-10', rest: 90 });
     expect(exercise.equipment).toBe('');
     expect(exercise.muscles).toEqual({});
+    expect(exercise.exerciseDbId).toBe('');
+  });
+
+  it('accepts an optional exerciseDbId linking to a third-party media provider', () => {
+    const exercise = exerciseSchema.parse({
+      name: 'Supino',
+      sets: 4,
+      reps: '8-10',
+      rest: 90,
+      exerciseDbId: 'edb_RBqXK5O',
+    });
+    expect(exercise.exerciseDbId).toBe('edb_RBqXK5O');
   });
 
   it('rejects dangerous or unrealistic exercise data', () => {

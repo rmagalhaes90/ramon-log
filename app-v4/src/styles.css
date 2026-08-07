@@ -740,10 +740,70 @@ h2 {
 .catalog-list article > div {
   display: grid;
   gap: 0.25rem;
+  flex: 1;
 }
 .catalog-list span {
   color: var(--dim);
   font-size: 0.7rem;
+}
+.exercise-thumb {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.exercise-example-gif {
+  display: block;
+  width: 100%;
+  max-width: 20rem;
+  border-radius: 0.7rem;
+  margin: 0.5rem 0;
+  background: var(--surface);
+}
+.exercise-media-picker {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+.exercise-media-preview {
+  width: 100%;
+  max-width: 16rem;
+  border-radius: 0.6rem;
+  background: var(--surface);
+}
+.exercise-media-search {
+  display: flex;
+  gap: 0.5rem;
+}
+.exercise-media-search input {
+  flex: 1;
+}
+.exercise-media-results {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+.exercise-media-result {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+}
+.exercise-media-result img {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
+  border-radius: 0.4rem;
+  flex-shrink: 0;
 }
 .session-clock {
   display: flex;
