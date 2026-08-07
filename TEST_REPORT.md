@@ -1,5 +1,11 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — onboarding interativo (spotlight) alpha.49
+
+Fecha o último item pendente do lote "wow factor": um walkthrough interativo, não apenas o tour estático de slides já existente (alpha.35). Novo `core/spotlight.ts` com `shouldShowRoutineSpotlight` (regra pura: mostra só se o tour já terminou, o usuário ainda não tem nenhuma rotina e nunca dispensou o aviso antes — testada isoladamente sem DOM) e `showSpotlight` (overlay com recorte via `box-shadow` ao redor do elemento alvo + tooltip, sem bloquear o clique no próprio elemento destacado). Aplicado no dashboard, destacando o card "Treinar" para convidar a criar a primeira rotina.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/87 testes Vitest** e `build` sem avisos de tamanho de chunk, todos com código 0. Versão mantida em `4.0.0-alpha.49` (mesma rodada de release do restante do lote).
+
 ## Rodada 2026-08-07 — lote "wow factor" (10 itens) alpha.49
 
 Lote grande pedido pelo usuário de uma vez ("faça todos, não precisa seguir ordem específica"), implementado item a item: acordeon de alternativas de exercício, catálogo de cardio, três templates novos com correção de repetição determinística entre dias, perfil (idade/sexo/altura/objetivo) em Configurações, sugestão de intensidade pelo objetivo no gerador, tema claro/escuro, vídeo próprio do coach por exercício, leitor de código de barras via ZXing, pesquisa de repositório de vídeos livre, e páginas legais (Termos/EULA/Privacidade/Direitos autorais) dentro do app. Os itens de #20 a #26 já tinham sido commitados em lotes anteriores nesta mesma sessão; esta rodada fecha #27 (barcode) e #29 (legal) e sincroniza a versão para todo o conjunto.
