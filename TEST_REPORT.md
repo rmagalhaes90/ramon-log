@@ -1,5 +1,17 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — adicionar/remover série durante o treino + tradução dos nomes padrão de dia alpha.53
+
+Dois pedidos do usuário na mesma rodada:
+
+1. "Adicionar ou remover mais séries on the fly, sem precisar editar, swipe para esquerda." Adicionado botão "+ Adicionar série" abaixo das séries de cada exercício na tela de Treino (ativa), e gesto de arrastar para a esquerda em cada série individual (Pointer Events — funciona em toque e mouse, diferente do reordenar de exercícios que só usa HTML5 drag-and-drop nativo, sem suporte em touch) revelando um botão vermelho "Remover" que apaga só aquela série. Ambos persistem a nova contagem de séries de volta no `exercise.sets` da rotina, não só no rascunho da sessão.
+
+2. "Os nomes dos dias não estão sendo traduzidos quando vêm de nomes padrão (templates/gerador), só os editados manualmente não traduzem [o que é esperado]." Causa: `templates.ts` sempre copiava o mesmo texto em português para `titleEn`, e o gerador automático copiava o texto do idioma ativo no momento da geração para os dois campos. Corrigido com `messageFor()` (novo, em `i18n.ts`) que busca uma chave em um idioma específico independente do idioma ativo; o Bro Split ganhou títulos reais em inglês (Peito→Chest, Costas→Back, Pernas→Legs, Ombros→Shoulders, Braços→Arms) — os demais templates já usam termos em inglês idênticos nos dois idiomas, sem mudança necessária. `main.ts` agora lê o campo certo via `localizedDayTitle()` em vez de sempre mostrar `.title`; renomear um dia agora grava o mesmo texto em `title` e `titleEn` (nome customizado não pode ser autotraduzido, então fica igual nos dois idiomas, de propósito).
+
+Verificado end-to-end no navegador logado contra o emulador (precisou reiniciar o emulador do Firestore, já com Java instalado): gerado treino "Push" em inglês, aplicado, trocado pra PT — título mudou corretamente para "Push (Peito+Ombro+Tríceps)"; adicionada uma série (persistiu após reload); preenchidas cargas distintas (10/20/30/40) em 4 séries, removida a 3ª via swipe simulado por Pointer Events — sobrou exatamente 10/20/40, na ordem certa, persistindo após reload.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/90 testes Vitest** (3 novos: 2 de templates bilíngues, 1 de `messageFor`) e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.53`.
+
 ## Rodada 2026-08-07 — botões sem estilo (padrão do navegador) alpha.52
 
 Usuário reportou que os botões de "duplicar" e do "voucher" (código do treinador) estavam feios. Causa: `<button id="duplicate-day">` na tela de Nutrição e o botão de submit/desvincular do formulário de código do treinador em Configurações não tinham nenhuma `class`, então renderizavam com a aparência crua padrão do navegador em vez do visual customizado do resto do app — o `<input type="date">` ao lado do botão de duplicar também estava sem estilo. Corrigido reaproveitando as classes `.secondary`/`.primary` já usadas em todo o app e adicionando `.nutrition-copy input` ao CSS.
