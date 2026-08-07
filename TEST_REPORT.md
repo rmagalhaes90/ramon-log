@@ -1,5 +1,24 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — lentidão geral, bugs de clique e lembretes diários alpha.58
+
+Usuário reportou o app "muito laggy", precisando clicar várias vezes em algumas telas ou até voltar pro dashboard pra conseguir acessar alguma parte, com "Editar rotina" às vezes não respondendo até "carregar quando menos espero" — mais alguns bugs pontuais na mesma rodada.
+
+**Causa raiz da lentidão geral.** `loadUserData()` (usada por toda navegação: Treino, Rotina, Nutrição, Progresso, Suplementos etc.) sempre esperava uma consulta `getDoc()` completa ao Firestore antes de desenhar a tela, mesmo quando o dado já estava em cache local e não tinha mudado — sem nenhum indicador visual de carregamento durante a espera. Em conexão lenta ou com latência, cada navegação pagava esse custo de rede por completo, e como não havia feedback visual, o usuário interpretava como clique travado e clicava de novo, empilhando mais consultas. Corrigido para "cache primeiro, atualiza depois": se já existe um valor salvo localmente, a tela usa ele na hora (instantâneo) e a consulta ao Firestore roda em segundo plano só pra manter o cache atualizado pra próxima leitura — sem bloquear a tela atual. Isso não muda o comportamento de sincronização/conflito já existente (que continua comparando revisões antes de sobrescrever), só evita pagar o custo de rede a cada navegação quando o dado local já é o mesmo que acabou de ser salvo (o caso mais comum).
+
+**Bugs de clique "não responsivo" encontrados durante a investigação:**
+1. Alternar "Mostrar RIR e RPE no treino" e tentar clicar em "Ocultar" logo em seguida, na MESMA visita a Configurações, não fazia nada — reproduzido e confirmado via clique real simulado (`ariaPressed` não mudava). Mesmo bug afetava o seletor de unidades (métrico/imperial). Causa: o botão comparava o valor clicado contra uma cópia "congelada" do estado passada pra tela no momento em que ela abriu, não contra o valor atual — depois de mudar uma vez, a segunda tentativa comparava contra o valor já desatualizado e saía pelo early-return sem fazer nada. Corrigido atualizando essa cópia junto com a mudança real, nos dois seletores. Confirmado ao vivo no emulador: mostrar → ocultar → mostrar de novo, tudo na mesma visita, funcionando.
+2. Aplicar um template não navegava nem mostrava nenhum retorno visual enquanto salvava, parecendo que "não funcionou" — o botão agora mostra "Aplicando…" e desabilita durante a operação. Confirmado ao vivo: aplicar template levou direto pra tela de Rotina com a rotina já populada.
+
+**Outros itens da mesma rodada:**
+3. Botão "Ver demonstração" (GIF) e o de assistir vídeo do YouTube apareciam colados um no outro (ambos `display:inline-block` sem espaçamento entre si), difícil de diferenciar — mudados pra `display:block`, cada um em sua própria linha.
+4. Removido o contador "Itens pendentes" do dashboard, considerado informação técnica sem utilidade direta pro usuário — a sincronização/retry da fila offline continua rodando normalmente por trás, só não aparece mais como número na tela principal.
+5. Primeira versão de lembretes diários (pedido do usuário): novo cartão "Lembretes diários" em Configurações com três horários opcionais (refeição, suplemento, treino); ao salvar, KYRO passa a checar a cada minuto se algum horário bate com a hora atual e dispara uma notificação local (reaproveitando a mesma API de notificação já usada pelo timer de descanso). Limitação clara: só funciona enquanto o KYRO estiver aberto numa aba do navegador — não é uma notificação push do sistema operacional, que exigiria um servidor de agendamento (Cloud Scheduler + Firebase Cloud Messaging) rodando à parte; deixado como possível próximo passo caso o usuário queira a versão mais robusta.
+
+Verificado ao vivo no emulador Auth+Firestore: cadastro, verificação, onboarding, aplicação de template (navegação imediata confirmada), remoção do contador de itens pendentes confirmada ausente no dashboard, alternância RIR/RPE mostrar→ocultar→mostrar na mesma visita confirmada funcionando via `ariaPressed`, cartão de lembretes renderizando os três campos de horário, e valor salvo (`08:30`) confirmado persistindo após sair e voltar pra Configurações.
+
+Bateria completa: `typecheck`, `lint` (inclui `functions/`), `format:check` (só `mobile/expo-env.d.ts` pré-existente), **34 arquivos/99 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.58`.
+
 ## Rodada 2026-08-07 — cinco correções após teste real da alpha.56 no link publicado alpha.57
 
 Usuário testou a alpha.56 no link publicado (GitHub Pages) e reportou cinco problemas na mesma rodada.

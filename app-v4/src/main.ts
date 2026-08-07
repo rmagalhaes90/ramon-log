@@ -58,7 +58,7 @@ import {
   saveSharedExerciseCatalog,
 } from './features/catalog/sharedCatalog';
 import { dosesTakenToday, normalizeTimes } from './features/supplements/model';
-import { flushPhotoUploads, photoQueueCount } from './features/photos/offline';
+import { flushPhotoUploads } from './features/photos/offline';
 import { renderPhotosView } from './features/photos/view';
 import { shareOrFallback } from './features/share';
 import {
@@ -124,7 +124,7 @@ import {
 } from './core/units';
 import { applyTheme, loadTheme } from './core/theme';
 import { shouldShowRoutineSpotlight, showSpotlight } from './core/spotlight';
-import { cacheGet, cacheSet, queueList } from './services/database';
+import { cacheGet, cacheSet } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
 
@@ -158,6 +158,8 @@ let sessionClock: number | undefined;
 let restClock: number | undefined;
 let notificationUid = '';
 let restNotificationsEnabled = false;
+let reminderSchedulerUid = '';
+let reminderCheckInterval: ReturnType<typeof setInterval> | undefined;
 let activeCameraStop: (() => void) | undefined;
 let unitsUid = '';
 let unitSystem: UnitSystem = 'metric';
@@ -524,6 +526,50 @@ function renderTour(user: User): void {
   renderStep();
 }
 
+const REMINDER_KEYS = [
+  ['mealTime', 'reminderMealTitle', 'reminderMealBody'],
+  ['supplementTime', 'reminderSupplementTitle', 'reminderSupplementBody'],
+  ['workoutTime', 'reminderWorkoutTitle', 'reminderWorkoutBody'],
+] as const;
+
+function currentTimeOfDay(): string {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+async function checkReminders(user: User): Promise<void> {
+  const settings = await loadUserData(user, 'notificationSettings');
+  if (!settings) return;
+  const nowTime = currentTimeOfDay();
+  const today = new Date().toISOString().slice(0, 10);
+  for (const [timeField, titleKey, bodyKey] of REMINDER_KEYS) {
+    const time = settings[timeField];
+    if (!time || time !== nowTime) continue;
+    const firedKey = `reminder-fired:${user.uid}:${timeField}:${today}`;
+    if (await cacheGet<boolean>(firedKey)) continue;
+    await cacheSet(firedKey, true);
+    void showLocalNotification(copy(titleKey), copy(bodyKey));
+  }
+}
+
+/** Fires configured meal/supplement/workout reminders while the app is open in a tab (see settings/view.ts's reminders card). Not a substitute for OS-level push — the tab must be open at the scheduled minute. */
+function startReminderScheduler(user: User): void {
+  if (reminderSchedulerUid === user.uid) return;
+  stopReminderScheduler();
+  reminderSchedulerUid = user.uid;
+  reminderCheckInterval = setInterval(() => {
+    void checkReminders(user).catch((error: unknown) =>
+      reportBackgroundError(error, 'notifications/reminder-check'),
+    );
+  }, 60_000);
+}
+
+function stopReminderScheduler(): void {
+  if (reminderCheckInterval) clearInterval(reminderCheckInterval);
+  reminderCheckInterval = undefined;
+  reminderSchedulerUid = '';
+}
+
 async function renderReady(user: User): Promise<void> {
   if (await needsOnboarding(user)) {
     renderOnboarding(user);
@@ -538,6 +584,7 @@ async function renderReady(user: User): Promise<void> {
     restNotificationsEnabled = settings?.restEnabled ?? false;
     notificationUid = user.uid;
   }
+  startReminderScheduler(user);
   if (unitsUid !== user.uid) {
     const savedUnits = await cacheGet<UnitSystem>(`units:${user.uid}`);
     unitSystem = savedUnits === 'imperial' ? 'imperial' : 'metric';
@@ -577,7 +624,7 @@ async function renderReady(user: User): Promise<void> {
 function renderDashboard(user: User): void {
   shell(`<section class="hero"><p class="eyebrow">${copy('foundation')}</p><h1>${copy('tagline')}</h1>
     <p class="account-email">${copy('loggedInAs')}: <strong>${user.email ?? user.uid}</strong></p>
-    <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span><span>·</span><button id="open-sync" class="status-link">${copy('queue')}: <b id="queue-count">0</b></button></div>
+    <div class="status"><span id="network">${copy(navigator.onLine ? 'online' : 'offline')}</span></div>
     <button id="start-workout" class="primary">${copy('train')}</button>${authState.isAdmin ? `<button id="open-admin" class="secondary">${copy('admin')}</button>` : ''}${authState.isCoach ? `<button id="open-coach" class="secondary">${copy('coach')}</button>` : ''}<button id="logout" class="link-button">${copy('logout')}</button></section>
     <section class="feature-grid" aria-label="KYRO modules"><article><span>01</span><h2>${copy('moduleTrainLabel')}</h2><p>${copy('trainModule')}</p><button id="open-workout-card">${copy('train')}</button></article>
     <article><span>02</span><h2>${copy('moduleRecoverLabel')}</h2><p>${copy('recoverModule')}</p><button id="open-progress">${copy('progress')}</button></article><article><span>03</span><h2>${copy('moduleFuelLabel')}</h2><p>${copy('fuelModule')}</p><button id="open-nutrition">${copy('nutrition')}</button></article>
@@ -606,10 +653,6 @@ function renderDashboard(user: User): void {
     currentView = 'settings';
     void renderSettings(user);
   });
-  document.querySelector('#open-sync')?.addEventListener('click', () => {
-    currentView = 'settings';
-    void renderSettings(user);
-  });
   document.querySelector('#open-admin')?.addEventListener('click', () => {
     currentView = 'admin';
     void renderAdmin(user);
@@ -618,18 +661,9 @@ function renderDashboard(user: User): void {
     currentView = 'coach';
     renderCoachHub(user);
   });
-  const refreshQueueCount = () =>
-    Promise.all([queueList(), photoQueueCount(user)])
-      .then(([items, photos]) => {
-        const count = document.querySelector('#queue-count');
-        const ownItems = items.filter((item) => item.id.startsWith(`${user.uid}-`));
-        if (count) count.textContent = String(ownItems.length + photos);
-      })
-      .catch((error: unknown) => reportError(error, 'queue/render'));
-  void Promise.all([flushUserDataQueue(user), flushPhotoUploads(user)])
-    .then(refreshQueueCount)
-    .catch(() => refreshQueueCount());
-  void refreshQueueCount();
+  void Promise.all([flushUserDataQueue(user), flushPhotoUploads(user)]).catch((error: unknown) =>
+    reportError(error, 'queue/flush'),
+  );
   void Promise.all([
     cacheGet<boolean>(`tour:${user.uid}`),
     cacheGet<boolean>(`spotlight-routine:${user.uid}`),
@@ -2283,6 +2317,8 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
     apply.textContent = copy('applyTemplate');
     apply.addEventListener('click', () => {
       if (!confirm(copy('templateConfirm'))) return;
+      apply.disabled = true;
+      apply.textContent = copy('applyingTemplate');
       const generated = createTemplate(key);
       void saveUserData(user, 'workouts', { ...workouts, ...generated })
         .then(() =>
@@ -2292,7 +2328,11 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
           selectedDay = (Object.keys(generated)[0] as DayKey | undefined) ?? 'segunda';
           return renderRoutine(user);
         })
-        .catch((error: unknown) => reportError(error, 'workout/template'));
+        .catch((error: unknown) => {
+          apply.disabled = false;
+          apply.textContent = copy('applyTemplate');
+          reportError(error, 'workout/template');
+        });
     });
     card.append(title, description, apply);
     list?.append(card);
@@ -3501,6 +3541,7 @@ function render(): void {
     return;
   }
   if (authState.status === 'signed-out' || authState.status === 'blocked') {
+    stopReminderScheduler();
     renderAuth();
     return;
   }

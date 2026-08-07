@@ -65,6 +65,21 @@ async function recordConflict<K extends UserDataKey>(
   });
 }
 
+async function fetchAndCacheUserData<K extends UserDataKey>(
+  user: User,
+  key: K,
+  schema: z.ZodType<UserDataValue<K>>,
+): Promise<UserDataValue<K> | null> {
+  const snapshot = await getDoc(dataRef(user.uid, key));
+  if (!snapshot.exists()) return null;
+  const result = schema.safeParse(snapshot.data().value);
+  if (!result.success) throw new Error(`Invalid ${key} document`);
+  await cacheSet(cacheKey(user.uid, key), result.data);
+  if (typeof snapshot.data().updatedAt === 'string')
+    await cacheSet(revisionKey(user.uid, key), snapshot.data().updatedAt);
+  return result.data;
+}
+
 export async function loadUserData<K extends UserDataKey>(
   user: User,
   key: K,
@@ -76,19 +91,16 @@ export async function loadUserData<K extends UserDataKey>(
     (item) => item.id === `${user.uid}-${key}` && item.feature === 'user-data',
   );
   if (hasPending && cachedResult.success) return cachedResult.data;
-  try {
-    const snapshot = await getDoc(dataRef(user.uid, key));
-    if (!snapshot.exists()) return cachedResult.success ? cachedResult.data : null;
-    const result = schema.safeParse(snapshot.data().value);
-    if (!result.success) throw new Error(`Invalid ${key} document`);
-    await cacheSet(cacheKey(user.uid, key), result.data);
-    if (typeof snapshot.data().updatedAt === 'string')
-      await cacheSet(revisionKey(user.uid, key), snapshot.data().updatedAt);
-    return result.data;
-  } catch (error) {
-    if (cachedResult.success) return cachedResult.data;
-    throw error;
+  if (cachedResult.success) {
+    // Serve the cached value immediately so every navigation doesn't pay a
+    // live Firestore round-trip on top of rendering — a save already wrote
+    // this same cache moments before most reads, so it's rarely actually
+    // stale. Refresh in the background purely to keep the NEXT read current
+    // (e.g. after a change made on another device).
+    void fetchAndCacheUserData(user, key, schema).catch(() => undefined);
+    return cachedResult.data;
   }
+  return fetchAndCacheUserData(user, key, schema);
 }
 
 export async function saveUserData<K extends UserDataKey>(

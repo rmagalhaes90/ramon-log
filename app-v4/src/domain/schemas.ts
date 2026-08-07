@@ -219,7 +219,16 @@ export type Goal = Profile['goal'];
 
 export const photoSchema = z.object({ id: safeIdSchema, d: dateKeySchema });
 export const photoIndexSchema = z.array(photoSchema).max(5000);
-export const notificationSettingsSchema = z.object({ restEnabled: z.boolean().default(false) });
+const reminderTimeSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+  .or(z.literal(''));
+export const notificationSettingsSchema = z.object({
+  restEnabled: z.boolean().default(false),
+  mealTime: reminderTimeSchema.default(''),
+  supplementTime: reminderTimeSchema.default(''),
+  workoutTime: reminderTimeSchema.default(''),
+});
 
 export const userDataSchemas = {
   workouts: workoutsSchema,

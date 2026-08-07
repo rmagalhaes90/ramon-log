@@ -50,7 +50,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
   const { copy, shell, onBack } = options;
   const passwordProvider = user.providerData.some(({ providerId }) => providerId === 'password');
   const settings = await loadUserData(user, 'notificationSettings').then(
-    (value) => value ?? { restEnabled: false },
+    (value) => value ?? { restEnabled: false, mealTime: '', supplementTime: '', workoutTime: '' },
   );
   options.onRestNotificationsChange(settings.restEnabled);
   shell(
@@ -160,6 +160,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
     button.addEventListener('click', () => {
       if (value === options.unitSystem) return;
       options.onUnitSystemChange(value);
+      options.unitSystem = value;
       void renderSettingsView(user, options);
     });
     unitsChoice.append(button);
@@ -248,6 +249,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
     button.addEventListener('click', () => {
       if (value === options.showRirRpe) return;
       options.onShowRirRpeChange(value);
+      options.showRirRpe = value;
       void renderSettingsView(user, options);
     });
     advancedFieldsChoice.append(button);
@@ -420,7 +422,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
             if (notificationStatus) notificationStatus.textContent = copy('notificationDenied');
             return;
           }
-          await saveUserData(user, 'notificationSettings', { restEnabled: enabled });
+          await saveUserData(user, 'notificationSettings', { ...settings, restEnabled: enabled });
           options.onRestNotificationsChange(enabled);
           await renderSettingsView(user, options);
         })().catch((error: unknown) => reportError(error, 'notifications/settings')),
@@ -441,6 +443,57 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
           .catch((error: unknown) => reportError(error, 'notifications/test')),
     );
   }
+  const remindersCard = document.createElement('article');
+  remindersCard.className = 'units-card';
+  const remindersTitle = document.createElement('h2');
+  remindersTitle.textContent = copy('remindersLabel');
+  const remindersHint = document.createElement('p');
+  remindersHint.className = 'hint';
+  remindersHint.textContent = copy('remindersHint');
+  const reminderField = (labelKey: MessageKey, value: string) => {
+    const label = document.createElement('label');
+    const span = document.createElement('span');
+    span.textContent = copy(labelKey);
+    const input = document.createElement('input');
+    input.type = 'time';
+    input.value = value;
+    label.append(span, input);
+    return { label, input };
+  };
+  const meal = reminderField('reminderMealLabel', settings.mealTime);
+  const supplement = reminderField('reminderSupplementLabel', settings.supplementTime);
+  const workout = reminderField('reminderWorkoutLabel', settings.workoutTime);
+  const saveRemindersButton = document.createElement('button');
+  saveRemindersButton.type = 'button';
+  saveRemindersButton.textContent = copy('saveReminders');
+  const remindersStatus = document.createElement('p');
+  remindersStatus.setAttribute('role', 'status');
+  saveRemindersButton.addEventListener('click', () => {
+    void (async () => {
+      const hasAnyTime = meal.input.value || supplement.input.value || workout.input.value;
+      if (hasAnyTime && (await requestNotificationAccess()) !== 'granted') {
+        remindersStatus.textContent = copy('notificationDenied');
+        return;
+      }
+      await saveUserData(user, 'notificationSettings', {
+        ...settings,
+        mealTime: meal.input.value,
+        supplementTime: supplement.input.value,
+        workoutTime: workout.input.value,
+      });
+      remindersStatus.textContent = copy('remindersSaved');
+    })().catch((error: unknown) => reportError(error, 'notifications/reminders'));
+  });
+  remindersCard.append(
+    remindersTitle,
+    remindersHint,
+    meal.label,
+    supplement.label,
+    workout.label,
+    saveRemindersButton,
+    remindersStatus,
+  );
+  document.querySelector('.notification-card')?.after(remindersCard);
   bindDataPortability(user, copy);
   document.querySelector('#delete-form')?.addEventListener('submit', (event) => {
     event.preventDefault();
