@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — botões sem estilo (padrão do navegador) alpha.52
+
+Usuário reportou que os botões de "duplicar" e do "voucher" (código do treinador) estavam feios. Causa: `<button id="duplicate-day">` na tela de Nutrição e o botão de submit/desvincular do formulário de código do treinador em Configurações não tinham nenhuma `class`, então renderizavam com a aparência crua padrão do navegador em vez do visual customizado do resto do app — o `<input type="date">` ao lado do botão de duplicar também estava sem estilo. Corrigido reaproveitando as classes `.secondary`/`.primary` já usadas em todo o app e adicionando `.nutrition-copy input` ao CSS.
+
+Verificado via `getComputedStyle` no navegador (sem precisar de login): `.secondary` produz borda, fundo e padding reais em vez dos valores padrão do navegador; `.nutrition-copy input` também.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/87 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.52`.
+
 ## Rodada 2026-08-07 — rótulos de módulo e "readiness" traduzidos alpha.51
 
 Usuário reportou que trocar o idioma para português não traduzia "Fuel" nem "Readiness". Causa: os textos `TRAIN`/`RECOVER`/`FUEL`/`SYNC` nos cartões do dashboard, no tour inicial e nos cabeçalhos de Progresso/Nutrição estavam escritos direto no HTML gerado (`main.ts`), nunca passando por `copy()` — só o texto do botão/parágrafo abaixo era traduzido, não o rótulo do módulo. Além disso, o próprio dicionário em português tinha a palavra inglesa "Readiness" nas chaves `readiness`, `recoverModule` e `readinessCorrelation`, sem tradução real.
