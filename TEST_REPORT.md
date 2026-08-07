@@ -1,5 +1,13 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — rótulos de módulo e "readiness" traduzidos alpha.51
+
+Usuário reportou que trocar o idioma para português não traduzia "Fuel" nem "Readiness". Causa: os textos `TRAIN`/`RECOVER`/`FUEL`/`SYNC` nos cartões do dashboard, no tour inicial e nos cabeçalhos de Progresso/Nutrição estavam escritos direto no HTML gerado (`main.ts`), nunca passando por `copy()` — só o texto do botão/parágrafo abaixo era traduzido, não o rótulo do módulo. Além disso, o próprio dicionário em português tinha a palavra inglesa "Readiness" nas chaves `readiness`, `recoverModule` e `readinessCorrelation`, sem tradução real.
+
+Corrigido com quatro chaves novas (`moduleTrainLabel`/`moduleRecoverLabel`/`moduleFuelLabel`/`moduleSyncLabel`, TREINO/RECUPERAÇÃO/NUTRIÇÃO/SINCRONIA em PT, TRAIN/RECOVER/FUEL/SYNC em EN) usadas em todos os lugares que antes tinham o literal em inglês, e trocando "Readiness"/"readiness" por "Prontidão"/"prontidão" nas três chaves do dicionário PT. Verificado diretamente no navegador importando o módulo `core/i18n.ts` e chamando `createI18n('pt').t(...)` para cada chave alterada, confirmando os valores traduzidos sem precisar de login.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/87 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.51`.
+
 ## Rodada 2026-08-07 — filtro de grupo muscular/equipamento ao adicionar exercício alpha.50
 
 Usuário reportou que a tela de adicionar exercício durante a montagem da rotina só tinha busca por texto, sem filtro por área do corpo/aparelho, e pediu que o filtro fizesse sentido para o dia (ex.: dia "Peito" já mostrar exercícios de peito). Reaproveitados os mesmos chips de grupo muscular (`muscleGroupKeys`/`muscleGroupLabels`, antes só declarados dentro de `renderWorkoutGenerator`, agora hoisted para módulo) e equipamento já usados no gerador automático. Nova função `guessDayMuscleGroups` prioriza os músculos dos exercícios já cadastrados no dia (somando `exercise.muscles` e comparando contra `MUSCLE_GROUPS`); se o dia estiver vazio, cai para um match de palavra-chave no título (peito/chest, costas/back, perna/legs, ombro/shoulder, braço/arms, abdômen/abs, push, pull, corpo inteiro/full body).
