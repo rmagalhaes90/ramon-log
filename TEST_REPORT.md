@@ -1,5 +1,15 @@
 # Relatório de testes
 
+## Rodada 2026-08-07 — exemplos em GIF via RapidAPI alpha.54
+
+Usuário forneceu uma chave de uma API paga (RapidAPI, "ExerciseDB with GIFs and images") pra trazer exemplos visuais reais dos exercícios, fechando a lacuna já identificada na alpha.28 (nenhum repositório gratuito de vídeos de exemplo existe). A chave não pode ir pro frontend (bundle público) nem pro repositório — implementado como proxy: duas Cloud Functions novas, `searchExerciseMedia` (admin/coach) e `getExerciseMedia` (qualquer usuário logado, com cache em `sharedExerciseMedia` no Firestore pra não regastar a cota em exercícios populares), seguram a chave via Firebase Functions secret (`RAPIDAPI_KEY`).
+
+Como os nomes do catálogo estão em português e a API busca em inglês, não dá pra casar automaticamente com confiança — decisão do usuário foi vincular manualmente: novo campo `exerciseDbId` no schema do exercício, populado via busca+seleção no Gerenciador de exercícios. Vídeo do YouTube (`videoUrl`/`videoUrlEn`) continua existindo em paralelo; GIF aparece a mais, não substitui.
+
+Verificado diretamente contra a API real com a chave do usuário via curl (`/api/v1/exercisetypes`, `/api/v1/exercises/search`, `/api/v1/exercises/{id}` — confirmado `gifUrls`/`imageUrls` em múltiplas resoluções). O emulador local de Functions apresentou uma falha de carregamento pré-existente neste repositório, não relacionada ao código novo (o módulo importa sem erro em Node puro) — validação real feita fazendo deploy direto pra produção (`traincontrollog`): secret configurado, Functions e regras do Firestore publicadas com sucesso. Teste visual final (buscar exemplo, vincular, ver o GIF no treino) delegado ao usuário, que tem acesso à conta admin real.
+
+Bateria completa: `typecheck`, `lint` (inclui `functions/`), `format:check` (só `mobile/expo-env.d.ts` pré-existente), **33 arquivos/91 testes Vitest**, `build` e `pnpm test:emulator:rules` (cobrindo as novas regras de `sharedExerciseMedia`), todos com código 0. Versão sincronizada para `4.0.0-alpha.54`.
+
 ## Rodada 2026-08-07 — adicionar/remover série durante o treino + tradução dos nomes padrão de dia alpha.53
 
 Dois pedidos do usuário na mesma rodada:
