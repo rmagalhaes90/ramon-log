@@ -193,8 +193,17 @@ export async function createAccount(email: string, password: string): Promise<vo
     password.slice(0, 128),
   );
   services.auth.languageCode = authLocale();
-  await sendEmailVerification(credential.user, emailActionSettings());
   sessionStorage.setItem('kyro-v4-new-account', credential.user.uid);
+  // The account already exists at this point (createUserWithEmailAndPassword
+  // succeeded above) — a transient failure sending the verification email
+  // (rate limit, quota, flaky network) must not surface as "signup failed"
+  // and strand the user on the form. onAuthStateChanged will still route
+  // them to the verify-email screen, where "Send again" retries this.
+  try {
+    await sendEmailVerification(credential.user, emailActionSettings());
+  } catch (error) {
+    reportBackgroundError(error, 'auth/verification-email-on-signup');
+  }
 }
 
 export async function loginWithGoogle(): Promise<void> {
@@ -245,10 +254,11 @@ export async function logout(): Promise<void> {
 
 export function authErrorKey(
   error: unknown,
-): 'authInvalid' | 'authRate' | 'passwordHint' | 'authGeneric' {
+): 'authInvalid' | 'authRate' | 'passwordHint' | 'authEmailInUse' | 'authGeneric' {
   const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : '';
   if (/invalid-credential|wrong-password|user-not-found/.test(code)) return 'authInvalid';
   if (code === 'auth/too-many-requests') return 'authRate';
   if (code === 'auth/weak-password') return 'passwordHint';
+  if (code === 'auth/email-already-in-use') return 'authEmailInUse';
   return 'authGeneric';
 }

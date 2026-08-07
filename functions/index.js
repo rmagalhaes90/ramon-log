@@ -170,6 +170,27 @@ export const setUserBlocked = onCall({ invoker: 'public' }, async (request) => {
   return { uid, blocked };
 });
 
+// The per-uid self-heal in getAuthUserOrCleanStale only fires reactively,
+// when an admin acts on that specific stale uid. Accounts deleted outside
+// the app (Firebase console, another tool) otherwise sit in the admin list
+// forever with no real Auth user behind them until someone happens to click
+// an action on them — this sweeps the whole collection on demand instead.
+export const cleanupOrphanedSharedUsers = onCall({ invoker: 'public' }, async (request) => {
+  requireAdmin(request);
+  const snapshot = await getFirestore().collection('sharedUsers').get();
+  let removed = 0;
+  for (const docSnapshot of snapshot.docs) {
+    try {
+      await getAuth().getUser(docSnapshot.id);
+    } catch (error) {
+      if (error?.code !== 'auth/user-not-found') throw error;
+      await docSnapshot.ref.delete();
+      removed += 1;
+    }
+  }
+  return { removed, checked: snapshot.size };
+});
+
 export const deleteOwnAccount = onCall({ invoker: 'public' }, async (request) => {
   const { uid } = requireUser(request);
   await getStorage()

@@ -39,3 +39,13 @@ export async function setUserCoach(uid: string, isCoach: boolean): Promise<void>
   if (!services) throw new Error('firebase/unavailable');
   await httpsCallable(services.functions, 'setCoachRole')({ uid, isCoach });
 }
+export interface CleanupOrphansResult {
+  removed: number;
+  checked: number;
+}
+export async function cleanupOrphanedUsers(): Promise<CleanupOrphansResult> {
+  const services = getFirebaseServices();
+  if (!services) throw new Error('firebase/unavailable');
+  const result = await httpsCallable(services.functions, 'cleanupOrphanedSharedUsers')();
+  return result.data as CleanupOrphansResult;
+}

@@ -35,7 +35,13 @@ import {
   verifyResetActionCode,
   type AuthState,
 } from './features/auth';
-import { listSharedUsers, setUserAdmin, setUserBlocked, setUserCoach } from './features/admin';
+import {
+  cleanupOrphanedUsers,
+  listSharedUsers,
+  setUserAdmin,
+  setUserBlocked,
+  setUserCoach,
+} from './features/admin';
 import {
   createInvite,
   listCoachStudents,
@@ -313,8 +319,8 @@ function renderAuth(): void {
       ${authMode === 'signup' ? `<p class="hint">${copy('passwordHint')}</p>` : ''}
       <button class="primary" type="submit">${authMode === 'login' ? copy('login') : copy('signup')}</button></form>
     ${authMode === 'login' ? `<button class="link-button" id="forgot">${copy('forgot')}</button>` : ''}
-    <div class="divider"><span>or</span></div><button id="google" class="secondary">${copy('google')}</button>
-    <button id="apple" class="secondary">${copy('apple')}</button>
+    <div class="divider"><span>or</span></div><button id="google" class="secondary oauth-button"><svg class="oauth-icon" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.87-3.04.87-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.73A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.19.28-1.73V4.94H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.06z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.94l3 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg><span>${copy('google')}</span></button>
+    <button id="apple" class="secondary oauth-button"><svg class="oauth-icon" viewBox="0 0 17 20" aria-hidden="true" fill="currentColor"><path d="M14.03 10.6c-.02-2.06 1.68-3.05 1.76-3.1-.96-1.4-2.45-1.6-2.98-1.62-1.27-.13-2.48.75-3.12.75-.65 0-1.63-.73-2.68-.71-1.38.02-2.65.8-3.36 2.03-1.43 2.48-.37 6.15 1.03 8.16.68.98 1.5 2.08 2.57 2.04 1.03-.04 1.42-.66 2.67-.66 1.24 0 1.6.66 2.68.64 1.11-.02 1.81-1 2.48-1.99.78-1.14 1.1-2.24 1.12-2.3-.02-.01-2.15-.83-2.17-3.24zM12 4.1c.56-.68.94-1.62.83-2.56-.81.03-1.78.54-2.36 1.21-.52.6-.98 1.56-.86 2.48.9.07 1.82-.46 2.39-1.13z"/></svg><span>${copy('apple')}</span></button>
     <button class="link-button" id="open-legal">${copy('legalTitle')}</button>
     <a class="baseline-link" href="../index.html">${copy('baseline')}</a></section>`);
   document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) =>
@@ -658,12 +664,26 @@ async function renderAdmin(user: User): Promise<void> {
   const users = await listSharedUsers();
   const superAdmin = user.email?.toLowerCase() === 'rmagalhaes90@gmail.com';
   shell(
-    `<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">ADMIN</p><h1>${copy('users')}</h1><button id="admin-manage-exercises" class="secondary">${copy('manageExercises')}</button><div id="admin-users" class="history-list"></div></section>`,
+    `<section class="feature-view"><button id="feature-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">ADMIN</p><h1>${copy('users')}</h1><button id="admin-manage-exercises" class="secondary">${copy('manageExercises')}</button><button id="admin-cleanup-orphans" class="secondary">${copy('cleanupOrphans')}</button><p id="admin-status" class="hint" role="status"></p><div id="admin-users" class="history-list"></div></section>`,
   );
   bindBack(user);
   document
     .querySelector('#admin-manage-exercises')
     ?.addEventListener('click', () => renderExerciseManager(user));
+  document.querySelector('#admin-cleanup-orphans')?.addEventListener('click', () => {
+    if (!confirm(copy('cleanupOrphansConfirm'))) return;
+    void cleanupOrphanedUsers()
+      .then(({ removed, checked }) =>
+        renderAdmin(user).then(() => {
+          const status = document.querySelector('#admin-status');
+          if (status)
+            status.textContent = copy('cleanupOrphansDone')
+              .replace('{removed}', String(removed))
+              .replace('{checked}', String(checked));
+        }),
+      )
+      .catch((error: unknown) => reportError(error, 'admin/cleanup-orphans'));
+  });
   const list = document.querySelector('#admin-users');
   const runAdminAction = (promise: Promise<unknown>, code: string) =>
     void promise
@@ -2575,7 +2595,11 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
       .filter((exercise) => !selectedEquipment.size || selectedEquipment.has(exercise.equipment))
       .slice(0, 100)
       .forEach((exercise) => {
+        const alreadyAdded = (workouts[selectedDay]?.exercises ?? []).some(
+          (item) => item.name === exercise.name,
+        );
         const row = document.createElement('article');
+        row.classList.toggle('already-added', alreadyAdded);
         if (exercise.exerciseDbId) {
           const thumb = document.createElement('img');
           thumb.className = 'exercise-thumb';
@@ -2595,24 +2619,29 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
         meta.textContent = `${exercise.sets} × ${exercise.reps} · ${exercise.equipment}`;
         body.append(name, meta);
         const add = document.createElement('button');
-        add.textContent = copy('add');
-        add.addEventListener('click', () => {
-          const current = workouts[selectedDay] ?? {
-            title: selectedDay,
-            titleEn: '',
-            cardioNote: '',
-            exercises: [],
-            abs: [],
-          };
-          const next = {
-            ...workouts,
-            [selectedDay]: { ...current, exercises: [...current.exercises, exercise].slice(0, 60) },
-          };
-          void saveUserData(user, 'workouts', next)
-            .then(() => clearWorkoutDraft(user, selectedDay))
-            .then(() => renderRoutine(user))
-            .catch((error: unknown) => reportError(error, 'workout/add'));
-        });
+        add.textContent = alreadyAdded ? copy('alreadyInRoutine') : copy('add');
+        add.disabled = alreadyAdded;
+        if (!alreadyAdded)
+          add.addEventListener('click', () => {
+            const current = workouts[selectedDay] ?? {
+              title: selectedDay,
+              titleEn: '',
+              cardioNote: '',
+              exercises: [],
+              abs: [],
+            };
+            const next = {
+              ...workouts,
+              [selectedDay]: {
+                ...current,
+                exercises: [...current.exercises, exercise].slice(0, 60),
+              },
+            };
+            void saveUserData(user, 'workouts', next)
+              .then(() => clearWorkoutDraft(user, selectedDay))
+              .then(() => renderRoutine(user))
+              .catch((error: unknown) => reportError(error, 'workout/add'));
+          });
         row.append(body, add);
         list.append(row);
       });
