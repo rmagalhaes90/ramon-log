@@ -78,6 +78,7 @@ import { rankExerciseAlternatives } from './features/workouts/substitutions';
 import { clearWorkoutDraft, loadWorkoutDraft, saveWorkoutDraft } from './features/workouts/draft';
 import {
   generateWorkout,
+  MUSCLE_GROUPS,
   type IntensityKey,
   type MuscleGroupKey,
 } from './features/workouts/generator';
@@ -2078,45 +2079,82 @@ function renderTemplatePicker(user: User, workouts: Workouts): void {
   });
 }
 
+const muscleGroupKeys: MuscleGroupKey[] = [
+  'chest',
+  'back',
+  'legs',
+  'shoulders',
+  'arms',
+  'abs',
+  'push',
+  'pull',
+  'fullbody',
+];
+const muscleGroupLabels: Record<MuscleGroupKey, MessageKey> = {
+  chest: 'genChest',
+  back: 'genBack',
+  legs: 'genLegs',
+  shoulders: 'genShoulders',
+  arms: 'genArms',
+  abs: 'genAbsGroup',
+  push: 'genPush',
+  pull: 'genPull',
+  fullbody: 'genFullBody',
+};
+const equipmentKeys: Exercise['equipment'][] = [
+  'barbell',
+  'dumbbell',
+  'machine',
+  'cable',
+  'bodyweight',
+  'cardio',
+];
+const equipmentLabels: Record<string, MessageKey> = {
+  barbell: 'equipBarbell',
+  dumbbell: 'equipDumbbell',
+  machine: 'equipMachine',
+  cable: 'equipCable',
+  bodyweight: 'equipBodyweight',
+  cardio: 'equipCardio',
+};
+
+/** Guesses which muscle group a routine day is for, from its exercises (or failing that, its title), so the "add exercise" picker can default to a sensible filter. */
+function guessDayMuscleGroups(day: Workouts[keyof Workouts]): MuscleGroupKey[] {
+  if (day?.exercises.length) {
+    const muscleTotals = new Map<string, number>();
+    day.exercises.forEach((exercise) => {
+      Object.entries(exercise.muscles).forEach(([muscle, value]) => {
+        muscleTotals.set(muscle, (muscleTotals.get(muscle) ?? 0) + value);
+      });
+    });
+    const best = muscleGroupKeys
+      .map((key) => ({
+        key,
+        score: MUSCLE_GROUPS[key].reduce((sum, muscle) => sum + (muscleTotals.get(muscle) ?? 0), 0),
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)[0];
+    if (best) return [best.key];
+  }
+  const title = `${day?.title ?? ''} ${day?.titleEn ?? ''}`.toLocaleLowerCase();
+  const keywordMap: [RegExp, MuscleGroupKey][] = [
+    [/push/, 'push'],
+    [/pull/, 'pull'],
+    [/peito|chest/, 'chest'],
+    [/costas|back/, 'back'],
+    [/perna|legs/, 'legs'],
+    [/ombro|shoulder/, 'shoulders'],
+    [/braç|arms/, 'arms'],
+    [/abd|abs\b/, 'abs'],
+    [/corpo inteiro|full ?body/, 'fullbody'],
+  ];
+  const match = keywordMap.find(([regex]) => regex.test(title));
+  return match ? [match[1]] : [];
+}
+
 function renderWorkoutGenerator(user: User, workouts: Workouts): void {
-  const groupKeys: MuscleGroupKey[] = [
-    'chest',
-    'back',
-    'legs',
-    'shoulders',
-    'arms',
-    'abs',
-    'push',
-    'pull',
-    'fullbody',
-  ];
-  const groupLabels: Record<MuscleGroupKey, MessageKey> = {
-    chest: 'genChest',
-    back: 'genBack',
-    legs: 'genLegs',
-    shoulders: 'genShoulders',
-    arms: 'genArms',
-    abs: 'genAbsGroup',
-    push: 'genPush',
-    pull: 'genPull',
-    fullbody: 'genFullBody',
-  };
-  const equipmentKeys: Exercise['equipment'][] = [
-    'barbell',
-    'dumbbell',
-    'machine',
-    'cable',
-    'bodyweight',
-    'cardio',
-  ];
-  const equipmentLabels: Record<string, MessageKey> = {
-    barbell: 'equipBarbell',
-    dumbbell: 'equipDumbbell',
-    machine: 'equipMachine',
-    cable: 'equipCable',
-    bodyweight: 'equipBodyweight',
-    cardio: 'equipCardio',
-  };
+  const groupKeys = muscleGroupKeys;
+  const groupLabels = muscleGroupLabels;
   const intensityKeys: IntensityKey[] = ['light', 'medium', 'heavy'];
   const intensityLabels: Record<IntensityKey, { title: MessageKey; desc: MessageKey }> = {
     light: { title: 'genLight', desc: 'genLightDesc' },
@@ -2272,14 +2310,65 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
 }
 
 function renderExerciseCatalog(user: User, workouts: Workouts): void {
+  const selectedGroups = new Set<MuscleGroupKey>(guessDayMuscleGroups(workouts[selectedDay]));
+  const selectedEquipment = new Set<Exercise['equipment']>();
   shell(
-    `<section class="feature-view"><button id="catalog-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">CATALOG · ${exerciseCatalog.length}</p><h1>${copy('addExercise')}</h1><input id="catalog-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><div id="catalog-list" class="catalog-list"></div></section>`,
+    `<section class="feature-view"><button id="catalog-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">CATALOG · ${exerciseCatalog.length}</p><h1>${copy('addExercise')}</h1><input id="catalog-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><div id="catalog-filters"></div><div id="catalog-list" class="catalog-list"></div></section>`,
   );
+  const currentQuery = () =>
+    document.querySelector<HTMLInputElement>('#catalog-search')?.value ?? '';
+  const renderFilters = () => {
+    const filters = document.querySelector('#catalog-filters');
+    if (!filters) return;
+    filters.replaceChildren();
+    const groupsHeading = document.createElement('h2');
+    groupsHeading.textContent = copy('genGroups');
+    const groupsGrid = document.createElement('div');
+    groupsGrid.className = 'chip-grid';
+    muscleGroupKeys.forEach((key) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.textContent = copy(muscleGroupLabels[key]);
+      chip.ariaPressed = String(selectedGroups.has(key));
+      chip.addEventListener('click', () => {
+        if (selectedGroups.has(key)) selectedGroups.delete(key);
+        else selectedGroups.add(key);
+        renderFilters();
+        draw(currentQuery());
+      });
+      groupsGrid.append(chip);
+    });
+    const equipmentHeading = document.createElement('h2');
+    equipmentHeading.textContent = copy('genEquipment');
+    const equipmentGrid = document.createElement('div');
+    equipmentGrid.className = 'chip-grid';
+    equipmentKeys.forEach((key) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.textContent = copy(equipmentLabels[key] ?? 'equipBarbell');
+      chip.ariaPressed = String(selectedEquipment.has(key));
+      chip.addEventListener('click', () => {
+        if (selectedEquipment.has(key)) selectedEquipment.delete(key);
+        else selectedEquipment.add(key);
+        renderFilters();
+        draw(currentQuery());
+      });
+      equipmentGrid.append(chip);
+    });
+    filters.append(groupsHeading, groupsGrid, equipmentHeading, equipmentGrid);
+  };
   const draw = (query = '') => {
     const list = document.querySelector('#catalog-list');
     if (!list) return;
     list.replaceChildren();
+    const groupMuscles = [...selectedGroups].flatMap((key) => MUSCLE_GROUPS[key]);
     searchExercises(query, i18n.locale)
+      .filter(
+        (exercise) =>
+          !groupMuscles.length ||
+          groupMuscles.some((muscle) => (exercise.muscles[muscle] ?? 0) > 0),
+      )
+      .filter((exercise) => !selectedEquipment.size || selectedEquipment.has(exercise.equipment))
       .slice(0, 100)
       .forEach((exercise) => {
         const row = document.createElement('article');
@@ -2312,6 +2401,7 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
         list.append(row);
       });
   };
+  renderFilters();
   draw();
   document
     .querySelector('#catalog-back')
