@@ -1635,6 +1635,13 @@ h2 {
   flex-basis: 100%;
   margin: 0;
 }
+.nutrition-copy input {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  color: var(--text);
+  padding: 0.6rem;
+}
 .history-list article > div {
   display: flex;
   flex-wrap: wrap;

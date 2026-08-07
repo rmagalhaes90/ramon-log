@@ -278,6 +278,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
         coachStatus.textContent = `${copy('linkedToCoach')}: ${link.coachEmail || link.coachUid}`;
         const unlink = document.createElement('button');
         unlink.type = 'button';
+        unlink.className = 'secondary';
         unlink.textContent = copy('unlinkCoach');
         unlink.addEventListener('click', () => {
           unlink.disabled = true;
@@ -299,6 +300,7 @@ export async function renderSettingsView(user: User, options: SettingsViewOption
       input.autocomplete = 'off';
       const submit = document.createElement('button');
       submit.type = 'submit';
+      submit.className = 'primary';
       submit.textContent = copy('linkToCoach');
       form.append(input, submit);
       coachCard.append(form);
