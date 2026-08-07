@@ -6,7 +6,7 @@ import {
   reportBackgroundError,
   reportError,
 } from './core/errors';
-import { createI18n, type Locale, type MessageKey } from './core/i18n';
+import { createI18n, messageFor, type Locale, type MessageKey } from './core/i18n';
 import type {
   Exercise,
   FavoriteMeal,
@@ -1834,7 +1834,7 @@ async function renderWorkout(user: User): Promise<void> {
     <header class="workout-heading"><p class="eyebrow">${dateKey()}</p><h1 id="workout-title"></h1><div class="session-clock"><span>${copy('sessionTime')}</span><strong id="session-clock">00:00:00</strong><button id="session-toggle" type="button"></button></div><button id="edit-routine" class="link-button">${copy('editRoutineTitle')}</button></header><div id="exercise-list"></div><aside id="rest-timer" class="rest-timer" hidden></aside>
     <button id="finish-workout" class="primary" ${workoutEntries.length ? '' : 'disabled'}>${copy('finishWorkout')}</button><p id="workout-status" class="hint" role="status"></p></section>`);
   const title = document.querySelector('#workout-title');
-  if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
+  if (title) title.textContent = localizedDayTitle(workouts[selectedDay]);
   if (draftMatches) {
     const status = document.querySelector('#workout-status');
     if (status) status.textContent = copy('sessionResumed');
@@ -1924,7 +1924,7 @@ async function renderRoutine(user: User): Promise<void> {
   shell(`<section class="workout-view"><button id="routine-back" class="link-button">← ${copy('back')}</button><div class="days" id="days"></div>
     <header class="workout-heading"><p class="eyebrow">${copy('routineExercises')}</p><h1 id="routine-title"></h1><div class="routine-actions"><button id="rename-routine">${copy('renameRoutine')}</button><button id="add-exercise">+ ${copy('addExercise')}</button><button id="routine-template">${copy('templates')}</button><button id="routine-autogen">${copy('autoGenerate')}</button></div></header><div id="routine-exercise-list"></div></section>`);
   const title = document.querySelector('#routine-title');
-  if (title) title.textContent = workouts[selectedDay]?.title ?? copy('noWorkout');
+  if (title) title.textContent = localizedDayTitle(workouts[selectedDay]);
   renderDayButtons(user, workouts, () => void renderRoutine(user));
   renderRoutineExercises(user, workouts);
   document.querySelector('#routine-back')?.addEventListener('click', () => {
@@ -1947,7 +1947,8 @@ async function renderRoutine(user: User): Promise<void> {
     .querySelector('#routine-autogen')
     ?.addEventListener('click', () => renderWorkoutGenerator(user, workouts));
   document.querySelector('#rename-routine')?.addEventListener('click', () => {
-    const newTitle = prompt(copy('routineName'), workouts[selectedDay]?.title ?? '');
+    const currentDay = workouts[selectedDay];
+    const newTitle = prompt(copy('routineName'), currentDay ? localizedDayTitle(currentDay) : '');
     if (newTitle?.trim()) {
       const current = workouts[selectedDay] ?? {
         title: selectedDay,
@@ -1956,9 +1957,10 @@ async function renderRoutine(user: User): Promise<void> {
         exercises: [],
         abs: [],
       };
+      const trimmed = newTitle.trim().slice(0, 80);
       void saveUserData(user, 'workouts', {
         ...workouts,
-        [selectedDay]: { ...current, title: newTitle.trim().slice(0, 80) },
+        [selectedDay]: { ...current, title: trimmed, titleEn: trimmed },
       })
         .then(() => renderRoutine(user))
         .catch((error: unknown) => reportError(error, 'workout/rename'));
@@ -2289,11 +2291,15 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
       apply.textContent = copy('genApply');
       apply.addEventListener('click', () => {
         if (!confirm(copy('genConfirm')) || !preview) return;
-        const groupLabelText = [...selectedGroups].map((key) => copy(groupLabels[key])).join(' + ');
+        const labelText = (locale: Locale) =>
+          [...selectedGroups]
+            .map((key) => messageFor(locale, groupLabels[key]))
+            .join(' + ')
+            .slice(0, 80);
         const generated = {
           ...preview,
-          title: groupLabelText.slice(0, 80),
-          titleEn: groupLabelText.slice(0, 80),
+          title: labelText('pt'),
+          titleEn: labelText('en'),
         };
         void saveUserData(user, 'workouts', { ...workouts, [selectedDay]: generated })
           .then(() => clearWorkoutDraft(user, selectedDay))
@@ -2757,9 +2763,37 @@ function renderExerciseEntries(
       setHeader.append(cell);
     });
     card.append(setHeader);
+    const persistSetCountChange = () => {
+      const current = workouts[selectedDay];
+      if (!current) return;
+      const isAbs = exerciseIndex >= current.exercises.length;
+      const abdominalIndex = exerciseIndex - current.exercises.length;
+      const nextCount = Math.max(1, Math.min(20, entry.sets.length));
+      const exercises = current.exercises.map((exercise, index) =>
+        !isAbs && index === exerciseIndex ? { ...exercise, sets: nextCount } : exercise,
+      );
+      const abs = current.abs.map((exercise, index) =>
+        isAbs && index === abdominalIndex ? { ...exercise, sets: nextCount } : exercise,
+      );
+      void saveUserData(user, 'workouts', {
+        ...workouts,
+        [selectedDay]: { ...current, exercises, abs },
+      })
+        .then(() =>
+          workoutStartedAt
+            ? saveWorkoutDraft(user, selectedDay, workoutStartedAt, workoutEntries)
+            : Promise.resolve(),
+        )
+        .then(() => renderWorkout(user))
+        .catch((error: unknown) => reportError(error, 'workout/set-count'));
+    };
     entry.sets.forEach((set, setIndex) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'set-row-wrap';
+      wrap.draggable = false;
       const row = document.createElement('div');
       row.className = 'set-row';
+      row.draggable = false;
       const number = document.createElement('span');
       number.textContent = String(setIndex + 1);
       const kg = document.createElement('input');
@@ -2845,11 +2879,87 @@ function renderExerciseEntries(
         persistDraft();
       });
       row.append(number, kg, reps, rir, rpe, done);
-      card.append(row);
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'set-row-delete';
+      deleteButton.textContent = copy('remove');
+      deleteButton.addEventListener('click', () => {
+        if (entry.sets.length <= 1) return;
+        entry.sets.splice(setIndex, 1);
+        persistSetCountChange();
+      });
+      wrap.append(row, deleteButton);
+      card.append(wrap);
       card.append(guidance);
+
+      const revealWidth = 76;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let dragBaseX = 0;
+      let tracking = false;
+      let horizontalDrag = false;
+      row.addEventListener('pointerdown', (event) => {
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+        dragBaseX = row.classList.contains('swiped') ? -revealWidth : 0;
+        tracking = true;
+        horizontalDrag = false;
+      });
+      row.addEventListener('pointermove', (event) => {
+        if (!tracking) return;
+        const dx = event.clientX - dragStartX;
+        const dy = event.clientY - dragStartY;
+        if (!horizontalDrag) {
+          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+          if (Math.abs(dy) > Math.abs(dx)) {
+            tracking = false;
+            return;
+          }
+          horizontalDrag = true;
+          row.setPointerCapture(event.pointerId);
+          document.querySelectorAll('.set-row.swiped').forEach((openRow) => {
+            if (openRow !== row) {
+              openRow.classList.remove('swiped');
+              (openRow as HTMLElement).style.transform = '';
+            }
+          });
+        }
+        const next = Math.min(0, Math.max(-revealWidth, dragBaseX + dx));
+        row.style.transform = `translateX(${next}px)`;
+        event.preventDefault();
+      });
+      const endSwipeDrag = (event: PointerEvent) => {
+        if (!tracking) return;
+        tracking = false;
+        if (!horizontalDrag) return;
+        const dx = event.clientX - dragStartX;
+        const finalX = Math.min(0, Math.max(-revealWidth, dragBaseX + dx));
+        const open = finalX < -revealWidth / 2;
+        row.classList.toggle('swiped', open);
+        row.style.transform = open ? `translateX(-${revealWidth}px)` : '';
+      };
+      row.addEventListener('pointerup', endSwipeDrag);
+      row.addEventListener('pointercancel', endSwipeDrag);
     });
+    const addSetButton = document.createElement('button');
+    addSetButton.type = 'button';
+    addSetButton.className = 'add-set-button';
+    addSetButton.textContent = copy('addSet');
+    addSetButton.disabled = entry.sets.length >= 20;
+    addSetButton.addEventListener('click', () => {
+      if (entry.sets.length >= 20) return;
+      entry.sets.push({ kg: 0, reps: 0, done: false, rir: undefined, rpe: undefined });
+      persistSetCountChange();
+    });
+    card.append(addSetButton);
     list.append(card);
   });
+}
+
+function localizedDayTitle(day: Workouts[keyof Workouts]): string {
+  if (!day) return copy('noWorkout');
+  if (i18n.locale === 'en') return day.titleEn || day.title;
+  return day.title || day.titleEn;
 }
 
 function localizedVideoUrl(exercise: Exercise): string {

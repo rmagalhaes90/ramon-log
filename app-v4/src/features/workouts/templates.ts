@@ -44,10 +44,15 @@ export function pickExercises(
   return result;
 }
 
-function routine(title: string, groups: string[], excludeNames: string[] = []) {
+function routine(
+  title: string,
+  groups: string[],
+  excludeNames: string[] = [],
+  titleEn: string = title,
+) {
   return {
     title,
-    titleEn: title,
+    titleEn,
     cardioNote: '',
     exercises: pickDiverseExercises(groups, 6, excludeNames),
     abs: [],
@@ -96,11 +101,11 @@ export function createTemplate(key: TemplateKey): Workouts {
     };
   if (key === 'broSplit')
     return {
-      segunda: routine('Peito', muscleGroups.chest ?? []),
-      terca: routine('Costas', muscleGroups.back ?? []),
-      quarta: routine('Pernas', muscleGroups.legs ?? []),
-      quinta: routine('Ombros', muscleGroups.shoulders ?? []),
-      sexta: routine('Braços', muscleGroups.arms ?? []),
+      segunda: routine('Peito', muscleGroups.chest ?? [], [], 'Chest'),
+      terca: routine('Costas', muscleGroups.back ?? [], [], 'Back'),
+      quarta: routine('Pernas', muscleGroups.legs ?? [], [], 'Legs'),
+      quinta: routine('Ombros', muscleGroups.shoulders ?? [], [], 'Shoulders'),
+      sexta: routine('Braços', muscleGroups.arms ?? [], [], 'Arms'),
     };
   const fullBodyDays: Array<[DayKey, string]> = [
     ['segunda', 'Full Body A'],

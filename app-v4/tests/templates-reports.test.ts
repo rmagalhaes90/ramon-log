@@ -37,6 +37,20 @@ describe('templates reports and CSV', () => {
     expect(broSplit.segunda?.exercises.length).toBeGreaterThan(0);
     expect(broSplit.terca?.exercises.length).toBeGreaterThan(0);
   });
+  it('gives bro split days a real English title distinct from the Portuguese one', () => {
+    const broSplit = createTemplate('broSplit');
+    expect(broSplit.segunda).toMatchObject({ title: 'Peito', titleEn: 'Chest' });
+    expect(broSplit.terca).toMatchObject({ title: 'Costas', titleEn: 'Back' });
+    expect(broSplit.quarta).toMatchObject({ title: 'Pernas', titleEn: 'Legs' });
+    expect(broSplit.quinta).toMatchObject({ title: 'Ombros', titleEn: 'Shoulders' });
+    expect(broSplit.sexta).toMatchObject({ title: 'Braços', titleEn: 'Arms' });
+  });
+  it('keeps title and titleEn identical for templates already using English gym terms', () => {
+    const ppl = createTemplate('ppl');
+    expect(ppl.segunda?.title).toBe(ppl.segunda?.titleEn);
+    const fullbody = createTemplate('fullbody');
+    expect(fullbody.segunda?.title).toBe(fullbody.segunda?.titleEn);
+  });
   it('drags exercises to an arbitrary position without mutating the source', () => {
     const plan = createTemplate('ppl');
     const originalFirst = plan.segunda?.exercises[0]?.name;

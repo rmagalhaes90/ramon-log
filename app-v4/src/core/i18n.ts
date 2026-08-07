@@ -88,6 +88,7 @@ const messages = {
     createRoutineForDay: '+ Criar rotina para este dia',
     stopRest: 'Parar descanso',
     sets: 'Séries',
+    addSet: '+ Adicionar série',
     close: 'Fechar',
     editRoutineTitle: 'Editar rotina',
     renameRoutine: 'Renomear',
@@ -499,6 +500,7 @@ const messages = {
     createRoutineForDay: '+ Create a routine for this day',
     stopRest: 'Stop rest',
     sets: 'Sets',
+    addSet: '+ Add set',
     close: 'Close',
     editRoutineTitle: 'Edit routine',
     renameRoutine: 'Rename',
@@ -825,6 +827,10 @@ const messages = {
 } as const;
 
 export type MessageKey = keyof (typeof messages)['pt'];
+
+export function messageFor(locale: Locale, key: MessageKey): string {
+  return messages[locale][key];
+}
 
 export function detectLocale(): Locale {
   const query = new URLSearchParams(location.search).get('lang');
