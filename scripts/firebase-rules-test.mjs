@@ -120,6 +120,17 @@ try {
     setDoc(doc(coach.firestore(), 'shared/exerciseDatabase'), { exercises: [] }),
   );
 
+  await assertSucceeds(
+    setDoc(doc(coach.firestore(), 'coachVideos/coachUser'), { videos: { Supino: 'x' } }),
+  );
+  await assertSucceeds(getDoc(doc(student1.firestore(), 'coachVideos/coachUser')));
+  await assertFails(
+    setDoc(doc(student1.firestore(), 'coachVideos/coachUser'), { videos: { Supino: 'y' } }),
+  );
+  await assertFails(
+    setDoc(doc(coach.firestore(), 'coachVideos/otherCoach'), { videos: { Supino: 'z' } }),
+  );
+
   console.log('Firestore/Storage rules: ownership, admin, coach scoping and upload limits passed');
 } finally {
   await testEnvironment.cleanup();

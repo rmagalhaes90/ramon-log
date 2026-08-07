@@ -4,7 +4,7 @@ export const dateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 export const safeIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,200}$/);
 const boundedText = (max: number) => z.string().max(max).default('');
 const finite = (min: number, max: number) => z.number().finite().min(min).max(max);
-const videoUrlSchema = z
+export const videoUrlSchema = z
   .string()
   .max(2048)
   .refine((value) => {

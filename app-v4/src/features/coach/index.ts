@@ -1,6 +1,7 @@
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { z } from 'zod';
+import { videoUrlSchema } from '../../domain/schemas';
 import { getFirebaseServices } from '../../services/firebase';
 
 function services() {
@@ -49,4 +50,26 @@ export async function myCoach(uid: string): Promise<CoachLink | null> {
   if (!snapshot.exists()) return null;
   const result = coachOfSchema.safeParse(snapshot.data());
   return result.success ? result.data : null;
+}
+
+const coachVideosSchema = z.object({ videos: z.record(z.string().max(120), videoUrlSchema) });
+
+export async function loadCoachVideos(coachUid: string): Promise<Record<string, string>> {
+  const snapshot = await getDoc(doc(services().firestore, 'coachVideos', coachUid));
+  if (!snapshot.exists()) return {};
+  const result = coachVideosSchema.safeParse(snapshot.data());
+  return result.success ? result.data.videos : {};
+}
+
+export async function saveCoachVideo(
+  coachUid: string,
+  exerciseName: string,
+  videoUrl: string,
+): Promise<void> {
+  const clean = videoUrlSchema.parse(videoUrl);
+  const current = await loadCoachVideos(coachUid);
+  const next = { ...current };
+  if (clean) next[exerciseName] = clean;
+  else delete next[exerciseName];
+  await setDoc(doc(services().firestore, 'coachVideos', coachUid), { videos: next });
 }

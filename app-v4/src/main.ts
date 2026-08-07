@@ -35,7 +35,14 @@ import {
   type AuthState,
 } from './features/auth';
 import { listSharedUsers, setUserAdmin, setUserBlocked, setUserCoach } from './features/admin';
-import { createInvite, listCoachStudents, type CoachStudent } from './features/coach';
+import {
+  createInvite,
+  listCoachStudents,
+  loadCoachVideos,
+  myCoach,
+  saveCoachVideo,
+  type CoachStudent,
+} from './features/coach';
 import { exerciseCatalog, searchExercises, supplementCatalog } from './features/catalog';
 import {
   loadSharedExerciseCatalog,
@@ -145,6 +152,8 @@ let unitSystem: UnitSystem = 'metric';
 let workoutPausedAt: number | null = null;
 let workoutPausedMs = 0;
 let sharedCatalogLoaded = false;
+let coachVideosUid = '';
+let coachVideoOverrides: Record<string, string> = {};
 let routineBackOverride: (() => void) | null = null;
 
 function asExternalUser(uid: string): User {
@@ -476,6 +485,15 @@ async function renderReady(user: User): Promise<void> {
     void loadSharedExerciseCatalog().catch((error: unknown) =>
       reportBackgroundError(error, 'catalog/shared-load'),
     );
+  }
+  if (coachVideosUid !== user.uid) {
+    coachVideosUid = user.uid;
+    void myCoach(user.uid)
+      .then((link) => (link ? loadCoachVideos(link.coachUid) : {}))
+      .then((videos) => {
+        coachVideoOverrides = videos;
+      })
+      .catch((error: unknown) => reportBackgroundError(error, 'coach/videos-load'));
   }
   if (currentView === 'workout') await renderWorkout(user);
   else if (currentView === 'routine') await renderRoutine(user);
@@ -849,7 +867,7 @@ function renderExerciseManager(user: User): void {
 
 function renderCoachHub(user: User): void {
   shell(
-    `<section class="feature-view"><button id="coach-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">COACH</p><h1>${copy('coachHub')}</h1><button id="coach-invite" class="secondary">${copy('generateInviteCode')}</button><p id="coach-invite-code" class="hint" role="status"></p><button id="coach-manage-exercises">${copy('manageExercises')}</button><div id="coach-students" class="history-list"></div></section>`,
+    `<section class="feature-view"><button id="coach-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">COACH</p><h1>${copy('coachHub')}</h1><button id="coach-invite" class="secondary">${copy('generateInviteCode')}</button><p id="coach-invite-code" class="hint" role="status"></p><button id="coach-manage-exercises">${copy('manageExercises')}</button><button id="coach-manage-videos">${copy('myExerciseVideos')}</button><div id="coach-students" class="history-list"></div></section>`,
   );
   document.querySelector('#coach-back')?.addEventListener('click', () => {
     currentView = 'dashboard';
@@ -858,6 +876,9 @@ function renderCoachHub(user: User): void {
   document
     .querySelector('#coach-manage-exercises')
     ?.addEventListener('click', () => renderExerciseManager(user));
+  document
+    .querySelector('#coach-manage-videos')
+    ?.addEventListener('click', () => renderCoachVideoManager(user));
   document.querySelector('#coach-invite')?.addEventListener('click', () => {
     void createInvite()
       .then(({ code }) => {
@@ -899,6 +920,61 @@ function renderCoachHub(user: User): void {
       });
     })
     .catch((error: unknown) => reportError(error, 'coach/students'));
+}
+
+function renderCoachVideoManager(user: User): void {
+  shell(
+    `<section class="feature-view"><button id="coach-videos-back" class="link-button">← ${copy('back')}</button><p class="eyebrow">COACH</p><h1>${copy('myExerciseVideos')}</h1><p class="hint">${copy('myExerciseVideosHint')}</p><input id="coach-videos-search" class="catalog-search" placeholder="${copy('search')}" autocomplete="off"><div id="coach-videos-list" class="catalog-list"></div></section>`,
+  );
+  document
+    .querySelector('#coach-videos-back')
+    ?.addEventListener('click', () => renderCoachHub(user));
+  let overrides: Record<string, string> = {};
+  const draw = (query = '') => {
+    const list = document.querySelector('#coach-videos-list');
+    if (!list) return;
+    list.replaceChildren();
+    const normalized = query.trim().toLocaleLowerCase();
+    exerciseCatalog
+      .filter((exercise) => !normalized || exercise.name.toLocaleLowerCase().includes(normalized))
+      .slice(0, 100)
+      .forEach((exercise) => {
+        const row = document.createElement('article');
+        const name = document.createElement('strong');
+        name.textContent = exercise.name;
+        const input = document.createElement('input');
+        input.type = 'url';
+        input.placeholder = copy('videoUrlPtLabel');
+        input.value = overrides[exercise.name] ?? '';
+        const save = document.createElement('button');
+        save.type = 'button';
+        save.textContent = copy('save');
+        const status = document.createElement('small');
+        save.addEventListener('click', () => {
+          const trimmed = input.value.trim();
+          void saveCoachVideo(user.uid, exercise.name, trimmed)
+            .then(() => {
+              overrides = { ...overrides };
+              if (trimmed) overrides[exercise.name] = trimmed;
+              else delete overrides[exercise.name];
+              coachVideoOverrides = overrides;
+              status.textContent = copy('profileSaved');
+            })
+            .catch((error: unknown) => reportError(error, 'coach/video-save'));
+        });
+        row.append(name, input, save, status);
+        list.append(row);
+      });
+  };
+  void loadCoachVideos(user.uid).then((videos) => {
+    overrides = videos;
+    draw();
+  });
+  document
+    .querySelector<HTMLInputElement>('#coach-videos-search')
+    ?.addEventListener('input', (event) => {
+      draw((event.target as HTMLInputElement).value);
+    });
 }
 
 async function renderStudentProgress(coachUser: User, student: CoachStudent): Promise<void> {
@@ -2608,6 +2684,8 @@ function renderExerciseEntries(
 }
 
 function localizedVideoUrl(exercise: Exercise): string {
+  const coachVideo = coachVideoOverrides[exercise.name];
+  if (coachVideo) return coachVideo;
   if (i18n.locale === 'en') return exercise.videoUrlEn || exercise.videoUrl;
   return exercise.videoUrl || exercise.videoUrlEn;
 }

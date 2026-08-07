@@ -154,6 +154,9 @@ const messages = {
     noStudentsYet: 'Nenhum aluno vinculado ainda.',
     buildStudentRoutine: 'Montar rotina',
     viewStudentProgress: 'Ver progresso',
+    myExerciseVideos: 'Meus vídeos por exercício',
+    myExerciseVideosHint:
+      'Cole um link do YouTube para um exercício e seus alunos vinculados verão esse vídeo em vez do padrão do catálogo.',
     redeemCoachCode: 'Código do treinador',
     coachCodePlaceholder: 'Digite o código do seu coach',
     linkToCoach: 'Vincular',
@@ -539,6 +542,9 @@ const messages = {
     noStudentsYet: 'No linked students yet.',
     buildStudentRoutine: 'Build routine',
     viewStudentProgress: 'View progress',
+    myExerciseVideos: 'My exercise videos',
+    myExerciseVideosHint:
+      'Paste a YouTube link for an exercise and your linked students will see that video instead of the catalog default.',
     redeemCoachCode: "Coach's code",
     coachCodePlaceholder: "Enter your coach's code",
     linkToCoach: 'Link',

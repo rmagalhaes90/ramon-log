@@ -58,6 +58,15 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin() || isCoach();
     }
 
+    // A coach's own per-exercise video overrides, shown to their linked
+    // students instead of the shared catalog video. Readable by anyone
+    // signed in (harmless: exercise names + YouTube URLs), writable only
+    // by that exact coach.
+    match /coachVideos/{coachUid} {
+      allow read: if signedIn();
+      allow write: if isCoach() && request.auth.uid == coachUid;
+    }
+
     // Billing state is server-owned. Clients receive a normalized feature set
     // through the getEntitlements callable function instead of reading it here.
     match /subscriptions/{uid} {
