@@ -61,6 +61,10 @@ const messages = {
     tourBack: 'Voltar',
     tourSkip: 'Pular tour',
     tourFinish: 'Começar a usar',
+    spotlightRoutineTitle: 'Vamos criar sua primeira rotina?',
+    spotlightRoutineBody:
+      'Clique aqui para montar seus treinos da semana — gerador automático, template pronto ou do zero.',
+    spotlightGotIt: 'Entendi',
     noWorkout: 'Nenhum treino configurado para este dia.',
     finishWorkout: 'Concluir treino',
     load: 'Carga',
@@ -464,6 +468,10 @@ const messages = {
     tourBack: 'Back',
     tourSkip: 'Skip tour',
     tourFinish: 'Start using KYRO',
+    spotlightRoutineTitle: "Let's create your first routine?",
+    spotlightRoutineBody:
+      'Click here to build your week — auto generator, ready-made template, or start from scratch.',
+    spotlightGotIt: 'Got it',
     noWorkout: 'No workout configured for this day.',
     finishWorkout: 'Finish workout',
     load: 'Load',

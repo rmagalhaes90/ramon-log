@@ -112,6 +112,7 @@ import {
   type UnitSystem,
 } from './core/units';
 import { applyTheme, loadTheme } from './core/theme';
+import { shouldShowRoutineSpotlight, showSpotlight } from './core/spotlight';
 import { cacheGet, cacheSet, queueList } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
@@ -596,6 +597,34 @@ function renderDashboard(user: User): void {
     .then(refreshQueueCount)
     .catch(() => refreshQueueCount());
   void refreshQueueCount();
+  void Promise.all([
+    cacheGet<boolean>(`tour:${user.uid}`),
+    cacheGet<boolean>(`spotlight-routine:${user.uid}`),
+    loadUserData(user, 'workouts'),
+  ])
+    .then(([tourDone, spotlightDone, workouts]) => {
+      const hasRoutine = Object.keys(workouts ?? {}).length > 0;
+      if (
+        !shouldShowRoutineSpotlight({
+          tourDone: tourDone === true,
+          spotlightDone: spotlightDone === true,
+          hasRoutine,
+        })
+      )
+        return;
+      const target = document.querySelector<HTMLElement>('#open-workout-card');
+      if (!target) return;
+      showSpotlight(
+        target,
+        {
+          title: copy('spotlightRoutineTitle'),
+          body: copy('spotlightRoutineBody'),
+          actionLabel: copy('spotlightGotIt'),
+        },
+        () => void cacheSet(`spotlight-routine:${user.uid}`, true),
+      );
+    })
+    .catch((error: unknown) => reportError(error, 'dashboard/spotlight'));
 }
 
 async function renderAdmin(user: User): Promise<void> {
