@@ -13,6 +13,7 @@ describe('domain schemas', () => {
     expect(exercise.equipment).toBe('');
     expect(exercise.muscles).toEqual({});
     expect(exercise.exerciseDbId).toBe('');
+    expect(exercise.nameEn).toBe('');
   });
 
   it('accepts an optional exerciseDbId linking to a third-party media provider', () => {
@@ -24,6 +25,17 @@ describe('domain schemas', () => {
       exerciseDbId: 'edb_RBqXK5O',
     });
     expect(exercise.exerciseDbId).toBe('edb_RBqXK5O');
+  });
+
+  it('accepts an optional English name for bilingual display', () => {
+    const exercise = exerciseSchema.parse({
+      name: 'Supino',
+      sets: 4,
+      reps: '8-10',
+      rest: 90,
+      nameEn: 'Bench press',
+    });
+    expect(exercise.nameEn).toBe('Bench press');
   });
 
   it('rejects dangerous or unrealistic exercise data', () => {

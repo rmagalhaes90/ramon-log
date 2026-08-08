@@ -33,6 +33,7 @@ export type LoggedSet = z.infer<typeof loggedSetSchema>;
 
 export const exerciseSchema = z.object({
   name: z.string().trim().min(1).max(120),
+  nameEn: boundedText(120),
   sets: z.coerce.number().int().min(1).max(20).default(4),
   reps: boundedText(20).pipe(z.string().min(1)).default('10'),
   rest: z.coerce.number().int().min(0).max(1800).default(90),

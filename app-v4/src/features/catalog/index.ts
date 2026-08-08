@@ -11,6 +11,7 @@ export function searchExercises(query: string, locale: 'pt' | 'en'): Exercise[] 
   return exerciseCatalog.filter(
     (exercise) =>
       exercise.name.toLocaleLowerCase().includes(normalized) ||
+      exercise.nameEn.toLocaleLowerCase().includes(normalized) ||
       Object.keys(exercise.muscles).some((muscle) =>
         muscle.toLocaleLowerCase().includes(normalized),
       ) ||

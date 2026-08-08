@@ -32,6 +32,7 @@ describe('premium progress analytics', () => {
       videoUrlEn: '',
       exerciseDbId: '',
       notes: '',
+      nameEn: '',
     } satisfies Exercise;
     expect(
       muscleVolume({ Press: [{ date: '2026-08-03', sets: [{ kg: 100, reps: 10 }] }] }, [exercise]),

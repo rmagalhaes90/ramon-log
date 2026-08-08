@@ -17,6 +17,7 @@ const exercise = (
   videoUrlEn: '',
   exerciseDbId: '',
   notes: '',
+  nameEn: '',
 });
 
 describe('occupied gym substitutions', () => {

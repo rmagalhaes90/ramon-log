@@ -851,6 +851,13 @@ h2 {
 .catalog-list article.already-added {
   opacity: 0.55;
 }
+.exercise-name-en {
+  color: var(--dim);
+  font-size: 0.7rem;
+}
+.exercise-name-en.missing {
+  color: #ff8c97;
+}
 .catalog-list button:disabled {
   opacity: 0.6;
   cursor: not-allowed;

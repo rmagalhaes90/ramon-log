@@ -132,7 +132,7 @@ import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-
 // in the auth screen's static HTML (not appended separately) so it always
 // shows even if something else on the page fails — the fastest way to tell
 // whether a device is actually running this build or a stale cached one.
-const APP_VERSION = '4.0.0-alpha.64';
+const APP_VERSION = '4.0.0-alpha.65';
 
 installGlobalErrorHandlers();
 applyTheme(loadTheme());
@@ -940,6 +940,14 @@ function openExerciseEditor(
   name.maxLength = 120;
   name.value = existing?.name ?? '';
 
+  const nameEnHint = document.createElement('p');
+  nameEnHint.className = 'hint';
+  nameEnHint.textContent = copy('exerciseNameEnHint');
+  const nameEn = document.createElement('input');
+  nameEn.type = 'text';
+  nameEn.maxLength = 120;
+  nameEn.value = existing?.nameEn || translateExerciseNameToEnglish(existing?.name ?? '');
+
   const equipment = document.createElement('select');
   (['', 'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'cardio'] as const).forEach(
     (value) => {
@@ -1095,9 +1103,12 @@ function openExerciseEditor(
   submit.textContent = copy('save');
   actions.append(cancel, submit);
 
+  const nameEnField = field('exerciseNameEnLabel', nameEn);
+  nameEnField.append(nameEnHint);
   card.append(
     title,
     field('exerciseName', name),
+    nameEnField,
     field('equipmentLabel', equipment),
     field('sets', sets),
     field('reps', reps),
@@ -1117,6 +1128,7 @@ function openExerciseEditor(
     event.preventDefault();
     const result = exerciseSchema.safeParse({
       name: name.value,
+      nameEn: nameEn.value,
       sets: Number(sets.value),
       reps: reps.value,
       rest: Number(rest.value),
@@ -1161,7 +1173,10 @@ function renderExerciseManager(user: User): void {
     exerciseCatalog
       .map((exercise, realIndex) => ({ exercise, realIndex }))
       .filter(
-        ({ exercise }) => !normalized || exercise.name.toLocaleLowerCase().includes(normalized),
+        ({ exercise }) =>
+          !normalized ||
+          exercise.name.toLocaleLowerCase().includes(normalized) ||
+          exercise.nameEn.toLocaleLowerCase().includes(normalized),
       )
       .forEach(({ exercise, realIndex }) => {
         const row = document.createElement('article');
@@ -1180,9 +1195,13 @@ function renderExerciseManager(user: User): void {
         const body = document.createElement('div');
         const name = document.createElement('strong');
         name.textContent = exercise.name;
+        const nameEnLine = document.createElement('span');
+        nameEnLine.className = 'exercise-name-en';
+        nameEnLine.textContent = exercise.nameEn || copy('missingTranslation');
+        nameEnLine.classList.toggle('missing', !exercise.nameEn);
         const meta = document.createElement('span');
         meta.textContent = `${exercise.equipment || '—'} · ${exercise.sets} × ${exercise.reps}`;
-        body.append(name, meta);
+        body.append(name, nameEnLine, meta);
         const edit = document.createElement('button');
         edit.type = 'button';
         edit.textContent = copy('edit');
@@ -2312,7 +2331,7 @@ function renderRoutineExercises(user: User, workouts: Workouts): void {
     const top = document.createElement('div');
     top.className = 'exercise-top';
     const heading = document.createElement('h2');
-    heading.textContent = exercise.name;
+    heading.textContent = localizedExerciseName(exercise);
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'exercise-top-delete';
@@ -2609,7 +2628,7 @@ function renderWorkoutGenerator(user: User, workouts: Workouts): void {
       previewSection.append(previewHeading);
       [...preview.exercises, ...preview.abs].forEach((exercise) => {
         const row = document.createElement('p');
-        row.textContent = `${exercise.name} — ${exercise.sets} × ${exercise.reps}`;
+        row.textContent = `${localizedExerciseName(exercise)} — ${exercise.sets} × ${exercise.reps}`;
         previewSection.append(row);
       });
       const actions = document.createElement('div');
@@ -2739,7 +2758,7 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
           const thumb = document.createElement('img');
           thumb.className = 'exercise-thumb';
           thumb.loading = 'lazy';
-          thumb.alt = exercise.name;
+          thumb.alt = localizedExerciseName(exercise);
           void getExerciseMedia(exercise.exerciseDbId)
             .then((media) => {
               if (media.imageUrl) thumb.src = media.imageUrl;
@@ -2749,7 +2768,7 @@ function renderExerciseCatalog(user: User, workouts: Workouts): void {
         }
         const body = document.createElement('div');
         const name = document.createElement('strong');
-        name.textContent = exercise.name;
+        name.textContent = localizedExerciseName(exercise);
         const meta = document.createElement('span');
         meta.textContent = `${exercise.sets} × ${exercise.reps} · ${exercise.equipment}`;
         body.append(name, meta);
@@ -2931,7 +2950,7 @@ function renderExerciseEntries(
     top.className = 'exercise-top';
     top.draggable = false;
     const heading = document.createElement('h2');
-    heading.textContent = entry.exercise.name;
+    heading.textContent = localizedExerciseName(entry.exercise);
     const actions = document.createElement('div');
     const reorder = (direction: -1 | 1) => {
       const current = workouts[selectedDay];
@@ -3081,7 +3100,9 @@ function renderExerciseEntries(
       video.type = 'button';
       video.className = 'exercise-video';
       video.textContent = copy('watchVideo');
-      video.addEventListener('click', () => openVideoModal(videoUrl, entry.exercise.name));
+      video.addEventListener('click', () =>
+        openVideoModal(videoUrl, localizedExerciseName(entry.exercise)),
+      );
       card.append(video);
     }
     if (entry.exercise.exerciseDbId) {
@@ -3094,7 +3115,7 @@ function renderExerciseEntries(
         void getExerciseMedia(exerciseDbId)
           .then((media) => {
             const src = media.gifUrl || media.imageUrl;
-            if (src) openExampleModal(src, entry.exercise.name);
+            if (src) openExampleModal(src, localizedExerciseName(entry.exercise));
           })
           .catch((error: unknown) => reportError(error, 'workout/example-media'));
       });
@@ -3133,7 +3154,7 @@ function renderExerciseEntries(
       alternatives.forEach(({ exercise, sharedMuscles }) => {
         const option = document.createElement('button');
         option.type = 'button';
-        option.textContent = `${exercise.name} · ${exercise.equipment} · ${sharedMuscles.join(', ')}`;
+        option.textContent = `${localizedExerciseName(exercise)} · ${exercise.equipment} · ${sharedMuscles.join(', ')}`;
         option.addEventListener('click', () => {
           const current = workouts[selectedDay];
           if (!current) return;
@@ -3370,6 +3391,15 @@ function localizedDayTitle(day: Workouts[keyof Workouts]): string {
   if (!day) return copy('noWorkout');
   if (i18n.locale === 'en') return day.titleEn || day.title;
   return day.title || day.titleEn;
+}
+
+// Display-only: `exercise.name` (PT) stays the canonical identifier used as
+// a key everywhere else (exerciseHistory, exerciseRecords,
+// coachVideoOverrides, progressionDecisions, duplicate checks) — translating
+// it here must never change what gets stored or matched.
+function localizedExerciseName(exercise: Exercise): string {
+  if (i18n.locale === 'en') return exercise.nameEn || exercise.name;
+  return exercise.name;
 }
 
 function localizedVideoUrl(exercise: Exercise): string {

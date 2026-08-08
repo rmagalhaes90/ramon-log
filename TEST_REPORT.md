@@ -1,5 +1,19 @@
 # Relatório de testes
 
+## Rodada 2026-08-08 — nomes de exercício bilíngues (PT/EN) alpha.65
+
+Usuário confirmou que o login no iPad foi resolvido pela correção da alpha.64, e pediu a próxima funcionalidade: nomes de exercício em português e inglês, no mesmo formato já usado pelos links de vídeo (`videoUrl`/`videoUrlEn`), para poder revisar e traduzir o catálogo de ~180 exercícios um por um pelo Gerenciador de exercícios.
+
+Adicionado `nameEn` ao `exerciseSchema` (texto limitado, padrão `''`, mesmo padrão de `videoUrlEn`/`exerciseDbId`/`notes`). Como é o mesmo schema usado tanto pelo catálogo compartilhado quanto pelos exercícios já copiados dentro das rotinas dos usuários, o campo passa a existir nos dois lugares automaticamente, sem precisar de migração separada.
+
+Decisão de design: `name` (português) continua sendo o **identificador canônico** usado como chave em `exerciseHistory`, `exerciseRecords`, `coachVideoOverrides`, na comparação de `progressionDecisions`, na checagem de duplicata do "+ Adicionar exercício" e na função de busca por igualdade de rascunho — nada disso muda. Só foi criada uma função nova, `localizedExerciseName()`, usada exclusivamente para **exibição**: mostra `nameEn` quando o idioma ativo é inglês e a tradução existe, senão cai pro nome em português. Aplicada nos cabeçalhos de exercício das telas de Treino e Rotina, na lista "+ Adicionar exercício", no seletor de alternativas de exercício, e nos títulos dos modais de vídeo/demonstração em GIF. As telas de **gerenciamento** (Gerenciador de exercícios do admin, gerenciador de vídeos do coach) continuam mostrando o nome em português cru, de propósito — ali o objetivo é comparar/editar os dois campos lado a lado, não localizar a exibição.
+
+No editor do Gerenciador de exercícios, o novo campo "Nome do exercício (EN)" vem **pré-preenchido com uma sugestão de tradução automática** (reaproveitando `translateExerciseNameToEnglish()`, já usada pela ferramenta de vínculo em massa de GIFs) sempre que o exercício ainda não tem uma tradução salva — o admin revisa e corrige antes de salvar, em vez de digitar do zero. A lista do gerenciador ganhou uma segunda linha sob cada nome em português: o nome em inglês já salvo, ou um aviso "Sem tradução (EN)" em vermelho quando ainda falta, para dar visibilidade do progresso da tradução de relance. A busca do gerenciador e a busca geral de exercícios (`searchExercises`) passaram a considerar `nameEn` também, não só o nome em português.
+
+Verificado ao vivo no emulador Auth+Firestore, logado como admin bootstrap: abrir o editor de um exercício sem tradução ("Agachamento Livre") mostrou o campo EN pré-preenchido com a sugestão automática ("squat free"); substituído por um valor revisado ("Free Squat") e salvo — a lista do gerenciador atualizou imediatamente mostrando "Free Squat" no lugar do aviso de tradução ausente; reaberto o editor do mesmo exercício confirmou que o valor salvo persiste corretamente.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **34 arquivos/103 testes Vitest** (2 novos: valor padrão de `nameEn` e aceitação de um `nameEn` explícito) e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.65`.
+
 ## Rodada 2026-08-08 — causa raiz real encontrada: IndexedDB fechado durante popup no PWA instalado alpha.64
 
 Com o conserto da alpha.63 (painel atualizando sozinho após cada tentativa), o usuário conseguiu finalmente capturar o erro real de dentro do iPad, usando o app instalado na tela de início (`standalone:true` no diagnóstico):

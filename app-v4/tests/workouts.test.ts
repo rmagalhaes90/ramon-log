@@ -29,6 +29,7 @@ describe('workouts', () => {
           videoUrlEn: '',
           exerciseDbId: '',
           notes: '',
+          nameEn: '',
         },
       ],
     },
