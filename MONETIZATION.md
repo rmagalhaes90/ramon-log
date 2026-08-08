@@ -35,3 +35,42 @@ Nada que trave o **primeiro treino registrado** pode ficar atrás do paywall —
 
 - Papel Coach, vínculo aluno↔treinador por código de convite e montagem de rotina para aluno.
 - Não compete com o Pro individual: monetiza o profissional que gerencia múltiplos alunos, cobrança e limites de vagas definidos à parte.
+
+## Paywall e conversão
+
+O paywall deve ser premium e transparente.
+
+Mostrar sempre:
+
+- Benefício.
+- Demonstração.
+- Comparação de planos.
+- Preço.
+- Frequência da cobrança.
+- Trial.
+- Cancelamento.
+- Renovação.
+- Termos.
+- Política de privacidade.
+
+Evitar sempre:
+
+- Dark patterns.
+- Botões confusos.
+- Preço escondido.
+- Cancelamento obscuro.
+- Pressão artificial.
+- Falsas contagens regressivas.
+
+### Momentos naturais de upgrade
+
+O paywall aparece apenas quando o titular já tentou usar um recurso Pro, nunca de forma preventiva ou aleatória:
+
+- Após gerar um insight avançado (analytics, e1RM, correlação de desempenho).
+- Ao abrir um relatório/comparação premium (relatório semanal além do limite grátis, comparação de fotos).
+- Ao atingir um limite legítimo de recurso (histórico além de 4–8 semanas, 3ª rotina simultânea).
+- Ao tentar usar o gerador automático/motor de progressão.
+- Ao tentar escanear código de barras (GTIN) na nutrição — busca manual continua grátis.
+- Ao tentar exportar o backup completo (`.zip` com fotos, CSV/JSON).
+
+Nunca interromper um treino em andamento com paywall.
