@@ -9,7 +9,6 @@ import {
 import { createI18n, messageFor, type Locale, type MessageKey } from './core/i18n';
 import type {
   Exercise,
-  ExerciseRecords,
   FavoriteMeal,
   NutritionDay,
   Profile,
@@ -72,7 +71,6 @@ import {
   createEntries,
   dateKey,
   dayKeys,
-  estimatedOneRepMax,
   todayDayKey,
   workoutVolume,
   type DayKey,
@@ -719,8 +717,16 @@ async function renderAdmin(user: User): Promise<void> {
       .catch((error: unknown) => reportError(error, 'admin/cleanup-orphans'));
   });
   const list = document.querySelector('#admin-users');
-  const runAdminAction = (promise: Promise<unknown>, code: string) =>
-    void promise
+  const runAdminAction = (
+    button: HTMLButtonElement,
+    action: () => Promise<unknown>,
+    code: string,
+  ) => {
+    const actionButtons = button.parentElement?.querySelectorAll('button') ?? [button];
+    actionButtons.forEach((other) => (other.disabled = true));
+    const originalText = button.textContent;
+    button.textContent = copy('working');
+    void action()
       .then(() => renderAdmin(user))
       .catch((error: unknown) => {
         const isStaleUser =
@@ -734,8 +740,11 @@ async function renderAdmin(user: User): Promise<void> {
           void renderAdmin(user);
           return;
         }
+        actionButtons.forEach((other) => (other.disabled = false));
+        button.textContent = originalText;
         reportError(error, code);
       });
+  };
   users.forEach((entry) => {
     const row = document.createElement('article');
     const identity = document.createElement('div');
@@ -750,14 +759,14 @@ async function renderAdmin(user: User): Promise<void> {
     const block = document.createElement('button');
     block.textContent = copy(entry.blocked ? 'unblock' : 'block');
     block.addEventListener('click', () =>
-      runAdminAction(setUserBlocked(entry.uid, !entry.blocked), 'admin/block'),
+      runAdminAction(block, () => setUserBlocked(entry.uid, !entry.blocked), 'admin/block'),
     );
     actions.append(block);
     if (superAdmin && entry.uid !== user.uid) {
       const admin = document.createElement('button');
       admin.textContent = copy(entry.isAdmin ? 'revokeAdmin' : 'grantAdmin');
       admin.addEventListener('click', () =>
-        runAdminAction(setUserAdmin(entry.uid, !entry.isAdmin), 'admin/role'),
+        runAdminAction(admin, () => setUserAdmin(entry.uid, !entry.isAdmin), 'admin/role'),
       );
       actions.append(admin);
     }
@@ -765,7 +774,7 @@ async function renderAdmin(user: User): Promise<void> {
       const coach = document.createElement('button');
       coach.textContent = copy(entry.isCoach ? 'revokeCoach' : 'grantCoach');
       coach.addEventListener('click', () =>
-        runAdminAction(setUserCoach(entry.uid, !entry.isCoach), 'admin/coach'),
+        runAdminAction(coach, () => setUserCoach(entry.uid, !entry.isCoach), 'admin/coach'),
       );
       actions.append(coach);
     }
@@ -2033,14 +2042,12 @@ async function renderSupplements(user: User): Promise<void> {
 
 async function renderWorkout(user: User): Promise<void> {
   clearWorkoutTimers();
-  const [workoutsValue, draft, exerciseHistory, progressionDecisions, exerciseRecords] =
-    await Promise.all([
-      loadUserData(user, 'workouts'),
-      loadWorkoutDraft(user, selectedDay),
-      loadUserData(user, 'exerciseHistory').catch(() => null),
-      loadUserData(user, 'progressionDecisions').catch(() => null),
-      loadUserData(user, 'exerciseRecords').catch(() => null),
-    ]);
+  const [workoutsValue, draft, exerciseHistory, progressionDecisions] = await Promise.all([
+    loadUserData(user, 'workouts'),
+    loadWorkoutDraft(user, selectedDay),
+    loadUserData(user, 'exerciseHistory').catch(() => null),
+    loadUserData(user, 'progressionDecisions').catch(() => null),
+  ]);
   const workouts = workoutsValue ?? {};
   if (!workouts[selectedDay]) {
     renderWorkoutEmptyState(user, workouts);
@@ -2064,13 +2071,7 @@ async function renderWorkout(user: User): Promise<void> {
     if (status) status.textContent = copy('sessionResumed');
   }
   renderDayButtons(user, workouts);
-  renderExerciseEntries(
-    user,
-    workouts,
-    exerciseHistory ?? {},
-    progressionDecisions ?? [],
-    exerciseRecords ?? {},
-  );
+  renderExerciseEntries(user, workouts, exerciseHistory ?? {}, progressionDecisions ?? []);
   const toggleButton = document.querySelector<HTMLButtonElement>('#session-toggle');
   const updateClock = () => {
     const elapsed = Math.max(0, Math.floor(sessionElapsedMs() / 1000));
@@ -2773,7 +2774,6 @@ function renderExerciseEntries(
   workouts: Workouts,
   exerciseHistory: Record<string, PerformanceEntry[]>,
   progressionDecisions: ProgressionDecision[],
-  exerciseRecords: ExerciseRecords,
 ): void {
   const list = document.querySelector('#exercise-list');
   if (!list) return;
@@ -3241,12 +3241,6 @@ function renderExerciseEntries(
         set.done = done.checked;
         row.classList.toggle('done', done.checked);
         persistDraft();
-        if (set.done && set.kg > 0 && set.reps > 0) {
-          const record = exerciseRecords[entry.exercise.name];
-          const e1rm = estimatedOneRepMax(set.kg, set.reps);
-          const isNewRecord = !record || set.kg > record.maxWeight || e1rm > record.maxE1rm;
-          if (isNewRecord) celebratePersonalRecord();
-        }
       });
       row.append(number, kg, reps, ...(showRirRpe ? [rir, rpe] : []), done);
       const deleteButton = document.createElement('button');
@@ -3482,15 +3476,6 @@ function spawnConfetti(): void {
   }
   document.body.append(container);
   window.setTimeout(() => container.remove(), 3000);
-}
-
-function celebratePersonalRecord(): void {
-  spawnConfetti();
-  const badge = document.createElement('div');
-  badge.className = 'pr-badge';
-  badge.textContent = `🏆 ${copy('newPersonalRecord')}`;
-  document.body.append(badge);
-  window.setTimeout(() => badge.remove(), 2600);
 }
 
 function showCelebration(streak: number, shareText: string): void {
