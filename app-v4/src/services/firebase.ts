@@ -1,5 +1,11 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
+import {
+  browserLocalPersistence,
+  connectAuthEmulator,
+  getAuth,
+  setPersistence,
+  type Auth,
+} from 'firebase/auth';
 import { connectFirestoreEmulator, initializeFirestore, type Firestore } from 'firebase/firestore';
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from 'firebase/storage';
 import { connectFunctionsEmulator, getFunctions, type Functions } from 'firebase/functions';
@@ -38,6 +44,15 @@ export function getFirebaseServices(): FirebaseServices | null {
       functions: getFunctions(app, 'us-central1'),
     };
     if (useFirebaseEmulators()) connectEmulators(current);
+    // Firebase Auth defaults to indexedDBLocalPersistence, which opens an
+    // async IndexedDB transaction to read/write auth state. Opening a
+    // signInWithPopup window from an iOS home-screen PWA backgrounds the
+    // parent WKWebView, and iOS can tear down its IndexedDB connection
+    // mid-flow — observed on a real device as `oauth:error` with message
+    // "Database is closing/hidden", stranding the sign-in with no usable
+    // error code. localStorage-backed persistence has no async transaction
+    // to interrupt, avoiding this failure mode entirely.
+    void setPersistence(current.auth, browserLocalPersistence).catch(() => undefined);
     return current;
   })();
   return services;

@@ -132,7 +132,7 @@ import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-
 // in the auth screen's static HTML (not appended separately) so it always
 // shows even if something else on the page fails — the fastest way to tell
 // whether a device is actually running this build or a stale cached one.
-const APP_VERSION = '4.0.0-alpha.63';
+const APP_VERSION = '4.0.0-alpha.64';
 
 installGlobalErrorHandlers();
 applyTheme(loadTheme());

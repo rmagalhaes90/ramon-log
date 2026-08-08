@@ -1,5 +1,24 @@
 # Relatório de testes
 
+## Rodada 2026-08-08 — causa raiz real encontrada: IndexedDB fechado durante popup no PWA instalado alpha.64
+
+Com o conserto da alpha.63 (painel atualizando sozinho após cada tentativa), o usuário conseguiu finalmente capturar o erro real de dentro do iPad, usando o app instalado na tela de início (`standalone:true` no diagnóstico):
+
+```
+oauth:start   {"provider":"google.com","strategy":"popup",...}
+oauth:error   {"provider":"google.com","strategy":"popup","code":"unknown","message":"Database is closing/hidden"}
+```
+
+Cerca de 5 segundos se passaram entre o início da tentativa e o erro — tempo suficiente pro usuário ter interagido com a pop-up (provavelmente escolhendo a conta Google) antes da falha. A mensagem `"Database is closing"` não é um código de erro do Firebase (por isso apareceu como `"unknown"`), é uma falha característica de transação do IndexedDB fechada à força pelo navegador — um padrão conhecido do WebKit/Safari quando a aba original perde o primeiro plano ou é suspensa pelo sistema operacional, e alguma operação assíncrona pendente nela é abortada no meio.
+
+Isso bate exatamente com o que acontece ao abrir uma pop-up de dentro de um PWA instalado no iOS ("Adicionar à Tela de Início"): o iOS trata a pop-up como uma superfície separada e pode suspender a WebView original (a do app instalado) enquanto ela está em segundo plano — e o Firebase Authentication, por padrão, usa `indexedDBLocalPersistence` para gravar e ler o estado da sessão de login, o que significa transações assíncronas do IndexedDB acontecendo bem nesse momento. Se a aba original é suspensa no meio de uma dessas transações, a conexão é fechada à força e a operação falha com exatamente essa mensagem.
+
+Corrigido forçando o Firebase Authentication a usar `browserLocalPersistence` (baseado em `localStorage`, síncrono, sem transação alguma pra ser interrompida) em vez do padrão baseado em IndexedDB — configurado uma única vez na inicialização dos serviços do Firebase (`services/firebase.ts`), antes de qualquer tentativa de login acontecer. O diagnóstico do próprio aparelho do usuário já tinha confirmado (`localStorageOk:true`) que `localStorage` funciona normalmente ali, então essa troca não introduz um problema novo pra trocar de um antigo.
+
+Verificado ao vivo (navegador local): a aplicação de auth continua inicializando normalmente depois da mudança de persistência, sem nenhum erro novo no console relacionado a `setPersistence` ou `browserLocalPersistence`, e o painel de diagnóstico continua registrando e mostrando os eventos de sempre (`module:init`, `redirect:skipped`, `onAuthStateChanged`) sem alteração de comportamento. Não é possível reproduzir a condição exata de "aba suspensa durante transação IndexedDB" fora de um iPad real, então a confirmação definitiva de que isso resolve o login depende do próximo teste do usuário no aparelho — mas a causa raiz agora está identificada com uma mensagem de erro real e específica, não mais suposição.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **34 arquivos/102 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.64`.
+
 ## Rodada 2026-08-08 — painel de diagnóstico não atualizava após tentativa de login alpha.63
 
 Usuário testou a alpha.62 num iPad real (finalmente com dados reais em mãos) e colou o conteúdo do painel de diagnóstico direto do aparelho. Isso confirmou, pela primeira vez com certeza (não suposição), que: (1) o build correto estava rodando no aparelho (`standalone:true`, indicando o app instalado via "Adicionar à Tela de Início"); (2) a estratégia de login escolhida automaticamente foi `"popup"`, exatamente o esperado pela lógica `oauthStrategy()` da alpha.62 quando o hostname do app (`rmagalhaes90.github.io`) difere do `authDomain` configurado no Firebase (`traincontrollog.firebaseapp.com`).
