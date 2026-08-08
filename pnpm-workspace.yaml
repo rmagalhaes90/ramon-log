@@ -2,6 +2,18 @@ packages:
   - 'packages/*'
   - 'mobile'
 
+overrides:
+  'nanoid@<3.3.17': 3.3.17
+
+# image-size 2.0.3 is listed as patched by both advisories but has not been
+# published to npm yet. Metro uses it only while bundling local assets; KYRO
+# does not pass user-controlled images to this build-time parser. Remove these
+# exceptions as soon as the patched release is available upstream.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-w3rx-r6r6-pgpr
+    - GHSA-5p2g-fcmc-qvqq
+
 allowBuilds:
   '@firebase/util': true
   esbuild: true
