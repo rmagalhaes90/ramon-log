@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(uid) { return signedIn() && request.auth.uid == uid; }
+    function isSuperAdmin() { return signedIn() && request.auth.token.email == 'rmagalhaes90@gmail.com'; }
+    function isGrantedAdmin() { return signedIn() && request.auth.token.admin == true; }
+    function isAdmin() { return isSuperAdmin() || isGrantedAdmin(); }
+    function isCoach() { return signedIn() && request.auth.token.coach == true; }
+    function isLinkedCoach(studentUid) {
+      return isCoach() && exists(/databases/$(database)/documents/coaches/$(request.auth.uid)/students/$(studentUid));
+    }
+
+    match /users/{uid}/data/{document=**} {
+      allow read, create, update, delete: if owns(uid);
+    }
+
+    // Narrow, explicit coach access to a linked student's data: write access
+    // to build their routine, read-only access to their training progress.
+    // Never covers nutrition, supplements, photos, or settings.
+    match /users/{uid}/data/{docId} {
+      allow read: if docId in [
+        'bodyWeights', 'bodyMeasurements', 'sessionLog', 'readinessLog',
+        'exerciseHistory', 'exerciseRecords', 'progressionDecisions', 'profile'
+      ] && isLinkedCoach(uid);
+      allow read, create, update, delete: if docId == 'workouts' && isLinkedCoach(uid);
+    }
+
+    match /coaches/{coachUid}/students/{studentUid} {
+      allow read: if (isCoach() && request.auth.uid == coachUid) || isAdmin();
+      allow write: if false;
+    }
+
+    match /coachOf/{studentUid} {
+      allow get: if owns(studentUid) || isAdmin();
+      allow write: if false;
+    }
+
+    match /coachInvites/{code} {
+      allow read, write: if false;
+    }
+
+    match /sharedUsers/{uid} {
+      allow get: if owns(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if owns(uid)
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.blocked == false
+        && request.resource.data.keys().hasOnly(['email', 'createdAt', 'blocked']);
+      allow update: if isSuperAdmin()
+        || (isGrantedAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['blocked']))
+        || (owns(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email']));
+      allow delete: if owns(uid) || isSuperAdmin();
+    }
+
+    match /shared/exerciseDatabase {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin() || isCoach();
+    }
+
+    // A coach's own per-exercise video overrides, shown to their linked
+    // students instead of the shared catalog video. Readable by anyone
+    // signed in (harmless: exercise names + YouTube URLs), writable only
+    // by that exact coach.
+    match /coachVideos/{coachUid} {
+      allow read: if signedIn();
+      allow write: if isCoach() && request.auth.uid == coachUid;
+    }
+
+    // Billing state is server-owned. Clients receive a normalized feature set
+    // through the getEntitlements callable function instead of reading it here.
+    match /subscriptions/{uid} {
+      allow read, write: if false;
+    }
+
+    // Server-side cache of exercise GIF/image lookups from the third-party
+    // media provider, populated only by the getExerciseMedia callable
+    // function (which holds the API key) so repeat views of the same
+    // exercise don't re-bill the quota. Readable by any signed-in user;
+    // never written directly by clients.
+    match /sharedExerciseMedia/{exerciseId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /adminAudit/{entry} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}

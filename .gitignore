@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.tools/
+*.tsbuildinfo
+dist-v4/
+playwright-report/
+test-results/
+*-debug.log
+coverage/
+.env
+.env.*
+!.env.example
+.secret.local
+functions/.secret.local

@@ -1,0 +1,302 @@
+[
+  {
+    "name": "Whey Protein Concentrado",
+    "nameEn": "Whey Protein Concentrate",
+    "category": "proteina",
+    "suggestedTiming": "Pós-treino"
+  },
+  {
+    "name": "Whey Protein Isolado",
+    "nameEn": "Whey Protein Isolate",
+    "category": "proteina",
+    "suggestedTiming": "Pós-treino"
+  },
+  {
+    "name": "Whey Protein Hidrolisado",
+    "nameEn": "Whey Protein Hydrolysate",
+    "category": "proteina",
+    "suggestedTiming": "Pós-treino"
+  },
+  {
+    "name": "Caseína",
+    "nameEn": "Casein",
+    "category": "proteina",
+    "suggestedTiming": "Antes de dormir"
+  },
+  {
+    "name": "Proteína Vegana",
+    "nameEn": "Vegan Protein",
+    "category": "proteina",
+    "suggestedTiming": "Pós-treino"
+  },
+  {
+    "name": "Albumina",
+    "nameEn": "Albumin",
+    "category": "proteina",
+    "suggestedTiming": "Entre refeições"
+  },
+  {
+    "name": "Creatina Monohidratada",
+    "nameEn": "Creatine Monohydrate",
+    "category": "creatina",
+    "suggestedTiming": "Qualquer horário"
+  },
+  {
+    "name": "Creatina Micronizada",
+    "nameEn": "Micronized Creatine",
+    "category": "creatina",
+    "suggestedTiming": "Qualquer horário"
+  },
+  {
+    "name": "Creatina HCL",
+    "nameEn": "Creatine HCL",
+    "category": "creatina",
+    "suggestedTiming": "Qualquer horário"
+  },
+  {
+    "name": "Pré-treino com Estimulante",
+    "nameEn": "Stimulant Pre-workout",
+    "category": "pretreino",
+    "suggestedTiming": "30-40 min antes do treino"
+  },
+  {
+    "name": "Pré-treino Vasodilatador",
+    "nameEn": "Pump/Vasodilator Pre-workout",
+    "category": "pretreino",
+    "suggestedTiming": "30-40 min antes do treino"
+  },
+  {
+    "name": "Cafeína Isolada",
+    "nameEn": "Caffeine (isolated)",
+    "category": "pretreino",
+    "suggestedTiming": "30-40 min antes do treino"
+  },
+  {
+    "name": "Beta-Alanina",
+    "nameEn": "Beta-Alanine",
+    "category": "pretreino",
+    "suggestedTiming": "Antes do treino"
+  },
+  {
+    "name": "Citrulina Malato",
+    "nameEn": "Citrulline Malate",
+    "category": "pretreino",
+    "suggestedTiming": "Antes do treino"
+  },
+  {
+    "name": "BCAA",
+    "nameEn": "BCAA",
+    "category": "aminoacidos",
+    "suggestedTiming": "Durante ou pós-treino"
+  },
+  {
+    "name": "EAA (Aminoácidos Essenciais)",
+    "nameEn": "EAA (Essential Amino Acids)",
+    "category": "aminoacidos",
+    "suggestedTiming": "Durante ou pós-treino"
+  },
+  {
+    "name": "Glutamina",
+    "nameEn": "Glutamine",
+    "category": "aminoacidos",
+    "suggestedTiming": "Pós-treino ou antes de dormir"
+  },
+  {
+    "name": "Arginina",
+    "nameEn": "Arginine",
+    "category": "aminoacidos",
+    "suggestedTiming": "Antes do treino"
+  },
+  {
+    "name": "Taurina",
+    "nameEn": "Taurine",
+    "category": "aminoacidos",
+    "suggestedTiming": "Antes do treino"
+  },
+  {
+    "name": "Hipercalórico (Mass Gainer)",
+    "nameEn": "Mass Gainer",
+    "category": "ganho_peso",
+    "suggestedTiming": "Entre refeições"
+  },
+  {
+    "name": "Maltodextrina",
+    "nameEn": "Maltodextrin",
+    "category": "ganho_peso",
+    "suggestedTiming": "Pós-treino"
+  },
+  {
+    "name": "Dextrose",
+    "nameEn": "Dextrose",
+    "category": "ganho_peso",
+    "suggestedTiming": "Pós-treino"
+  },
+  {
+    "name": "Termogênico",
+    "nameEn": "Thermogenic",
+    "category": "emagrecimento",
+    "suggestedTiming": "Manhã ou antes do treino"
+  },
+  {
+    "name": "L-Carnitina",
+    "nameEn": "L-Carnitine",
+    "category": "emagrecimento",
+    "suggestedTiming": "Antes do treino"
+  },
+  {
+    "name": "CLA",
+    "nameEn": "CLA",
+    "category": "emagrecimento",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Picolinato de Cromo",
+    "nameEn": "Chromium Picolinate",
+    "category": "emagrecimento",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Multivitamínico",
+    "nameEn": "Multivitamin",
+    "category": "vitaminas",
+    "suggestedTiming": "Manhã, com café da manhã"
+  },
+  {
+    "name": "Vitamina D",
+    "nameEn": "Vitamin D",
+    "category": "vitaminas",
+    "suggestedTiming": "Manhã, com alguma gordura"
+  },
+  {
+    "name": "Vitamina C",
+    "nameEn": "Vitamin C",
+    "category": "vitaminas",
+    "suggestedTiming": "Qualquer horário"
+  },
+  {
+    "name": "Complexo B",
+    "nameEn": "Vitamin B Complex",
+    "category": "vitaminas",
+    "suggestedTiming": "Manhã"
+  },
+  {
+    "name": "Zinco",
+    "nameEn": "Zinc",
+    "category": "vitaminas",
+    "suggestedTiming": "Noite, longe de cálcio"
+  },
+  {
+    "name": "Magnésio",
+    "nameEn": "Magnesium",
+    "category": "vitaminas",
+    "suggestedTiming": "Noite"
+  },
+  {
+    "name": "Ferro",
+    "nameEn": "Iron",
+    "category": "vitaminas",
+    "suggestedTiming": "Com vitamina C, longe de café"
+  },
+  {
+    "name": "Cálcio",
+    "nameEn": "Calcium",
+    "category": "vitaminas",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Ômega 3",
+    "nameEn": "Omega-3",
+    "category": "omega3",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Óleo de Peixe",
+    "nameEn": "Fish Oil",
+    "category": "omega3",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Colágeno Hidrolisado",
+    "nameEn": "Hydrolyzed Collagen",
+    "category": "articulacoes",
+    "suggestedTiming": "Manhã, em jejum"
+  },
+  {
+    "name": "Glucosamina + Condroitina",
+    "nameEn": "Glucosamine + Chondroitin",
+    "category": "articulacoes",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "MSM",
+    "nameEn": "MSM",
+    "category": "articulacoes",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Melatonina",
+    "nameEn": "Melatonin",
+    "category": "sono_humor",
+    "suggestedTiming": "30 min antes de dormir"
+  },
+  {
+    "name": "ZMA",
+    "nameEn": "ZMA",
+    "category": "sono_humor",
+    "suggestedTiming": "Antes de dormir, estômago vazio"
+  },
+  {
+    "name": "Ashwagandha",
+    "nameEn": "Ashwagandha",
+    "category": "sono_humor",
+    "suggestedTiming": "Noite"
+  },
+  {
+    "name": "5-HTP",
+    "nameEn": "5-HTP",
+    "category": "sono_humor",
+    "suggestedTiming": "Noite"
+  },
+  {
+    "name": "Tribulus Terrestris",
+    "nameEn": "Tribulus Terrestris",
+    "category": "hormonal",
+    "suggestedTiming": "Manhã"
+  },
+  {
+    "name": "Ácido D-Aspártico (DAA)",
+    "nameEn": "D-Aspartic Acid (DAA)",
+    "category": "hormonal",
+    "suggestedTiming": "Manhã"
+  },
+  {
+    "name": "Fenogreco",
+    "nameEn": "Fenugreek",
+    "category": "hormonal",
+    "suggestedTiming": "Com refeições"
+  },
+  {
+    "name": "Probióticos",
+    "nameEn": "Probiotics",
+    "category": "intestino",
+    "suggestedTiming": "Manhã, em jejum"
+  },
+  {
+    "name": "Própolis",
+    "nameEn": "Propolis",
+    "category": "intestino",
+    "suggestedTiming": "Manhã"
+  },
+  {
+    "name": "Cafeína + L-Teanina",
+    "nameEn": "Caffeine + L-Theanine",
+    "category": "cognicao",
+    "suggestedTiming": "Manhã"
+  },
+  {
+    "name": "Ginkgo Biloba",
+    "nameEn": "Ginkgo Biloba",
+    "category": "cognicao",
+    "suggestedTiming": "Manhã"
+  }
+]

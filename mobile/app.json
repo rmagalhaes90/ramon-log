@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "KYRO",
+    "slug": "kyro",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "kyro",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.kyro.mobile"
+    },
+    "android": {
+      "package": "app.kyro.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#080d0b"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O KYRO acessa suas fotos somente para registrar seu progresso.",
+          "cameraPermission": "O KYRO usa a câmera somente para registrar fotos de progresso.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-sharing",
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

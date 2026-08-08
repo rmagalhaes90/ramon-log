@@ -1,0 +1,45 @@
+# Arquitetura KYRO v4
+
+## Backend confiável
+
+`functions/` contém Cloud Functions v2 em Node 22. O cliente usa callables para papéis administrativos, bloqueio e exclusão definitiva. As regras Firestore autorizam administradores concedidos exclusivamente pela custom claim `admin`; o campo `isAdmin` em `sharedUsers` serve apenas para apresentação e auditoria.
+
+## Estratégia paralela
+
+O produto estável permanece nos arquivos da raiz. A aplicação v4 vive em `app-v4/` e gera `dist-v4/`; não substitui nem publica o baseline. O corte só ocorrerá quando a matriz de paridade estiver aprovada e houver plano de rollback.
+
+Os catálogos legados são extraídos por `scripts/extract-legacy-data.mjs` para JSON validado por Zod. Assim, a v4 não precisa carregar nem analisar o `index.html` de 661 KB para obter exercícios ou suplementos.
+
+## Camadas
+
+```text
+features (auth, workouts, progress, nutrition, admin)
+       ↓
+services (Firebase modular, IndexedDB, offline queue, PWA updates)
+       ↓
+core (errors, i18n, validation, design tokens)
+```
+
+- Features possuem UI, estado e casos de uso; não acessam SDKs diretamente.
+- Services encapsulam efeitos externos e retornam resultados tipados.
+- Zod valida fronteiras: Firestore, importações, IndexedDB, rede e mensagens do SW.
+- O estado confirmado remoto e o estado otimista local são distintos. Toda mutação offline recebe ID idempotente, usuário, instante e política de retry.
+- Erros inesperados chegam ao reporter global; erros de domínio são exibidos próximos à ação e nunca descartados silenciosamente.
+
+## Dados e sincronização
+
+IndexedDB contém cache versionado e fila. O processador sincroniza apenas quando autenticado e online, aplica backoff, preserva falhas e só remove uma operação após confirmação. Migrações futuras nunca apagam o namespace legado. Adaptadores de leitura poderão importar `ramon_log_*` depois de snapshot, validação e confirmação de escrita.
+
+## Segurança
+
+O cliente não decide autorização. Firestore Rules, Storage Rules e testes de emulador serão obrigatórios antes de migrar admin ou exclusão. Segredos operacionais não entram no bundle; identificadores públicos Firebase vêm de `.env` validado.
+
+## Build e qualidade
+
+TypeScript strict, ESLint type-aware, Prettier, Vitest e Playwright compõem o gate. Vite gera assets com hash. A PWA v4 usa SW independente e nunca deve controlar o escopo do baseline durante desenvolvimento/migração.
+
+## Composição da interface
+
+`main.ts` permanece como composition root: autenticação, roteamento de views e estado transitório de treino. Fluxos completos não devem voltar a ser implementados nele. Ajustes/conta ficam em `features/settings/view.ts`, portabilidade em `features/backup/ui.ts` e galeria/Storage/compartilhamento em `features/photos/view.ts`. Cada view recebe apenas callbacks de shell, tradução e navegação necessários, enquanto serviços e regras de domínio permanecem importados pela própria feature.
+
+Na primeira extração, `main.ts` foi formatado integralmente e caiu de aproximadamente 59,6 mil para 53,3 mil caracteres após mover ajustes e fotos. As próximas extrações-alvo são nutrição, progresso e workout view.

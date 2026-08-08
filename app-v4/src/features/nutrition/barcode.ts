@@ -1,0 +1,64 @@
+import { z } from 'zod';
+const finite = z.number().finite().nonnegative().max(100000).catch(0);
+const responseSchema = z.object({
+  status: z.union([z.string(), z.number()]).optional(),
+  product: z
+    .object({
+      product_name: z.string().max(300).optional(),
+      product_name_en: z.string().max(300).optional(),
+      nutriments: z
+        .object({
+          energy_kcal_100g: finite.optional(),
+          proteins_100g: finite.optional(),
+          carbohydrates_100g: finite.optional(),
+          fat_100g: finite.optional(),
+          fiber_100g: finite.optional(),
+        })
+        .default({}),
+    })
+    .optional(),
+});
+export interface BarcodeFood {
+  name: string;
+  kcal: number;
+  protein: number;
+  carb: number;
+  fat: number;
+  fiber: number;
+}
+export function validBarcode(value: string): boolean {
+  return /^\d{8,14}$/.test(value.trim());
+}
+export function parseBarcodeProduct(value: unknown): BarcodeFood | null {
+  const result = responseSchema.safeParse(value);
+  if (!result.success || !result.data.product) return null;
+  const product = result.data.product;
+  const name = (product.product_name || product.product_name_en || '').trim();
+  if (!name) return null;
+  return {
+    name,
+    kcal: product.nutriments.energy_kcal_100g ?? 0,
+    protein: product.nutriments.proteins_100g ?? 0,
+    carb: product.nutriments.carbohydrates_100g ?? 0,
+    fat: product.nutriments.fat_100g ?? 0,
+    fiber: product.nutriments.fiber_100g ?? 0,
+  };
+}
+export async function lookupBarcode(
+  code: string,
+  signal?: AbortSignal,
+): Promise<BarcodeFood | null> {
+  if (!validBarcode(code)) throw new Error('barcodeInvalid');
+  const fields = 'product_name,product_name_en,nutriments';
+  const options: RequestInit = {
+    headers: { Accept: 'application/json' },
+    ...(signal ? { signal } : {}),
+  };
+  const response = await fetch(
+    `https://world.openfoodfacts.org/api/v3/product/${encodeURIComponent(code.trim())}?fields=${fields}`,
+    options,
+  );
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error('barcodeUnavailable');
+  return parseBarcodeProduct(await response.json());
+}
