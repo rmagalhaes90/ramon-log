@@ -18,6 +18,7 @@ import type {
 import { exerciseSchema } from './domain/schemas';
 import {
   authErrorKey,
+  checkRedirectResult,
   completeEmailAction,
   completePasswordReset,
   createAccount,
@@ -3552,6 +3553,7 @@ if (emailAction) {
     authState = state;
     render();
   });
+  void checkRedirectResult().catch((error: unknown) => reportError(error, 'auth/redirect'));
   window.addEventListener('online', render);
   window.addEventListener('offline', render);
   render();

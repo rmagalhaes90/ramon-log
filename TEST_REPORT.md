@@ -1,5 +1,17 @@
 # Relatório de testes
 
+## Rodada 2026-08-08 — login falhando em iPhone/iPad alpha.60
+
+Usuário reportou não conseguir logar em "outro aparelho". Não é possível reproduzir tentativas reais de login/criação de conta contra produção diretamente (regra própria: nunca crio contas nem digito senhas em formulários de autenticação, nem para diagnóstico, mesmo autorizado) — investigação começou de forma indireta: exportado (somente leitura) a lista de contas reais do Firebase Authentication em produção para checar se havia alguma conta travada, desabilitada ou com atividade recente incomum. Nenhuma encontrada — todas as 4 contas ativas, nenhuma desabilitada, os dois logins mais recentes (incluindo a conta bootstrap do próprio usuário) bem-sucedidos no dia. Isso descartou conta travada/desabilitada como causa.
+
+Perguntado ao usuário qual método de login e qual aparelho — resposta: "Continuar com Google" num iPhone/iPad, com a mensagem de erro aparecendo depois de voltar da tela de login do Google. Essa combinação (Google/Apple sign-in + Safari/iOS + erro genérico) bate exatamente com uma limitação amplamente documentada do Firebase Auth: o método usado (`signInWithPopup`) abre uma janela pop-up que precisa se comunicar de volta com a página principal, e o Safari no iOS bloqueia esse mecanismo de comunicação entre pop-up e página de origem por proteção de privacidade contra rastreamento entre sites (ITP — Intelligent Tracking Prevention), fazendo a pop-up falhar silenciosamente sem completar o login. Isso não afeta o Chrome/computador (por isso o usuário não tinha notado antes), só navegadores baseados em WebKit como Safari e qualquer navegador em iOS (que é obrigado a usar o motor do Safari por regra da Apple, incluindo o Chrome para iOS).
+
+Corrigido trocando `signInWithPopup` por `signInWithRedirect` (login com Google e com Apple) — em vez de abrir uma pop-up, a página inteira navega pro login do provedor e volta, sem precisar da comunicação entre janelas que o Safari bloqueia. Adicionado também `getRedirectResult()` na inicialização do app pra capturar e mostrar qualquer erro que aconteça durante esse redirecionamento (antes, um erro nesse fluxo ficaria silenciosamente perdido).
+
+Não foi possível testar esse fix diretamente num iPhone/iPad real (sem acesso a esse aparelho neste ambiente) nem simular o comportamento específico do Safari/ITP no emulador local. Validação limitada a: build/typecheck/lint/testes passando sem quebrar nada, e checagem visual de que a tela de login carrega normalmente e os botões de Google/Apple continuam presentes e funcionais no fluxo padrão (sem regressão observável no Chrome/desktop). A correção em si é a solução padrão recomendada pela própria documentação do Firebase para esse cenário exato, não uma tentativa especulativa.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **34 arquivos/99 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.60`.
+
 ## Rodada 2026-08-08 — remover confete por série, vazamento do botão remover e feedback de admin alpha.59
 
 Usuário testou a alpha.58 e reportou três pontos.

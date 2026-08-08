@@ -5,13 +5,14 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   getIdTokenResult,
+  getRedirectResult,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   reload,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
   type User,
   verifyPasswordResetCode,
@@ -206,17 +207,28 @@ export async function createAccount(email: string, password: string): Promise<vo
   }
 }
 
+// Popup-based sign-in (signInWithPopup) is unreliable on Safari/iOS: ITP
+// blocks the third-party storage access the popup needs to hand its result
+// back to the opener, so the popup silently fails and the app reports a
+// generic auth error. Redirect-based sign-in has no such cross-window
+// handshake and works consistently across browsers, including iOS Safari
+// and installed PWAs. checkRedirectResult (below) picks up the result
+// when the page reloads after the redirect completes.
 export async function loginWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  await signInWithPopup(services.auth, provider);
+  await signInWithRedirect(services.auth, provider);
 }
 
 export async function loginWithApple(): Promise<void> {
   const provider = new OAuthProvider('apple.com');
   provider.addScope('email');
   provider.addScope('name');
-  await signInWithPopup(services.auth, provider);
+  await signInWithRedirect(services.auth, provider);
+}
+
+export async function checkRedirectResult(): Promise<void> {
+  await getRedirectResult(services.auth);
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
