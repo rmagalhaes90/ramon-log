@@ -6,6 +6,7 @@ import {
   reportBackgroundError,
   reportError,
 } from './core/errors';
+import { clearAuthDebugLog, getAuthDebugLog } from './core/authDebug';
 import { createI18n, messageFor, type Locale, type MessageKey } from './core/i18n';
 import type {
   Exercise,
@@ -337,6 +338,63 @@ function renderAuth(): void {
   document.querySelector('#apple')?.addEventListener('click', () => void runAuth(loginWithApple));
   document.querySelector('#forgot')?.addEventListener('click', () => void resetPassword());
   document.querySelector('#open-legal')?.addEventListener('click', () => renderLegal(renderAuth));
+  renderAuthDebugPanel();
+}
+
+// Temporary diagnostic panel for the "can't log in on iPad, no error shown"
+// report — signInWithRedirect leaves the page and comes back, so any error
+// during that round trip would otherwise be invisible without a computer to
+// plug the device into. Logs are read from authDebug.ts, which is written
+// to from features/auth/index.ts at each step of the flow.
+function renderAuthDebugPanel(): void {
+  document.querySelector('.auth-debug')?.remove();
+  const log = getAuthDebugLog();
+  const container = document.createElement('section');
+  container.className = 'auth-debug';
+  const title = document.createElement('h2');
+  title.textContent = 'Diagnóstico de login';
+  const hint = document.createElement('p');
+  hint.className = 'hint';
+  hint.textContent =
+    'Registro do que aconteceu nas últimas tentativas de login. Se o login falhar, copie e envie este texto.';
+  const pre = document.createElement('pre');
+  pre.className = 'auth-debug-log';
+  pre.textContent = log.length
+    ? log
+        .map(
+          (entry) =>
+            `${entry.t}  ${entry.event}${entry.detail ? '  ' + JSON.stringify(entry.detail) : ''}`,
+        )
+        .join('\n')
+    : 'Nenhum evento registrado ainda.';
+  const actions = document.createElement('div');
+  actions.className = 'auth-debug-actions';
+  const copyButton = document.createElement('button');
+  copyButton.type = 'button';
+  copyButton.className = 'secondary';
+  copyButton.textContent = 'Copiar diagnóstico';
+  copyButton.addEventListener('click', () => {
+    void navigator.clipboard.writeText(pre.textContent ?? '').then(
+      () => {
+        copyButton.textContent = 'Copiado!';
+        window.setTimeout(() => (copyButton.textContent = 'Copiar diagnóstico'), 2000);
+      },
+      () => {
+        copyButton.textContent = 'Não foi possível copiar — selecione o texto manualmente.';
+      },
+    );
+  });
+  const clearButton = document.createElement('button');
+  clearButton.type = 'button';
+  clearButton.className = 'link-button';
+  clearButton.textContent = 'Limpar';
+  clearButton.addEventListener('click', () => {
+    clearAuthDebugLog();
+    renderAuthDebugPanel();
+  });
+  actions.append(copyButton, clearButton);
+  container.append(title, hint, pre, actions);
+  document.querySelector('.auth-card')?.after(container);
 }
 
 function renderLegal(onBack: () => void): void {
@@ -3553,7 +3611,11 @@ if (emailAction) {
     authState = state;
     render();
   });
-  void checkRedirectResult().catch((error: unknown) => reportError(error, 'auth/redirect'));
+  void checkRedirectResult()
+    .catch((error: unknown) => reportError(error, 'auth/redirect'))
+    .finally(() => {
+      if (document.querySelector('.auth-card')) renderAuthDebugPanel();
+    });
   window.addEventListener('online', render);
   window.addEventListener('offline', render);
   render();

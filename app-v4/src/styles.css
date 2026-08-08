@@ -141,6 +141,38 @@ h2 {
   box-shadow: 0 2rem 6rem #0008;
 }
 
+.auth-debug {
+  width: min(30rem, 100%);
+  margin: 1rem auto 0;
+  background: rgba(23, 25, 29, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  padding: clamp(1rem, 4vw, 1.5rem);
+}
+.auth-debug h2 {
+  font-size: 0.9rem;
+  margin: 0 0 0.3rem;
+}
+.auth-debug-log {
+  max-height: 14rem;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  padding: 0.6rem;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--dim);
+}
+.auth-debug-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
 .action-link {
   display: block;
   margin-top: 1.25rem;

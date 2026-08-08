@@ -20,6 +20,7 @@ import {
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { KyroError, reportBackgroundError } from '../../core/errors';
 import { getFirebaseServices } from '../../services/firebase';
+import { environmentSnapshot, logAuthEvent } from '../../core/authDebug';
 
 export type AuthStatus = 'loading' | 'signed-out' | 'unverified' | 'blocked' | 'ready';
 export interface AuthState {
@@ -33,6 +34,7 @@ export type AuthListener = (state: AuthState) => void;
 const configuredServices = getFirebaseServices();
 if (!configuredServices) throw new KyroError('Firebase unavailable', 'firebase/unconfigured');
 const services = configuredServices;
+logAuthEvent('module:init', environmentSnapshot());
 
 // Mirrors the bootstrap-admin bypass already present in firestore.rules
 // (isSuperAdmin) and functions/index.js (requireAdmin) — this account is
@@ -146,11 +148,18 @@ export function observeAuth(listener: AuthListener): () => void {
   let generation = 0;
   return onAuthStateChanged(services.auth, (user) => {
     const current = ++generation;
+    logAuthEvent('onAuthStateChanged', {
+      hasUser: !!user,
+      email: user?.email ?? null,
+      emailVerified: user?.emailVerified ?? null,
+      providers: user?.providerData.map((p) => p.providerId) ?? [],
+    });
     if (!user) {
       listener({ status: 'signed-out', user: null, isAdmin: false, isCoach: false });
       return;
     }
     if (requiresVerification(user)) {
+      logAuthEvent('status:unverified', { email: user.email });
       listener({ status: 'unverified', user, isAdmin: false, isCoach: false });
       return;
     }
@@ -162,10 +171,15 @@ export function observeAuth(listener: AuthListener): () => void {
     // on a real outage.
     void retryEnsureSharedProfile(user, Date.now() + 60000)
       .then(({ blocked, isAdmin, isCoach }) => {
-        if (current === generation)
+        if (current === generation) {
+          logAuthEvent(blocked ? 'status:blocked' : 'status:ready', { email: user.email });
           listener({ status: blocked ? 'blocked' : 'ready', user, isAdmin, isCoach });
+        }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        logAuthEvent('status:shared-profile-failed', {
+          message: error instanceof Error ? error.message : String(error),
+        });
         if (current === generation)
           listener({ status: 'signed-out', user: null, isAdmin: false, isCoach: false });
       });
@@ -217,6 +231,7 @@ export async function createAccount(email: string, password: string): Promise<vo
 export async function loginWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
+  logAuthEvent('redirect:start', { provider: 'google.com', ...environmentSnapshot() });
   await signInWithRedirect(services.auth, provider);
 }
 
@@ -224,11 +239,26 @@ export async function loginWithApple(): Promise<void> {
   const provider = new OAuthProvider('apple.com');
   provider.addScope('email');
   provider.addScope('name');
+  logAuthEvent('redirect:start', { provider: 'apple.com', ...environmentSnapshot() });
   await signInWithRedirect(services.auth, provider);
 }
 
 export async function checkRedirectResult(): Promise<void> {
-  await getRedirectResult(services.auth);
+  logAuthEvent('redirect:checking', environmentSnapshot());
+  try {
+    const result = await getRedirectResult(services.auth);
+    logAuthEvent('redirect:result', {
+      hasResult: !!result,
+      email: result?.user.email ?? null,
+      providerId: result?.providerId ?? null,
+    });
+  } catch (error: unknown) {
+    logAuthEvent('redirect:error', {
+      code: typeof error === 'object' && error && 'code' in error ? String(error.code) : null,
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
