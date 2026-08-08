@@ -1,5 +1,19 @@
 # Relatório de testes
 
+## Rodada 2026-08-08 — painel de diagnóstico não atualizava após tentativa de login alpha.63
+
+Usuário testou a alpha.62 num iPad real (finalmente com dados reais em mãos) e colou o conteúdo do painel de diagnóstico direto do aparelho. Isso confirmou, pela primeira vez com certeza (não suposição), que: (1) o build correto estava rodando no aparelho (`standalone:true`, indicando o app instalado via "Adicionar à Tela de Início"); (2) a estratégia de login escolhida automaticamente foi `"popup"`, exatamente o esperado pela lógica `oauthStrategy()` da alpha.62 quando o hostname do app (`rmagalhaes90.github.io`) difere do `authDomain` configurado no Firebase (`traincontrollog.firebaseapp.com`).
+
+Só que depois de o usuário limpar o registro e tentar logar de novo, ele reportou "não populo nada" — nenhuma entrada nova aparecia, mesmo tendo certeza de ter tentado. Investigação no código: `runAuth()`, a função que envolve toda tentativa de login (chamada pelo clique nos botões "Continuar com Google/Apple"), nunca chamava `renderAuthDebugPanel()` de novo depois da tentativa — só o carregamento inicial da tela (`renderAuth()`/`renderVerification()`) desenhava o painel. Como o fluxo popup mantém o usuário na MESMA tela (sem navegação/reload), qualquer evento nôvo gravado (`oauth:start`, `oauth:popup-result`, `oauth:error`) ficava salvo no `localStorage` do aparelho mas nunca aparecia on-screen sem um recarregamento manual da página — o usuário não tinha como saber disso e concluiu (razoavelmente) que a tentativa "não deixou rastro".
+
+Corrigido adicionando a atualização do painel ao bloco `finally` de `runAuth()`, condicionada a ainda estar na tela de login (`.auth-card` presente no DOM) para não interferir num login bem-sucedido que já navegou pra outro lugar.
+
+Verificado ao vivo (navegador local): clicar em "Continuar com Google" sem um servidor de popup disponível gerou corretamente `oauth:start` seguido de `oauth:error` com o código real do Firebase (`auth/popup-blocked`) — e os dois apareceram no painel IMEDIATAMENTE, sem precisar recarregar a página, confirmando o conserto. A mensagem de erro visível na tela ("Não foi possível autenticar agora.") também apareceu corretamente ao mesmo tempo.
+
+Pedido feito ao usuário: tentar de novo no iPad, dessa vez esperando ver `oauth:start` e (`oauth:popup-result` ou `oauth:error`) aparecerem devidamente no painel após o clique, sem precisar recarregar — e, se possível, testar tanto pelo Safari direto quanto pelo ícone instalado, já que o comportamento de `window.open` (usado internamente pelo popup) é historicamente menos confiável dentro de um PWA instalado no iOS do que numa aba normal do Safari.
+
+Bateria completa: `typecheck`, `lint`, `format:check` (só `mobile/expo-env.d.ts` pré-existente), **34 arquivos/102 testes Vitest** e `build`, todos com código 0. Versão sincronizada para `4.0.0-alpha.63`.
+
 ## Rodada 2026-08-08 — OAuth móvel cross-site alpha.62
 
 Correção focada no retorno silencioso do Google/Apple no Safari iOS/iPadOS quando o app está em `rmagalhaes90.github.io` e o helper Auth em `traincontrollog.firebaseapp.com`. A estratégia OAuth passou a usar popup nesse cenário e redirect somente em domínio first-party. Foram adicionados testes unitários para cross-site, first-party e configuração sem `authDomain`.

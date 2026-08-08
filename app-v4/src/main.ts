@@ -132,7 +132,7 @@ import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-
 // in the auth screen's static HTML (not appended separately) so it always
 // shows even if something else on the page fails — the fastest way to tell
 // whether a device is actually running this build or a stale cached one.
-const APP_VERSION = '4.0.0-alpha.62';
+const APP_VERSION = '4.0.0-alpha.63';
 
 installGlobalErrorHandlers();
 applyTheme(loadTheme());
@@ -451,6 +451,18 @@ async function runAuth(action: () => Promise<void>): Promise<void> {
     setFormError(copy(authErrorKey(error)));
   } finally {
     setBusy(false);
+    // A popup-based attempt (or a failed/hung redirect) leaves us on this
+    // same screen, but nothing re-renders it — without this, new log
+    // entries from the attempt exist in storage but never appear on screen
+    // until an unrelated re-render happens.
+    if (document.querySelector('.auth-card')) {
+      try {
+        renderAuthDebugPanel();
+      } catch {
+        // best-effort; the initial render's own try/catch already covers
+        // showing a visible failure message for this
+      }
+    }
   }
 }
 
