@@ -128,6 +128,12 @@ import { cacheGet, cacheSet } from './services/database';
 import { activateUpdate, registerPwaUpdates } from './services/pwa-update';
 import { flushUserDataQueue, loadUserData, saveUserData } from './services/user-data';
 
+// Bumped by hand alongside package.json/version.json/sw.js. Rendered directly
+// in the auth screen's static HTML (not appended separately) so it always
+// shows even if something else on the page fails — the fastest way to tell
+// whether a device is actually running this build or a stale cached one.
+const APP_VERSION = '4.0.0-alpha.62';
+
 installGlobalErrorHandlers();
 applyTheme(loadTheme());
 const i18n = createI18n();
@@ -324,7 +330,8 @@ function renderAuth(): void {
     <div class="divider"><span>or</span></div><button id="google" class="secondary oauth-button"><svg class="oauth-icon" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.87-3.04.87-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.73A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.19.28-1.73V4.94H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.06z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.94l3 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg><span>${copy('google')}</span></button>
     <button id="apple" class="secondary oauth-button"><svg class="oauth-icon" viewBox="0 0 17 20" aria-hidden="true" fill="currentColor"><path d="M14.03 10.6c-.02-2.06 1.68-3.05 1.76-3.1-.96-1.4-2.45-1.6-2.98-1.62-1.27-.13-2.48.75-3.12.75-.65 0-1.63-.73-2.68-.71-1.38.02-2.65.8-3.36 2.03-1.43 2.48-.37 6.15 1.03 8.16.68.98 1.5 2.08 2.57 2.04 1.03-.04 1.42-.66 2.67-.66 1.24 0 1.6.66 2.68.64 1.11-.02 1.81-1 2.48-1.99.78-1.14 1.1-2.24 1.12-2.3-.02-.01-2.15-.83-2.17-3.24zM12 4.1c.56-.68.94-1.62.83-2.56-.81.03-1.78.54-2.36 1.21-.52.6-.98 1.56-.86 2.48.9.07 1.82-.46 2.39-1.13z"/></svg><span>${copy('apple')}</span></button>
     <button class="link-button" id="open-legal">${copy('legalTitle')}</button>
-    <a class="baseline-link" href="../index.html">${copy('baseline')}</a></section>`);
+    <a class="baseline-link" href="../index.html">${copy('baseline')}</a>
+    <p class="version-tag">build ${APP_VERSION}</p></section>`);
   document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) =>
     button.addEventListener('click', () => {
       authMode = button.dataset.mode as 'login' | 'signup';
@@ -338,7 +345,14 @@ function renderAuth(): void {
   document.querySelector('#apple')?.addEventListener('click', () => void runAuth(loginWithApple));
   document.querySelector('#forgot')?.addEventListener('click', () => void resetPassword());
   document.querySelector('#open-legal')?.addEventListener('click', () => renderLegal(renderAuth));
-  renderAuthDebugPanel();
+  try {
+    renderAuthDebugPanel();
+  } catch (error) {
+    const fallback = document.createElement('p');
+    fallback.className = 'auth-debug-crash';
+    fallback.textContent = `Painel de diagnóstico falhou: ${error instanceof Error ? error.message : String(error)}`;
+    document.querySelector('.auth-card')?.after(fallback);
+  }
 }
 
 // Temporary diagnostic panel for the "can't log in on iPad, no error shown"
@@ -463,7 +477,8 @@ function renderVerification(user: User): void {
   shell(`<section class="auth-card verify" aria-labelledby="verify-title"><p class="eyebrow">EMAIL</p><h1 id="verify-title">${copy('verifyTitle')}</h1>
     <p>${copy('verifyBody')}</p><strong class="email-address"></strong><p id="auth-error" class="form-error" role="status" hidden></p>
     <button class="primary" id="verify-check">${copy('verifyCheck')}</button><button class="secondary" id="verify-again">${copy('verifyAgain')}</button>
-    <button class="link-button" id="verify-logout">${copy('useAnother')}</button></section>`);
+    <button class="link-button" id="verify-logout">${copy('useAnother')}</button>
+    <p class="version-tag">build ${APP_VERSION}</p></section>`);
   const address = document.querySelector('.email-address');
   if (address) address.textContent = user.email ?? '';
   document.querySelector('#verify-check')?.addEventListener(
@@ -488,6 +503,14 @@ function renderVerification(user: User): void {
       'click',
       () => void logout().catch((error: unknown) => reportError(error, 'auth/logout')),
     );
+  try {
+    renderAuthDebugPanel();
+  } catch (error) {
+    const fallback = document.createElement('p');
+    fallback.className = 'auth-debug-crash';
+    fallback.textContent = `Painel de diagnóstico falhou: ${error instanceof Error ? error.message : String(error)}`;
+    document.querySelector('.auth-card')?.after(fallback);
+  }
 }
 
 async function runVerification(action: () => Promise<void>): Promise<void> {

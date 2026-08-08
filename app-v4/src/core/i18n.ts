@@ -657,7 +657,7 @@ const messages = {
     manageExercises: 'Manage exercises',
     cleanupOrphans: 'Clean up orphaned accounts',
     cleanupOrphansConfirm:
-      "Checks every account in this list against Firebase Authentication and removes the ones that no longer exist there (deleted outside the app). Continue?",
+      'Checks every account in this list against Firebase Authentication and removes the ones that no longer exist there (deleted outside the app). Continue?',
     cleanupOrphansDone: '{removed} of {checked} account(s) removed from the list.',
     editExercise: 'Edit exercise',
     newExercise: 'New exercise',

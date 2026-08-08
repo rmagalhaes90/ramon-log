@@ -12,6 +12,7 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signInWithRedirect,
   signOut,
   type User,
@@ -221,29 +222,68 @@ export async function createAccount(email: string, password: string): Promise<vo
   }
 }
 
-// Popup-based sign-in (signInWithPopup) is unreliable on Safari/iOS: ITP
-// blocks the third-party storage access the popup needs to hand its result
-// back to the opener, so the popup silently fails and the app reports a
-// generic auth error. Redirect-based sign-in has no such cross-window
-// handshake and works consistently across browsers, including iOS Safari
-// and installed PWAs. checkRedirectResult (below) picks up the result
-// when the page reloads after the redirect completes.
+export type OAuthStrategy = 'popup' | 'redirect';
+
+// Firebase redirect auth persists pending state through the configured
+// authDomain. Safari blocks that cross-site storage when KYRO is served from
+// GitHub Pages, causing a successful provider round-trip to return no result.
+// Popup auth does not use that redirect persistence and is therefore the safe
+// choice whenever the app and auth helper are on different hostnames.
+export function oauthStrategy(appHostname: string, authDomain?: string): OAuthStrategy {
+  return authDomain && appHostname.toLowerCase() === authDomain.toLowerCase()
+    ? 'redirect'
+    : 'popup';
+}
+
+async function loginWithProvider(
+  provider: GoogleAuthProvider | OAuthProvider,
+  providerId: string,
+): Promise<void> {
+  const strategy = oauthStrategy(location.hostname, services.auth.config.authDomain);
+  logAuthEvent('oauth:start', { provider: providerId, strategy, ...environmentSnapshot() });
+  try {
+    if (strategy === 'redirect') {
+      await signInWithRedirect(services.auth, provider);
+      return;
+    }
+    const result = await signInWithPopup(services.auth, provider);
+    logAuthEvent('oauth:popup-result', {
+      provider: providerId,
+      email: result.user.email,
+    });
+  } catch (error) {
+    logAuthEvent('oauth:error', {
+      provider: providerId,
+      strategy,
+      code:
+        typeof error === 'object' && error !== null && 'code' in error
+          ? String(error.code)
+          : 'unknown',
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+}
+
 export async function loginWithGoogle(): Promise<void> {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  logAuthEvent('redirect:start', { provider: 'google.com', ...environmentSnapshot() });
-  await signInWithRedirect(services.auth, provider);
+  await loginWithProvider(provider, 'google.com');
 }
 
 export async function loginWithApple(): Promise<void> {
   const provider = new OAuthProvider('apple.com');
   provider.addScope('email');
   provider.addScope('name');
-  logAuthEvent('redirect:start', { provider: 'apple.com', ...environmentSnapshot() });
-  await signInWithRedirect(services.auth, provider);
+  await loginWithProvider(provider, 'apple.com');
 }
 
 export async function checkRedirectResult(): Promise<void> {
+  const strategy = oauthStrategy(location.hostname, services.auth.config.authDomain);
+  if (strategy !== 'redirect') {
+    logAuthEvent('redirect:skipped', { strategy, ...environmentSnapshot() });
+    return;
+  }
   logAuthEvent('redirect:checking', environmentSnapshot());
   try {
     const result = await getRedirectResult(services.auth);

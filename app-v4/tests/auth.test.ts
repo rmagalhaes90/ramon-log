@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseEmailAction, passwordIsStrong } from '../src/features/auth';
+import { oauthStrategy, parseEmailAction, passwordIsStrong } from '../src/features/auth';
 
 describe('authentication policy', () => {
   it('requires length, upper, lower and numeric characters', () => {
@@ -8,6 +8,22 @@ describe('authentication policy', () => {
     expect(passwordIsStrong('alllowercase1')).toBe(false);
     expect(passwordIsStrong('NOLOWERCASE1')).toBe(false);
     expect(passwordIsStrong('NoDigitsHere!')).toBe(false);
+  });
+});
+
+describe('OAuth strategy', () => {
+  it('uses popup when GitHub Pages and the Firebase helper are cross-site', () => {
+    expect(oauthStrategy('rmagalhaes90.github.io', 'traincontrollog.firebaseapp.com')).toBe(
+      'popup',
+    );
+  });
+
+  it('uses redirect only when the auth helper is first-party', () => {
+    expect(oauthStrategy('auth.kyro.app', 'auth.kyro.app')).toBe('redirect');
+  });
+
+  it('fails safely to popup when the auth domain is unavailable', () => {
+    expect(oauthStrategy('rmagalhaes90.github.io')).toBe('popup');
   });
 });
 
